@@ -11,7 +11,7 @@ extension NSTextLayoutManager {
     }
 
     var insertionPointLocation: NSTextLocation? {
-        guard let textSelection = textSelections.first else {
+        guard let textSelection = textSelections.first(where: { !$0.isLogical }) else {
             return nil
         }
         return textSelectionNavigation.resolvedInsertionLocation(for: textSelection, writingDirection: .leftToRight)

@@ -349,6 +349,7 @@ extension STTextView {
             )
         }
         updateSelectionHighlights()
+        needsDisplay = true
 
         let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
