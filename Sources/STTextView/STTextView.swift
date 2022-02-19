@@ -348,42 +348,27 @@ extension STTextView {
     public override func mouseDown(with event: NSEvent) {
         if isSelectable {
             let point = convert(event.locationInWindow, from: nil)
-            let textSelectionNavigation = textLayoutManager.textSelectionNavigation
-
-            textLayoutManager.textSelections = textSelectionNavigation.textSelections(interactingAt: point,
-                                                                   inContainerAt: textLayoutManager.documentRange.location,
-                                                                   anchors: [],
-                                                                   modifiers: [],
-                                                                   selecting: true,
-                                                                   bounds: .zero)
-
-            updateSelectionHighlights()
-
-            let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
-            NotificationCenter.default.post(notification)
-            delegate?.textViewDidChangeSelection?(notification)
-            needsDisplay = true
+            updateTextSelection(
+                interactingAt: point,
+                inContainerAt: textLayoutManager.documentRange.location,
+                anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
+                extending: event.modifierFlags.contains(.shift),
+                shouldScrollToVisible: false
+            )
         }
     }
 
     public override func mouseDragged(with event: NSEvent) {
         if isSelectable {
             let point = convert(event.locationInWindow, from: nil)
-            let textSelectionNavigation = textLayoutManager.textSelectionNavigation
-
-            textLayoutManager.textSelections = textSelectionNavigation.textSelections(interactingAt: point,
-                                                                   inContainerAt: textLayoutManager.documentRange.location,
-                                                                   anchors: textLayoutManager.textSelections,
-                                                                   modifiers: .extend,
-                                                                   selecting: true,
-                                                                   bounds: .zero)
-
-            updateSelectionHighlights()
-
-            let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
-            NotificationCenter.default.post(notification)
-            delegate?.textViewDidChangeSelection?(notification)
-            needsDisplay = true
+            updateTextSelection(
+                interactingAt: point,
+                inContainerAt: textLayoutManager.documentRange.location,
+                anchors: textLayoutManager.textSelections,
+                extending: true,
+                visual: event.modifierFlags.contains(.option),
+                shouldScrollToVisible: true
+            )
         }
     }
 
@@ -433,26 +418,27 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     func updateSelectionHighlights() {
-        if !textLayoutManager.textSelections.isEmpty {
-            selectionView.subviews = []
-            for textSelection in textLayoutManager.textSelections {
-                for textRange in textSelection.textRanges {
-                    textLayoutManager.enumerateTextSegments(in: textRange, type: .highlight, options: []) {(textSegmentRange, textSegmentFrame, baselinePosition, textContainer) in
-                        var highlightFrame = textSegmentFrame.intersection(frame)
-                        let highlight = STTextSelectionView()
-                        highlight.wantsLayer = true
+        guard !textLayoutManager.textSelections.isEmpty else { return }
 
-                        if highlightFrame.size.width > 0 {
-                            highlight.layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
-                        } else {
-                            highlightFrame.size.width = 1 // fatten up the cursor
-                            highlight.layer?.backgroundColor = NSColor.black.cgColor
-                        }
+        selectionView.subviews = []
+        
+        for textSelection in textLayoutManager.textSelections {
+            for textRange in textSelection.textRanges {
+                textLayoutManager.enumerateTextSegments(in: textRange, type: .highlight, options: []) {(textSegmentRange, textSegmentFrame, baselinePosition, textContainer) in
+                    var highlightFrame = textSegmentFrame.intersection(frame)
+                    let highlight = STTextSelectionView()
+                    highlight.wantsLayer = true
 
-                        highlight.frame = highlightFrame
-                        selectionView.addSubview(highlight)
-                        return true // keep going
+                    if highlightFrame.size.width > 0 {
+                        highlight.layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
+                    } else {
+                        highlightFrame.size.width = 1 // fatten up the cursor
+                        highlight.layer?.backgroundColor = NSColor.black.cgColor
                     }
+
+                    highlight.frame = highlightFrame
+                    selectionView.addSubview(highlight)
+                    return true // keep going
                 }
             }
         }

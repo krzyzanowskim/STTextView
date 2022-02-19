@@ -30,7 +30,7 @@ final class ViewController: NSViewController {
         textView.textColor = .labelColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
-        textView.widthTracksTextView = true
+        textView.widthTracksTextView = false
         textView.delegate = self
 
         view.addSubview(scrollView)
