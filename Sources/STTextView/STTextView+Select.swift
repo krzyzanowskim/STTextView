@@ -348,16 +348,17 @@ extension STTextView {
                 confined: false
             )
         }
+
         updateSelectionHighlights()
         needsDisplay = true
-
-        let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
-        NotificationCenter.default.post(notification)
-        delegate?.textViewDidChangeSelection?(notification)
 
         if shouldScrollToVisible, let lastSelection = textLayoutManager.textSelections.last {
             scrollToSelection(lastSelection)
         }
+
+        let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
+        NotificationCenter.default.post(notification)
+        delegate?.textViewDidChangeSelection?(notification)
     }
 
     func updateTextSelection(interactingAt point: CGPoint, inContainerAt location: NSTextLocation, anchors: [NSTextSelection] = [], extending: Bool, visual: Bool = false, shouldScrollToVisible: Bool = true) {
@@ -381,13 +382,13 @@ extension STTextView {
         updateSelectionHighlights()
         needsDisplay = true
 
-        let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
-        NotificationCenter.default.post(notification)
-        delegate?.textViewDidChangeSelection?(notification)
-
         if shouldScrollToVisible, let lastSelection = textLayoutManager.textSelections.last {
             scrollToSelection(lastSelection)
         }
+
+        let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
+        NotificationCenter.default.post(notification)
+        delegate?.textViewDidChangeSelection?(notification)
     }
 
     private func scrollToSelection(_ selection: NSTextSelection) {

@@ -6,10 +6,6 @@ import Cocoa
 
 extension NSTextLayoutManager {
 
-    var textSelectionsRanges: [NSTextRange] {
-        textSelections.flatMap(\.textRanges)
-    }
-
     var insertionPointLocation: NSTextLocation? {
         guard let textSelection = textSelections.first(where: { !$0.isLogical }) else {
             return nil
@@ -17,6 +13,36 @@ extension NSTextLayoutManager {
         return textSelectionNavigation.resolvedInsertionLocation(for: textSelection, writingDirection: .leftToRight)
     }
 
+    func substring(for range: NSTextRange) -> String? {
+        guard !range.isEmpty else { return nil }
+        var output = String()
+        output.reserveCapacity(128)
+        enumerateSubstrings(from: range.location, options: .byComposedCharacterSequences, using:  { (substring, textRange, _, stop) in
+            if let substring = substring {
+                output += substring
+            }
+
+            if textRange.location >= range.endLocation {
+                stop.pointee = true
+            }
+        })
+        return output
+    }
+
+    func textSelectionsString() -> String? {
+        textSelections.flatMap(\.textRanges).reduce(nil) { partialResult, textRange in
+            guard let substring = substring(for: textRange) else {
+                return partialResult
+            }
+
+            var partialResult = partialResult
+            if partialResult == nil {
+                partialResult = ""
+            }
+
+            return partialResult?.appending(substring)
+        }
+    }
 }
 
 extension NSTextLayoutFragment {
