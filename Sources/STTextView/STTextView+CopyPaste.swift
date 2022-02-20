@@ -21,7 +21,8 @@ extension STTextView {
             return
         }
 
-        let nsrange = NSRange(textLayoutManager.insertionPointLocation!, in: textContentStorage)
+        let insertLocation = textLayoutManager.insertionPointLocation ?? textLayoutManager.documentRange.location
+        let nsrange = NSRange(insertLocation, in: textContentStorage)
         insertText(string, replacementRange: nsrange)
     }
 

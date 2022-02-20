@@ -418,14 +418,21 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     func updateSelectionHighlights() {
-        guard !textLayoutManager.textSelections.isEmpty else { return }
+        guard !textLayoutManager.textSelections.isEmpty else {
+            selectionView.subviews = []
+            return
+        }
 
         selectionView.subviews = []
-        
+
         for textSelection in textLayoutManager.textSelections {
             for textRange in textSelection.textRanges {
                 textLayoutManager.enumerateTextSegments(in: textRange, type: .highlight, options: []) {(textSegmentRange, textSegmentFrame, baselinePosition, textContainer) in
                     var highlightFrame = textSegmentFrame.intersection(frame)
+                    guard !highlightFrame.isNull else {
+                        return true
+                    }
+
                     let highlight = STTextSelectionView()
                     highlight.wantsLayer = true
 
