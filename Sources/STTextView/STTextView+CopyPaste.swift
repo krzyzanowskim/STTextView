@@ -17,15 +17,26 @@ extension STTextView {
     }
 
     @objc func paste(_ sender: Any?) {
+        guard let string = NSPasteboard.general.string(forType: .string) else {
+            return
+        }
 
+        let nsrange = NSRange(textLayoutManager.insertionPointLocation!, in: textContentStorage)
+        insertText(string, replacementRange: nsrange)
     }
 
     @objc func cut(_ sender: Any?) {
-        
+        copy(sender)
+        delete(sender)
     }
 
     @objc func delete(_ sender: Any?) {
-
+        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+            // "replaceContents" doesn't work with NSTextContentStorage at all
+            // textLayoutManager.replaceContents(in: textRange, with: NSAttributedString())
+            let nsrange = NSRange(textRange, in: textContentStorage)
+            insertText("", replacementRange: nsrange)
+        }
     }
 
     private func updatePasteboard(with text: String) {

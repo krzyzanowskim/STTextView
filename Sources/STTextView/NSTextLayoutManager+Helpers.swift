@@ -22,7 +22,7 @@ extension NSTextLayoutManager {
                 output += substring
             }
 
-            if textRange.location >= range.endLocation {
+            if textRange.endLocation >= range.endLocation {
                 stop.pointee = true
             }
         })
