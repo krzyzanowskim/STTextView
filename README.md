@@ -28,7 +28,7 @@ paragraph.defaultTabInterval = 28
 textView.defaultParagraphStyle = paragraph
 textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
 textView.textColor = .labelColor
-textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
+textView.string = "text content"
 textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
 textView.widthTracksTextView = true
 textView.delegate = self
