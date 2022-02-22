@@ -25,4 +25,18 @@ extension STTextView {
     public override func pageDownAndModifySelection(_ sender: Any?) {
         assertionFailure()
     }
+
+}
+
+extension STTextView {
+
+    func scrollToVisibleInsertionPointLocation() {
+        if let insertionPointLocation = textLayoutManager.insertionPointLocation,
+           let textLayoutFragment = textLayoutManager.textLayoutFragment(for: insertionPointLocation)
+        {
+            scrollToVisible(textLayoutFragment.layoutFragmentFrame)
+            needsDisplay = true
+        }
+    }
+
 }

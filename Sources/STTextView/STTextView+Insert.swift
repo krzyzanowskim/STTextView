@@ -23,10 +23,8 @@ extension STTextView {
     }
 
 
-    //     public override func doCommand(by selector: Selector) {
-    //        print(selector)
-    //        super.doCommand(by: selector)
-    //     }
-
-
+//     public override func doCommand(by selector: Selector) {
+//        print(selector)
+//        super.doCommand(by: selector)
+//     }
 }

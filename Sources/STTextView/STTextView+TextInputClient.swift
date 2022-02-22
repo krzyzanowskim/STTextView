@@ -39,6 +39,7 @@ extension STTextView: NSTextInputClient {
                     }
                 }
                 textContentStorage.textStorage?.endEditing()
+                scrollToVisibleInsertionPointLocation()
             }
         case is NSAttributedString:
              guard let string = string as? NSAttributedString else {
@@ -62,6 +63,7 @@ extension STTextView: NSTextInputClient {
                     }
                 }
                 textContentStorage.textStorage?.endEditing()
+                scrollToVisibleInsertionPointLocation()
             }
         default:
             assertionFailure()
