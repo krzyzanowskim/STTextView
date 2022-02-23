@@ -48,13 +48,13 @@ extension STTextView {
 
     private func delete(direction: NSTextSelectionNavigation.Direction, destination: NSTextSelectionNavigation.Destination, allowsDecomposition: Bool) {
         let textRanges = textLayoutManager.textSelections.flatMap { textSelection -> [NSTextRange] in
-            if direction == .backward && destination == .word {
+            if destination == .word {
                 // FB9925766. deletionRanges only works correctly if textSelection is at the end of the word
                 // Workaround
                 return textLayoutManager.textSelectionNavigation.destinationSelection(
                     for: textSelection,
-                    direction: .backward,
-                    destination: .word,
+                    direction: direction,
+                    destination: destination,
                     extending: true,
                     confined: false
                 )?.textRanges ?? []
