@@ -1,7 +1,6 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-
 import Cocoa
 
 // The default implementation of the NSView method inputContext manages

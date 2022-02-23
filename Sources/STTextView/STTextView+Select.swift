@@ -13,10 +13,6 @@ extension STTextView {
             ]
 
             updateSelectionHighlights()
-
-            let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
-            NotificationCenter.default.post(notification)
-            delegate?.textViewDidChangeSelection?(notification)
         }
     }
 
@@ -336,7 +332,7 @@ extension STTextView {
         )
     }
 
-    private func updateTextSelection(direction: NSTextSelectionNavigation.Direction, destination: NSTextSelectionNavigation.Destination, extending: Bool, shouldScrollToVisible: Bool = true) {
+    private func updateTextSelection(direction: NSTextSelectionNavigation.Direction, destination: NSTextSelectionNavigation.Destination, extending: Bool) {
         guard isSelectable else { return }
 
         textLayoutManager.textSelections = textLayoutManager.textSelections.compactMap { textSelection in
@@ -351,17 +347,9 @@ extension STTextView {
 
         updateSelectionHighlights()
         needsDisplay = true
-
-        if shouldScrollToVisible, let lastSelection = textLayoutManager.textSelections.last {
-            scrollToSelection(lastSelection)
-        }
-
-        let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
-        NotificationCenter.default.post(notification)
-        delegate?.textViewDidChangeSelection?(notification)
     }
 
-    func updateTextSelection(interactingAt point: CGPoint, inContainerAt location: NSTextLocation, anchors: [NSTextSelection] = [], extending: Bool, visual: Bool = false, shouldScrollToVisible: Bool = true) {
+    func updateTextSelection(interactingAt point: CGPoint, inContainerAt location: NSTextLocation, anchors: [NSTextSelection] = [], extending: Bool, visual: Bool = false) {
         guard isSelectable else { return }
 
         var modifiers: NSTextSelectionNavigation.Modifier = []
@@ -381,39 +369,6 @@ extension STTextView {
 
         updateSelectionHighlights()
         needsDisplay = true
-
-        if shouldScrollToVisible, let lastSelection = textLayoutManager.textSelections.last {
-            scrollToSelection(lastSelection)
-        }
-
-        let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
-        NotificationCenter.default.post(notification)
-        delegate?.textViewDidChangeSelection?(notification)
     }
 
-    private func scrollToSelection(_ selection: NSTextSelection) {
-        if let selectionTextRange = selection.textRanges.first {
-
-            if selectionTextRange.isEmpty {
-                if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: selectionTextRange.location) {
-                    scrollToVisible(textLayoutFragment.layoutFragmentFrame)
-                }
-            } else {
-                switch selection.affinity {
-                case .upstream:
-                    if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: selectionTextRange.location) {
-                        scrollToVisible(textLayoutFragment.layoutFragmentFrame)
-                    }
-                case .downstream:
-                    if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
-                       let textLayoutFragment = textLayoutManager.textLayoutFragment(for: location)
-                    {
-                        self.scrollToVisible(textLayoutFragment.layoutFragmentFrame)
-                    }
-                @unknown default:
-                    break
-                }
-            }
-        }
-    }
 }

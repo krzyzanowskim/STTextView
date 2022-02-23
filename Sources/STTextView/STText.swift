@@ -1,7 +1,6 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-
 import Cocoa
 
 /// akin to NSText
@@ -15,6 +14,7 @@ import Cocoa
 
     var textColor: NSColor? { get set }
     var defaultParagraphStyle: NSParagraphStyle? { get set }
+    var typingAttributes: [NSAttributedString.Key: Any] { get set }
 
     weak var delegate: STTextViewDelegate? { get set }
 

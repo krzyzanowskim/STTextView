@@ -12,15 +12,6 @@ private final class STTextSelectionView: NSView {
     override var isFlipped: Bool { true }
 }
 
-@objc public protocol STTextViewDelegate: AnyObject {
-    /// Any keyDown or paste which changes the contents causes this
-    @objc optional func textDidChange(_ notification: Notification)
-    /// Sent when the selection changes in the text view.
-    @objc optional func textViewDidChangeSelection(_ notification: Notification)
-    /// Sent when a text view needs to determine if text in a specified range should be changed.
-    @objc optional func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSRange, replacementString: String?) -> Bool
-}
-
 final public class STTextView: NSView, STText {
 
     public static let didChangeNotification = NSText.didChangeNotification
@@ -36,20 +27,41 @@ final public class STTextView: NSView, STText {
     public var isSelectable: Bool
 
     public var font: NSFont? {
-        didSet {
-            needsViewportLayout = true
+        get {
+            typingAttributes[.font] as? NSFont
+        }
+
+        set {
+            typingAttributes[.font] = newValue
+            // TODO: update storage
         }
     }
 
     public var textColor: NSColor? {
-        didSet {
-            needsDisplay = true
+        get {
+            typingAttributes[.foregroundColor] as? NSColor
+        }
+
+        set {
+            typingAttributes[.foregroundColor] = newValue
+            // TODO: update storage
         }
     }
 
     public var defaultParagraphStyle: NSParagraphStyle? {
+        get {
+            typingAttributes[.paragraphStyle] as? NSParagraphStyle
+        }
+
+        set {
+            typingAttributes[.paragraphStyle] = newValue
+        }
+    }
+
+    public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
             needsViewportLayout = true
+            needsDisplay = true
         }
     }
 
@@ -108,9 +120,9 @@ final public class STTextView: NSView, STText {
     override init(frame frameRect: NSRect) {
         fragmentViewMap = .weakToWeakObjects()
 
-        textContentStorage = NSTextContentStorage()
+        textContentStorage = STTextContentStorage()
         textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: frameRect.height))
-        textLayoutManager = NSTextLayoutManager()
+        textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = textContainer
         textContentStorage.addTextLayoutManager(textLayoutManager)
 
@@ -120,6 +132,7 @@ final public class STTextView: NSView, STText {
         isEditable = true
         isSelectable = true
         highlightSelectedLine = true
+        typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
 
         super.init(frame: frameRect)
 
@@ -141,6 +154,13 @@ final public class STTextView: NSView, STText {
         contentView.autoresizingMask = [.width, .height]
 
         addSubview(contentView)
+
+        NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: nil) { [weak self] notification in
+            guard let self = self else { return }
+            let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
+            NotificationCenter.default.post(notification)
+            self.delegate?.textViewDidChangeSelection?(notification)
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -172,10 +192,6 @@ final public class STTextView: NSView, STText {
     public override func prepareContent(in rect: NSRect) {
         needsViewportLayout = true
         super.prepareContent(in: rect)
-    }
-
-    public override func viewDidMoveToSuperview() {
-        super.viewDidMoveToSuperview()
     }
 
     public override func draw(_ dirtyRect: NSRect) {
@@ -230,57 +246,34 @@ final public class STTextView: NSView, STText {
 
     private func setString(_ string: Any?) {
         let documentRange = NSRange(textContentStorage.documentRange, in: textContentStorage)
-
-        switch string {
-        case .none:
-            if delegate?.textView?(self, shouldChangeTextIn: documentRange, replacementString: nil) ?? true {
-                textContentStorage.textStorage = NSTextStorage()
-                updateContentSizeIfNeeded()
-                needsViewportLayout = true
-                didChangeText()
+        if case .some(let string) = string {
+            switch string {
+            case is NSAttributedString:
+                insertText(string as! NSAttributedString, replacementRange: documentRange)
+            case is String:
+                insertText(NSAttributedString(string: string as! String, attributes: typingAttributes), replacementRange: documentRange)
+            default:
+                assertionFailure()
+                return
             }
-        case is String:
-            var attributes: [NSAttributedString.Key: Any] = [:]
-            if let paragraphStyle = defaultParagraphStyle {
-                attributes[.paragraphStyle] = paragraphStyle
-            }
-            if let font = font {
-                attributes[.font] = font
-            }
-            if let textColor = textColor {
-                attributes[.foregroundColor] = textColor
-            }
-            if delegate?.textView?(self, shouldChangeTextIn: documentRange, replacementString: string as? String) ?? true {
-                textContentStorage.textStorage = NSTextStorage(string: string as! String, attributes: attributes)
-                updateContentSizeIfNeeded()
-                needsViewportLayout = true
-                didChangeText()
-            }
-        case is NSAttributedString:
-            if delegate?.textView?(self, shouldChangeTextIn: documentRange, replacementString: (string as? NSAttributedString)?.string) ?? true {
-                textContentStorage.textStorage = NSTextStorage(attributedString: string as! NSAttributedString)
-                updateContentSizeIfNeeded()
-                needsViewportLayout = true
-                didChangeText()
-            }
-        default:
-            assertionFailure()
-            break
+        } else if case .none = string {
+            insertText("", replacementRange: documentRange)
         }
-
-        updateContentSizeIfNeeded()
-        needsViewportLayout = true
     }
 
     public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
-        textContentStorage.textStorage?.addAttributes(attrs, range: range)
+        textContentStorage.performEditingTransaction {
+            textContentStorage.textStorage?.addAttributes(attrs, range: range)
+        }
     }
 
     public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange) {
-        textContentStorage.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentStorage))
+        textContentStorage.performEditingTransaction {
+            textContentStorage.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentStorage))
+        }
     }
 
-    private func updateContentSizeIfNeeded() {
+    internal func updateContentSizeIfNeeded() {
         let currentHeight = bounds.height
         var height: CGFloat = 0
         textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout]) { layoutFragment in
@@ -306,6 +299,12 @@ final public class STTextView: NSView, STText {
             let contentSize = NSSize(width: width, height: height)
             setFrameSize(contentSize)
         }
+    }
+
+    public override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        adjustViewportOffsetIfNeeded()
+        updateContentSizeIfNeeded()
     }
 
     public override func setFrameSize(_ newSize: NSSize) {
@@ -352,8 +351,7 @@ extension STTextView {
                 interactingAt: point,
                 inContainerAt: textLayoutManager.documentRange.location,
                 anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                extending: event.modifierFlags.contains(.shift),
-                shouldScrollToVisible: false
+                extending: event.modifierFlags.contains(.shift)
             )
         }
     }
@@ -366,23 +364,16 @@ extension STTextView {
                 inContainerAt: textLayoutManager.documentRange.location,
                 anchors: textLayoutManager.textSelections,
                 extending: true,
-                visual: event.modifierFlags.contains(.option),
-                shouldScrollToVisible: true
+                visual: event.modifierFlags.contains(.option)
             )
         }
+        autoscroll(with: event)
     }
 
-    public override func mouseUp(with event: NSEvent) {
-        super.mouseUp(with: event)
-    }
 }
 
 extension STTextView: NSTextLayoutManagerDelegate {
-
-    // func textLayoutManager(_ textLayoutManager: NSTextLayoutManager, textLayoutFragmentFor location: NSTextLocation, in textElement: NSTextElement) -> NSTextLayoutFragment {
-    //    NSTextLayoutFragment(textElement: textElement, range: textElement.elementRange)
-    // }
-
+    //
 }
 
 extension STTextView: NSTextViewportLayoutControllerDelegate {

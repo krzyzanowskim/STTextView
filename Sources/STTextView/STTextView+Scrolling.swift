@@ -7,7 +7,12 @@ import Cocoa
 extension STTextView {
 
     public override func centerSelectionInVisibleArea(_ sender: Any?) {
-        assertionFailure()
+        guard !textLayoutManager.textSelections.isEmpty else {
+            return
+        }
+
+        scrollToSelection(textLayoutManager.textSelections[0])
+        needsDisplay = true
     }
 
     public override func pageUp(_ sender: Any?) {
@@ -30,13 +35,40 @@ extension STTextView {
 
 extension STTextView {
 
-    func scrollToVisibleInsertionPointLocation() {
-        if let insertionPointLocation = textLayoutManager.insertionPointLocation,
-           let textLayoutFragment = textLayoutManager.textLayoutFragment(for: insertionPointLocation)
-        {
-            scrollToVisible(textLayoutFragment.layoutFragmentFrame)
-            needsDisplay = true
+//    func scrollToVisibleInsertionPointLocation() {
+//        if let insertionPointLocation = textLayoutManager.insertionPointLocation,
+//           let textLayoutFragment = textLayoutManager.textLayoutFragment(for: insertionPointLocation)
+//        {
+//            scrollToVisible(textLayoutFragment.layoutFragmentFrame)
+//            needsDisplay = true
+//        }
+//    }
+
+    internal func scrollToSelection(_ selection: NSTextSelection) {
+        guard let selectionTextRange = selection.textRanges.first else {
+            return
+        }
+
+        if selectionTextRange.isEmpty {
+            if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: selectionTextRange.location) {
+                print(textLayoutFragment)
+                scrollToVisible(textLayoutFragment.layoutFragmentFrame)
+            }
+        } else {
+            switch selection.affinity {
+            case .upstream:
+                if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: selectionTextRange.location) {
+                    scrollToVisible(textLayoutFragment.layoutFragmentFrame)
+                }
+            case .downstream:
+                if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
+                   let textLayoutFragment = textLayoutManager.textLayoutFragment(for: location)
+                {
+                    self.scrollToVisible(textLayoutFragment.layoutFragmentFrame)
+                }
+            @unknown default:
+                break
+            }
         }
     }
-
 }

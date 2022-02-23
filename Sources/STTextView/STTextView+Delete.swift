@@ -24,16 +24,18 @@ extension STTextView {
             return
         }
 
-        for textRange in textRanges {
-            let range = NSRange(textRange, in: textContentStorage)
-            if delegate?.textView?(self, shouldChangeTextIn: range, replacementString: nil) ?? true {
-                textContentStorage.textStorage?.deleteCharacters(in: range)
-                needsViewportLayout = true
-                didChangeText()
+        textContentStorage.performEditingTransaction {
+            for textRange in textRanges {
+                let range = NSRange(textRange, in: textContentStorage)
+                if delegate?.textView?(self, shouldChangeTextIn: range, replacementString: nil) ?? true {
+                    textContentStorage.textStorage?.deleteCharacters(in: range)
+                }
             }
         }
 
         needsViewportLayout = true
+        needsDisplay = true
+        didChangeText()
     }
 
     public override func deleteBackward(_ sender: Any?) {
@@ -50,14 +52,17 @@ extension STTextView {
             return
         }
 
-        for textRange in textRanges {
-            let range = NSRange(textRange, in: textContentStorage)
-            if delegate?.textView?(self, shouldChangeTextIn: range, replacementString: nil) ?? true {
-                textContentStorage.textStorage?.deleteCharacters(in: range)
-                needsViewportLayout = true
-                didChangeText()
+        textContentStorage.performEditingTransaction {
+            for textRange in textRanges {
+                let range = NSRange(textRange, in: textContentStorage)
+                if delegate?.textView?(self, shouldChangeTextIn: range, replacementString: nil) ?? true {
+                    textContentStorage.textStorage?.deleteCharacters(in: range)
+                }
             }
         }
-
+        
+        needsViewportLayout = true
+        needsDisplay = true
+        didChangeText()
     }
 }
