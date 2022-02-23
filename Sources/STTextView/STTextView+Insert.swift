@@ -82,11 +82,7 @@ extension STTextView {
         }
 
         if didChange {
-            needsViewportLayout = true
-            needsDisplay = true
-            // layoutSubtreeIfNeeded()
             didChangeText()
         }
-
     }
 }

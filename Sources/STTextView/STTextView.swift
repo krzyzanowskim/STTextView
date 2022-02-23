@@ -336,6 +336,13 @@ final public class STTextView: NSView, STText {
     }
 
     public func didChangeText() {
+//        if let textSelection = textLayoutManager.textSelections.first {
+//            scrollToSelection(textSelection)
+//        }
+
+        needsViewportLayout = true
+        needsDisplay = true
+
         let notification = Notification(name: STTextView.didChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         delegate?.textDidChange?(notification)
