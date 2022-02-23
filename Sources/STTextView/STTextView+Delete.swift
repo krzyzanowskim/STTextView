@@ -26,13 +26,24 @@ extension STTextView {
         delete(direction: .backward, destination: .word, allowsDecomposition: false)
     }
 
+    public override func deleteWordForward(_ sender: Any?) {
+        delete(direction: .forward, destination: .word, allowsDecomposition: false)
+    }
+
     public override func deleteToBeginningOfLine(_ sender: Any?) {
         delete(direction: .backward, destination: .line, allowsDecomposition: false)
-
     }
 
     public override func deleteToEndOfLine(_ sender: Any?) {
         delete(direction: .forward, destination: .line, allowsDecomposition: false)
+    }
+
+    public override func deleteToBeginningOfParagraph(_ sender: Any?) {
+        delete(direction: .backward, destination: .paragraph, allowsDecomposition: false)
+    }
+
+    public override func deleteToEndOfParagraph(_ sender: Any?) {
+        delete(direction: .forward, destination: .paragraph, allowsDecomposition: false)
     }
 
     private func delete(direction: NSTextSelectionNavigation.Direction, destination: NSTextSelectionNavigation.Destination, allowsDecomposition: Bool) {
