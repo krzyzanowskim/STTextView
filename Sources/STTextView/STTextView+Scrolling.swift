@@ -41,25 +41,25 @@ extension STTextView {
         }
 
         if selectionTextRange.isEmpty {
-            if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: selectionTextRange.location) {
-                scrollToVisible(textLayoutFragment.layoutFragmentFrame)
+            if let selectionRect = textLayoutManager.textSegmentRect(at: selectionTextRange.location) {
+                scrollToVisible(selectionRect)
             }
         } else {
             switch selection.affinity {
             case .upstream:
-                if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: selectionTextRange.location) {
-                    scrollToVisible(textLayoutFragment.layoutFragmentFrame)
+                if let selectionRect = textLayoutManager.textSegmentRect(at: selectionTextRange.location) {
+                    scrollToVisible(selectionRect)
                 }
             case .downstream:
                 if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
-                   let textLayoutFragment = textLayoutManager.textLayoutFragment(for: location)
+                   let selectionRect = textLayoutManager.textSegmentRect(at: location)
                 {
-                    self.scrollToVisible(textLayoutFragment.layoutFragmentFrame)
+                    scrollToVisible(selectionRect)
                 }
             @unknown default:
                 break
             }
         }
     }
-    
+
 }

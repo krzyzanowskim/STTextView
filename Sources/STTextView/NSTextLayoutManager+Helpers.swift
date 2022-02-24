@@ -43,6 +43,16 @@ extension NSTextLayoutManager {
             return partialResult?.appending(substring)
         }
     }
+
+    func textSegmentRect(at location: NSTextLocation) -> CGRect? {
+        var result: CGRect? = nil
+        enumerateTextSegments(in: NSTextRange(location: location), type: .highlight, options: .rangeNotRequired) { _, textSegmentFrame, baselinePosition, textContainer -> Bool in
+            result = textSegmentFrame
+            return false
+        }
+        return result
+    }
+
 }
 
 extension NSTextLayoutFragment {
@@ -64,6 +74,7 @@ extension NSTextLayoutFragment {
             return absoluteLineRange.contains(searchNSLocation)
         }
     }
+
 }
 
 extension NSTextLineFragment {
