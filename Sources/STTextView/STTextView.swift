@@ -98,7 +98,8 @@ final public class STTextView: NSView, STText {
     private let selectionView: STTextContentView
     private var fragmentViewMap: NSMapTable<NSTextLayoutFragment, NSView>
 
-    var needsViewportLayout: Bool = false {
+    private var needScrollToSelection: Bool = false
+    private var needsViewportLayout: Bool = false {
         didSet {
             if needsViewportLayout {
                 needsLayout = true
@@ -131,14 +132,14 @@ final public class STTextView: NSView, STText {
 
         isEditable = true
         isSelectable = true
-        highlightSelectedLine = true
+        highlightSelectedLine = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
 
         super.init(frame: frameRect)
 
         // workaround for: the text selection highlight can remain between lines (2017-09 macOS 10.13).
-        scaleUnitSquare(to: NSSize(width: 0.5, height: 0.5))
-        scaleUnitSquare(to: convert(CGSize(width: 1, height: 1), from: nil)) // reset scale
+        // scaleUnitSquare(to: NSSize(width: 0.5, height: 0.5))
+        // scaleUnitSquare(to: convert(CGSize(width: 1, height: 1), from: nil)) // reset scale
 
         wantsLayer = true
         autoresizingMask = [.width, .height]
@@ -333,13 +334,17 @@ final public class STTextView: NSView, STText {
             textLayoutManager.textViewportLayoutController.layoutViewport()
             updateContentSizeIfNeeded()
         }
+
+        if needScrollToSelection {
+            needScrollToSelection = false
+            if let textSelection = textLayoutManager.textSelections.first {
+                scrollToSelection(textSelection)
+            }
+        }
     }
 
     public func didChangeText() {
-//        if let textSelection = textLayoutManager.textSelections.first {
-//            scrollToSelection(textSelection)
-//        }
-
+        needScrollToSelection = true
         needsViewportLayout = true
         needsDisplay = true
 
@@ -360,6 +365,8 @@ extension STTextView {
                 anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
                 extending: event.modifierFlags.contains(.shift)
             )
+        } else {
+            super.mouseDown(with: event)
         }
     }
 
@@ -373,8 +380,10 @@ extension STTextView {
                 extending: true,
                 visual: event.modifierFlags.contains(.option)
             )
+            autoscroll(with: event)
+        } else {
+            super.mouseDragged(with: event)
         }
-        autoscroll(with: event)
     }
 
 }

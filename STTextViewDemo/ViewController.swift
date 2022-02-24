@@ -31,6 +31,7 @@ final class ViewController: NSViewController {
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
         textView.widthTracksTextView = false
+        textView.highlightSelectedLine = true
         textView.delegate = self
 
         view.addSubview(scrollView)
