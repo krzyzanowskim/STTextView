@@ -35,15 +35,6 @@ extension STTextView {
 
 extension STTextView {
 
-//    func scrollToVisibleInsertionPointLocation() {
-//        if let insertionPointLocation = textLayoutManager.insertionPointLocation,
-//           let textLayoutFragment = textLayoutManager.textLayoutFragment(for: insertionPointLocation)
-//        {
-//            scrollToVisible(textLayoutFragment.layoutFragmentFrame)
-//            needsDisplay = true
-//        }
-//    }
-
     internal func scrollToSelection(_ selection: NSTextSelection) {
         guard let selectionTextRange = selection.textRanges.first else {
             return
@@ -51,7 +42,6 @@ extension STTextView {
 
         if selectionTextRange.isEmpty {
             if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: selectionTextRange.location) {
-                print(textLayoutFragment)
                 scrollToVisible(textLayoutFragment.layoutFragmentFrame)
             }
         } else {
@@ -71,4 +61,5 @@ extension STTextView {
             }
         }
     }
+    
 }

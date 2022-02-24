@@ -15,6 +15,7 @@ final class ViewController: NSViewController {
         scrollView.autoresizingMask = [.height, .width]
         scrollView.borderType = .noBorder
         scrollView.hasVerticalScroller = true
+        scrollView.automaticallyAdjustsContentInsets = true
         scrollView.hasHorizontalScroller = true
 
         let clipView = NSClipView()

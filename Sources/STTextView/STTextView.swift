@@ -98,7 +98,13 @@ final public class STTextView: NSView, STText {
     private let selectionView: STTextContentView
     private var fragmentViewMap: NSMapTable<NSTextLayoutFragment, NSView>
 
-    private var needScrollToSelection: Bool = false
+    private var needScrollToSelection: Bool = false {
+        didSet {
+            if needScrollToSelection {
+                needsLayout = true
+            }
+        }
+    }
     private var needsViewportLayout: Bool = false {
         didSet {
             if needsViewportLayout {
@@ -158,6 +164,9 @@ final public class STTextView: NSView, STText {
 
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: nil) { [weak self] notification in
             guard let self = self else { return }
+
+            self.needScrollToSelection = true
+
             let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
             NotificationCenter.default.post(notification)
             self.delegate?.textViewDidChangeSelection?(notification)
