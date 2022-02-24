@@ -345,7 +345,7 @@ extension STTextView {
             )
         }
 
-        updateSelectionHighlights()
+        needScrollToSelection = true
         needsDisplay = true
     }
 
@@ -359,7 +359,7 @@ extension STTextView {
         if visual {
             modifiers.insert(.visual)
         }
-        
+
         textLayoutManager.textSelections = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point,
                                                    inContainerAt: location,
                                                    anchors: anchors,

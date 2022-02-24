@@ -32,34 +32,3 @@ extension STTextView {
     }
 
 }
-
-extension STTextView {
-
-    internal func scrollToSelection(_ selection: NSTextSelection) {
-        guard let selectionTextRange = selection.textRanges.first else {
-            return
-        }
-
-        if selectionTextRange.isEmpty {
-            if let selectionRect = textLayoutManager.textSegmentRect(at: selectionTextRange.location) {
-                scrollToVisible(selectionRect)
-            }
-        } else {
-            switch selection.affinity {
-            case .upstream:
-                if let selectionRect = textLayoutManager.textSegmentRect(at: selectionTextRange.location) {
-                    scrollToVisible(selectionRect)
-                }
-            case .downstream:
-                if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
-                   let selectionRect = textLayoutManager.textSegmentRect(at: location)
-                {
-                    scrollToVisible(selectionRect)
-                }
-            @unknown default:
-                break
-            }
-        }
-    }
-
-}

@@ -98,14 +98,14 @@ final public class STTextView: NSView, STText {
     private let selectionView: STTextContentView
     private var fragmentViewMap: NSMapTable<NSTextLayoutFragment, NSView>
 
-    private var needScrollToSelection: Bool = false {
+    internal var needScrollToSelection: Bool = false {
         didSet {
             if needScrollToSelection {
                 needsLayout = true
             }
         }
     }
-    private var needsViewportLayout: Bool = false {
+    internal var needsViewportLayout: Bool = false {
         didSet {
             if needsViewportLayout {
                 needsLayout = true
@@ -147,6 +147,9 @@ final public class STTextView: NSView, STText {
         // scaleUnitSquare(to: NSSize(width: 0.5, height: 0.5))
         // scaleUnitSquare(to: convert(CGSize(width: 1, height: 1), from: nil)) // reset scale
 
+        postsBoundsChangedNotifications = true
+        postsFrameChangedNotifications = true
+
         wantsLayer = true
         autoresizingMask = [.width, .height]
 
@@ -165,12 +168,11 @@ final public class STTextView: NSView, STText {
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: nil) { [weak self] notification in
             guard let self = self else { return }
 
-            self.needScrollToSelection = true
-
             let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
             NotificationCenter.default.post(notification)
             self.delegate?.textViewDidChangeSelection?(notification)
         }
+
     }
 
     required init?(coder: NSCoder) {
@@ -348,13 +350,41 @@ final public class STTextView: NSView, STText {
             needScrollToSelection = false
             if let textSelection = textLayoutManager.textSelections.first {
                 scrollToSelection(textSelection)
+                textLayoutManager.textViewportLayoutController.layoutViewport()
+                updateContentSizeIfNeeded()
+            }
+        }
+    }
+
+    internal func scrollToSelection(_ selection: NSTextSelection) {
+        guard let selectionTextRange = selection.textRanges.first else {
+            return
+        }
+
+        if selectionTextRange.isEmpty {
+            if let selectionRect = textLayoutManager.textSegmentRect(at: selectionTextRange.location) {
+                scrollToVisible(selectionRect)
+            }
+        } else {
+            switch selection.affinity {
+            case .upstream:
+                if let selectionRect = textLayoutManager.textSegmentRect(at: selectionTextRange.location) {
+                    scrollToVisible(selectionRect)
+                }
+            case .downstream:
+                if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
+                   let selectionRect = textLayoutManager.textSegmentRect(at: location)
+                {
+                    scrollToVisible(selectionRect)
+                }
+            @unknown default:
+                break
             }
         }
     }
 
     public func didChangeText() {
         needScrollToSelection = true
-        needsViewportLayout = true
         needsDisplay = true
 
         let notification = Notification(name: STTextView.didChangeNotification, object: self, userInfo: nil)
@@ -366,7 +396,7 @@ final public class STTextView: NSView, STText {
 extension STTextView {
 
     public override func mouseDown(with event: NSEvent) {
-        if isSelectable {
+        if isSelectable, event.type == .leftMouseDown {
             let point = convert(event.locationInWindow, from: nil)
             updateTextSelection(
                 interactingAt: point,
@@ -380,7 +410,7 @@ extension STTextView {
     }
 
     public override func mouseDragged(with event: NSEvent) {
-        if isSelectable {
+        if isSelectable, event.type == .leftMouseDragged, (!event.deltaY.isZero || !event.deltaX.isZero) {
             let point = convert(event.locationInWindow, from: nil)
             updateTextSelection(
                 interactingAt: point,
