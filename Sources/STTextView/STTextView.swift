@@ -115,7 +115,7 @@ final public class STTextView: NSView, STText {
     
     public override var isFlipped: Bool { return true }
 
-    private var scrollView: NSScrollView? {
+    internal var scrollView: NSScrollView? {
         guard let result = enclosingScrollView else { return nil }
         if result.documentView == self {
             return result
@@ -391,40 +391,6 @@ final public class STTextView: NSView, STText {
         NotificationCenter.default.post(notification)
         delegate?.textDidChange?(notification)
     }
-}
-
-extension STTextView {
-
-    public override func mouseDown(with event: NSEvent) {
-        if isSelectable, event.type == .leftMouseDown {
-            let point = convert(event.locationInWindow, from: nil)
-            updateTextSelection(
-                interactingAt: point,
-                inContainerAt: textLayoutManager.documentRange.location,
-                anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                extending: event.modifierFlags.contains(.shift)
-            )
-        } else {
-            super.mouseDown(with: event)
-        }
-    }
-
-    public override func mouseDragged(with event: NSEvent) {
-        if isSelectable, event.type == .leftMouseDragged, (!event.deltaY.isZero || !event.deltaX.isZero) {
-            let point = convert(event.locationInWindow, from: nil)
-            updateTextSelection(
-                interactingAt: point,
-                inContainerAt: textLayoutManager.documentRange.location,
-                anchors: textLayoutManager.textSelections,
-                extending: true,
-                visual: event.modifierFlags.contains(.option)
-            )
-            autoscroll(with: event)
-        } else {
-            super.mouseDragged(with: event)
-        }
-    }
-
 }
 
 extension STTextView: NSTextLayoutManagerDelegate {
