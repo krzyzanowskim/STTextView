@@ -349,7 +349,7 @@ extension STTextView {
         needsDisplay = true
     }
 
-    func updateTextSelection(interactingAt point: CGPoint, inContainerAt location: NSTextLocation, anchors: [NSTextSelection] = [], extending: Bool, visual: Bool = false) {
+    internal func updateTextSelection(interactingAt point: CGPoint, inContainerAt location: NSTextLocation, anchors: [NSTextSelection] = [], extending: Bool, visual: Bool = false) {
         guard isSelectable else { return }
 
         var modifiers: NSTextSelectionNavigation.Modifier = []

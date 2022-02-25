@@ -12,7 +12,7 @@ private final class STTextSelectionView: NSView {
     override var isFlipped: Bool { true }
 }
 
-final public class STTextView: NSView, STText {
+open class STTextView: NSView, STText {
 
     public static let didChangeNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
@@ -74,6 +74,10 @@ final public class STTextView: NSView, STText {
         }
     }
 
+    public var documentRange: NSTextRange {
+        textContentStorage.documentRange
+    }
+
     public var widthTracksTextView: Bool {
         set {
             textContainer.widthTracksTextView = newValue
@@ -86,6 +90,12 @@ final public class STTextView: NSView, STText {
     public var highlightSelectedLine: Bool {
         didSet {
             needsDisplay = true
+        }
+    }
+
+    public var backgroundColor: NSColor? {
+        didSet {
+            layer?.backgroundColor = backgroundColor?.cgColor
         }
     }
 
@@ -124,7 +134,7 @@ final public class STTextView: NSView, STText {
         }
     }
 
-    override init(frame frameRect: NSRect) {
+    override public init(frame frameRect: NSRect) {
         fragmentViewMap = .weakToWeakObjects()
 
         textContentStorage = STTextContentStorage()
@@ -175,7 +185,7 @@ final public class STTextView: NSView, STText {
 
     }
 
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -283,6 +293,12 @@ final public class STTextView: NSView, STText {
         textContentStorage.performEditingTransaction {
             textContentStorage.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentStorage))
         }
+    }
+
+    public func setSelectedRange(_ textRange: NSTextRange) {
+        textLayoutManager.textSelections = [
+            NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
+        ]
     }
 
     internal func updateContentSizeIfNeeded() {
