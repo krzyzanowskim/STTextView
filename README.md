@@ -2,9 +2,9 @@
 
 The goal of this project is to build [NSTextView](https://developer.apple.com/documentation/appkit/nstextview) replacement component utilizing TextKit2. Because reasons.
 
-The component is developed to serve [Swift Studio](https://swiftstudio.app) needs. (**ST** prefix stands for "Swift sTudio" because **SS** is not good prefix since 1939)
+The component is developed to serve [Swift Studio](https://swiftstudio.app) needs. (**ST** prefix stands for "**S**wift s**T**udio" because **SS** is not good prefix since 1939)
 
-https://user-images.githubusercontent.com/758033/154321737-5d757d75-fdc3-46da-92b6-0d149276c3ec.mov
+https://user-images.githubusercontent.com/758033/155702958-cdc9e3a4-275a-4953-b5bb-28907041fd21.mov
 
 ## Integration
 
