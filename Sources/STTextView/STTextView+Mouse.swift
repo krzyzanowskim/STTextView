@@ -5,7 +5,7 @@ import Cocoa
 
 extension STTextView {
 
-    public override func mouseDown(with event: NSEvent) {
+    open override func mouseDown(with event: NSEvent) {
         
         if isSelectable, event.type == .leftMouseDown {
             let point = convert(event.locationInWindow, from: nil)
@@ -20,7 +20,7 @@ extension STTextView {
         }
     }
 
-    public override func mouseDragged(with event: NSEvent) {
+    open override func mouseDragged(with event: NSEvent) {
         if isSelectable, event.type == .leftMouseDragged, (!event.deltaY.isZero || !event.deltaX.isZero) {
             let point = convert(event.locationInWindow, from: nil)
             updateTextSelection(

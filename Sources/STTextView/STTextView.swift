@@ -117,6 +117,7 @@ open class STTextView: NSView, STText, NSTextInput {
             }
         }
     }
+
     internal var needsViewportLayout: Bool = false {
         didSet {
             if needsViewportLayout {
@@ -231,21 +232,21 @@ open class STTextView: NSView, STText, NSTextInput {
         return true
     }
 
-    public override class var isCompatibleWithResponsiveScrolling: Bool {
+    open override class var isCompatibleWithResponsiveScrolling: Bool {
         true
     }
 
-    public override func prepareContent(in rect: NSRect) {
+    open override func prepareContent(in rect: NSRect) {
         needsViewportLayout = true
         super.prepareContent(in: rect)
     }
 
-    public override func draw(_ dirtyRect: NSRect) {
+    open override func draw(_ dirtyRect: NSRect) {
         drawBackground(in: dirtyRect)
         super.draw(dirtyRect)
     }
 
-    public func drawBackground(in rect: NSRect) {
+    open func drawBackground(in rect: NSRect) {
         if highlightSelectedLine {
             drawHighlightedLine(in: rect)
         }
@@ -353,13 +354,13 @@ open class STTextView: NSView, STText, NSTextInput {
         }
     }
 
-    public override func viewDidEndLiveResize() {
+    open override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
         adjustViewportOffsetIfNeeded()
         updateContentSizeIfNeeded()
     }
 
-    public override func setFrameSize(_ newSize: NSSize) {
+    open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         updateTextContainerSizeIfNeeded()
         needsViewportLayout = true
@@ -377,7 +378,7 @@ open class STTextView: NSView, STText, NSTextInput {
         needsViewportLayout = true
     }
 
-    public override func layout() {
+    open override func layout() {
         super.layout()
 
         if needsViewportLayout {
@@ -469,7 +470,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         adjustViewportOffsetIfNeeded()
     }
 
-    func updateSelectionHighlights() {
+    internal func updateSelectionHighlights() {
         guard !textLayoutManager.textSelections.isEmpty else {
             selectionView.subviews = []
             return

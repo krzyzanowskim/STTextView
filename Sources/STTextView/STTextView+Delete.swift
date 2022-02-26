@@ -6,43 +6,43 @@ import Cocoa
 
 extension STTextView {
 
-    public override func yank(_ sender: Any?) {
+    open override func yank(_ sender: Any?) {
         cut(sender)
     }
 
-    public override func deleteForward(_ sender: Any?) {
+    open override func deleteForward(_ sender: Any?) {
         delete(direction: .forward, destination: .character, allowsDecomposition: false)
     }
 
-    public override func deleteBackward(_ sender: Any?) {
+    open override func deleteBackward(_ sender: Any?) {
         delete(direction: .backward, destination: .character, allowsDecomposition: false)
     }
 
-    public override func deleteBackwardByDecomposingPreviousCharacter(_ sender: Any?) {
+    open override func deleteBackwardByDecomposingPreviousCharacter(_ sender: Any?) {
         delete(direction: .backward, destination: .character, allowsDecomposition: true)
     }
 
-    public override func deleteWordBackward(_ sender: Any?) {
+    open override func deleteWordBackward(_ sender: Any?) {
         delete(direction: .backward, destination: .word, allowsDecomposition: false)
     }
 
-    public override func deleteWordForward(_ sender: Any?) {
+    open override func deleteWordForward(_ sender: Any?) {
         delete(direction: .forward, destination: .word, allowsDecomposition: false)
     }
 
-    public override func deleteToBeginningOfLine(_ sender: Any?) {
+    open override func deleteToBeginningOfLine(_ sender: Any?) {
         delete(direction: .backward, destination: .line, allowsDecomposition: false)
     }
 
-    public override func deleteToEndOfLine(_ sender: Any?) {
+    open override func deleteToEndOfLine(_ sender: Any?) {
         delete(direction: .forward, destination: .line, allowsDecomposition: false)
     }
 
-    public override func deleteToBeginningOfParagraph(_ sender: Any?) {
+    open override func deleteToBeginningOfParagraph(_ sender: Any?) {
         delete(direction: .backward, destination: .paragraph, allowsDecomposition: false)
     }
 
-    public override func deleteToEndOfParagraph(_ sender: Any?) {
+    open override func deleteToEndOfParagraph(_ sender: Any?) {
         delete(direction: .forward, destination: .paragraph, allowsDecomposition: false)
     }
 

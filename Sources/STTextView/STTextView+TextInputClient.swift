@@ -8,7 +8,7 @@ import Cocoa
 // to the NSTextInputClient protocol.
 extension STTextView: NSTextInputClient {
 
-    public override func keyDown(with event: NSEvent) {
+    open override func keyDown(with event: NSEvent) {
         interpretKeyEvents([event])
     }
 

@@ -5,19 +5,19 @@ import Cocoa
 
 extension STTextView {
 
-    public override func insertLineBreak(_ sender: Any?) {
+    open override func insertLineBreak(_ sender: Any?) {
         insertNewline(sender)
     }
 
-    public override func insertTab(_ sender: Any?) {
+    open override func insertTab(_ sender: Any?) {
         insertText("\t")
     }
 
-    public override func insertNewline(_ sender: Any?) {
+    open override func insertNewline(_ sender: Any?) {
         insertText("\n")
     }
 
-    public override func insertText(_ insertString: Any) {
+    open override func insertText(_ insertString: Any) {
         insertText(insertString, replacementRange: NSRange.notFound)
     }
 
@@ -30,7 +30,7 @@ extension STTextView {
 
 extension STTextView {
     
-    public func insertText(_ string: Any, replacementRange: NSRange) {
+    open func insertText(_ string: Any, replacementRange: NSRange) {
         guard isEditable else { return }
         var didChange = false
 

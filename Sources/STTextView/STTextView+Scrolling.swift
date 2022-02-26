@@ -6,7 +6,7 @@ import Cocoa
 
 extension STTextView {
 
-    public override func centerSelectionInVisibleArea(_ sender: Any?) {
+    open override func centerSelectionInVisibleArea(_ sender: Any?) {
         guard !textLayoutManager.textSelections.isEmpty else {
             return
         }
@@ -15,19 +15,19 @@ extension STTextView {
         needsDisplay = true
     }
 
-    public override func pageUp(_ sender: Any?) {
+    open override func pageUp(_ sender: Any?) {
         assertionFailure()
     }
 
-    public override func pageUpAndModifySelection(_ sender: Any?) {
+    open override func pageUpAndModifySelection(_ sender: Any?) {
         assertionFailure()
     }
 
-    public override func pageDown(_ sender: Any?) {
+    open override func pageDown(_ sender: Any?) {
         assertionFailure()
     }
 
-    public override func pageDownAndModifySelection(_ sender: Any?) {
+    open override func pageDownAndModifySelection(_ sender: Any?) {
         assertionFailure()
     }
 

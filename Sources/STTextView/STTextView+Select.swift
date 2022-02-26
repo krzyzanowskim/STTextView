@@ -6,7 +6,7 @@ import Cocoa
 
 extension STTextView {
     
-    public override func selectAll(_ sender: Any?) {
+    open override func selectAll(_ sender: Any?) {
         if isSelectable {
             textLayoutManager.textSelections = [
                 NSTextSelection(range: textLayoutManager.documentRange, affinity: .downstream, granularity: .line)
@@ -16,19 +16,19 @@ extension STTextView {
         }
     }
 
-    public override func selectLine(_ sender: Any?) {
+    open override func selectLine(_ sender: Any?) {
         assertionFailure()
     }
 
-    public override func selectWord(_ sender: Any?) {
+    open override func selectWord(_ sender: Any?) {
         assertionFailure()
     }
 
-    public override func selectParagraph(_ sender: Any?) {
+    open override func selectParagraph(_ sender: Any?) {
         assertionFailure()
     }
 
-    public override func moveLeft(_ sender: Any?) {
+    open override func moveLeft(_ sender: Any?) {
         updateTextSelection(
             direction: .left,
             destination: .character,
@@ -36,7 +36,7 @@ extension STTextView {
         )
     }
 
-    public override func moveLeftAndModifySelection(_ sender: Any?) {
+    open override func moveLeftAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .left,
             destination: .character,
@@ -44,7 +44,7 @@ extension STTextView {
         )
     }
 
-    public override func moveRight(_ sender: Any?) {
+    open override func moveRight(_ sender: Any?) {
         updateTextSelection(
             direction: .right,
             destination: .character,
@@ -52,7 +52,7 @@ extension STTextView {
         )
     }
 
-    public override func moveRightAndModifySelection(_ sender: Any?) {
+    open override func moveRightAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .right,
             destination: .character,
@@ -60,7 +60,7 @@ extension STTextView {
         )
     }
 
-    public override func moveUp(_ sender: Any?) {
+    open override func moveUp(_ sender: Any?) {
         updateTextSelection(
             direction: .up,
             destination: .character,
@@ -68,7 +68,7 @@ extension STTextView {
         )
     }
 
-    public override func moveUpAndModifySelection(_ sender: Any?) {
+    open override func moveUpAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .up,
             destination: .character,
@@ -76,7 +76,7 @@ extension STTextView {
         )
     }
 
-    public override func moveDown(_ sender: Any?) {
+    open override func moveDown(_ sender: Any?) {
         updateTextSelection(
             direction: .down,
             destination: .character,
@@ -84,7 +84,7 @@ extension STTextView {
         )
     }
 
-    public override func moveDownAndModifySelection(_ sender: Any?) {
+    open override func moveDownAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .down,
             destination: .character,
@@ -92,7 +92,7 @@ extension STTextView {
         )
     }
 
-    public override func moveForward(_ sender: Any?) {
+    open override func moveForward(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .character,
@@ -100,7 +100,7 @@ extension STTextView {
         )
     }
 
-    public override func moveForwardAndModifySelection(_ sender: Any?) {
+    open override func moveForwardAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .character,
@@ -108,7 +108,7 @@ extension STTextView {
         )
     }
 
-    public override func moveBackward(_ sender: Any?) {
+    open override func moveBackward(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .character,
@@ -116,7 +116,7 @@ extension STTextView {
         )
     }
 
-    public override func moveBackwardAndModifySelection(_ sender: Any?) {
+    open override func moveBackwardAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .character,
@@ -124,7 +124,7 @@ extension STTextView {
         )
     }
 
-    public override func moveWordLeft(_ sender: Any?) {
+    open override func moveWordLeft(_ sender: Any?) {
         updateTextSelection(
             direction: .left,
             destination: .word,
@@ -132,7 +132,7 @@ extension STTextView {
         )
     }
 
-    public override func moveWordLeftAndModifySelection(_ sender: Any?) {
+    open override func moveWordLeftAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .left,
             destination: .word,
@@ -140,7 +140,7 @@ extension STTextView {
         )
     }
 
-    public override func moveWordRight(_ sender: Any?) {
+    open override func moveWordRight(_ sender: Any?) {
         updateTextSelection(
             direction: .right,
             destination: .word,
@@ -148,7 +148,7 @@ extension STTextView {
         )
     }
 
-    public override func moveWordRightAndModifySelection(_ sender: Any?) {
+    open override func moveWordRightAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .right,
             destination: .word,
@@ -156,7 +156,7 @@ extension STTextView {
         )
     }
 
-    public override func moveWordForward(_ sender: Any?) {
+    open override func moveWordForward(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .word,
@@ -164,7 +164,7 @@ extension STTextView {
         )
     }
 
-    public override func moveWordForwardAndModifySelection(_ sender: Any?) {
+    open override func moveWordForwardAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .word,
@@ -172,7 +172,7 @@ extension STTextView {
         )
     }
 
-    public override func moveWordBackward(_ sender: Any?) {
+    open override func moveWordBackward(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .word,
@@ -180,7 +180,7 @@ extension STTextView {
         )
     }
 
-    public override func moveWordBackwardAndModifySelection(_ sender: Any?) {
+    open override func moveWordBackwardAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .word,
@@ -188,7 +188,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToBeginningOfLine(_ sender: Any?) {
+    open override func moveToBeginningOfLine(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .line,
@@ -196,7 +196,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToBeginningOfLineAndModifySelection(_ sender: Any?) {
+    open override func moveToBeginningOfLineAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .line,
@@ -204,7 +204,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToLeftEndOfLine(_ sender: Any?) {
+    open override func moveToLeftEndOfLine(_ sender: Any?) {
         updateTextSelection(
             direction: .left,
             destination: .line,
@@ -212,7 +212,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToLeftEndOfLineAndModifySelection(_ sender: Any?) {
+    open override func moveToLeftEndOfLineAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .left,
             destination: .line,
@@ -220,7 +220,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToEndOfLine(_ sender: Any?) {
+    open override func moveToEndOfLine(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .line,
@@ -228,7 +228,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToEndOfLineAndModifySelection(_ sender: Any?) {
+    open override func moveToEndOfLineAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .line,
@@ -236,7 +236,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToRightEndOfLine(_ sender: Any?) {
+    open override func moveToRightEndOfLine(_ sender: Any?) {
         updateTextSelection(
             direction: .right,
             destination: .line,
@@ -244,7 +244,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToRightEndOfLineAndModifySelection(_ sender: Any?) {
+    open override func moveToRightEndOfLineAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .right,
             destination: .line,
@@ -252,7 +252,7 @@ extension STTextView {
         )
     }
 
-    public override func moveParagraphForwardAndModifySelection(_ sender: Any?) {
+    open override func moveParagraphForwardAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .paragraph,
@@ -260,7 +260,7 @@ extension STTextView {
         )
     }
 
-    public override func moveParagraphBackwardAndModifySelection(_ sender: Any?) {
+    open override func moveParagraphBackwardAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .paragraph,
@@ -268,7 +268,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToBeginningOfParagraph(_ sender: Any?) {
+    open override func moveToBeginningOfParagraph(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .paragraph,
@@ -276,7 +276,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToBeginningOfParagraphAndModifySelection(_ sender: Any?) {
+    open override func moveToBeginningOfParagraphAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .paragraph,
@@ -284,7 +284,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToEndOfParagraph(_ sender: Any?) {
+    open override func moveToEndOfParagraph(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .paragraph,
@@ -292,7 +292,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToEndOfParagraphAndModifySelection(_ sender: Any?) {
+    open override func moveToEndOfParagraphAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .paragraph,
@@ -300,7 +300,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToBeginningOfDocument(_ sender: Any?) {
+    open override func moveToBeginningOfDocument(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .document,
@@ -308,7 +308,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToBeginningOfDocumentAndModifySelection(_ sender: Any?) {
+    open override func moveToBeginningOfDocumentAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .backward,
             destination: .document,
@@ -316,7 +316,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToEndOfDocument(_ sender: Any?) {
+    open override func moveToEndOfDocument(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .document,
@@ -324,7 +324,7 @@ extension STTextView {
         )
     }
 
-    public override func moveToEndOfDocumentAndModifySelection(_ sender: Any?) {
+    open override func moveToEndOfDocumentAndModifySelection(_ sender: Any?) {
         updateTextSelection(
             direction: .forward,
             destination: .document,
