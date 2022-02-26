@@ -6,10 +6,7 @@ import Cocoa
 extension STTextView {
 
     public override func mouseDown(with event: NSEvent) {
-        if window?.firstResponder != self, acceptsFirstResponder {
-            window?.makeFirstResponder(self)
-        }
-
+        
         if isSelectable, event.type == .leftMouseDown {
             let point = convert(event.locationInWindow, from: nil)
             updateTextSelection(

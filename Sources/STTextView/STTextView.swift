@@ -5,7 +5,9 @@
 import Cocoa
 
 private final class STTextContentView: NSView {
-    override var isFlipped: Bool { true }
+    override var isFlipped: Bool {
+        true
+    }
 }
 
 private final class STTextSelectionView: NSView {
@@ -187,6 +189,18 @@ open class STTextView: NSView, STText, NSTextInput {
 
     }
 
+    open override func hitTest(_ point: NSPoint) -> NSView? {
+        let result = super.hitTest(point)
+        // click-through `contentView` and `selectionView` subviews
+        // that makes first responder properly redirect to main view
+        // and ignore utility subviews that should remain transparent
+        // for interaction.
+        if let view = result, view != self, (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView)) {
+            return self
+        }
+        return result
+    }
+
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -206,10 +220,8 @@ open class STTextView: NSView, STText, NSTextInput {
     open override func becomeFirstResponder() -> Bool {
         if isEditable {
             NotificationCenter.default.post(name: NSText.didBeginEditingNotification, object: self, userInfo: nil)
-            return true
-        } else {
-            return false
         }
+        return true
     }
 
     open override func resignFirstResponder() -> Bool {

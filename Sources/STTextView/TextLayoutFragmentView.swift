@@ -18,7 +18,9 @@ final class TextLayoutFragmentView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override var isFlipped: Bool { true }
+    override var isFlipped: Bool {
+        true
+    }
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
