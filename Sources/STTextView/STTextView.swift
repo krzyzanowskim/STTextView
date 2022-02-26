@@ -12,7 +12,7 @@ private final class STTextSelectionView: NSView {
     override var isFlipped: Bool { true }
 }
 
-open class STTextView: NSView, STText {
+open class STTextView: NSView, STText, NSTextInput {
 
     public static let didChangeNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
@@ -101,9 +101,9 @@ open class STTextView: NSView, STText {
 
     public weak var delegate: STTextViewDelegate?
 
-    let textLayoutManager: NSTextLayoutManager
-    let textContentStorage: NSTextContentStorage
-    private let textContainer: NSTextContainer
+    public let textLayoutManager: NSTextLayoutManager
+    public let textContentStorage: NSTextContentStorage
+    public let textContainer: NSTextContainer
     private let contentView: STTextContentView
     private let selectionView: STTextContentView
     private var fragmentViewMap: NSMapTable<NSTextLayoutFragment, NSView>
@@ -123,7 +123,9 @@ open class STTextView: NSView, STText {
         }
     }
     
-    public override var isFlipped: Bool { return true }
+    public override var isFlipped: Bool {
+        true
+    }
 
     internal var scrollView: NSScrollView? {
         guard let result = enclosingScrollView else { return nil }
@@ -189,18 +191,28 @@ open class STTextView: NSView, STText {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override var acceptsFirstResponder: Bool {
-        true
+    open override var canBecomeKeyView: Bool {
+        acceptsFirstResponder
     }
 
-    public override func becomeFirstResponder() -> Bool {
+    open override var needsPanelToBecomeKey: Bool {
+        isSelectable || isEditable
+    }
+
+    open override var acceptsFirstResponder: Bool {
+        isSelectable
+    }
+
+    open override func becomeFirstResponder() -> Bool {
         if isEditable {
             NotificationCenter.default.post(name: NSText.didBeginEditingNotification, object: self, userInfo: nil)
+            return true
+        } else {
+            return false
         }
-        return true
     }
 
-    public override func resignFirstResponder() -> Bool {
+    open override func resignFirstResponder() -> Bool {
         if isEditable {
             NotificationCenter.default.post(name: NSText.didEndEditingNotification, object: self, userInfo: nil)
         }
