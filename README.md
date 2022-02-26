@@ -6,6 +6,19 @@ The component is developed to serve [Swift Studio](https://swiftstudio.app) need
 
 https://user-images.githubusercontent.com/758033/155702958-cdc9e3a4-275a-4953-b5bb-28907041fd21.mov
 
+[TextKit2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as an TextKit replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing will adopt TextKit2 and provide support along TextKit1 bits. As I started to learn more about NSTextView + TextKit2 I realized as of today (Feb 2022) neither NSTextView is fully functional, nor TextKit2 classess are fully functional. Along the way I reported several bug reports to Apple, requested DTS (support tickets). Eventually I've got blocked by certain bugs that pushed me to start this project.
+
+
+- FB9856587: TextKit2 unexpected additional line fragment for last line
+- FB9925766: NSTextSelectionNavigation.deletionRanges only works at the end of the word
+- FB9925647: NSTextLayoutManager.replaceContents(in range:  with attributedString:) is documented but is not part of the public API
+- FB9907261: NSTextElementProvider.replaceContents(in:with:) does not replace content as documented
+- FB9692714: Rendering attributes does not draw properly
+- FB9886911: NSTextView can't properly layout and display long lines (this one is especially bad since it cause the view "jump" whenever text attribute updates)
+- FB9713415: NSTextView drawInsertionPoint(in:color:turnedOn) is never called
+
+... I'm aware that the list of issues is not complete.
+
 ## Integration
 
 Swift Package Manager:
