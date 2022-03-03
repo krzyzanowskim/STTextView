@@ -6,15 +6,25 @@ import Cocoa
 extension STTextView {
 
     open override func mouseDown(with event: NSEvent) {
+        guard isSelectable else {
+            super.mouseDown(with: event)
+            return
+        }
         
-        if isSelectable, event.type == .leftMouseDown {
-            let point = convert(event.locationInWindow, from: nil)
-            updateTextSelection(
-                interactingAt: point,
-                inContainerAt: textLayoutManager.documentRange.location,
-                anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                extending: event.modifierFlags.contains(.shift)
-            )
+        if event.type == .leftMouseDown {
+            if event.clickCount == 1 {
+                let point = convert(event.locationInWindow, from: nil)
+                updateTextSelection(
+                    interactingAt: point,
+                    inContainerAt: textLayoutManager.documentRange.location,
+                    anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
+                    extending: event.modifierFlags.contains(.shift)
+                )
+            } else if event.clickCount == 2 {
+                selectWord(self)
+            } else if event.clickCount == 3 {
+                selectLine(self)
+            }
         } else {
             super.mouseDown(with: event)
         }

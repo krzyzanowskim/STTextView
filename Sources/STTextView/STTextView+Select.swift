@@ -17,15 +17,52 @@ extension STTextView {
     }
 
     open override func selectLine(_ sender: Any?) {
-        assertionFailure()
+        guard let startSelection = textLayoutManager.textSelections.first else {
+            return
+        }
+
+        textLayoutManager.textSelections = [
+            textLayoutManager.textSelectionNavigation.textSelection(
+                for: .line,
+                enclosing: startSelection
+            )
+        ]
+
+        needScrollToSelection = true
+        needsDisplay = true
     }
 
     open override func selectWord(_ sender: Any?) {
-        assertionFailure()
+        guard let startSelection = textLayoutManager.textSelections.first else {
+            return
+        }
+
+        textLayoutManager.textSelections = [
+            textLayoutManager.textSelectionNavigation.textSelection(
+                for: .word,
+                enclosing: startSelection
+            )
+        ]
+
+        needScrollToSelection = true
+        needsDisplay = true
     }
 
     open override func selectParagraph(_ sender: Any?) {
-        assertionFailure()
+        guard let startSelection = textLayoutManager.textSelections.first else {
+            return
+        }
+
+        textLayoutManager.textSelections = [
+            textLayoutManager.textSelectionNavigation.textSelection(
+                for: .paragraph,
+                enclosing: startSelection
+            )
+        ]
+
+        needScrollToSelection = true
+        needsDisplay = true
+
     }
 
     open override func moveLeft(_ sender: Any?) {
