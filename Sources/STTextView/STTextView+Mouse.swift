@@ -55,4 +55,22 @@ extension STTextView {
             super.mouseDragged(with: event)
         }
     }
+
+    open override func rightMouseDown(with event: NSEvent) {
+
+        if menu(for: event) != nil {
+
+            let point = convert(event.locationInWindow, from: nil)
+            updateTextSelection(
+                interactingAt: point,
+                inContainerAt: textLayoutManager.documentRange.location,
+                anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
+                extending: event.modifierFlags.contains(.shift)
+            )
+
+            selectWord(self)
+        }
+
+        super.rightMouseDown(with: event)
+    }
 }
