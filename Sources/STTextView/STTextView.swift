@@ -139,6 +139,16 @@ open class STTextView: NSView, STText, NSTextInput {
         }
     }
 
+    open override class var defaultMenu: NSMenu? {
+        let menu = NSMenu()
+        menu.items = [
+            NSMenuItem(title: NSLocalizedString("Cut", comment: ""), action: #selector(cut(_:)), keyEquivalent: "x"),
+            NSMenuItem(title: NSLocalizedString("Copy", comment: ""), action: #selector(copy(_:)), keyEquivalent: "c"),
+            NSMenuItem(title: NSLocalizedString("Paste", comment: ""), action: #selector(paste(_:)), keyEquivalent: "v")
+        ]
+        return menu
+    }
+
     override public init(frame frameRect: NSRect) {
         fragmentViewMap = .weakToWeakObjects()
 
@@ -192,6 +202,7 @@ open class STTextView: NSView, STText, NSTextInput {
 
     open override func hitTest(_ point: NSPoint) -> NSView? {
         let result = super.hitTest(point)
+
         // click-through `contentView` and `selectionView` subviews
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent

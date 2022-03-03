@@ -6,12 +6,14 @@ import Cocoa
 extension STTextView {
 
     open override func mouseDown(with event: NSEvent) {
-        guard isSelectable else {
+        guard isSelectable, event.type == .leftMouseDown else {
             super.mouseDown(with: event)
             return
         }
-        
-        if event.type == .leftMouseDown {
+
+        var handled = false
+
+        if event.modifierFlags.isEmpty {
             if event.clickCount == 1 {
                 let point = convert(event.locationInWindow, from: nil)
                 updateTextSelection(
@@ -20,12 +22,17 @@ extension STTextView {
                     anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
                     extending: event.modifierFlags.contains(.shift)
                 )
+                handled = true
             } else if event.clickCount == 2 {
                 selectWord(self)
+                handled = true
             } else if event.clickCount == 3 {
                 selectLine(self)
+                handled = true
             }
-        } else {
+        }
+
+        if !handled {
             super.mouseDown(with: event)
         }
     }
