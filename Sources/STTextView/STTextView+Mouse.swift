@@ -60,15 +60,17 @@ extension STTextView {
 
         if menu(for: event) != nil {
 
-            let point = convert(event.locationInWindow, from: nil)
-            updateTextSelection(
-                interactingAt: point,
-                inContainerAt: textLayoutManager.documentRange.location,
-                anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                extending: event.modifierFlags.contains(.shift)
-            )
+            if textLayoutManager.textSelections.isEmpty {
+                let point = convert(event.locationInWindow, from: nil)
+                updateTextSelection(
+                    interactingAt: point,
+                    inContainerAt: textLayoutManager.documentRange.location,
+                    anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
+                    extending: event.modifierFlags.contains(.shift)
+                )
 
-            selectWord(self)
+                selectWord(self)
+            }
         }
 
         super.rightMouseDown(with: event)
