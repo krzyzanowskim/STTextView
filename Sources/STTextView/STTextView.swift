@@ -25,7 +25,7 @@ open class STTextView: NSView, STText, NSTextInput {
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
     /// Insertion point view. default: `STInsertionPointView` 
-    open class var insertionPointClass: Any {
+    open class var insertionPointClass: AnyObject.Type {
         STInsertionPointView.self
     }
 

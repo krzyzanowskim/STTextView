@@ -9,7 +9,9 @@ extension STTextView {
     /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
     open func updateInsertionPointStateAndRestartTimer() {
 
-        selectionView.subviews.removeAll(where: { type(of:$0) is STInsertionPointView.Type })
+        selectionView.subviews.removeAll(where: {
+            type(of: $0) == Self.insertionPointClass
+        })
 
         if shouldDrawInsertionPoint {
             for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
