@@ -21,11 +21,6 @@ extension STTextView {
         insertText(insertString, replacementRange: NSRange.notFound)
     }
 
-
-//     public override func doCommand(by selector: Selector) {
-//        print(selector)
-//        super.doCommand(by: selector)
-//     }
 }
 
 extension STTextView {

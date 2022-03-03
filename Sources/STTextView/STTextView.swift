@@ -1,13 +1,18 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
-
+//
+//
+//  STTextView
+//      |---selectionView (STTextSelectionView)
+//      |---contentView (STTextContentView)
+//              |---(STInsertionPointView | TextLayoutFragmentView)
+//
+//
 
 import Cocoa
 
-private final class STTextContentView: NSView {
-    override var isFlipped: Bool {
-        true
-    }
+internal final class STTextContentView: NSView {
+    override var isFlipped: Bool { true }
 }
 
 private final class STTextSelectionView: NSView {
@@ -19,14 +24,29 @@ open class STTextView: NSView, STText, NSTextInput {
     public static let didChangeNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
+    /// Insertion point view. default: `STInsertionPointView` 
+    open class var insertionPointClass: Any {
+        STInsertionPointView.self
+    }
+
     /// A Boolean value that controls whether the text view allow the user to edit text.
-    public var isEditable: Bool {
+    open var isEditable: Bool {
         didSet {
             isSelectable = isEditable
         }
     }
     
-    public var isSelectable: Bool
+    open var isSelectable: Bool {
+        didSet {
+            updateInsertionPointStateAndRestartTimer()
+        }
+    }
+
+    open var shouldDrawInsertionPoint: Bool {
+        didSet {
+            updateInsertionPointStateAndRestartTimer()
+        }
+    }
 
     public var font: NSFont? {
         get {
@@ -89,7 +109,7 @@ open class STTextView: NSView, STText, NSTextInput {
         }
     }
 
-    public var highlightSelectedLine: Bool {
+    open var highlightSelectedLine: Bool {
         didSet {
             needsDisplay = true
         }
@@ -107,7 +127,7 @@ open class STTextView: NSView, STText, NSTextInput {
     public let textContentStorage: NSTextContentStorage
     public let textContainer: NSTextContainer
     private let contentView: STTextContentView
-    private let selectionView: STTextContentView
+    internal let selectionView: STTextContentView
     private var fragmentViewMap: NSMapTable<NSTextLayoutFragment, NSView>
 
     internal var needScrollToSelection: Bool = false {
@@ -162,7 +182,8 @@ open class STTextView: NSView, STText, NSTextInput {
         selectionView = STTextContentView(frame: frameRect)
 
         isEditable = true
-        isSelectable = true
+        isSelectable = isEditable
+        shouldDrawInsertionPoint = isSelectable
         highlightSelectedLine = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
 
@@ -489,28 +510,24 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
         selectionView.subviews = []
 
-        for textSelection in textLayoutManager.textSelections {
-            for textRange in textSelection.textRanges {
-                textLayoutManager.enumerateTextSegments(in: textRange, type: .highlight, options: []) {(textSegmentRange, textSegmentFrame, baselinePosition, textContainer) in
-                    var highlightFrame = textSegmentFrame.intersection(frame)
-                    guard !highlightFrame.isNull else {
-                        return true
-                    }
+        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+            textLayoutManager.enumerateTextSegments(in: textRange, type: .highlight, options: [.rangeNotRequired]) {(_, textSegmentFrame, baselinePosition, textContainer) in
+                let highlightFrame = textSegmentFrame.intersection(frame)
+                guard !highlightFrame.isNull else {
+                    return true
+                }
 
+                if highlightFrame.size.width > 0 {
                     let highlight = STTextSelectionView()
                     highlight.wantsLayer = true
-
-                    if highlightFrame.size.width > 0 {
-                        highlight.layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
-                    } else {
-                        highlightFrame.size.width = 1 // fatten up the cursor
-                        highlight.layer?.backgroundColor = NSColor.black.cgColor
-                    }
-
+                    highlight.layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
                     highlight.frame = highlightFrame
                     selectionView.addSubview(highlight)
-                    return true // keep going
+                } else {
+                    updateInsertionPointStateAndRestartTimer()
                 }
+
+                return true // keep going
             }
         }
     }
