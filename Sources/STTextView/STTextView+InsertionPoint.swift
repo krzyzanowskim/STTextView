@@ -23,6 +23,9 @@ extension STTextView {
 
                     let insertionView = (Self.insertionPointClass as! NSView.Type).init(frame: highlightFrame)
                     assert(insertionView.isFlipped)
+                    if let insertionPointView = insertionView as? STInsertionPointView {
+                        insertionPointView.insertionPointColor = insertionPointColor
+                    }
                     selectionView.addSubview(insertionView)
 
                     return true

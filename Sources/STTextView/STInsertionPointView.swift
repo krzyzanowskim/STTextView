@@ -6,7 +6,17 @@ import Cocoa
 
 open class STInsertionPointView: NSView {
     private var timer: Timer?
-    private let insertionPointWidth: CGFloat = 1
+    open var insertionPointWidth: CGFloat = 1 {
+        didSet {
+            frame.size.width = insertionPointWidth
+        }
+    }
+
+    open var insertionPointColor: NSColor = .textColor {
+        didSet {
+            layer?.backgroundColor = insertionPointColor.cgColor
+        }
+    }
 
     public override var isFlipped: Bool {
         true
@@ -22,13 +32,16 @@ open class STInsertionPointView: NSView {
         commonInit()
     }
 
+    convenience init(frame frameRect: NSRect, color: NSColor) {
+        self.init(frame: frameRect)
+        self.insertionPointColor = color
+    }
+
     private func commonInit() {
         wantsLayer = true
-
+        frame = frame.insetBy(dx: 0, dy: 1)
         frame.size.width = insertionPointWidth
-        frame.size.height -= 2
-        frame.origin.y += 1
-        layer?.backgroundColor = NSColor.textColor.withAlphaComponent(0.9).cgColor
+        layer?.backgroundColor = insertionPointColor.cgColor
 
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
             guard let self = self else { return }

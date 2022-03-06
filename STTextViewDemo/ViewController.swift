@@ -28,7 +28,7 @@ final class ViewController: NSViewController {
 
         textView.defaultParagraphStyle = paragraph
         textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
-        textView.textColor = .labelColor
+        textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
         textView.widthTracksTextView = false

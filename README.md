@@ -41,7 +41,7 @@ paragraph.defaultTabInterval = 28
 
 textView.defaultParagraphStyle = paragraph
 textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
-textView.textColor = .labelColor
+textView.textColor = .textColor
 textView.string = "text content"
 textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
 textView.widthTracksTextView = true

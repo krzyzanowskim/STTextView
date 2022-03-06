@@ -48,6 +48,8 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    open var insertionPointColor: NSColor
+
     public var font: NSFont? {
         get {
             typingAttributes[.font] as? NSFont
@@ -184,6 +186,7 @@ open class STTextView: NSView, NSTextInput {
         isEditable = true
         isSelectable = isEditable
         shouldDrawInsertionPoint = isSelectable
+        insertionPointColor = .textColor
         highlightSelectedLine = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
 
