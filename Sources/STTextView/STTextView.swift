@@ -19,7 +19,7 @@ private final class STTextSelectionView: NSView {
     override var isFlipped: Bool { true }
 }
 
-open class STTextView: NSView, STText, NSTextInput {
+open class STTextView: NSView, NSTextInput {
 
     public static let didChangeNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
