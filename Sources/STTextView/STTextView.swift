@@ -186,7 +186,6 @@ open class STTextView: NSView, STText, NSTextInput {
         shouldDrawInsertionPoint = isSelectable
         highlightSelectedLine = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
-        textContainer.lineFragmentPadding = 0
 
         super.init(frame: frameRect)
 
@@ -317,7 +316,6 @@ open class STTextView: NSView, STText, NSTextInput {
                     height: textLineFragment.typographicBounds.height
                 )
             )
-            .insetBy(dx: textContainer.lineFragmentPadding, dy: 0)
 
             context.fill(fillRect)
             context.restoreGState()
