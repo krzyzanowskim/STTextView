@@ -36,15 +36,15 @@ extension STTextView {
                     return
                 }
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
-                    let nsrange = NSRange(textRange, in: textContentStorage)
-                    if delegate?.textView?(self, shouldChangeTextIn: nsrange, replacementString: string) ?? true {
+                    if shouldChangeText(in: textRange, replacementString: string) {
+                        let nsrange = NSRange(textRange, in: textContentStorage)
                         textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: string)
                         didChange = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-                        let nsrange = NSRange(textRange, in: textContentStorage)
-                        if delegate?.textView?(self, shouldChangeTextIn: nsrange, replacementString: string) ?? true {
+                        if shouldChangeText(in: textRange, replacementString: string) {
+                            let nsrange = NSRange(textRange, in: textContentStorage)
                             textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: string)
                             didChange = true
                         }
@@ -55,15 +55,15 @@ extension STTextView {
                     return
                 }
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
-                    let nsrange = NSRange(textRange, in: textContentStorage)
-                    if delegate?.textView?(self, shouldChangeTextIn: nsrange, replacementString: string.string) ?? true {
+                    if shouldChangeText(in: textRange, replacementString: string.string) {
+                        let nsrange = NSRange(textRange, in: textContentStorage)
                         textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: string)
                         didChange = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-                        let nsrange = NSRange(textRange, in: textContentStorage)
-                        if delegate?.textView?(self, shouldChangeTextIn: nsrange, replacementString: string.string) ?? true {
+                        if shouldChangeText(in: textRange, replacementString: string.string) {
+                            let nsrange = NSRange(textRange, in: textContentStorage)
                             textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: string)
                             didChange = true
                         }

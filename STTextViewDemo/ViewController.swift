@@ -51,7 +51,7 @@ extension ViewController: STTextViewDelegate {
         //
     }
 
-    func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSRange, replacementString: String?) -> Bool {
+    func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool {
         true
     }
 }

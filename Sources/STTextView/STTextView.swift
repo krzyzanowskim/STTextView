@@ -466,6 +466,12 @@ open class STTextView: NSView, NSTextInput {
         NotificationCenter.default.post(notification)
         delegate?.textDidChange?(notification)
     }
+
+    /// Whenever text is to be changed due to some user-induced action, this method should be called with information on the change. 
+    internal func shouldChangeText(in affectedTextRange: NSTextRange, replacementString: String?) -> Bool {
+        let result = delegate?.textView?(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString) ?? true
+        return result
+    }
 }
 
 extension STTextView: NSTextLayoutManagerDelegate {

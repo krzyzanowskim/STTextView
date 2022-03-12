@@ -74,9 +74,9 @@ extension STTextView {
 
         textContentStorage.performEditingTransaction {
             for textRange in textRanges {
-                let range = NSRange(textRange, in: textContentStorage)
-                if delegate?.textView?(self, shouldChangeTextIn: range, replacementString: nil) ?? true {
-                    textContentStorage.textStorage?.deleteCharacters(in: range)
+                if shouldChangeText(in: textRange, replacementString: nil) {
+                    let nsrange = NSRange(textRange, in: textContentStorage)
+                    textContentStorage.textStorage?.deleteCharacters(in: nsrange)
                 }
             }
         }
