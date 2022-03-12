@@ -68,19 +68,21 @@ extension STTextView {
             }
         }
 
-        if textRanges.isEmpty || textRanges == textLayoutManager.textSelections.flatMap(\.textRanges) {
+        if textRanges.isEmpty {
             return
         }
 
+        var didChange = false
         textContentStorage.performEditingTransaction {
-            for textRange in textRanges {
-                if shouldChangeText(in: textRange, replacementString: nil) {
-                    let nsrange = NSRange(textRange, in: textContentStorage)
-                    textContentStorage.textStorage?.deleteCharacters(in: nsrange)
-                }
+            for textRange in textRanges where shouldChangeText(in: textRange, replacementString: nil) {
+                didChange = true
+                let nsrange = NSRange(textRange, in: textContentStorage)
+                textContentStorage.textStorage?.deleteCharacters(in: nsrange)
             }
         }
 
-        didChangeText()
+        if didChange {
+            didChangeText()
+        }
     }
 }
