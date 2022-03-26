@@ -123,6 +123,12 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    /// A Boolean value that indicates whether the receiver allows undo.
+    ///
+    /// `true` if the receiver allows undo, otherwise `false`. Default `true`.
+    open var allowsUndo: Bool
+    internal var _undoManager: UndoManager?
+
     public weak var delegate: STTextViewDelegate?
 
     public let textLayoutManager: NSTextLayoutManager
@@ -189,12 +195,10 @@ open class STTextView: NSView, NSTextInput {
         insertionPointColor = .textColor
         highlightSelectedLine = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
+        allowsUndo = true
+        _undoManager = CoalescingUndoManager<TypingTextUndo>()
 
         super.init(frame: frameRect)
-
-        // workaround for: the text selection highlight can remain between lines (2017-09 macOS 10.13).
-        // scaleUnitSquare(to: NSSize(width: 0.5, height: 0.5))
-        // scaleUnitSquare(to: convert(CGSize(width: 1, height: 1), from: nil)) // reset scale
 
         postsBoundsChangedNotifications = true
         postsFrameChangedNotifications = true
@@ -202,7 +206,6 @@ open class STTextView: NSView, NSTextInput {
         wantsLayer = true
         autoresizingMask = [.width, .height]
 
-        textLayoutManager.delegate = self
         textLayoutManager.textViewportLayoutController.delegate = self
 
         selectionView.wantsLayer = true
@@ -326,6 +329,10 @@ open class STTextView: NSView, NSTextInput {
     }
 
     private func setString(_ string: Any?) {
+        undoManager?.disableUndoRegistration()
+        defer {
+            undoManager?.enableUndoRegistration()
+        }
         let documentRange = NSRange(textContentStorage.documentRange, in: textContentStorage)
         if case .some(let string) = string {
             switch string {
@@ -458,7 +465,7 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    public func didChangeText() {
+    open func didChangeText() {
         needScrollToSelection = true
         needsDisplay = true
 
@@ -467,15 +474,118 @@ open class STTextView: NSView, NSTextInput {
         delegate?.textDidChange?(notification)
     }
 
-    /// Whenever text is to be changed due to some user-induced action, this method should be called with information on the change. 
-    internal func shouldChangeText(in affectedTextRange: NSTextRange, replacementString: String?) -> Bool {
+    open func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString) {
+        // NSTextDidBeginEditingNotification
+        let nsrange = NSRange(textRange, in: textContentStorage)
+        textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: replacementString)
+
+        if let undoManager = undoManager as? CoalescingUndoManager<TypingTextUndo>, undoManager.isUndoing == false {
+            // Add undo
+
+            // An event is considered a typing event
+            // if it is a keyboard event and the event's characters
+            // match our replacement string.
+            let isTyping: Bool
+            if let event = NSApp.currentEvent, event.type == .keyDown, event.characters == replacementString.string {
+                isTyping = true
+            } else {
+                isTyping = false
+            }
+
+            if allowsUndo, undoManager.isUndoRegistrationEnabled {
+                if isTyping, textRange.isEmpty,
+                   let coalescingValue = undoManager.coalescing?.value,
+                   textRange.location == coalescingValue.textRange.endLocation,
+                   let endLocation = textLayoutManager.location(textRange.location, offsetBy: replacementString.string.count ),
+                   let range = NSTextRange(location: coalescingValue.textRange.location, end: endLocation)
+                {
+                    // update or extend existing range
+                    undoManager.coalesce(
+                        TypingTextUndo(
+                            textRange: range,
+                            value: replacementString
+                        )
+                    )
+
+                    return
+                } else {
+                    // reset undo range
+                    if undoManager.isCoalescing {
+                        if let coalescingAction = undoManager.coalescing?.action,
+                           let coalescingValue = undoManager.coalescing?.value {
+
+                            // put coalesed undo on the stack
+                            undoManager.setActionName("Typing")
+                            undoManager.registerUndo(withTarget: self) { target in
+                                coalescingAction(coalescingValue)
+                            }
+
+                            undoManager.breakUndoCoalescing()
+                        }
+                    }
+                }
+            }
+
+            if isTyping, allowsUndo, undoManager.isUndoRegistrationEnabled {
+                let undoRange: NSTextRange
+
+                // The length of the undoRange is the length of the replacement, if any.
+                if let endLocation = textLayoutManager.location(textRange.location, offsetBy: replacementString.string.count),
+                   let range = NSTextRange(location: textRange.location, end: endLocation)
+                {
+                    undoRange = range
+                } else {
+                    undoRange = textRange
+                }
+
+                if !undoManager.isCoalescing {
+                    // It fits here,
+                    // yet it start implicit nested group that screw undo stack without following regular undo action
+                    //
+                    // undoManager.setActionName("Typing")
+
+                    undoManager.registerCoalescingUndo(withTarget: self) { target, value in
+                        // Replace with empty string
+                        target.replaceCharacters(in: value.textRange, with: NSAttributedString())
+                        target.didChangeText()
+                    }
+
+                    undoManager.coalesce(
+                        TypingTextUndo(
+                            textRange: undoRange,
+                            value: replacementString
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    open func replaceCharacters(in textRange: NSTextRange, with replacementString: String) {
+        //let nsrange = NSRange(textRange, in: textContentStorage)
+        //textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: replacementString)
+        replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: typingAttributes))
+    }
+
+    /// Whenever text is to be changed due to some user-induced action,
+    /// this method should be called with information on the change.
+    /// Coalesce consecutive typing events
+    open func shouldChangeText(in affectedTextRange: NSTextRange, replacementString: String?) -> Bool {
+        if !isEditable {
+            return false
+        }
+
         let result = delegate?.textView?(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString) ?? true
+        if !result {
+            return result
+        }
+
         return result
     }
-}
 
-extension STTextView: NSTextLayoutManagerDelegate {
-    //
+    public func breakUndoCoalescing() {
+        (undoManager as? CoalescingUndoManager<TypingTextUndo>)?.breakUndoCoalescing()
+    }
 }
 
 extension STTextView: NSTextViewportLayoutControllerDelegate {

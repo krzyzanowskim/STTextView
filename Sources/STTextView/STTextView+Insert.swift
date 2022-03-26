@@ -37,15 +37,13 @@ extension STTextView {
                 }
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string) {
-                        let nsrange = NSRange(textRange, in: textContentStorage)
-                        textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: string)
+                        replaceCharacters(in: textRange, with: string)
                         didChange = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string) {
-                            let nsrange = NSRange(textRange, in: textContentStorage)
-                            textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: string)
+                            replaceCharacters(in: textRange, with: string)
                             didChange = true
                         }
                     }
@@ -56,15 +54,13 @@ extension STTextView {
                 }
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string.string) {
-                        let nsrange = NSRange(textRange, in: textContentStorage)
-                        textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: string)
+                        replaceCharacters(in: textRange, with: string)
                         didChange = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string.string) {
-                            let nsrange = NSRange(textRange, in: textContentStorage)
-                            textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: string)
+                            replaceCharacters(in: textRange, with: string)
                             didChange = true
                         }
                     }
@@ -79,4 +75,5 @@ extension STTextView {
             didChangeText()
         }
     }
+    
 }
