@@ -353,12 +353,14 @@ open class STTextView: NSView, NSTextInput {
         textContentStorage.performEditingTransaction {
             textContentStorage.textStorage?.addAttributes(attrs, range: range)
         }
+        needsViewportLayout = true
     }
 
     public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange) {
         textContentStorage.performEditingTransaction {
             textContentStorage.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentStorage))
         }
+        needsViewportLayout = true
     }
 
     public func setSelectedRange(_ textRange: NSTextRange) {
@@ -565,6 +567,7 @@ open class STTextView: NSView, NSTextInput {
         //let nsrange = NSRange(textRange, in: textContentStorage)
         //textContentStorage.textStorage?.replaceCharacters(in: nsrange, with: replacementString)
         replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: typingAttributes))
+        delegate?.textView?(self, didChangeTextIn: textRange, replacementString: replacementString)
     }
 
     /// Whenever text is to be changed due to some user-induced action,
