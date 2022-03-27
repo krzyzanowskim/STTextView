@@ -15,7 +15,7 @@ extension STTextView {
 
         if shouldDrawInsertionPoint {
             for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-                textLayoutManager.enumerateTextSegments(in: textRange, type: .highlight, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, textContainer) in
+                textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, textContainer) in
                     let highlightFrame = textSegmentFrame.intersection(frame)
                     guard !highlightFrame.isNull else {
                         return true
