@@ -25,7 +25,7 @@ open class STTextView: NSView, NSTextInput {
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
     /// Insertion point view. default: `STInsertionPointView` 
-    open class var insertionPointClass: AnyObject.Type {
+    open class var insertionPointClass: STInsertionPoint.Type {
         STInsertionPointView.self
     }
 
@@ -43,9 +43,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     open var shouldDrawInsertionPoint: Bool {
-        didSet {
-            updateInsertionPointStateAndRestartTimer()
-        }
+        isFirstResponder && isSelectable
     }
 
     open var insertionPointColor: NSColor
@@ -146,7 +144,7 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    internal var needsViewportLayout: Bool = false {
+    public var needsViewportLayout: Bool = false {
         didSet {
             if needsViewportLayout {
                 needsLayout = true
@@ -191,12 +189,12 @@ open class STTextView: NSView, NSTextInput {
 
         isEditable = true
         isSelectable = isEditable
-        shouldDrawInsertionPoint = isSelectable
         insertionPointColor = .textColor
         highlightSelectedLine = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
         allowsUndo = true
         _undoManager = CoalescingUndoManager<TypingTextUndo>()
+        isFirstResponder = false
 
         super.init(frame: frameRect)
 
@@ -256,10 +254,17 @@ open class STTextView: NSView, NSTextInput {
         isSelectable
     }
 
+    internal var isFirstResponder: Bool {
+        didSet {
+            updateInsertionPointStateAndRestartTimer()
+        }
+    }
+
     open override func becomeFirstResponder() -> Bool {
         if isEditable {
             NotificationCenter.default.post(name: NSText.didBeginEditingNotification, object: self, userInfo: nil)
         }
+        isFirstResponder = true
         return true
     }
 
@@ -267,6 +272,7 @@ open class STTextView: NSView, NSTextInput {
         if isEditable {
             NotificationCenter.default.post(name: NSText.didEndEditingNotification, object: self, userInfo: nil)
         }
+        isFirstResponder = false
         return true
     }
 
@@ -349,24 +355,32 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
         textContentStorage.performEditingTransaction {
             textContentStorage.textStorage?.addAttributes(attrs, range: range)
         }
-        needsViewportLayout = true
     }
 
-    public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange) {
+    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
         textContentStorage.performEditingTransaction {
             textContentStorage.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentStorage))
         }
-        needsViewportLayout = true
+
+        if updateLayout {
+            needsViewportLayout = true
+        }
     }
 
-    public func setSelectedRange(_ textRange: NSTextRange) {
+    public func setSelectedRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
         textLayoutManager.textSelections = [
             NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
         ]
+
+        if updateLayout {
+            needsViewportLayout = true
+        }
     }
 
     internal func updateContentSizeIfNeeded() {
