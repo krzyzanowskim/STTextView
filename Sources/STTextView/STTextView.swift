@@ -306,34 +306,36 @@ open class STTextView: NSView, NSTextInput {
             return
         }
 
-        var fragment = textLayoutManager.textLayoutFragment(for: caretLocation)
-        var textLineFragment = fragment?.textLineFragment(at: caretLocation)
-
-        if fragment == nil, let lastLocation = textLayoutManager.location(textLayoutManager.documentRange.endLocation, offsetBy: -1) {
-            fragment = textLayoutManager.textLayoutFragment(for: lastLocation)
-            if fragment?.hasExtraLineFragment == true {
-                textLineFragment = fragment?.textLineFragments.last // aka extra line fragment
-            } else {
-                textLineFragment = fragment?.textLineFragments.first
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, baselinePosition, textContainer -> Bool in
+            // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
+            // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
+            // therefore for empty override height with value manually calculated from font + paragraph style
+            var selectionFrame: NSRect = textSegmentFrame
+            if segmentRange == documentRange {
+                if let font = typingAttributes[.font] as? NSFont {
+                    let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
+                    let lineHeight = NSLayoutManager().defaultLineHeight(for: font) * paragraphStyle.lineHeightMultiple
+                    selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: lineHeight))
+                }
             }
-        }
 
-        if let fragment = fragment, let textLineFragment = textLineFragment {
             context.saveGState()
             context.setFillColor(NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25).cgColor)
 
             let fillRect = CGRect(
-                origin: fragment.layoutFragmentFrame.origin.applying(
-                    .init(translationX: textLineFragment.typographicBounds.origin.x, y: textLineFragment.typographicBounds.origin.y)
+                origin: CGPoint(
+                    x: 0,
+                    y: selectionFrame.origin.y
                 ),
                 size: CGSize(
-                    width: frame.width,
-                    height: textLineFragment.typographicBounds.height
+                    width: textContainer.size.width,
+                    height: selectionFrame.height
                 )
             )
 
             context.fill(fillRect)
             context.restoreGState()
+            return false
         }
     }
 
