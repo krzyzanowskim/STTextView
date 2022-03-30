@@ -82,4 +82,56 @@ extension STTextView: NSTextInputClient {
         )
     }
 
+    open func insertText(_ string: Any, replacementRange: NSRange) {
+        guard isEditable else { return }
+        var didChange = false 
+
+        textContentStorage.performEditingTransaction {
+            switch string {
+            case is String:
+                guard let string = string as? String else {
+                    return
+                }
+                if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
+                    if shouldChangeText(in: textRange, replacementString: string) {
+                        replaceCharacters(in: textRange, with: string)
+                        didChange = true
+                    }
+                } else if !textLayoutManager.textSelections.isEmpty {
+                    for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+                        if shouldChangeText(in: textRange, replacementString: string) {
+                            replaceCharacters(in: textRange, with: string)
+                            didChange = true
+                        }
+                    }
+                }
+            case is NSAttributedString:
+                guard let string = string as? NSAttributedString else {
+                    return
+                }
+                if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
+                    if shouldChangeText(in: textRange, replacementString: string.string) {
+                        replaceCharacters(in: textRange, with: string)
+                        didChange = true
+                    }
+                } else if !textLayoutManager.textSelections.isEmpty {
+                    for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+                        if shouldChangeText(in: textRange, replacementString: string.string) {
+                            replaceCharacters(in: textRange, with: string)
+                            didChange = true
+                        }
+                    }
+                }
+            default:
+                assertionFailure()
+            }
+
+        }
+
+        if didChange {
+            didChangeText()
+        }
+    }
+
+
 }

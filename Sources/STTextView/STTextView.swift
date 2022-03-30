@@ -198,6 +198,9 @@ open class STTextView: NSView, NSTextInput {
 
         super.init(frame: frameRect)
 
+        // Set insert point at the very beginning
+        setSelectedRange(NSTextRange(location: documentRange.location))
+
         postsBoundsChangedNotifications = true
         postsFrameChangedNotifications = true
 

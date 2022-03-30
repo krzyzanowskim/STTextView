@@ -397,12 +397,16 @@ extension STTextView {
             modifiers.insert(.visual)
         }
 
-        textLayoutManager.textSelections = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point,
+        let selections = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point,
                                                    inContainerAt: location,
                                                    anchors: anchors,
                                                    modifiers: modifiers,
                                                    selecting: true,
                                                    bounds: .zero)
+
+        if !selections.isEmpty {
+            textLayoutManager.textSelections = selections
+        }
 
         updateSelectionHighlights()
         needsDisplay = true
