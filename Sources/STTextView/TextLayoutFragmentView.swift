@@ -9,7 +9,7 @@ final class TextLayoutFragmentView: NSView {
 
     init(layoutFragment: NSTextLayoutFragment) {
         self.layoutFragment = layoutFragment
-        super.init(frame: layoutFragment.layoutFragmentFrame)
+        super.init(frame: layoutFragment.renderingSurfaceBounds.applying(.init(translationX: layoutFragment.layoutFragmentFrame.origin.x, y: layoutFragment.layoutFragmentFrame.origin.y)))
         needsDisplay = true
     }
 
@@ -28,5 +28,9 @@ final class TextLayoutFragmentView: NSView {
         context.saveGState()
         layoutFragment.draw(at: .zero, in: context)
         context.restoreGState()
+    }
+
+    func updateGeometry() {
+        frame = layoutFragment.renderingSurfaceBounds.applying(.init(translationX: layoutFragment.layoutFragmentFrame.origin.x, y: layoutFragment.layoutFragmentFrame.origin.y))
     }
 }

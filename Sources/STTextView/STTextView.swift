@@ -443,19 +443,24 @@ open class STTextView: NSView, NSTextInput {
     open override func layout() {
         super.layout()
 
+        var shouldLayoutViewport = false
+
         if needsViewportLayout {
             needsViewportLayout = false
-            textLayoutManager.textViewportLayoutController.layoutViewport()
-            updateContentSizeIfNeeded()
+            shouldLayoutViewport = true
         }
 
         if needScrollToSelection {
             needScrollToSelection = false
             if let textSelection = textLayoutManager.textSelections.first {
                 scrollToSelection(textSelection)
-                textLayoutManager.textViewportLayoutController.layoutViewport()
-                updateContentSizeIfNeeded()
+                shouldLayoutViewport = true
             }
+        }
+
+        if shouldLayoutViewport {
+            textLayoutManager.textViewportLayoutController.layoutViewport()
+            updateContentSizeIfNeeded()
         }
     }
 
@@ -706,7 +711,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
         if let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) as? TextLayoutFragmentView {
             let oldFrame = fragmentView.frame
-            fragmentView.frame = fragmentView.layoutFragment.layoutFragmentFrame
+            fragmentView.updateGeometry()
             if oldFrame != fragmentView.frame {
                 fragmentView.needsDisplay = true
             }
