@@ -17,6 +17,7 @@ List of issues I reported so far:
 - FB9692714: Rendering attributes does not draw properly
 - FB9886911: NSTextView can't properly layout and display long lines (this one is nasty since it causes the view "jump" whenever text attribute updates)
 - FB9713415: NSTextView drawInsertionPoint(in:color:turnedOn) is never called
+- FB9971054: NSLayoutManager.enumerateCaretOffsetsInLineFragment ignores starting location
 
 ... I'm aware that the list of issues is not complete.
 
@@ -42,7 +43,7 @@ paragraph.defaultTabInterval = 28
 textView.defaultParagraphStyle = paragraph
 textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
 textView.textColor = .textColor
-textView.string = "text content"
+textView.string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ornare lobortis sem a vulputate."
 textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
 textView.widthTracksTextView = true
 textView.delegate = self
