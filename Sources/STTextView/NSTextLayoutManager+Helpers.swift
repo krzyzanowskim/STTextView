@@ -57,6 +57,7 @@ extension NSTextLayoutManager {
 
 extension NSTextLayoutFragment {
 
+    @available(*, deprecated, message: "Unused")
     var hasExtraLineFragment: Bool {
         textLineFragments.contains(where: \.isExtraLineFragment)
     }
@@ -79,8 +80,9 @@ extension NSTextLayoutFragment {
 
 extension NSTextLineFragment {
 
-    // textLineFragment.characterRange.isEmpty the extra line fragment at the end of a document.
+    @available(*, deprecated, message: "Unused")
     var isExtraLineFragment: Bool {
+        // textLineFragment.characterRange.isEmpty the extra line fragment at the end of a document.
         characterRange.isEmpty
     }
 
