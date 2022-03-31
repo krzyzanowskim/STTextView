@@ -706,7 +706,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
         if let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) as? TextLayoutFragmentView {
             let oldFrame = fragmentView.frame
-            fragmentView.updateGeometry()
+            fragmentView.frame = fragmentView.layoutFragment.layoutFragmentFrame
             if oldFrame != fragmentView.frame {
                 fragmentView.needsDisplay = true
             }

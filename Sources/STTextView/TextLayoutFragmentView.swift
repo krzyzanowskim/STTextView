@@ -5,12 +5,11 @@ import Cocoa
 import CoreGraphics
 
 final class TextLayoutFragmentView: NSView {
-    private let layoutFragment: NSTextLayoutFragment
+    let layoutFragment: NSTextLayoutFragment
 
     init(layoutFragment: NSTextLayoutFragment) {
         self.layoutFragment = layoutFragment
-        super.init(frame: .zero)
-        updateGeometry()
+        super.init(frame: layoutFragment.layoutFragmentFrame)
         needsDisplay = true
     }
 
@@ -29,9 +28,5 @@ final class TextLayoutFragmentView: NSView {
         context.saveGState()
         layoutFragment.draw(at: .zero, in: context)
         context.restoreGState()
-    }
-
-    func updateGeometry() {
-        frame = layoutFragment.layoutFragmentFrame
     }
 }
