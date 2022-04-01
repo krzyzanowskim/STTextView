@@ -49,6 +49,10 @@ textView.widthTracksTextView = true
 textView.delegate = self
 ```
 
+## Suggestions or Feedback
+
+I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twitter.com/krzyzanowskim), or a pull request.
+
 ## License
 
 ### Commercial license
@@ -56,10 +60,5 @@ If you want to use STTextView to develop non open sourced product, and applicati
 
 ### Open source license
 If you are creating an open source application under a license compatible with the [GNU GPL license v3](https://www.gnu.org/licenses/gpl-3.0.html), you may use STTextView under the terms of the GPLv3.
-
-### Suggestions or Feedback
-
-I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twitter.com/krzyzanowskim), an issue, or a pull request.
-
 
 
