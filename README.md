@@ -19,6 +19,7 @@ List of issues I reported so far:
 - FB9886911: NSTextView can't properly layout and display long lines (this one is nasty since it causes the view "jump" whenever text attribute updates)
 - FB9713415: NSTextView drawInsertionPoint(in:color:turnedOn) is never called
 - FB9971054: NSLayoutManager.enumerateCaretOffsetsInLineFragment ignores starting location
+- FB9971054: NSTextView assert on selection when setup with TextKit2
 
 ... I'm aware that the list of issues is not complete.
 
