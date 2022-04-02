@@ -27,11 +27,13 @@ final class ViewController: NSViewController {
         paragraph.defaultTabInterval = 28 // default
 
         textView.defaultParagraphStyle = paragraph
-        textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
+        textView.font = NSFont.monospacedSystemFont(ofSize: 20, weight: .regular)
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
-        textView.widthTracksTextView = false
+        textView.addAttributes([.font: NSFont.systemFont(ofSize: 50)], range: NSRange(location: 0, length: 1))
+        textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 6, length: 5))
+        textView.addAttributes([.foregroundColor: NSColor.systemMint], range: NSRange(location: 12, length: 5))
+        textView.widthTracksTextView = true
         textView.highlightSelectedLine = true
         textView.delegate = self
 

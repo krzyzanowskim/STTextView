@@ -100,6 +100,9 @@ open class STTextView: NSView, NSTextInput {
         textContentStorage.documentRange
     }
 
+    /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
+    ///
+    /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.
     public var widthTracksTextView: Bool {
         set {
             textContainer.widthTracksTextView = newValue
