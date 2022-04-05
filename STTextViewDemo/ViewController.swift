@@ -18,6 +18,12 @@ final class ViewController: NSViewController {
         scrollView.automaticallyAdjustsContentInsets = true
         scrollView.hasHorizontalScroller = true
 
+        // Line numbers
+        scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+        scrollView.hasHorizontalRuler = false
+        scrollView.hasVerticalRuler = true
+        scrollView.rulersVisible = true
+
         let clipView = NSClipView()
         scrollView.contentView = clipView
         scrollView.documentView = textView

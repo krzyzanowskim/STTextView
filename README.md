@@ -49,6 +49,13 @@ textView.string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aene
 textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
 textView.widthTracksTextView = true
 textView.delegate = self
+
+// Add line numbers to enclosing NSScrollView using provided STLineNumberRulerView
+scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+scrollView.hasHorizontalRuler = false
+scrollView.hasVerticalRuler = true
+scrollView.rulersVisible = true
+
 ```
 
 ## Suggestions or Feedback

@@ -17,7 +17,7 @@ extension STTextView {
             for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                 textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, textContainer) in
                     var selectionFrame = textSegmentFrame.intersection(frame)
-                    guard !selectionFrame.isNull else {
+                    guard !selectionFrame.isNull, !selectionFrame.isEmpty, !selectionFrame.isInfinite else {
                         return true
                     }
 

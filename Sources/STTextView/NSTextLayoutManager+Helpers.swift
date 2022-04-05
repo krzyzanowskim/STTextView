@@ -80,7 +80,6 @@ extension NSTextLayoutFragment {
 
 extension NSTextLineFragment {
 
-    @available(*, deprecated, message: "Unused")
     var isExtraLineFragment: Bool {
         // textLineFragment.characterRange.isEmpty the extra line fragment at the end of a document.
         characterRange.isEmpty
