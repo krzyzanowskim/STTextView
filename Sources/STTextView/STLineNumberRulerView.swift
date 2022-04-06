@@ -11,14 +11,18 @@ public final class STLineNumberRulerView: NSRulerView {
         true
     }
 
+    private var font: NSFont {
+        textView?.font ?? NSFont.controlContentFont(ofSize: NSFont.labelFontSize)
+    }
+
+    public var textColor: NSColor?
+
     public init(textView: STTextView, scrollView: NSScrollView) {
         self.textView = textView
 
         super.init(scrollView: scrollView, orientation: .verticalRuler)
 
         clientView = textView
-
-        ruleThickness = 32 // TODO: adjust to the number of the lines
 
         NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: textView, queue: nil) { [weak self] _ in
             self?.needsDisplay = true
@@ -46,8 +50,8 @@ public final class STLineNumberRulerView: NSRulerView {
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: textView.font ?? NSFont.controlContentFont(ofSize: NSFont.labelFontSize),
-            .foregroundColor: NSColor.secondaryLabelColor
+            .font: font,
+            .foregroundColor: textColor ?? NSColor.secondaryLabelColor
         ]
 
         var lineNum = 1
@@ -69,5 +73,8 @@ public final class STLineNumberRulerView: NSRulerView {
         }
 
         context.restoreGState()
+
+        // Adjust thickness
+        ruleThickness = (log10(CGFloat(lineNum)) + 1) * font.boundingRectForFont.width
     }
 }
