@@ -4,13 +4,14 @@
 import Foundation
 import Cocoa
 
-public protocol STInsertionPoint: NSView {
+public protocol STInsertionPoint: CALayer {
     var insertionPointColor: NSColor { get set }
     func enable()
     func disable()
+    func updateGeometry()
 }
 
-open class STInsertionPointView: NSView, STInsertionPoint {
+open class STInsertionPointLayer: CALayer, STInsertionPoint {
     private var timer: Timer?
     open var insertionPointWidth: CGFloat = 1 {
         didSet {
@@ -20,16 +21,12 @@ open class STInsertionPointView: NSView, STInsertionPoint {
 
     open var insertionPointColor: NSColor = .textColor {
         didSet {
-            layer?.backgroundColor = insertionPointColor.cgColor
+            backgroundColor = insertionPointColor.cgColor
         }
     }
 
-    public override var isFlipped: Bool {
-        true
-    }
-
-    public override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
+    public override init() {
+        super.init()
         commonInit()
     }
 
@@ -38,28 +35,26 @@ open class STInsertionPointView: NSView, STInsertionPoint {
         commonInit()
     }
 
-    convenience init(frame frameRect: NSRect, color: NSColor) {
-        self.init(frame: frameRect)
-        self.insertionPointColor = color
+    convenience init(frameRect: CGRect) {
+        self.init()
+        frame = frameRect
+        commonInit()
+    }
+
+    convenience init(color: NSColor) {
+        self.init()
+        insertionPointColor = color
     }
 
     private func commonInit() {
-        wantsLayer = true
-        frame = frame.insetBy(dx: 0, dy: 1)
-        frame.size.width = insertionPointWidth
-        layer?.backgroundColor = insertionPointColor.cgColor
+        updateGeometry()
     }
 
-    /*
-    open override func viewDidMoveToSuperview() {
-        super.viewDidMoveToSuperview()
-        if superview == nil {
-            disable()
-        } else {
-            enable()
-        }
+    public func updateGeometry() {
+        frame = frame.insetBy(dx: 0, dy: 1)
+        frame.size.width = insertionPointWidth
+        backgroundColor = insertionPointColor.cgColor
     }
-    */
 
     open func enable() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in

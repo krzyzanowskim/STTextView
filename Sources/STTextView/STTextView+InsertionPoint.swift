@@ -8,16 +8,18 @@ extension STTextView {
 
     /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
     open func updateInsertionPointStateAndRestartTimer() {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
 
-        selectionView.subviews.removeAll(where: {
-            type(of: $0) == Self.insertionPointClass
+        selectionLayer.sublayers?.removeAll(where: { layer in
+            type(of: layer) == Self.insertionPointClass
         })
 
         if shouldDrawInsertionPoint {
             for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                 textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, textContainer) in
                     var selectionFrame = textSegmentFrame.intersection(frame)
-                    guard !selectionFrame.isNull, !selectionFrame.isEmpty, !selectionFrame.isInfinite else {
+                    guard !selectionFrame.isNull, !selectionFrame.isInfinite else {
                         return true
                     }
 
@@ -32,22 +34,24 @@ extension STTextView {
                         }
                     }
 
-                    let insertionView = (Self.insertionPointClass as STInsertionPoint.Type).init(frame: selectionFrame)
-                    assert(insertionView.isFlipped)
-                    insertionView.insertionPointColor = insertionPointColor
+                    let insertionLayer = (Self.insertionPointClass as STInsertionPoint.Type).init()
+                    insertionLayer.frame = selectionFrame
+                    insertionLayer.insertionPointColor = insertionPointColor
+                    insertionLayer.updateGeometry()
 
                     if isFirstResponder {
-                        insertionView.enable()
+                        insertionLayer.enable()
                     } else {
-                        insertionView.disable()
+                        insertionLayer.disable()
                     }
 
-                    selectionView.addSubview(insertionView)
+                    selectionLayer.addSublayer(insertionLayer)
 
                     return true
                 }
             }
         }
+        CATransaction.commit()
     }
 
 }

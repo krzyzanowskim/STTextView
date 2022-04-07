@@ -3,7 +3,7 @@
 //
 //
 //  STTextView
-//      |---selectionView (STTextSelectionView)
+//      |---selectionView (CALayer)
 //      |---contentView (STTextContentView)
 //              |---(STInsertionPointView | TextLayoutFragmentView)
 //
@@ -15,10 +15,6 @@ internal final class STTextContentView: NSView {
     override var isFlipped: Bool { true }
 }
 
-private final class STTextSelectionView: NSView {
-    override var isFlipped: Bool { true }
-}
-
 open class STTextView: NSView, NSTextInput {
 
     public static let didChangeNotification = NSText.didChangeNotification
@@ -26,7 +22,7 @@ open class STTextView: NSView, NSTextInput {
 
     /// Insertion point view. default: `STInsertionPointView` 
     open class var insertionPointClass: STInsertionPoint.Type {
-        STInsertionPointView.self
+        STInsertionPointLayer.self
     }
 
     /// A Boolean value that controls whether the text view allow the user to edit text.
@@ -136,7 +132,7 @@ open class STTextView: NSView, NSTextInput {
     public let textContentStorage: NSTextContentStorage
     public let textContainer: NSTextContainer
     private let contentView: STTextContentView
-    internal let selectionView: STTextContentView
+    internal let selectionLayer: CALayer
     private var fragmentViewMap: NSMapTable<NSTextLayoutFragment, NSView>
 
     internal var needScrollToSelection: Bool = false {
@@ -188,7 +184,7 @@ open class STTextView: NSView, NSTextInput {
         textContentStorage.addTextLayoutManager(textLayoutManager)
 
         contentView = STTextContentView(frame: frameRect)
-        selectionView = STTextContentView(frame: frameRect)
+        selectionLayer = CALayer()
 
         isEditable = true
         isSelectable = isEditable
@@ -212,9 +208,9 @@ open class STTextView: NSView, NSTextInput {
 
         textLayoutManager.textViewportLayoutController.delegate = self
 
-        selectionView.wantsLayer = true
-        selectionView.autoresizingMask = [.width, .height]
-        addSubview(selectionView)
+        selectionLayer.frame = frameRect
+        selectionLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+        layer?.addSublayer(selectionLayer)
 
         contentView.wantsLayer = true
         contentView.autoresizingMask = [.width, .height]
@@ -238,7 +234,7 @@ open class STTextView: NSView, NSTextInput {
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent
         // for interaction.
-        if let view = result, view != self, (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView)) {
+        if let view = result, view != self, (view.isDescendant(of: contentView) || view.layer!.isDescendant(of: selectionLayer)) {
             return self
         }
         return result
@@ -645,18 +641,24 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        CATransaction.commit()
         updateSelectionHighlights()
+        CATransaction.commit()
         adjustViewportOffsetIfNeeded()
     }
 
     internal func updateSelectionHighlights() {
         guard !textLayoutManager.textSelections.isEmpty else {
-            selectionView.subviews = []
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            selectionLayer.sublayers?.removeAll(keepingCapacity: true)
+            CATransaction.commit()
             return
         }
 
-        selectionView.subviews = []
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        
+        selectionLayer.sublayers?.removeAll(keepingCapacity: true)
 
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: [.rangeNotRequired]) {(_, textSegmentFrame, baselinePosition, textContainer) in
@@ -666,11 +668,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 }
 
                 if highlightFrame.size.width > 0 {
-                    let highlight = STTextSelectionView()
-                    highlight.wantsLayer = true
-                    highlight.layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
-                    highlight.frame = highlightFrame
-                    selectionView.addSubview(highlight)
+                    let highlightLayer = CALayer()
+                    highlightLayer.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
+                    highlightLayer.frame = highlightFrame
+                    selectionLayer.addSublayer(highlightLayer)
                 } else {
                     updateInsertionPointStateAndRestartTimer()
                 }
@@ -678,6 +679,8 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 return true // keep going
             }
         }
+
+        CATransaction.commit()
     }
 
     private func adjustViewportOffsetIfNeeded() {
@@ -724,5 +727,17 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             contentView.addSubview(fragmentView)
             fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
         }
+    }
+}
+
+private extension CALayer {
+    func isDescendant(of layer: CALayer) -> Bool {
+        while let parent = layer.superlayer {
+            if parent == layer {
+                return true
+            }
+        }
+
+        return false
     }
 }
