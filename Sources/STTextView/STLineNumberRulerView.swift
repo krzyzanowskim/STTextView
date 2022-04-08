@@ -46,7 +46,6 @@ public final class STLineNumberRulerView: NSRulerView {
 
         // TODO: Instead of do the calculations for every drawing,
         //       implement invalidation and draw the current state only
-        
         let relativePoint = self.convert(NSZeroPoint, from: textView)
 
         context.saveGState()
@@ -66,7 +65,7 @@ public final class STLineNumberRulerView: NSRulerView {
                 let locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
                 let ctline = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, "\(lineNum)" as CFString, attributes as CFDictionary))
 
-                context.textPosition = textLayoutFragment.layoutFragmentFrame.origin.applying(.init(translationX: 4, y: locationForFirstCharacter.y + relativePoint.y))
+                context.textPosition = textLayoutFragment.layoutFragmentFrame.pixelAligned.origin.applying(.init(translationX: 4, y: locationForFirstCharacter.y + relativePoint.y))
                 CTLineDraw(ctline, context)
 
                 lineNum += 1
