@@ -5,10 +5,12 @@ import Foundation
 import Cocoa
 
 public final class STLineNumberRulerView: NSRulerView {
-    private weak var textView: STTextView?
-
     public override var isFlipped: Bool {
         true
+    }
+
+    private var textView: STTextView? {
+        clientView as? STTextView
     }
 
     private var font: NSFont {
@@ -18,8 +20,6 @@ public final class STLineNumberRulerView: NSRulerView {
     public var textColor: NSColor?
 
     public init(textView: STTextView, scrollView: NSScrollView) {
-        self.textView = textView
-
         super.init(scrollView: scrollView, orientation: .verticalRuler)
 
         clientView = textView
@@ -44,6 +44,9 @@ public final class STLineNumberRulerView: NSRulerView {
             return
         }
 
+        // TODO: Instead of do the calculations for every drawing,
+        //       implement invalidation and draw the current state only
+        
         let relativePoint = self.convert(NSZeroPoint, from: textView)
 
         context.saveGState()
@@ -75,6 +78,9 @@ public final class STLineNumberRulerView: NSRulerView {
         context.restoreGState()
 
         // Adjust thickness
-        ruleThickness = (log10(CGFloat(lineNum)) + 1) * font.boundingRectForFont.width
+        let estimatedWidth = (log10(CGFloat(lineNum)) + 1) * font.boundingRectForFont.width
+        if estimatedWidth != ruleThickness {
+            ruleThickness = estimatedWidth
+        }
     }
 }
