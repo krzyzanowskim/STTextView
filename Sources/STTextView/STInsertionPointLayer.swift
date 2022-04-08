@@ -4,14 +4,16 @@
 import Foundation
 import Cocoa
 
-public protocol STInsertionPoint: CALayer {
+public protocol STInsertionPoint: STCALayer {
+    init(frame frameRect: CGRect)
+
     var insertionPointColor: NSColor { get set }
     func enable()
     func disable()
     func updateGeometry()
 }
 
-open class STInsertionPointLayer: CALayer, STInsertionPoint {
+open class STInsertionPointLayer: STCALayer, STInsertionPoint {
     private var timer: Timer?
     open var insertionPointWidth: CGFloat = 1 {
         didSet {
@@ -25,25 +27,15 @@ open class STInsertionPointLayer: CALayer, STInsertionPoint {
         }
     }
 
-    public override init() {
-        super.init()
-        commonInit()
-    }
-
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
         commonInit()
     }
 
-    convenience init(frameRect: CGRect) {
-        self.init()
+    public override required init(frame frameRect: CGRect) {
+        super.init(frame: frameRect)
         frame = frameRect
         commonInit()
-    }
-
-    convenience init(color: NSColor) {
-        self.init()
-        insertionPointColor = color
     }
 
     private func commonInit() {
