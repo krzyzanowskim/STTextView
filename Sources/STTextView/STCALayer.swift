@@ -3,6 +3,7 @@
 
 import Foundation
 import QuartzCore
+import AppKit
 
 open class STCALayer: CALayer {
 
@@ -32,19 +33,19 @@ open class STCALayer: CALayer {
     public init(frame frameRect: CGRect) {
         super.init()
         needsDisplayOnBoundsChange = true
-        contentsScale = 2
+        contentsScale = NSScreen.main?.backingScaleFactor ?? 1.0
         frame = frameRect
     }
 
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
         needsDisplayOnBoundsChange = true
-        contentsScale = 2
+        contentsScale = NSScreen.main?.backingScaleFactor ?? 1.0
     }
 
     public override init(layer: Any) {
         super.init(layer: layer)
-        contentsScale = 2
+        contentsScale = NSScreen.main?.backingScaleFactor ?? 1.0
         needsDisplayOnBoundsChange = true
     }
 }

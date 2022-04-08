@@ -43,7 +43,7 @@ open class STInsertionPointLayer: STCALayer, STInsertionPoint {
     }
 
     public func updateGeometry() {
-        frame = frame.insetBy(dx: 0, dy: 1)
+        frame = frame.insetBy(dx: 0, dy: 1).pixelAligned
         frame.size.width = insertionPointWidth
         backgroundColor = insertionPointColor.cgColor
     }

@@ -32,7 +32,7 @@ final class TextLayoutFragmentLayer: STCALayer {
     }
 
     func updateGeometry() {
-        frame = layoutFragment.renderingSurfaceBounds.applying(.init(translationX: 0, y: layoutFragment.layoutFragmentFrame.origin.y))
-        bounds = layoutFragment.renderingSurfaceBounds
+        frame = layoutFragment.renderingSurfaceBounds.applying(.init(translationX: 0, y: layoutFragment.layoutFragmentFrame.origin.y)).pixelAligned
+        bounds = layoutFragment.renderingSurfaceBounds.pixelAligned
     }
 }

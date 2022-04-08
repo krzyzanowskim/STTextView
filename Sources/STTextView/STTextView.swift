@@ -5,7 +5,7 @@
 //  STTextView
 //      |---selectionLayer (CALayer)
 //      |---contentLayer (CALAyer)
-//              |---(STInsertionPointLayer | TextLayoutFragmentView)
+//              |---(STInsertionPointLayer | TextLayoutFragmentLayer)
 //
 //
 
@@ -649,7 +649,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: [.rangeNotRequired]) {(_, textSegmentFrame, baselinePosition, textContainer) in
-                let highlightFrame = textSegmentFrame.intersection(frame)
+                let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
                 guard !highlightFrame.isNull else {
                     return true
                 }
