@@ -703,10 +703,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         let viewportLayoutController = textLayoutManager.textViewportLayoutController
         let contentOffset = scrollView.contentView.bounds.minY
         if contentOffset < scrollView.contentView.bounds.height &&
-            viewportLayoutController.viewportRange!.location.compare(textLayoutManager.documentRange.location) == .orderedDescending {
+            viewportLayoutController.viewportRange!.location > textLayoutManager.documentRange.location {
             // Nearing top, see if we need to adjust and make room above.
             adjustViewportOffset()
-        } else if viewportLayoutController.viewportRange!.location.compare(textLayoutManager.documentRange.location) == .orderedSame {
+        } else if viewportLayoutController.viewportRange!.location == textLayoutManager.documentRange.location {
             // At top, see if we need to adjust and reduce space above.
             adjustViewportOffset()
         }
