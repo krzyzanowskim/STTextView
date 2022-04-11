@@ -16,11 +16,6 @@ open class STTextView: NSView, NSTextInput {
     public static let didChangeNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
-    /// Insertion point view. default: `STInsertionPointView` 
-    open class var insertionPointClass: STInsertionPoint.Type {
-        STInsertionPointLayer.self
-    }
-
     /// A Boolean value that controls whether the text view allow the user to edit text.
     open var isEditable: Bool {
         didSet {
@@ -129,6 +124,9 @@ open class STTextView: NSView, NSTextInput {
     public let textContainer: NSTextContainer
     private let contentLayer: STCALayer
     internal let selectionLayer: STCALayer
+    internal var backingScaleFactor: CGFloat {
+        window?.backingScaleFactor ?? 1
+    }
     private var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
 
     internal var needScrollToSelection: Bool = false {
@@ -218,6 +216,21 @@ open class STTextView: NSView, NSTextInput {
             self.delegate?.textViewDidChangeSelection?(notification)
         }
 
+    }
+
+    open override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+
+        func updateContentScale(for layer: CALayer, scale: CGFloat) {
+            layer.contentsScale = backingScaleFactor
+            layer.setNeedsDisplay()
+            for sublayer in layer.sublayers ?? [] {
+                updateContentScale(for: sublayer, scale: scale)
+            }
+        }
+
+        updateContentScale(for: contentLayer, scale: backingScaleFactor)
+        updateContentScale(for: selectionLayer, scale: backingScaleFactor)
     }
 
     open override func hitTest(_ point: NSPoint) -> NSView? {
@@ -656,6 +669,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
                 if highlightFrame.size.width > 0 {
                     let highlightLayer = STCALayer(frame: highlightFrame)
+                    highlightLayer.contentsScale = backingScaleFactor
                     highlightLayer.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
                     selectionLayer.addSublayer(highlightLayer)
                 } else {
@@ -708,6 +722,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             contentLayer.addSublayer(fragmentLayer)
         } else {
             let fragmentLayer = TextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
+            fragmentLayer.contentsScale = backingScaleFactor
             contentLayer.addSublayer(fragmentLayer)
             fragmentLayerMap.setObject(fragmentLayer, forKey: textLayoutFragment)
         }

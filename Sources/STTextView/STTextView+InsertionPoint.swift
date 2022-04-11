@@ -9,7 +9,7 @@ extension STTextView {
     /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
     open func updateInsertionPointStateAndRestartTimer() {
         selectionLayer.sublayers?.removeAll(where: { layer in
-            type(of: layer) == Self.insertionPointClass
+            type(of: layer) == STInsertionPointLayer.self
         })
 
         if shouldDrawInsertionPoint {
@@ -31,7 +31,7 @@ extension STTextView {
                         }
                     }
 
-                    let insertionLayer = (Self.insertionPointClass as STInsertionPoint.Type).init(frame: selectionFrame)
+                    let insertionLayer = STInsertionPointLayer(frame: selectionFrame)
                     insertionLayer.insertionPointColor = insertionPointColor
                     insertionLayer.updateGeometry()
 
