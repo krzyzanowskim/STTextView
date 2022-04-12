@@ -18,6 +18,10 @@ open class STInsertionPointLayer: STCALayer {
         }
     }
 
+    public override init(layer: Any) {
+        super.init(layer: layer)
+    }
+
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
         commonInit()
