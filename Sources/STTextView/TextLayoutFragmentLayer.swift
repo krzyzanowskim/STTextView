@@ -10,7 +10,6 @@ final class TextLayoutFragmentLayer: STCALayer {
     init(layoutFragment: NSTextLayoutFragment) {
         self.layoutFragment = layoutFragment
         super.init(frame: .zero)
-        updateGeometry()
         setNeedsDisplay()
     }
 

@@ -11,7 +11,7 @@
 
 import Cocoa
 
-open class STTextView: NSView, NSTextInput {
+open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
     public static let didChangeNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
@@ -178,7 +178,9 @@ open class STTextView: NSView, NSTextInput {
         textContentStorage.addTextLayoutManager(textLayoutManager)
 
         contentLayer = STCALayer(frame: frameRect)
+        contentLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
         selectionLayer = STCALayer(frame: frameRect)
+        selectionLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
 
         isEditable = true
         isSelectable = isEditable
@@ -202,10 +204,7 @@ open class STTextView: NSView, NSTextInput {
 
         textLayoutManager.textViewportLayoutController.delegate = self
 
-        selectionLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         layer?.addSublayer(selectionLayer)
-
-        contentLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         layer?.addSublayer(contentLayer)
 
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: nil) { [weak self] notification in
@@ -722,6 +721,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             contentLayer.addSublayer(fragmentLayer)
         } else {
             let fragmentLayer = TextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
+            fragmentLayer.updateGeometry()
             fragmentLayer.contentsScale = backingScaleFactor
             contentLayer.addSublayer(fragmentLayer)
             fragmentLayerMap.setObject(fragmentLayer, forKey: textLayoutFragment)
