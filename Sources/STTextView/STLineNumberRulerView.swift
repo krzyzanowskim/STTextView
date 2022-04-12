@@ -24,11 +24,11 @@ public final class STLineNumberRulerView: NSRulerView {
 
         clientView = textView
 
-        NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: textView, queue: nil) { [weak self] _ in
+        NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: textView, queue: .main) { [weak self] _ in
             self?.needsDisplay = true
         }
 
-        NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: textView, queue: nil) { [weak self] _ in
+        NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: textView, queue: .main) { [weak self] _ in
             self?.needsDisplay = true
         }
     }

@@ -207,7 +207,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         layer?.addSublayer(selectionLayer)
         layer?.addSublayer(contentLayer)
 
-        NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: nil) { [weak self] notification in
+        NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
             let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
