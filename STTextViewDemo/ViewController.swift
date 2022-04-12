@@ -36,7 +36,11 @@ final class ViewController: NSViewController {
         textView.font = NSFont.monospacedSystemFont(ofSize: 20, weight: .regular)
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        textView.addAttributes([.font: NSFont.systemFont(ofSize: 50)], range: NSRange(location: 0, length: 1))
+        
+        // When first character font size is big enough, the text segment frame for first line is incorrect
+        // see README for bugs
+        textView.addAttributes([.font: NSFont.systemFont(ofSize: 50)], range: NSRange(location: 1, length: 1))
+
         textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 6, length: 5))
         textView.addAttributes([.foregroundColor: NSColor.systemMint], range: NSRange(location: 12, length: 5))
         textView.widthTracksTextView = true

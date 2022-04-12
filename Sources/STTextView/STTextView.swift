@@ -129,6 +129,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
     private var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
 
+    /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
     internal var needScrollToSelection: Bool = false {
         didSet {
             if needScrollToSelection {
@@ -137,6 +138,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    /// A Boolean value indicating whether the view needs a viewport layout pass before it can be drawn
     public var needsViewportLayout: Bool = false {
         didSet {
             if needsViewportLayout {
@@ -159,7 +161,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
     open override class var defaultMenu: NSMenu? {
-        let menu = NSMenu()
+        let menu = super.defaultMenu ?? NSMenu()
         menu.items = [
             NSMenuItem(title: NSLocalizedString("Cut", comment: ""), action: #selector(cut(_:)), keyEquivalent: "x"),
             NSMenuItem(title: NSLocalizedString("Copy", comment: ""), action: #selector(copy(_:)), keyEquivalent: "c"),
