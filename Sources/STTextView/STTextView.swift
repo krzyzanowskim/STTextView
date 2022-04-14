@@ -13,6 +13,7 @@ import Cocoa
 
 open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
+    public static let willChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
     public static let didChangeNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
@@ -74,12 +75,12 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
-    public var string: String? {
+    public var string: String {
         set {
             setString(newValue)
         }
         get {
-            textContentStorage.attributedString?.string
+            textContentStorage.attributedString?.string ?? ""
         }
     }
 
@@ -128,6 +129,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         window?.backingScaleFactor ?? 1
     }
     private var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
+    internal let textFinder: NSTextFinder
+    internal let textFinderClient: STTextFinderClient
 
     /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
     internal var needScrollToSelection: Bool = false {
@@ -193,7 +196,14 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         _undoManager = CoalescingUndoManager<TypingTextUndo>()
         isFirstResponder = false
 
+        textFinder = NSTextFinder()
+        textFinder.isIncrementalSearchingEnabled = true
+        textFinder.incrementalSearchingShouldDimContentView = false
+        textFinderClient = STTextFinderClient()
+
         super.init(frame: frameRect)
+
+        textFinderClient.textView = self
 
         // Set insert point at the very beginning
         setSelectedRange(NSTextRange(location: documentRange.location))
@@ -209,7 +219,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         layer?.addSublayer(selectionLayer)
         layer?.addSublayer(contentLayer)
 
-        NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
+        NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
             let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
@@ -232,12 +242,15 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         updateContentScale(for: contentLayer, scale: backingScaleFactor)
         updateContentScale(for: selectionLayer, scale: backingScaleFactor)
+
+        textFinder.client = textFinderClient
+        textFinder.findBarContainer = scrollView
     }
 
     open override func hitTest(_ point: NSPoint) -> NSView? {
         let result = super.hitTest(point)
 
-        // click-through `contentView` and `selectionView` subviews
+        // click-through `contentLayer` and `selectionLayer` sublayers
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent
         // for interaction.
@@ -397,7 +410,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     internal func updateContentSizeIfNeeded() {
         let currentHeight = bounds.height
         var height: CGFloat = 0
-        textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout]) { layoutFragment in
+        textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
             height = layoutFragment.layoutFragmentFrame.maxY
             return false // stop
         }
@@ -497,6 +510,16 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    open func willChangeText() {
+        if textFinder.isIncrementalSearchingEnabled {
+            textFinder.noteClientStringWillChange()
+        }
+
+        let notification = Notification(name: STTextView.willChangeNotification, object: self, userInfo: nil)
+        NotificationCenter.default.post(notification)
+        delegate?.textWillChange?(notification)
+    }
+
     open func didChangeText() {
         needScrollToSelection = true
         needsDisplay = true
@@ -578,6 +601,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
                     undoManager.registerCoalescingUndo(withTarget: self) { target, value in
                         // Replace with empty string
+                        target.willChangeText()
                         target.replaceCharacters(in: value.textRange, with: NSAttributedString())
                         target.didChangeText()
                     }
@@ -662,7 +686,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         selectionLayer.sublayers = nil
 
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-            textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: [.rangeNotRequired]) {(_, textSegmentFrame, baselinePosition, textContainer) in
+            textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
                 let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
                 guard !highlightFrame.isNull else {
                     return true

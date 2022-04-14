@@ -22,38 +22,3 @@ extension STTextView {
     }
 
 }
-
-extension STTextView: NSMenuItemValidation {
-
-    public func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-        validateUserInterfaceItem(menuItem)
-    }
-
-}
-
-extension STTextView: NSUserInterfaceValidations {
-
-    public func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
-        if item.action == #selector(undo(_:)) {
-            let result = allowsUndo ? undoManager?.canUndo ?? false : false
-
-            // NSWindow does that like this, here (as debugged)
-            if let undoManager = undoManager {
-                (item as? NSMenuItem)?.title = undoManager.undoMenuItemTitle
-            }
-
-            return result
-        } else if item.action == #selector(redo(_:)) {
-            let result = allowsUndo ? undoManager?.canRedo ?? false : false
-
-            // NSWindow does that like this, here (as debugged)
-            if let undoManager = undoManager {
-                (item as? NSMenuItem)?.title = undoManager.redoMenuItemTitle
-            }
-            return result
-        }
-
-        return true
-    }
-
-}

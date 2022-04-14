@@ -75,6 +75,10 @@ extension STTextView {
         var didChange = false
         textContentStorage.performEditingTransaction {
             for textRange in textRanges where shouldChangeText(in: textRange, replacementString: nil) {
+                if didChange == false {
+                    willChangeText()
+                }
+
                 didChange = true
                 let nsrange = NSRange(textRange, in: textContentStorage)
                 textContentStorage.textStorage?.deleteCharacters(in: nsrange)

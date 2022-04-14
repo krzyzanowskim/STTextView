@@ -84,8 +84,6 @@ extension STTextView: NSTextInputClient {
 
     open func insertText(_ string: Any, replacementRange: NSRange) {
         guard isEditable else { return }
-        var didChange = false 
-
         textContentStorage.performEditingTransaction {
             switch string {
             case is String:
@@ -94,14 +92,16 @@ extension STTextView: NSTextInputClient {
                 }
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string) {
+                        willChangeText()
                         replaceCharacters(in: textRange, with: string)
-                        didChange = true
+                        didChangeText()
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string) {
+                            willChangeText()
                             replaceCharacters(in: textRange, with: string)
-                            didChange = true
+                            didChangeText()
                         }
                     }
                 }
@@ -111,14 +111,16 @@ extension STTextView: NSTextInputClient {
                 }
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string.string) {
+                        willChangeText()
                         replaceCharacters(in: textRange, with: string)
-                        didChange = true
+                        didChangeText()
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string.string) {
+                            willChangeText()
                             replaceCharacters(in: textRange, with: string)
-                            didChange = true
+                            didChangeText()
                         }
                     }
                 }
@@ -126,10 +128,6 @@ extension STTextView: NSTextInputClient {
                 assertionFailure()
             }
 
-        }
-
-        if didChange {
-            didChangeText()
         }
     }
 

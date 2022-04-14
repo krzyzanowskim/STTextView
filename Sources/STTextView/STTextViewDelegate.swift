@@ -6,6 +6,8 @@ import Cocoa
 
 @objc public protocol STTextViewDelegate: AnyObject {
     /// Any keyDown or paste which changes the contents causes this
+    @objc optional func textWillChange(_ notification: Notification)
+    /// Any keyDown or paste which changes the contents causes this
     @objc optional func textDidChange(_ notification: Notification)
     /// Sent when the selection changes in the text view.
     @objc optional func textViewDidChangeSelection(_ notification: Notification)
