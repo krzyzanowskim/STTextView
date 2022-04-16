@@ -7,16 +7,21 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
     weak var textView: STTextView?
 
+    // cached value
+    private var stringCount: Int = 0
+
     private var textContentManager: NSTextContentManager? {
         textView?.textContentStorage
     }
 
     var string: String {
-        textView?.string ?? ""
+        let str = textView?.string ?? ""
+        stringCount = str.count
+        return str
     }
 
     func stringLength() -> Int {
-        string.count
+        stringCount
     }
 
     var isSelectable: Bool {
@@ -133,7 +138,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         }
 
         if let layoutFragment = textView.textLayoutManager.textLayoutFragment(for: textRange.location) {
-            layoutFragment.draw(at: layoutFragment.layoutFragmentFrame.origin, in: context)
+            layoutFragment.draw(at: layoutFragment.layoutFragmentFrame.pixelAligned.origin, in: context)
         }
     }
 

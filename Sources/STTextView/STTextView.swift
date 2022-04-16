@@ -129,7 +129,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         window?.backingScaleFactor ?? 1
     }
     private var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
-    internal let textFinder: NSTextFinder
+    public let textFinder: NSTextFinder
     internal let textFinderClient: STTextFinderClient
 
     /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
@@ -197,8 +197,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         isFirstResponder = false
 
         textFinder = NSTextFinder()
-        textFinder.isIncrementalSearchingEnabled = true
-        textFinder.incrementalSearchingShouldDimContentView = false
         textFinderClient = STTextFinderClient()
 
         super.init(frame: frameRect)

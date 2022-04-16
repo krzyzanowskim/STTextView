@@ -45,6 +45,8 @@ final class ViewController: NSViewController {
         textView.addAttributes([.foregroundColor: NSColor.systemMint], range: NSRange(location: 12, length: 5))
         textView.widthTracksTextView = true
         textView.highlightSelectedLine = true
+        textView.textFinder.isIncrementalSearchingEnabled = true
+        textView.textFinder.incrementalSearchingShouldDimContentView = true
         textView.delegate = self
 
         view.addSubview(scrollView)
