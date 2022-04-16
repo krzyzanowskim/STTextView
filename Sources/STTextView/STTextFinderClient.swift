@@ -27,6 +27,21 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         false
     }
 
+    func replaceCharacters(in range: NSRange, with string: String) {
+        guard let textContentManager = textContentManager,
+              let textRange = NSTextRange(range, in: textContentManager)
+        else {
+            return
+        }
+
+        textView?.willChangeText()
+        textView?.replaceCharacters(in: textRange, with: string)
+    }
+
+    func didReplaceCharacters() {
+        textView?.didChangeText()
+    }
+
     public var firstSelectedRange: NSRange {
         guard let firstTextSelectionRange = textView?.textLayoutManager.textSelections.first?.textRanges.first,
               let textContentManager = textContentManager else {
@@ -74,6 +89,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         else {
             return
         }
+
         textView?.scrollToSelection(NSTextSelection(range: textRange, affinity: .downstream, granularity: .character))
     }
 
