@@ -23,7 +23,7 @@ extension STTextView {
                     // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
                     // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
                     // therefore for empty override height with value manually calculated from font + paragraph style
-                    if textRange == documentRange {
+                    if textRange == textContentStorage.documentRange {
                         if let font = typingAttributes[.font] as? NSFont {
                             let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
                             let lineHeight = NSLayoutManager().defaultLineHeight(for: font) * paragraphStyle.lineHeightMultiple

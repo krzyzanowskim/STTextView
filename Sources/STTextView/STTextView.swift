@@ -84,10 +84,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
-    public var documentRange: NSTextRange {
-        textContentStorage.documentRange
-    }
-
     /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
     ///
     /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.
@@ -204,7 +200,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         textFinderClient.textView = self
 
         // Set insert point at the very beginning
-        setSelectedRange(NSTextRange(location: documentRange.location))
+        setSelectedRange(NSTextRange(location: textContentStorage.documentRange.location))
 
         postsBoundsChangedNotifications = true
         postsFrameChangedNotifications = true
@@ -328,7 +324,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
             // therefore for empty override height with value manually calculated from font + paragraph style
             var selectionFrame: NSRect = textSegmentFrame
-            if segmentRange == documentRange {
+            if segmentRange == textContentStorage.documentRange {
                 if let font = typingAttributes[.font] as? NSFont {
                     let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
                     let lineHeight = NSLayoutManager().defaultLineHeight(for: font) * paragraphStyle.lineHeightMultiple
@@ -361,19 +357,19 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         defer {
             undoManager?.enableUndoRegistration()
         }
-        let documentRange = NSRange(textContentStorage.documentRange, in: textContentStorage)
+        let documentNSRange = NSRange(textContentStorage.documentRange, in: textContentStorage)
         if case .some(let string) = string {
             switch string {
             case is NSAttributedString:
-                insertText(string as! NSAttributedString, replacementRange: documentRange)
+                insertText(string as! NSAttributedString, replacementRange: documentNSRange)
             case is String:
-                insertText(NSAttributedString(string: string as! String, attributes: typingAttributes), replacementRange: documentRange)
+                insertText(NSAttributedString(string: string as! String, attributes: typingAttributes), replacementRange: documentNSRange)
             default:
                 assertionFailure()
                 return
             }
         } else if case .none = string {
-            insertText("", replacementRange: documentRange)
+            insertText("", replacementRange: documentNSRange)
         }
     }
 
@@ -402,6 +398,35 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         if updateLayout {
             needsViewportLayout = true
+        }
+    }
+
+    internal func updateSelectionHighlights() {
+        guard !textLayoutManager.textSelections.isEmpty else {
+            selectionLayer.sublayers = nil
+            return
+        }
+
+        selectionLayer.sublayers = nil
+
+        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+            textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
+                let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
+                guard !highlightFrame.isNull else {
+                    return true
+                }
+
+                if highlightFrame.size.width > 0 {
+                    let highlightLayer = STCALayer(frame: highlightFrame)
+                    highlightLayer.contentsScale = backingScaleFactor
+                    highlightLayer.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
+                    selectionLayer.addSublayer(highlightLayer)
+                } else {
+                    updateInsertionPointStateAndRestartTimer()
+                }
+
+                return true // keep going
+            }
         }
     }
 
@@ -650,6 +675,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         let visibleRect = self.visibleRect
         var minY: CGFloat = 0
         var maxY: CGFloat = 0
+
         if overdrawRect.intersects(visibleRect) {
             // Use preparedContentRect for vertical overdraw and ensure visibleRect is included at the minimum,
             // the width is always bounds width for proper line wrapping.
@@ -673,35 +699,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         CATransaction.commit()
         updateSelectionHighlights()
         adjustViewportOffsetIfNeeded()
-    }
-
-    internal func updateSelectionHighlights() {
-        guard !textLayoutManager.textSelections.isEmpty else {
-            selectionLayer.sublayers = nil
-            return
-        }
-
-        selectionLayer.sublayers = nil
-
-        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-            textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
-                let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
-                guard !highlightFrame.isNull else {
-                    return true
-                }
-
-                if highlightFrame.size.width > 0 {
-                    let highlightLayer = STCALayer(frame: highlightFrame)
-                    highlightLayer.contentsScale = backingScaleFactor
-                    highlightLayer.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
-                    selectionLayer.addSublayer(highlightLayer)
-                } else {
-                    updateInsertionPointStateAndRestartTimer()
-                }
-
-                return true // keep going
-            }
-        }
     }
 
     private func adjustViewportOffsetIfNeeded() {
