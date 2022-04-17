@@ -17,6 +17,8 @@ public final class STLineNumberRulerView: NSRulerView {
         textView?.font ?? NSFont.controlContentFont(ofSize: NSFont.labelFontSize)
     }
 
+    private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
+
     public var textColor: NSColor?
 
     public init(textView: STTextView, scrollView: NSScrollView) {
@@ -25,16 +27,67 @@ public final class STLineNumberRulerView: NSRulerView {
         clientView = textView
 
         NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: textView, queue: .main) { [weak self] _ in
+            self?.invalidateLineNumbers()
             self?.needsDisplay = true
         }
 
         NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: textView, queue: .main) { [weak self] _ in
+            self?.invalidateLineNumbers()
             self?.needsDisplay = true
         }
+
     }
 
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    public override func invalidateHashMarks() {
+        super.invalidateHashMarks()
+        invalidateLineNumbers()
+    }
+
+    private func invalidateLineNumbers() {
+        let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        paragraph.alignment = .right
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: textColor ?? NSColor.secondaryLabelColor,
+            .paragraphStyle: paragraph
+        ]
+
+        lines.removeAll(keepingCapacity: true)
+
+        var lineNum = 1
+        let enumerateStartLocation = textView?.textLayoutManager.documentRange.location
+        textView?.textLayoutManager.enumerateTextLayoutFragments(from: enumerateStartLocation, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
+
+            for textLineFragment in textLayoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == textLineFragment) {
+
+                let locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
+                let attributedString = CFAttributedStringCreate(nil, "\(lineNum)" as CFString, attributes as CFDictionary)!
+                let ctline = CTLineCreateWithAttributedString(attributedString)
+
+                lines.append(
+                    (
+                        textPosition: textLayoutFragment.layoutFragmentFrame.pixelAligned.origin.applying(.init(translationX: 4, y: locationForFirstCharacter.y)),
+                        ctLine: ctline
+                    )
+                )
+
+                lineNum += 1
+            }
+
+            return true
+        }
+
+        // Adjust thickness
+        let estimatedWidth = (log10(CGFloat(lineNum)) + 1) * font.boundingRectForFont.width
+        if estimatedWidth != ruleThickness {
+            ruleThickness = estimatedWidth
+        }
+
     }
 
     public override func drawHashMarksAndLabels(in rect: NSRect) {
@@ -44,42 +97,16 @@ public final class STLineNumberRulerView: NSRulerView {
             return
         }
 
-        // TODO: Instead of do the calculations for every drawing,
-        //       implement invalidation and draw the current state only
         let relativePoint = self.convert(NSZeroPoint, from: textView)
 
         context.saveGState()
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: textColor ?? NSColor.secondaryLabelColor
-        ]
-
-        var lineNum = 1
-        let enumerateStartLocation = textView.textLayoutManager.documentRange.location
-        textView.textLayoutManager.enumerateTextLayoutFragments(from: enumerateStartLocation, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
-
-            for textLineFragment in textLayoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == textLineFragment) {
-
-                let locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
-                let ctline = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, "\(lineNum)" as CFString, attributes as CFDictionary))
-
-                context.textPosition = textLayoutFragment.layoutFragmentFrame.pixelAligned.origin.applying(.init(translationX: 4, y: locationForFirstCharacter.y + relativePoint.y))
-                CTLineDraw(ctline, context)
-
-                lineNum += 1
-            }
-
-            return true
+        for line in lines {
+            context.textPosition = line.textPosition.applying(.init(translationX: 0, y: relativePoint.y))
+            CTLineDraw(line.ctLine, context)
         }
 
         context.restoreGState()
-
-        // Adjust thickness
-        let estimatedWidth = (log10(CGFloat(lineNum)) + 1) * font.boundingRectForFont.width
-        if estimatedWidth != ruleThickness {
-            ruleThickness = estimatedWidth
-        }
     }
 }
