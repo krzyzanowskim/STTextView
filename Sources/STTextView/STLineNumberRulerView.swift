@@ -71,7 +71,7 @@ public final class STLineNumberRulerView: NSRulerView {
 
                 lines.append(
                     (
-                        textPosition: textLayoutFragment.layoutFragmentFrame.pixelAligned.origin.applying(.init(translationX: 4, y: locationForFirstCharacter.y)),
+                        textPosition: textLayoutFragment.layoutFragmentFrame.pixelAligned.origin.applying(.init(translationX: 0, y: locationForFirstCharacter.y)),
                         ctLine: ctline
                     )
                 )
@@ -88,6 +88,16 @@ public final class STLineNumberRulerView: NSRulerView {
             ruleThickness = estimatedWidth
         }
 
+
+        // align right
+        lines = lines.map {
+            let ctLineWidth = CTLineGetTypographicBounds($0.ctLine, nil, nil, nil)
+
+            return (
+                textPosition: $0.textPosition.applying(.init(translationX: ruleThickness - ctLineWidth - 6, y: 0)),
+                ctLine: $0.ctLine
+            )
+        }
     }
 
     public override func drawHashMarksAndLabels(in rect: NSRect) {
