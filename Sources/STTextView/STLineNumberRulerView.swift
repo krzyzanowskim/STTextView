@@ -85,13 +85,13 @@ public final class STLineNumberRulerView: NSRulerView {
         // Adjust thickness
         let estimatedWidth = (log10(CGFloat(lineNum)) + 1) * font.boundingRectForFont.width
         if estimatedWidth != ruleThickness {
-            ruleThickness = estimatedWidth
+            ruleThickness = ceil(estimatedWidth)
         }
 
 
         // align right
         lines = lines.map {
-            let ctLineWidth = CTLineGetTypographicBounds($0.ctLine, nil, nil, nil)
+            let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return (
                 textPosition: $0.textPosition.applying(.init(translationX: ruleThickness - ctLineWidth - 6, y: 0)),
