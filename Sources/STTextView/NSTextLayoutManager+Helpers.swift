@@ -43,9 +43,9 @@ extension NSTextLayoutManager {
         }
     }
 
-    func textSegmentRect(at location: NSTextLocation) -> CGRect? {
+    func textSelectionSegmentRect(at location: NSTextLocation) -> CGRect? {
         var result: CGRect? = nil
-        enumerateTextSegments(in: NSTextRange(location: location), type: .standard, options: .rangeNotRequired) { _, textSegmentFrame, baselinePosition, textContainer -> Bool in
+        enumerateTextSegments(in: NSTextRange(location: location), type: .selection, options: .rangeNotRequired) { _, textSegmentFrame, _, _ -> Bool in
             result = textSegmentFrame
             return false
         }

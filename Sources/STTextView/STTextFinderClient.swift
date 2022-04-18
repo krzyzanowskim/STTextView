@@ -115,7 +115,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         }
 
         var rangeRects: [CGRect] = []
-        textView?.textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: .rangeNotRequired, using: { _, rect, _, _ in
+        textView?.textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired, using: { _, rect, _, _ in
             rangeRects.append(rect.pixelAligned)
             return true
         })

@@ -1,27 +1,27 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-import Foundation
 import Cocoa
 
-public final class STLineNumberRulerView: NSRulerView {
-    public override var isFlipped: Bool {
-        true
-    }
+open class STLineNumberRulerView: NSRulerView {
 
     private var textView: STTextView? {
         clientView as? STTextView
     }
 
-    private var font: NSFont {
+    open var font: NSFont {
         textView?.font ?? NSFont.controlContentFont(ofSize: NSFont.labelFontSize)
     }
 
+    @Invalidating(.display)
+    open var rulePadding: CGFloat = 6
+
     private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
 
-    public var textColor: NSColor?
+    @Invalidating(.display)
+    public var textColor: NSColor = .secondaryLabelColor
 
-    public init(textView: STTextView, scrollView: NSScrollView) {
+    public required init(textView: STTextView, scrollView: NSScrollView) {
         super.init(scrollView: scrollView, orientation: .verticalRuler)
 
         clientView = textView
@@ -38,69 +38,62 @@ public final class STLineNumberRulerView: NSRulerView {
 
     }
 
-    required init(coder: NSCoder) {
+    required public init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override func invalidateHashMarks() {
+    open override func invalidateHashMarks() {
         super.invalidateHashMarks()
         invalidateLineNumbers()
     }
 
     private func invalidateLineNumbers() {
-        let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        paragraph.alignment = .right
-
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
-            .foregroundColor: textColor ?? NSColor.secondaryLabelColor,
-            .paragraphStyle: paragraph
+            .foregroundColor: textColor
         ]
 
         lines.removeAll(keepingCapacity: true)
 
-        var lineNum = 1
         let enumerateStartLocation = textView?.textLayoutManager.documentRange.location
         textView?.textLayoutManager.enumerateTextLayoutFragments(from: enumerateStartLocation, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
 
             for textLineFragment in textLayoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == textLineFragment) {
-
                 let locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
-                let attributedString = CFAttributedStringCreate(nil, "\(lineNum)" as CFString, attributes as CFDictionary)!
-                let ctline = CTLineCreateWithAttributedString(attributedString)
+                let attributedString = CFAttributedStringCreate(nil, "\(lines.count + 1)" as CFString, attributes as CFDictionary)!
+                let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                 lines.append(
                     (
-                        textPosition: textLayoutFragment.layoutFragmentFrame.pixelAligned.origin.applying(.init(translationX: 0, y: locationForFirstCharacter.y)),
-                        ctLine: ctline
+                        textPosition: textLayoutFragment.layoutFragmentFrame.origin.applying(.init(translationX: 0, y: locationForFirstCharacter.y)),
+                        ctLine: ctLine
                     )
                 )
-
-                lineNum += 1
             }
 
             return true
         }
 
-        // Adjust thickness
-        let estimatedWidth = (log10(CGFloat(lineNum)) + 1) * font.boundingRectForFont.width
-        if estimatedWidth != ruleThickness {
-            ruleThickness = ceil(estimatedWidth)
+        // Adjust ruleThickness based on last (longest) value
+        if let lastLine = lines.last {
+            let ctLineWidth = CTLineGetTypographicBounds(lastLine.ctLine, nil, nil, nil)
+            if ruleThickness < ctLineWidth {
+                ruleThickness = ctLineWidth + (rulePadding * 2)
+            }
         }
 
-
-        // align right
+        // align to right
         lines = lines.map {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return (
-                textPosition: $0.textPosition.applying(.init(translationX: ruleThickness - ctLineWidth - 6, y: 0)),
+                textPosition: $0.textPosition.applying(.init(translationX: ruleThickness - (ctLineWidth + rulePadding), y: 0)),
                 ctLine: $0.ctLine
             )
         }
     }
 
-    public override func drawHashMarksAndLabels(in rect: NSRect) {
+    open override func drawHashMarksAndLabels(in rect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext,
               let textView = textView
         else {

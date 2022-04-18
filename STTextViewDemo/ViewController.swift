@@ -43,7 +43,7 @@ final class ViewController: NSViewController {
 
         textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 6, length: 5))
         textView.addAttributes([.foregroundColor: NSColor.systemMint], range: NSRange(location: 12, length: 5))
-        textView.widthTracksTextView = true
+        textView.widthTracksTextView = true // wrap
         textView.highlightSelectedLine = true
         textView.textFinder.isIncrementalSearchingEnabled = true
         textView.textFinder.incrementalSearchingShouldDimContentView = true
