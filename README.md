@@ -52,10 +52,13 @@ textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location:
 textView.widthTracksTextView = true
 textView.delegate = self
 
+let scrollView = NSScrollView()
+scrollView.contentView = NSClipView()
+scrollView.documentView = textView
+
 // Add line numbers to enclosing NSScrollView using provided STLineNumberRulerView
+let scrollView = NSScrollView()
 scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
-scrollView.hasHorizontalRuler = false
-scrollView.hasVerticalRuler = true
 scrollView.rulersVisible = true
 
 ```

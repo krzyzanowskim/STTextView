@@ -174,6 +174,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         textContentStorage = STTextContentStorage()
         textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: frameRect.height))
+        textContainer.lineFragmentPadding = 0
         textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = textContainer
         textContentStorage.addTextLayoutManager(textLayoutManager)
@@ -439,7 +440,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
 
         let currentWidth = bounds.width
-        var width: CGFloat = scrollView?.bounds.width ?? bounds.width
+        var width = scrollView?.bounds.width ?? bounds.width
 
         // TODO: if offset didn't change since last time, it is not necessary to relayout
         if textContainer.widthTracksTextView == false, let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
@@ -471,15 +472,14 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
     private func updateTextContainerSizeIfNeeded() {
-        guard let textContainer = textLayoutManager.textContainer,
-              textContainer.widthTracksTextView,
-              textContainer.size.width != bounds.width
-        else {
+        guard let textContainer = textLayoutManager.textContainer else {
             return
         }
 
-        textContainer.size = NSSize(width: bounds.size.width, height: 0)
-        needsViewportLayout = true
+        let expectedWidth = bounds.width - (scrollView?.contentView.contentInsets.left ?? 0) - (scrollView?.contentView.contentInsets.right ?? 0)
+        if textContainer.widthTracksTextView, textContainer.size.width != expectedWidth {
+            textContainer.size = NSSize(width: expectedWidth, height: 0)
+        }
     }
 
     open override func layout() {

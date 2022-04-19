@@ -12,21 +12,14 @@ final class ViewController: NSViewController {
 
         let scrollView = NSScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.autoresizingMask = [.height, .width]
         scrollView.borderType = .noBorder
-        scrollView.hasVerticalScroller = true
-        scrollView.automaticallyAdjustsContentInsets = true
         scrollView.hasHorizontalScroller = true
+        scrollView.hasVerticalScroller = true
+        scrollView.contentView = NSClipView()
 
         // Line numbers
         scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
-        scrollView.hasHorizontalRuler = false
-        scrollView.hasVerticalRuler = true
         scrollView.rulersVisible = true
-
-        let clipView = NSClipView()
-        scrollView.contentView = clipView
-        scrollView.documentView = textView
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.1
@@ -48,6 +41,8 @@ final class ViewController: NSViewController {
         textView.textFinder.isIncrementalSearchingEnabled = true
         textView.textFinder.incrementalSearchingShouldDimContentView = true
         textView.delegate = self
+
+        scrollView.documentView = textView
 
         view.addSubview(scrollView)
         NSLayoutConstraint.activate([
