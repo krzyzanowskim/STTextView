@@ -174,7 +174,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         textContentStorage = STTextContentStorage()
         textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: frameRect.height))
-        textContainer.lineFragmentPadding = 0
         textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = textContainer
         textContentStorage.addTextLayoutManager(textLayoutManager)
