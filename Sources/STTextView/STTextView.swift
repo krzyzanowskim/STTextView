@@ -77,7 +77,12 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
     public var string: String {
         set {
+            let prevLocation = textLayoutManager.textSelections.first?.textRanges.first?.location
+
             setString(newValue)
+
+            // restore selection location
+            setSelectedRange(NSTextRange(location: prevLocation ?? textLayoutManager.documentRange.location))
         }
         get {
             textContentStorage.attributedString?.string ?? ""
@@ -485,6 +490,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         super.layout()
 
         var shouldLayoutViewport = false
+        var didUpdateContentSize = false
 
         if needsViewportLayout {
             needsViewportLayout = false
@@ -494,6 +500,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         if needScrollToSelection {
             needScrollToSelection = false
             if let textSelection = textLayoutManager.textSelections.first {
+                updateContentSizeIfNeeded()
+                didUpdateContentSize = true
                 scrollToSelection(textSelection)
                 shouldLayoutViewport = true
             }
@@ -501,7 +509,9 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         if shouldLayoutViewport {
             textLayoutManager.textViewportLayoutController.layoutViewport()
-            updateContentSizeIfNeeded()
+            if !didUpdateContentSize {
+                updateContentSizeIfNeeded()
+            }
         }
     }
 
