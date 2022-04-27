@@ -5,17 +5,15 @@ import Cocoa
 import STTextView
 
 final class ViewController: NSViewController {
-    var textView = STTextView()
+    var textView: STTextView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let scrollView = NSScrollView()
+        let scrollView = STTextView.scrollableTextView()
+        textView = scrollView.documentView as? STTextView
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.borderType = .noBorder
-        scrollView.hasHorizontalScroller = true
         scrollView.hasVerticalScroller = true
-        scrollView.contentView = NSClipView()
 
         // Line numbers
         scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
@@ -52,7 +50,6 @@ final class ViewController: NSViewController {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
 }
 
 extension ViewController: STTextViewDelegate {

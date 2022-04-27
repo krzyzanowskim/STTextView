@@ -155,6 +155,26 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         true
     }
 
+    public static func scrollableTextView() -> NSScrollView {
+        let scrollView = NSScrollView()
+        let textView = STTextView()
+        textView.autoresizingMask = [.width, .height]
+        
+        let textContainer = textView.textContainer
+        textContainer.widthTracksTextView = true
+        textContainer.heightTracksTextView = false
+
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = false
+        scrollView.drawsBackground = false
+
+        let clipView = NSClipView()
+        scrollView.contentView = clipView
+        scrollView.documentView = textView
+
+        return scrollView
+    }
+
     internal var scrollView: NSScrollView? {
         guard let result = enclosingScrollView else { return nil }
         if result.documentView == self {
@@ -681,30 +701,30 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
         // Return bounds until resolve bounds problem
-        return bounds
+        return frame
 
         // FIXME: bounds affects layout. layoutFragments from outside of the viewport bounds are borken
         //        this is visible in line number ruler. Until I figure correct calculation of bounds
         //        the viewport is effectively whole textview = no viewport.
         //        Meybe overdraw is too small, maybe something else.
 
-        // let overdrawRect = preparedContentRect
-        // let visibleRect = self.visibleRect
-        // var minY: CGFloat = 0
-        // var maxY: CGFloat = 0
+        //let overdrawRect = preparedContentRect
+        //let visibleRect = self.visibleRect
+        //var minY: CGFloat = 0
+        //var maxY: CGFloat = 0
         //
-        // if overdrawRect.intersects(visibleRect) {
-        //     // Use preparedContentRect for vertical overdraw and ensure visibleRect is included at the minimum,
-        //     // the width is always bounds width for proper line wrapping.
-        //     minY = min(overdrawRect.minY, max(visibleRect.minY, 0))
-        //     maxY = max(overdrawRect.maxY, visibleRect.maxY)
-        // } else {
-        //     // We use visible rect directly if preparedContentRect does not intersect.
-        //     // This can happen if overdraw has not caught up with scrolling yet, such as before the first layout.
-        //     minY = visibleRect.minY
-        //     maxY = visibleRect.maxY
-        // }
-        // return CGRect(x: bounds.minX, y: minY, width: bounds.width, height: maxY - minY)
+        //if overdrawRect.intersects(visibleRect) {
+        //    // Use preparedContentRect for vertical overdraw and ensure visibleRect is included at the minimum,
+        //    // the width is always bounds width for proper line wrapping.
+        //    minY = min(overdrawRect.minY, max(visibleRect.minY, 0))
+        //    maxY = max(overdrawRect.maxY, visibleRect.maxY)
+        //} else {
+        //    // We use visible rect directly if preparedContentRect does not intersect.
+        //    // This can happen if overdraw has not caught up with scrolling yet, such as before the first layout.
+        //    minY = visibleRect.minY
+        //    maxY = visibleRect.maxY
+        //}
+        //return CGRect(x: bounds.minX, y: minY, width: bounds.width, height: maxY - minY)
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
