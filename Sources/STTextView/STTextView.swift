@@ -770,7 +770,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
-        if let fragmentLayer = fragmentLayerMap.object(forKey: textLayoutFragment) as? TextLayoutFragmentLayer {
+        if let fragmentLayer = fragmentLayerMap.object(forKey: textLayoutFragment) as? STTextLayoutFragmentLayer {
             let oldFrame = fragmentLayer.frame
             fragmentLayer.updateGeometry()
             if oldFrame != fragmentLayer.frame {
@@ -778,7 +778,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             }
             contentLayer.addSublayer(fragmentLayer)
         } else {
-            let fragmentLayer = TextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
+            let fragmentLayer = STTextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
             fragmentLayer.updateGeometry()
             fragmentLayer.contentsScale = backingScaleFactor
             contentLayer.addSublayer(fragmentLayer)

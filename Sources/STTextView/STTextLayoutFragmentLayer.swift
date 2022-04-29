@@ -4,7 +4,7 @@
 import Cocoa
 import CoreGraphics
 
-final class TextLayoutFragmentLayer: STCALayer {
+final class STTextLayoutFragmentLayer: STCALayer {
     private let layoutFragment: NSTextLayoutFragment
 
     init(layoutFragment: NSTextLayoutFragment) {
