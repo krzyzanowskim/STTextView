@@ -164,6 +164,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     public static func scrollableTextView() -> NSScrollView {
         let scrollView = NSScrollView()
         let textView = STTextView()
+        textView.translatesAutoresizingMaskIntoConstraints = false
         textView.autoresizingMask = [.width, .height]
         
         let textContainer = textView.textContainer
@@ -171,7 +172,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         textContainer.heightTracksTextView = false
 
         scrollView.hasVerticalScroller = true
-        scrollView.hasHorizontalScroller = false
+        scrollView.hasHorizontalScroller = true
         scrollView.drawsBackground = false
 
         let clipView = NSClipView()
@@ -780,6 +781,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     private func adjustViewportOffsetIfNeeded() {
         guard let scrollView = scrollView else { return }
+        let clipView = scrollView.contentView
 
         func adjustViewportOffset() {
             let viewportLayoutController = textLayoutManager.textViewportLayoutController
@@ -792,13 +794,13 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             if !layoutYPoint.isZero {
                 let adjustmentDelta = bounds.minY - layoutYPoint
                 viewportLayoutController.adjustViewport(byVerticalOffset: adjustmentDelta)
-                scroll(CGPoint(x: scrollView.contentView.bounds.minX, y: scrollView.contentView.bounds.minY + adjustmentDelta))
+                scroll(CGPoint(x: clipView.bounds.minX, y: clipView.bounds.minY + adjustmentDelta))
             }
         }
 
         let viewportLayoutController = textLayoutManager.textViewportLayoutController
-        let contentOffset = scrollView.contentView.bounds.minY
-        if contentOffset < scrollView.contentView.bounds.height &&
+        let contentOffset = clipView.bounds.minY
+        if contentOffset < clipView.bounds.height &&
             viewportLayoutController.viewportRange!.location > textLayoutManager.documentRange.location {
             // Nearing top, see if we need to adjust and make room above.
             adjustViewportOffset()
