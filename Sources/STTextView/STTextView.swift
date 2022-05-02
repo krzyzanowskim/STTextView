@@ -107,6 +107,12 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    open var lineNumbersVisible: Bool {
+        didSet {
+            setupLineNumbersView()
+        }
+    }
+
     public var backgroundColor: NSColor? {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
@@ -212,6 +218,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         isSelectable = isEditable
         insertionPointColor = .textColor
         highlightSelectedLine = false
+        lineNumbersVisible = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
         allowsUndo = true
         _undoManager = CoalescingUndoManager<TypingTextUndo>()
@@ -238,6 +245,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         layer?.addSublayer(selectionLayer)
         layer?.addSublayer(contentLayer)
 
+        setupLineNumbersView()
+
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
@@ -245,7 +254,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             NotificationCenter.default.post(notification)
             self.delegate?.textViewDidChangeSelection?(notification)
         }
-
     }
 
     open override func viewDidMoveToWindow() {
@@ -455,55 +463,87 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
-    internal func updateContentSizeIfNeeded() {
-        let currentHeight = bounds.height
-        var height: CGFloat = 0
+    // Update text view frame size
+    internal func updateFrameSizeIfNeeded() {
+        let currentSize = frame
+
+        var proposedHeight: CGFloat = 0
         textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-            height = layoutFragment.layoutFragmentFrame.maxY
+            proposedHeight = max(currentSize.height, layoutFragment.layoutFragmentFrame.maxY)
             return false // stop
         }
 
-        let currentWidth = bounds.width
-        var width = scrollView?.bounds.width ?? bounds.width
-
-        // TODO: if offset didn't change since last time, it is not necessary to relayout
-        if textContainer.widthTracksTextView == false, let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
+        var proposedWidth = frame.width
+        if !textContainer.widthTracksTextView {
+            // TODO: if offset didn't change since last time, it is not necessary to relayout
             // not necessarly need to layout whole thing, is's enough to enumerate over visible area
-            textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: .ensuresLayout) { layoutFragment in
-                width = max(width, layoutFragment.layoutFragmentFrame.maxX)
-                return layoutFragment.rangeInElement.intersects(viewportRange)
+            let startLocation = textLayoutManager.textViewportLayoutController.viewportRange?.location ?? textLayoutManager.documentRange.location
+            let endLocation = textLayoutManager.textViewportLayoutController.viewportRange?.endLocation ?? textLayoutManager.documentRange.endLocation
+            textLayoutManager.enumerateTextLayoutFragments(from: startLocation, options: .ensuresLayout) { layoutFragment in
+                proposedWidth = max(proposedWidth, layoutFragment.layoutFragmentFrame.maxX)
+                return layoutFragment.rangeInElement.location < endLocation
             }
         }
 
-        height = max(height, scrollView?.contentSize.height ?? 0)
-        width = max(width, scrollView?.contentSize.width ?? 0)
-        if abs(currentHeight - height) > 1e-10 || abs(currentWidth - width) > 1e-10 {
-            let contentSize = NSSize(width: width, height: height)
-            setFrameSize(contentSize)
+        if abs(currentSize.height - proposedHeight) > 1e-10 || abs(currentSize.width - proposedWidth) > 1e-10 {
+            setFrameSize(CGSize(width: proposedWidth, height: proposedHeight))
         }
     }
 
     open override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
         adjustViewportOffsetIfNeeded()
-        updateContentSizeIfNeeded()
+        updateFrameSizeIfNeeded()
     }
 
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        updateTextContainerSizeIfNeeded()
-        needsViewportLayout = true
+        if updateTextContainerSizeIfNeeded() {
+            needsViewportLayout = true
+        }
     }
 
-    private func updateTextContainerSizeIfNeeded() {
-        guard let textContainer = textLayoutManager.textContainer else {
-            return
+    // Update textContainer width to match textview width if track textview width
+    @discardableResult
+    private func updateTextContainerSizeIfNeeded() -> Bool {
+        var proposedSize = textContainer.size
+
+        if textContainer.widthTracksTextView, textContainer.size.width != frame.width {
+            proposedSize.width = frame.width
         }
 
-        let expectedWidth = bounds.width - (scrollView?.contentView.contentInsets.left ?? 0) - (scrollView?.contentView.contentInsets.right ?? 0)
-        if textContainer.widthTracksTextView, textContainer.size.width != expectedWidth {
-            textContainer.size = NSSize(width: expectedWidth, height: 0)
+        if textContainer.heightTracksTextView, textContainer.size.height != frame.height {
+            proposedSize.height = frame.height
         }
+
+        if textContainer.size != proposedSize {
+            textContainer.size = proposedSize
+            return true
+        }
+
+        return false
+    }
+
+//    private var lineNumbersView: NSView?
+
+    /// Lays out the components of the receiver: the content view, the scrollers, and the ruler views.
+    private func setupLineNumbersView() {
+//        if lineNumbersVisible, lineNumbersView == nil {
+//            let lineNumberView = NSView()
+//            lineNumberView.translatesAutoresizingMaskIntoConstraints = false
+//            lineNumberView.wantsLayer = true
+//            lineNumberView.layer?.backgroundColor = .black
+//            addSubview(lineNumberView)
+//            NSLayoutConstraint.activate([
+//                lineNumberView.leadingAnchor.constraint(equalTo: leadingAnchor),
+//                lineNumberView.widthAnchor.constraint(equalToConstant: 50),
+//                lineNumberView.topAnchor.constraint(equalTo: topAnchor),
+//                lineNumberView.bottomAnchor.constraint(equalTo: bottomAnchor),
+//            ])
+//            self.lineNumbersView = lineNumberView
+//        } else if !lineNumbersVisible {
+//            lineNumbersView?.removeFromSuperview()
+//        }
     }
 
     open override func layout() {
@@ -520,7 +560,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         if needScrollToSelection {
             needScrollToSelection = false
             if let textSelection = textLayoutManager.textSelections.first {
-                updateContentSizeIfNeeded()
+                updateFrameSizeIfNeeded()
                 didUpdateContentSize = true
                 scrollToSelection(textSelection)
                 shouldLayoutViewport = true
@@ -530,7 +570,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         if shouldLayoutViewport {
             textLayoutManager.textViewportLayoutController.layoutViewport()
             if !didUpdateContentSize {
-                updateContentSizeIfNeeded()
+                updateFrameSizeIfNeeded()
             }
         }
     }
@@ -739,7 +779,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     private func adjustViewportOffsetIfNeeded() {
-
         guard let scrollView = scrollView else { return }
 
         func adjustViewportOffset() {
@@ -775,7 +814,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
             // Adjust position
             fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
-            // TODO: Accomodate NSTextContainer line fragment rectangle
 
             if oldFrame != fragmentLayer.frame {
                 fragmentLayer.needsDisplay()
@@ -787,7 +825,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
             // Adjust position
             fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
-            // TODO: Accomodate NSTextContainer line fragment rectangle
 
             contentLayer.addSublayer(fragmentLayer)
             fragmentLayerMap.setObject(fragmentLayer, forKey: textLayoutFragment)

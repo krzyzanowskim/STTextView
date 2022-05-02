@@ -3,6 +3,8 @@
 
 import Cocoa
 
+
+@available(*, deprecated, message: "NSRulerView is deprecated")
 open class STLineNumberRulerView: NSRulerView {
 
     private var textView: STTextView? {

@@ -16,8 +16,8 @@ final class ViewController: NSViewController {
         scrollView.hasVerticalScroller = true
 
         // Line numbers
-        scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
-        scrollView.rulersVisible = true
+        //scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+        //scrollView.rulersVisible = true
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.1
@@ -34,8 +34,9 @@ final class ViewController: NSViewController {
 
         textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 6, length: 5))
         textView.addAttributes([.foregroundColor: NSColor.systemMint], range: NSRange(location: 12, length: 5))
-        textView.widthTracksTextView = true // wrap
+        textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true
+        textView.lineNumbersVisible = true
         textView.textFinder.isIncrementalSearchingEnabled = true
         textView.textFinder.incrementalSearchingShouldDimContentView = true
         textView.delegate = self

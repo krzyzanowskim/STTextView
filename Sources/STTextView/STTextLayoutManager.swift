@@ -11,4 +11,5 @@ public final class STTextLayoutManager: NSTextLayoutManager {
             NotificationCenter.default.post(notification)
         }
     }
+
 }

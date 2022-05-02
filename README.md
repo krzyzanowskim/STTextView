@@ -50,17 +50,13 @@ textView.textColor = .textColor
 textView.string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ornare lobortis sem a vulputate."
 textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
 textView.widthTracksTextView = true
+textView.highlightSelectedLine = true
+textView.lineNumbersVisible = true
 textView.delegate = self
 
 let scrollView = NSScrollView()
 scrollView.contentView = NSClipView()
 scrollView.documentView = textView
-
-// Add line numbers to enclosing NSScrollView using provided STLineNumberRulerView
-let scrollView = NSScrollView()
-scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
-scrollView.rulersVisible = true
-
 ```
 
 ## Suggestions or Feedback
