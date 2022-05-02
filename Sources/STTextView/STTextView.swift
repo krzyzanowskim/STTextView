@@ -772,15 +772,23 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
         if let fragmentLayer = fragmentLayerMap.object(forKey: textLayoutFragment) as? STTextLayoutFragmentLayer {
             let oldFrame = fragmentLayer.frame
-            fragmentLayer.updateGeometry()
+
+            // Adjust position
+            fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
+            // TODO: Accomodate NSTextContainer line fragment rectangle
+
             if oldFrame != fragmentLayer.frame {
                 fragmentLayer.needsDisplay()
             }
             contentLayer.addSublayer(fragmentLayer)
         } else {
             let fragmentLayer = STTextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
-            fragmentLayer.updateGeometry()
             fragmentLayer.contentsScale = backingScaleFactor
+
+            // Adjust position
+            fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
+            // TODO: Accomodate NSTextContainer line fragment rectangle
+
             contentLayer.addSublayer(fragmentLayer)
             fragmentLayerMap.setObject(fragmentLayer, forKey: textLayoutFragment)
         }
@@ -790,10 +798,12 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 private extension CALayer {
 
     func isDescendant(of layer: CALayer) -> Bool {
+        var layer = layer
         while let parent = layer.superlayer {
             if parent == layer {
                 return true
             }
+            layer = parent
         }
 
         return false

@@ -29,9 +29,4 @@ final class STTextLayoutFragmentLayer: STCALayer {
     override func draw(in ctx: CGContext) {
         layoutFragment.draw(at: .zero, in: ctx)
     }
-
-    func updateGeometry() {
-        frame = layoutFragment.renderingSurfaceBounds.applying(.init(translationX: 0, y: layoutFragment.layoutFragmentFrame.origin.y)).pixelAligned
-        bounds = layoutFragment.renderingSurfaceBounds.pixelAligned
-    }
 }
