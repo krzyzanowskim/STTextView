@@ -16,8 +16,8 @@ final class ViewController: NSViewController {
         scrollView.hasVerticalScroller = true
 
         // Line numbers
-        //scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
-        //scrollView.rulersVisible = true
+        scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+        scrollView.rulersVisible = true
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.1

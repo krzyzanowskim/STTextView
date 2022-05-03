@@ -55,8 +55,12 @@ textView.lineNumbersVisible = true
 textView.delegate = self
 
 let scrollView = NSScrollView()
-scrollView.contentView = NSClipView()
 scrollView.documentView = textView
+
+// Line numbers
+scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+scrollView.rulersVisible = true
+
 ```
 
 ## Suggestions or Feedback

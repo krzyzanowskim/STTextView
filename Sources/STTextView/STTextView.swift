@@ -107,11 +107,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
-    open var lineNumbersVisible: Bool {
-        didSet {
-            setupLineNumbersView()
-        }
-    }
+    open var lineNumbersVisible: Bool
 
     public var backgroundColor: NSColor? {
         didSet {
@@ -164,9 +160,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     public static func scrollableTextView() -> NSScrollView {
         let scrollView = NSScrollView()
         let textView = STTextView()
-        textView.translatesAutoresizingMaskIntoConstraints = false
-        textView.autoresizingMask = [.width, .height]
-        
+
         let textContainer = textView.textContainer
         textContainer.widthTracksTextView = true
         textContainer.heightTracksTextView = false
@@ -174,11 +168,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = true
         scrollView.drawsBackground = false
-
-        let clipView = NSClipView()
-        scrollView.contentView = clipView
         scrollView.documentView = textView
-
         return scrollView
     }
 
@@ -205,14 +195,14 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         fragmentLayerMap = .weakToWeakObjects()
 
         textContentStorage = STTextContentStorage()
-        textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: frameRect.height))
+        textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude)))
         textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = textContainer
         textContentStorage.addTextLayoutManager(textLayoutManager)
 
-        contentLayer = STCALayer(frame: frameRect)
+        contentLayer = STCALayer()
         contentLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
-        selectionLayer = STCALayer(frame: frameRect)
+        selectionLayer = STCALayer()
         selectionLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
 
         isEditable = true
@@ -245,8 +235,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         layer?.addSublayer(selectionLayer)
         layer?.addSublayer(contentLayer)
-
-        setupLineNumbersView()
 
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
@@ -474,7 +462,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             return false // stop
         }
 
-        var proposedWidth = frame.width
+        var proposedWidth = currentSize.width
         if !textContainer.widthTracksTextView {
             // TODO: if offset didn't change since last time, it is not necessary to relayout
             // not necessarly need to layout whole thing, is's enough to enumerate over visible area
@@ -499,9 +487,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        if updateTextContainerSizeIfNeeded() {
-            needsViewportLayout = true
-        }
+        updateTextContainerSizeIfNeeded()
+        needsViewportLayout = true
     }
 
     // Update textContainer width to match textview width if track textview width
@@ -525,26 +512,40 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         return false
     }
 
-//    private var lineNumbersView: NSView?
+    private func tile() {
 
-    /// Lays out the components of the receiver: the content view, the scrollers, and the ruler views.
-    private func setupLineNumbersView() {
-//        if lineNumbersVisible, lineNumbersView == nil {
-//            let lineNumberView = NSView()
-//            lineNumberView.translatesAutoresizingMaskIntoConstraints = false
-//            lineNumberView.wantsLayer = true
-//            lineNumberView.layer?.backgroundColor = .black
-//            addSubview(lineNumberView)
-//            NSLayoutConstraint.activate([
-//                lineNumberView.leadingAnchor.constraint(equalTo: leadingAnchor),
-//                lineNumberView.widthAnchor.constraint(equalToConstant: 50),
-//                lineNumberView.topAnchor.constraint(equalTo: topAnchor),
-//                lineNumberView.bottomAnchor.constraint(equalTo: bottomAnchor),
-//            ])
-//            self.lineNumbersView = lineNumberView
-//        } else if !lineNumbersVisible {
-//            lineNumbersView?.removeFromSuperview()
-//        }
+        // Update clipView to accomodate vertical ruler
+        if let scrollView = scrollView,
+           scrollView.hasVerticalRuler,
+           let verticalRulerView = scrollView.verticalRulerView
+        {
+            let clipView = scrollView.contentView
+            clipView.automaticallyAdjustsContentInsets = false
+            clipView.contentInsets = NSEdgeInsets(
+                top: clipView.contentInsets.top,
+                left: 0, // reset content inset
+                bottom: clipView.contentInsets.bottom,
+                right: clipView.contentInsets.right
+            )
+
+            scrollView.contentView.frame = CGRect(
+                x: scrollView.bounds.origin.x + verticalRulerView.frame.width,
+                y: scrollView.bounds.origin.y,
+                width: scrollView.bounds.size.width - verticalRulerView.frame.width,
+                height: scrollView.bounds.size.height
+            )
+        }
+    }
+
+    open override func resize(withOldSuperviewSize oldSize: NSSize) {
+        super.resize(withOldSuperviewSize: oldSize)
+        tile()
+    }
+
+
+    open override func resizeSubviews(withOldSize oldSize: NSSize) {
+        super.resizeSubviews(withOldSize: oldSize)
+        tile()
     }
 
     open override func layout() {
@@ -561,7 +562,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         if needScrollToSelection {
             needScrollToSelection = false
             if let textSelection = textLayoutManager.textSelections.first {
-                updateFrameSizeIfNeeded()
+                updateFrameSizeIfNeeded() // TODO: not needed?
                 didUpdateContentSize = true
                 scrollToSelection(textSelection)
                 shouldLayoutViewport = true
@@ -788,7 +789,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             var layoutYPoint: CGFloat = 0
             textLayoutManager.enumerateTextLayoutFragments(from: viewportLayoutController.viewportRange!.location, options: [.reverse, .ensuresLayout]) { layoutFragment in
                 layoutYPoint = layoutFragment.layoutFragmentFrame.origin.y
-                return true
+                return true //return false?
             }
 
             if !layoutYPoint.isZero {

@@ -86,10 +86,7 @@ extension STTextView: NSTextInputClient {
         guard isEditable else { return }
         textContentStorage.performEditingTransaction {
             switch string {
-            case is String:
-                guard let string = string as? String else {
-                    return
-                }
+            case let string as String:
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string) {
                         willChangeText()
@@ -105,10 +102,7 @@ extension STTextView: NSTextInputClient {
                         }
                     }
                 }
-            case is NSAttributedString:
-                guard let string = string as? NSAttributedString else {
-                    return
-                }
+            case let string as NSAttributedString:
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string.string) {
                         willChangeText()

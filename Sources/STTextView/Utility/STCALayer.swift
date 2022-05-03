@@ -30,6 +30,11 @@ open class STCALayer: CALayer {
         }
     }
 
+    public override init() {
+        super.init()
+        needsDisplayOnBoundsChange = true
+    }
+
     public init(frame frameRect: CGRect) {
         super.init()
         needsDisplayOnBoundsChange = true
