@@ -454,15 +454,15 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
     // Update text view frame size
     internal func updateFrameSizeIfNeeded() {
-        let currentSize = frame
+        let currentSize = frame.size
 
         var proposedHeight: CGFloat = 0
         textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-            proposedHeight = max(currentSize.height, layoutFragment.layoutFragmentFrame.maxY)
+            proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
             return false // stop
         }
 
-        var proposedWidth = currentSize.width
+        var proposedWidth: CGFloat = 0
         if !textContainer.widthTracksTextView {
             // TODO: if offset didn't change since last time, it is not necessary to relayout
             // not necessarly need to layout whole thing, is's enough to enumerate over visible area
@@ -472,23 +472,15 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 proposedWidth = max(proposedWidth, layoutFragment.layoutFragmentFrame.maxX)
                 return layoutFragment.rangeInElement.location < endLocation
             }
+        } else {
+            proposedWidth = currentSize.width
         }
 
-        if abs(currentSize.height - proposedHeight) > 1e-10 || abs(currentSize.width - proposedWidth) > 1e-10 {
-            setFrameSize(CGSize(width: proposedWidth, height: proposedHeight))
+        let proposedSize = CGSize(width: proposedWidth, height: proposedHeight)
+
+        if !currentSize.isAlmostEqual(to: proposedSize) {
+            setFrameSize(proposedSize)
         }
-    }
-
-    open override func viewDidEndLiveResize() {
-        super.viewDidEndLiveResize()
-        adjustViewportOffsetIfNeeded()
-        updateFrameSizeIfNeeded()
-    }
-
-    open override func setFrameSize(_ newSize: NSSize) {
-        super.setFrameSize(newSize)
-        updateTextContainerSizeIfNeeded()
-        needsViewportLayout = true
     }
 
     // Update textContainer width to match textview width if track textview width
@@ -496,11 +488,11 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     private func updateTextContainerSizeIfNeeded() -> Bool {
         var proposedSize = textContainer.size
 
-        if textContainer.widthTracksTextView, textContainer.size.width != frame.width {
+        if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: frame.width) {
             proposedSize.width = frame.width
         }
 
-        if textContainer.heightTracksTextView, textContainer.size.height != frame.height {
+        if textContainer.heightTracksTextView, !textContainer.size.height.isAlmostEqual(to: frame.height)  {
             proposedSize.height = frame.height
         }
 
@@ -510,6 +502,18 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
 
         return false
+    }
+
+    open override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        updateTextContainerSizeIfNeeded()
+        needsViewportLayout = true
+    }
+
+    open override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        adjustViewportOffsetIfNeeded()
+        updateFrameSizeIfNeeded()
     }
 
     private func tile() {
@@ -543,11 +547,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
 
-    open override func resizeSubviews(withOldSize oldSize: NSSize) {
-        super.resizeSubviews(withOldSize: oldSize)
-        tile()
-    }
-
     open override func layout() {
         super.layout()
 
@@ -562,7 +561,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         if needScrollToSelection {
             needScrollToSelection = false
             if let textSelection = textLayoutManager.textSelections.first {
-                updateFrameSizeIfNeeded() // TODO: not needed?
+                updateFrameSizeIfNeeded()
                 didUpdateContentSize = true
                 scrollToSelection(textSelection)
                 shouldLayoutViewport = true
