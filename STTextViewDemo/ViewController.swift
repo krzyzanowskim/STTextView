@@ -5,7 +5,7 @@ import Cocoa
 import STTextView
 
 final class ViewController: NSViewController {
-    var textView: STTextView!
+    private var textView: STTextView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +50,10 @@ final class ViewController: NSViewController {
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+
+    @IBAction func toggleTextWrapMode(_ sender: Any?) {
+        textView.widthTracksTextView.toggle()
     }
 }
 

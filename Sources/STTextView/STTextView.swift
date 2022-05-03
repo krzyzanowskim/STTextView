@@ -94,7 +94,18 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.
     public var widthTracksTextView: Bool {
         set {
-            textContainer.widthTracksTextView = newValue
+            if textContainer.widthTracksTextView != newValue {
+                textContainer.widthTracksTextView = newValue
+
+                if newValue == true {
+                    textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
+                    setFrameSize(scrollView!.contentSize)
+                } else {
+                    textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
+                    needsViewportLayout = true
+                }
+                needsDisplay = true
+            }
         }
         get {
             textContainer.widthTracksTextView
