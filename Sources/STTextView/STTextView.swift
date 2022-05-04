@@ -626,11 +626,10 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
     open func didChangeText() {
         needScrollToSelection = true
-        needsDisplay = true
 
         let notification = Notification(name: STTextView.didChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
-        delegate?.textDidChange?(notification)
+        needsDisplay = true
     }
 
     open func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString) {
@@ -753,7 +752,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
         // Return bounds until resolve bounds problem
-        return frame
+        return bounds
 
         // FIXME: bounds affects layout. layoutFragments from outside of the viewport bounds are borken
         //        this is visible in line number ruler. Until I figure correct calculation of bounds

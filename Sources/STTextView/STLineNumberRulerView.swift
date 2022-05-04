@@ -26,25 +26,18 @@ open class STLineNumberRulerView: NSRulerView {
 
         clientView = textView
 
-        NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: textView, queue: .main) { [weak self] _ in
-            self?.invalidateLineNumbers()
-            self?.needsDisplay = true
-        }
-
         NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: textView, queue: .main) { [weak self] _ in
-            self?.invalidateLineNumbers()
             self?.needsDisplay = true
         }
 
-    }
-
-    required public init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 
     open override func invalidateHashMarks() {
         super.invalidateHashMarks()
-        invalidateLineNumbers()
+    }
+
+    required public init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func invalidateLineNumbers() {
@@ -53,17 +46,17 @@ open class STLineNumberRulerView: NSRulerView {
             .foregroundColor: textColor
         ]
 
-        lines.removeAll(keepingCapacity: true)
+        var linesTmp = lines
+        linesTmp.removeAll(keepingCapacity: true)
 
-        let enumerateStartLocation = textView?.textLayoutManager.documentRange.location
-        textView?.textLayoutManager.enumerateTextLayoutFragments(from: enumerateStartLocation, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
+        textView?.textLayoutManager.enumerateTextLayoutFragments(from: textView?.textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
 
             for textLineFragment in textLayoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == textLineFragment) {
                 let locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
-                let attributedString = CFAttributedStringCreate(nil, "\(lines.count + 1)" as CFString, attributes as CFDictionary)!
+                let attributedString = CFAttributedStringCreate(nil, "\(linesTmp.count + 1)" as CFString, attributes as CFDictionary)!
                 let ctLine = CTLineCreateWithAttributedString(attributedString)
 
-                lines.append(
+                linesTmp.append(
                     (
                         textPosition: textLayoutFragment.layoutFragmentFrame.origin.applying(.init(translationX: 0, y: locationForFirstCharacter.y)),
                         ctLine: ctLine
@@ -75,7 +68,7 @@ open class STLineNumberRulerView: NSRulerView {
         }
 
         // Adjust ruleThickness based on last (longest) value
-        if let lastLine = lines.last {
+        if let lastLine = linesTmp.last {
             let ctLineWidth = CTLineGetTypographicBounds(lastLine.ctLine, nil, nil, nil)
             if ruleThickness < (ctLineWidth + (rulePadding * 2)) {
                 ruleThickness = max(ruleThickness, ctLineWidth + (rulePadding * 2))
@@ -83,7 +76,7 @@ open class STLineNumberRulerView: NSRulerView {
         }
 
         // align to right
-        lines = lines.map {
+        lines = linesTmp.map {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return (
@@ -99,6 +92,13 @@ open class STLineNumberRulerView: NSRulerView {
         else {
             return
         }
+
+        // Invalidate on each drawing is not the best
+        // however otherwise there's out of sync (sic)
+        // and as drawHashMarksAndLabels draws in parts
+        // drawing is borken. TODO: take rect into account
+        // and invalidate only visible part
+        invalidateLineNumbers()
 
         let relativePoint = self.convert(NSZeroPoint, from: textView)
 

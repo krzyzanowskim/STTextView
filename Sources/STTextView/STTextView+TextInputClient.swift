@@ -84,44 +84,46 @@ extension STTextView: NSTextInputClient {
 
     open func insertText(_ string: Any, replacementRange: NSRange) {
         guard isEditable else { return }
+
+        willChangeText()
+        var didChangeFlag = false
         textContentStorage.performEditingTransaction {
             switch string {
             case let string as String:
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string) {
-                        willChangeText()
                         replaceCharacters(in: textRange, with: string)
-                        didChangeText()
+                        didChangeFlag = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string) {
-                            willChangeText()
                             replaceCharacters(in: textRange, with: string)
-                            didChangeText()
+                            didChangeFlag = true
                         }
                     }
                 }
             case let string as NSAttributedString:
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string.string) {
-                        willChangeText()
                         replaceCharacters(in: textRange, with: string)
-                        didChangeText()
+                        didChangeFlag = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string.string) {
-                            willChangeText()
                             replaceCharacters(in: textRange, with: string)
-                            didChangeText()
+                            didChangeFlag = true
                         }
                     }
                 }
             default:
                 assertionFailure()
             }
+        }
 
+        if didChangeFlag {
+            didChangeText()
         }
     }
 
