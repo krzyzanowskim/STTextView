@@ -118,8 +118,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
-    open var lineNumbersVisible: Bool
-
     public var backgroundColor: NSColor? {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
@@ -220,7 +218,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         isSelectable = isEditable
         insertionPointColor = .textColor
         highlightSelectedLine = false
-        lineNumbersVisible = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
         allowsUndo = true
         _undoManager = CoalescingUndoManager<TypingTextUndo>()
