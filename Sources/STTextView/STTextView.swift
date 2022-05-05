@@ -135,8 +135,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     public let textLayoutManager: NSTextLayoutManager
     public let textContentStorage: NSTextContentStorage
     public let textContainer: NSTextContainer
-    private let contentLayer: STCALayer
-    internal let selectionLayer: STCALayer
+    private let contentLayer: STCATiledLayer
+    internal let selectionLayer: STCATiledLayer
     internal var backingScaleFactor: CGFloat {
         window?.backingScaleFactor ?? 1
     }
@@ -209,9 +209,9 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         textLayoutManager.textContainer = textContainer
         textContentStorage.addTextLayoutManager(textLayoutManager)
 
-        contentLayer = STCALayer()
+        contentLayer = STCATiledLayer()
         contentLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
-        selectionLayer = STCALayer()
+        selectionLayer = STCATiledLayer()
         selectionLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
 
         isEditable = true
