@@ -558,28 +558,16 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     open override func layout() {
         super.layout()
 
-        var shouldLayoutViewport = false
-        var didUpdateContentSize = false
-
         if needsViewportLayout {
             needsViewportLayout = false
-            shouldLayoutViewport = true
+            textLayoutManager.textViewportLayoutController.layoutViewport()
         }
 
         if needScrollToSelection {
             needScrollToSelection = false
             if let textSelection = textLayoutManager.textSelections.first {
-                updateFrameSizeIfNeeded()
-                didUpdateContentSize = true
                 scrollToSelection(textSelection)
-                shouldLayoutViewport = true
-            }
-        }
-
-        if shouldLayoutViewport {
-            textLayoutManager.textViewportLayoutController.layoutViewport()
-            if !didUpdateContentSize {
-                updateFrameSizeIfNeeded()
+                textLayoutManager.textViewportLayoutController.layoutViewport()
             }
         }
     }
@@ -777,11 +765,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         contentLayer.sublayers = nil
-        CATransaction.begin()
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        CATransaction.commit()
+        updateFrameSizeIfNeeded()
         updateSelectionHighlights()
         adjustViewportOffsetIfNeeded()
     }
