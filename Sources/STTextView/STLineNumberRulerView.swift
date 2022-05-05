@@ -16,10 +16,13 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var rulePadding: CGFloat = 6
 
-    private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
+    @Invalidating(.display)
+    open var textColor: NSColor = .secondaryLabelColor
 
     @Invalidating(.display)
-    public var textColor: NSColor = .secondaryLabelColor
+    open var drawSeparator: Bool = true
+
+    private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
 
     public required init(textView: STTextView, scrollView: NSScrollView) {
         super.init(scrollView: scrollView, orientation: .verticalRuler)
@@ -93,6 +96,14 @@ open class STLineNumberRulerView: NSRulerView {
         let relativePoint = self.convert(NSZeroPoint, from: textView)
 
         context.saveGState()
+
+        if drawSeparator {
+            context.setLineWidth(1)
+            context.setStrokeColor(NSColor.separatorColor.withAlphaComponent(0.3).cgColor)
+            context.addLines(between: [CGPoint(x: ruleThickness, y: 0), CGPoint(x: ruleThickness, y: frame.maxY) ])
+            context.strokePath()
+        }
+
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
         for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dx: 0, dy: relativePoint.y)) {
