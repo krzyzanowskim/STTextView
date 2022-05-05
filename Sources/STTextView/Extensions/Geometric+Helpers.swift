@@ -39,12 +39,30 @@ extension CGRect {
         return result
     }
 
-    func insetBy(dx: CGFloat) -> CGRect {
+    func inset(dx: CGFloat) -> CGRect {
         insetBy(dx: dx, dy: 0)
     }
 
-    func insetBy(dy: CGFloat) -> CGRect {
+    func inset(dy: CGFloat) -> CGRect {
         insetBy(dx: 0, dy: dy)
+    }
+
+    func moved(dx: CGFloat, dy: CGFloat) -> CGRect {
+        applying(.init(translationX: dx, y: dy))
+    }
+
+    func moved(by point: CGPoint) -> CGRect {
+        applying(.init(translationX: point.x, y: point.y))
+    }
+}
+
+extension CGPoint {
+    func moved(dx: CGFloat, dy: CGFloat) -> CGPoint {
+        applying(.init(translationX: dx, y: dy))
+    }
+
+    func moved(by point: CGPoint) -> CGPoint {
+        applying(.init(translationX: point.x, y: point.y))
     }
 }
 

@@ -26,14 +26,16 @@ open class STLineNumberRulerView: NSRulerView {
 
         clientView = textView
 
-        NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: textView, queue: .main) { [weak self] _ in
+        NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: textView, queue: .main) { [weak self] _ in
+            self?.invalidateLineNumbers()
             self?.needsDisplay = true
         }
 
-    }
+        NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: textView, queue: .main) { [weak self] _ in
+            self?.invalidateLineNumbers()
+            self?.needsDisplay = true
+        }
 
-    open override func invalidateHashMarks() {
-        super.invalidateHashMarks()
     }
 
     required public init(coder: NSCoder) {
@@ -46,19 +48,18 @@ open class STLineNumberRulerView: NSRulerView {
             .foregroundColor: textColor
         ]
 
-        var linesTmp = lines
-        linesTmp.removeAll(keepingCapacity: true)
+        lines.removeAll(keepingCapacity: true)
 
         textView?.textLayoutManager.enumerateTextLayoutFragments(from: textView?.textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
 
             for textLineFragment in textLayoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == textLineFragment) {
                 let locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
-                let attributedString = CFAttributedStringCreate(nil, "\(linesTmp.count + 1)" as CFString, attributes as CFDictionary)!
+                let attributedString = CFAttributedStringCreate(nil, "\(lines.count + 1)" as CFString, attributes as CFDictionary)!
                 let ctLine = CTLineCreateWithAttributedString(attributedString)
 
-                linesTmp.append(
+                lines.append(
                     (
-                        textPosition: textLayoutFragment.layoutFragmentFrame.origin.applying(.init(translationX: 0, y: locationForFirstCharacter.y)),
+                        textPosition: textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y),
                         ctLine: ctLine
                     )
                 )
@@ -68,45 +69,34 @@ open class STLineNumberRulerView: NSRulerView {
         }
 
         // Adjust ruleThickness based on last (longest) value
-        if let lastLine = linesTmp.last {
+        if let lastLine = lines.last {
             let ctLineWidth = CTLineGetTypographicBounds(lastLine.ctLine, nil, nil, nil)
             if ruleThickness < (ctLineWidth + (rulePadding * 2)) {
-                ruleThickness = max(ruleThickness, ctLineWidth + (rulePadding * 2))
+                self.ruleThickness = max(self.ruleThickness, ctLineWidth + (self.rulePadding * 2))
             }
         }
 
         // align to right
-        lines = linesTmp.map {
+        lines = lines.map {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return (
-                textPosition: $0.textPosition.applying(.init(translationX: ruleThickness - (ctLineWidth + rulePadding), y: 0)),
+                textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rulePadding), dy: 0),
                 ctLine: $0.ctLine
             )
         }
     }
 
-    open override func drawHashMarksAndLabels(in rect: NSRect) {
-        guard let context = NSGraphicsContext.current?.cgContext,
-              let textView = textView
-        else {
-            return
-        }
-
-        // Invalidate on each drawing is not the best
-        // however otherwise there's out of sync (sic)
-        // and as drawHashMarksAndLabels draws in parts
-        // drawing is borken. TODO: take rect into account
-        // and invalidate only visible part
-        invalidateLineNumbers()
+    open override func draw(_ dirtyRect: NSRect) {
+        guard let context = NSGraphicsContext.current?.cgContext, let textView = textView else { return }
 
         let relativePoint = self.convert(NSZeroPoint, from: textView)
 
         context.saveGState()
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
-        for line in lines {
-            context.textPosition = line.textPosition.applying(.init(translationX: 0, y: relativePoint.y))
+        for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dx: 0, dy: relativePoint.y)) {
+            context.textPosition = line.textPosition.moved(dx: 0, dy: relativePoint.y)
             CTLineDraw(line.ctLine, context)
         }
 
