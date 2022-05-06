@@ -508,7 +508,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     open override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
         adjustViewportOffsetIfNeeded()
-        updateFrameSizeIfNeeded()
+        updateTextContainerSizeIfNeeded()
     }
 
     private func tile() {
