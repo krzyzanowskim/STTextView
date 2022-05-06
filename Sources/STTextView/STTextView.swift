@@ -70,7 +70,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
     public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
-            needsViewportLayout = true
+            needsLayout = true
             needsDisplay = true
         }
     }
@@ -102,8 +102,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                     setFrameSize(scrollView!.contentSize)
                 } else {
                     textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
-                    needsViewportLayout = true
                 }
+                needsLayout = true
                 needsDisplay = true
             }
         }
@@ -153,15 +153,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
-    /// A Boolean value indicating whether the view needs a viewport layout pass before it can be drawn
-    public var needsViewportLayout: Bool = false {
-        didSet {
-            if needsViewportLayout {
-                needsLayout = true
-            }
-        }
-    }
-    
     public override var isFlipped: Bool {
         true
     }
@@ -327,7 +318,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
     open override func prepareContent(in rect: NSRect) {
-        needsViewportLayout = true
+        needsLayout = true
         super.prepareContent(in: rect)
     }
 
@@ -417,7 +408,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
 
         if updateLayout {
-            needsViewportLayout = true
+            needsLayout = true
         }
     }
 
@@ -427,7 +418,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         ]
 
         if updateLayout {
-            needsViewportLayout = true
+            needsLayout = true
         }
     }
 
@@ -492,30 +483,26 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
     // Update textContainer width to match textview width if track textview width
-    @discardableResult
-    private func updateTextContainerSizeIfNeeded() -> Bool {
+    private func updateTextContainerSizeIfNeeded() {
         var proposedSize = textContainer.size
 
-        if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: frame.width) {
-            proposedSize.width = frame.width
+        if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: bounds.width) {
+            proposedSize.width = bounds.width
         }
 
-        if textContainer.heightTracksTextView, !textContainer.size.height.isAlmostEqual(to: frame.height)  {
-            proposedSize.height = frame.height
+        if textContainer.heightTracksTextView, !textContainer.size.height.isAlmostEqual(to: bounds.height)  {
+            proposedSize.height = bounds.height
         }
 
         if textContainer.size != proposedSize {
             textContainer.size = proposedSize
-            return true
+            needsLayout = true
         }
-
-        return false
     }
 
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         updateTextContainerSizeIfNeeded()
-        needsViewportLayout = true
     }
 
     open override func viewDidEndLiveResize() {
@@ -558,10 +545,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     open override func layout() {
         super.layout()
 
-        if needsViewportLayout {
-            needsViewportLayout = false
-            textLayoutManager.textViewportLayoutController.layoutViewport()
-        }
+        textLayoutManager.textViewportLayoutController.layoutViewport()
 
         if needScrollToSelection {
             needScrollToSelection = false
