@@ -99,10 +99,14 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
                 if newValue == true {
                     textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
-                    setFrameSize(scrollView!.contentSize)
                 } else {
                     textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
                 }
+
+                if let scrollView = scrollView {
+                    setFrameSize(scrollView.contentSize)
+                }
+                
                 needsLayout = true
                 needsDisplay = true
             }
