@@ -22,6 +22,9 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var drawSeparator: Bool = true
 
+    @Invalidating(.display)
+    open var backgroundColor: NSColor = NSColor.controlBackgroundColor
+
     private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
 
     public required init(textView: STTextView, scrollView: NSScrollView) {
@@ -90,6 +93,10 @@ open class STLineNumberRulerView: NSRulerView {
         }
     }
 
+    open override func drawHashMarksAndLabels(in rect: NSRect) {
+        //
+    }
+
     open override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext, let textView = textView else { return }
 
@@ -97,9 +104,12 @@ open class STLineNumberRulerView: NSRulerView {
 
         context.saveGState()
 
+        context.setFillColor(backgroundColor.cgColor)
+        context.fill(bounds)
+
         if drawSeparator {
             context.setLineWidth(1)
-            context.setStrokeColor(NSColor.separatorColor.withAlphaComponent(0.3).cgColor)
+            context.setStrokeColor(NSColor.separatorColor.cgColor)
             context.addLines(between: [CGPoint(x: ruleThickness, y: 0), CGPoint(x: ruleThickness, y: frame.maxY) ])
             context.strokePath()
         }
@@ -112,5 +122,11 @@ open class STLineNumberRulerView: NSRulerView {
         }
 
         context.restoreGState()
+
+        drawHashMarksAndLabels(in: dirtyRect)
+
+        if let markers = markers, !markers.isEmpty {
+            drawMarkers(in: dirtyRect)
+        }
     }
 }
