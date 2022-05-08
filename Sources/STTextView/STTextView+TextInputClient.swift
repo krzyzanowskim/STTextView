@@ -9,6 +9,12 @@ import Cocoa
 extension STTextView: NSTextInputClient {
 
     open override func keyDown(with event: NSEvent) {
+        // ^Space -> complete:
+        if event.modifierFlags.contains(.control) && event.charactersIgnoringModifiers == " " {
+            doCommand(by: #selector(NSStandardKeyBindingResponding.complete(_:)))
+            return
+        }
+
         interpretKeyEvents([event])
     }
 
