@@ -5,7 +5,7 @@ import Cocoa
 
 extension NSTextLayoutManager {
 
-    var insertionPointLocation: NSTextLocation? {
+    public var insertionPointLocation: NSTextLocation? {
         guard let textSelection = textSelections.first(where: { !$0.isLogical }) else {
             return nil
         }
@@ -43,7 +43,7 @@ extension NSTextLayoutManager {
         }
     }
 
-    func textSelectionSegmentRect(at location: NSTextLocation) -> CGRect? {
+    public func textSelectionSegmentRect(at location: NSTextLocation) -> CGRect? {
         var result: CGRect? = nil
         enumerateTextSegments(in: NSTextRange(location: location), type: .selection, options: .rangeNotRequired) { _, textSegmentFrame, _, _ -> Bool in
             result = textSegmentFrame
