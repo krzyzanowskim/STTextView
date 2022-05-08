@@ -653,6 +653,19 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
                             undoManager.breakUndoCoalescing()
                         }
+                    } else {
+
+                        // Remove inserted range
+                        if let toRemoveRange = NSTextRange(location: textRange.location, end: textContentStorage.location(textRange.endLocation, offsetBy: replacementString.length)) {
+                            undoManager.breakUndoCoalescing()
+
+                            undoManager.registerUndo(withTarget: self) { target in
+                                target.willChangeText()
+                                target.replaceCharacters(in: toRemoveRange, with: "")
+                                target.didChangeText()
+                            }
+                        }
+
                     }
                 }
             }
