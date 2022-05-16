@@ -615,7 +615,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             if processingKeyEvent, allowsTypingCoalescing,
                let undoManager = undoManager as? CoalescingUndoManager<TypingTextUndo>
             {
-
                 if undoManager.isCoalescing {
                     // Extend existing coalesce range
                     if let coalescingValue = undoManager.coalescing?.value,
@@ -627,6 +626,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                             textRange: undoTextRange,
                             attribugedString: NSAttributedString()
                         ))
+                        
                     } else {
                         breakUndoCoalescing()
                     }
@@ -672,6 +672,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 let previousStringInRange = textContentStorage.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentStorage))
 
                 // Register undo/redo
+                // I can't control internal redoStack, and coalescing messes up with the state
+                // resulting in broken undo/redo availability
                 undoManager.registerUndo(withTarget: self) { textView in
                     // Regular undo action
                     textView.willChangeText()

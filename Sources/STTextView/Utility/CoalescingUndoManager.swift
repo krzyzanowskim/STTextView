@@ -36,6 +36,10 @@ final class CoalescingUndoManager<T>: UndoManager {
         coalescing = (value: value, action: { action(target, $0) })
     }
 
+    override var canRedo: Bool {
+        super.canRedo
+    }
+
     override var canUndo: Bool {
         super.canUndo || isCoalescing
     }
@@ -57,6 +61,10 @@ final class CoalescingUndoManager<T>: UndoManager {
         } else {
             super.undo()
         }
+    }
+
+    override func redo() {
+        super.redo()
     }
 
     override var undoMenuItemTitle: String {
