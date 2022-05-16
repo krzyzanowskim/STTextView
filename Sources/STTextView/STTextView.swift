@@ -610,7 +610,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
-        if allowsUndo, let undoManager = undoManager, !undoManager.isUndoing {
+        if allowsUndo, let undoManager = undoManager {
             // typing coalescing
             if processingKeyEvent, allowsTypingCoalescing,
                let undoManager = undoManager as? CoalescingUndoManager<TypingTextUndo>
@@ -671,6 +671,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
                 let previousStringInRange = textContentStorage.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentStorage))
 
+                // Register undo/redo
                 undoManager.registerUndo(withTarget: self) { textView in
                     // Regular undo action
                     textView.willChangeText()

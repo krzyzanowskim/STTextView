@@ -15,6 +15,11 @@ final class CoalescingUndoManager<T>: UndoManager {
         coalescing = nil
     }
 
+    override init() {
+        super.init()
+        self.runLoopModes = [.default, .common, .eventTracking, .modalPanel]
+    }
+
     func coalesce(_ value: T) {
         guard isUndoRegistrationEnabled else {
             return
@@ -52,15 +57,6 @@ final class CoalescingUndoManager<T>: UndoManager {
         } else {
             super.undo()
         }
-    }
-
-    override func redo() {
-        // TODO: coalescing redo
-        // Doesn't work. `super.undo()` put action on redo stack,
-        // what we can't do here since that's private stack.
-        // We should manage our redo stack just for clalescing action.
-        // but that's for another day.
-        super.redo()
     }
 
     override var undoMenuItemTitle: String {
