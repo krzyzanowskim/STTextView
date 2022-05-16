@@ -11,18 +11,24 @@ final class CoalescingUndoManager<T>: UndoManager {
         coalescing != nil
     }
 
-    func breakUndoCoalescing() {
+    func breakCoalescing() {
         coalescing = nil
     }
 
     func coalesce(_ value: T) {
-        guard isUndoRegistrationEnabled else { return}
+        guard isUndoRegistrationEnabled else {
+            return
+        }
+
+        assert(isCoalescing, "Coalescing not started. Call startCoalescing(withTarget:_) first")
+
         coalescing = (value: value, action: coalescing?.action)
+        return
     }
 
-    func registerCoalescingUndo<Target>(withTarget target: Target, _ action: @escaping (Target, T) -> Void) where Target: AnyObject {
+    func startCoalescing<Target>(_ value: T, withTarget target: Target, _ action: @escaping (Target, T) -> Void) where Target: AnyObject {
         guard isUndoRegistrationEnabled else { return }
-        coalescing = (value: coalescing?.value, action: { action(target, $0) })
+        coalescing = (value: value, action: { action(target, $0) })
     }
 
     override var canUndo: Bool {
@@ -41,7 +47,7 @@ final class CoalescingUndoManager<T>: UndoManager {
         if let action = coalescing?.action, let value = coalescing?.value {
             coalescingIsUndoing = true
             action(value)
-            breakUndoCoalescing()
+            breakCoalescing()
             coalescingIsUndoing = false
         } else {
             super.undo()

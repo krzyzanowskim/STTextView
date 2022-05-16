@@ -17,13 +17,13 @@ extension STTextView {
     }
 
     @objc open func paste(_ sender: Any?) {
-        guard let string = NSPasteboard.general.string(forType: .string) else {
+        guard let string = NSPasteboard.general.string(forType: .string),
+              let firstTextSelectionRange = textLayoutManager.textSelections.first?.textRanges.first
+        else {
             return
         }
 
-        let insertLocation = textLayoutManager.insertionPointLocation ?? textLayoutManager.documentRange.location
-        let nsrange = NSRange(insertLocation, in: textContentStorage)
-        insertText(string, replacementRange: nsrange)
+        replaceCharacters(in: firstTextSelectionRange, with: string, useTypingAttributes: false, allowsTypingCoalescing: false)
     }
 
     @objc open func cut(_ sender: Any?) {

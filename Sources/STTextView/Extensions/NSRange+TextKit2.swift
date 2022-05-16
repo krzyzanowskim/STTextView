@@ -34,4 +34,8 @@ extension NSTextRange {
         let end = textContentManager.location(start, offsetBy: nsRange.length)
         self.init(location: start, end: end)
     }
+
+    func length(in textContentManager: NSTextContentManager) -> Int {
+        textContentManager.offset(from: location, to: endLocation)
+    }
 }

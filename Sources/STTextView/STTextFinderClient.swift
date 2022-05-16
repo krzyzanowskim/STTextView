@@ -40,7 +40,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         }
 
         textView?.willChangeText()
-        textView?.replaceCharacters(in: textRange, with: string)
+        textView?.replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
     }
 
     func didReplaceCharacters() {

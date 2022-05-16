@@ -9,6 +9,11 @@ import Cocoa
 extension STTextView: NSTextInputClient {
 
     open override func keyDown(with event: NSEvent) {
+        processingKeyEvent = true
+        defer {
+            processingKeyEvent = false
+        }
+
         // ^Space -> complete:
         if event.modifierFlags.contains(.control) && event.charactersIgnoringModifiers == " " {
             doCommand(by: #selector(NSStandardKeyBindingResponding.complete(_:)))
@@ -98,13 +103,13 @@ extension STTextView: NSTextInputClient {
             case let string as String:
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string) {
-                        replaceCharacters(in: textRange, with: string)
+                        replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
                         didChangeFlag = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string) {
-                            replaceCharacters(in: textRange, with: string)
+                            replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
                             didChangeFlag = true
                         }
                     }
@@ -112,13 +117,13 @@ extension STTextView: NSTextInputClient {
             case let string as NSAttributedString:
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string.string) {
-                        replaceCharacters(in: textRange, with: string)
+                        replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
                         didChangeFlag = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string.string) {
-                            replaceCharacters(in: textRange, with: string)
+                            replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
                             didChangeFlag = true
                         }
                     }

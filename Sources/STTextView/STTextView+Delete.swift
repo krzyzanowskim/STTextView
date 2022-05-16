@@ -80,8 +80,7 @@ extension STTextView {
                 }
 
                 didChange = true
-                let nsrange = NSRange(textRange, in: textContentStorage)
-                textContentStorage.textStorage?.deleteCharacters(in: nsrange)
+                replaceCharacters(in: textRange, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)
             }
         }
 

@@ -21,7 +21,7 @@ List of issues I reported to Apple so far:
 - FB9713415: NSTextView drawInsertionPoint(in:color:turnedOn) is never called
 - FB9971054: NSLayoutManager.enumerateCaretOffsetsInLineFragment ignores starting location
 - FB9971054: NSTextView assert on selection when setup with TextKit2
-- (pending): Incorrect text segment frame reported when first character attribute font size is bigger then the rest
+- FB9743449, FB10019859: NSTextContentStorage.textElements(for:) returns no element, while enumerateTextElements does return elements
 
 ... I'm aware that the list of issues is not complete.
 
