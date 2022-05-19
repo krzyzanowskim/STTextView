@@ -50,6 +50,7 @@ open class STCALayer: CALayer {
         super.init(layer: layer)
         needsDisplayOnBoundsChange = true
     }
+
 }
 
 open class STCATiledLayer: CATiledLayer {

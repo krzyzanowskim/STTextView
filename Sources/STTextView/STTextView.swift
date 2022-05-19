@@ -3,9 +3,10 @@
 //
 //
 //  STTextView
-//      |---selectionLayer (CALayer)
-//      |---contentLayer (CALAyer)
-//              |---(STInsertionPointLayer | TextLayoutFragmentLayer)
+//      |---selectionLayer (STCATiledLayer)
+//      |---contentLayer (STCATiledLayer)
+//              |---(STInsertionPointLayer (STCALayer) | STTextLayoutFragmentLayer (STCALayer))
+//      |---lineAnnotationLayer (STCATiledLayer)
 //
 //
 
@@ -145,10 +146,11 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     public let textContainer: NSTextContainer
     internal let contentLayer: STCATiledLayer
     internal let selectionLayer: STCATiledLayer
-    internal var backingScaleFactor: CGFloat {
-        window?.backingScaleFactor ?? 1
-    }
+    internal let lineAnnotationLayer: STCATiledLayer
+    internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
     internal var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
+    internal var lineAnnotations: [LineAnnotation] = []
+
     public let textFinder: NSTextFinder
     internal let textFinderClient: STTextFinderClient
 
@@ -212,6 +214,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         contentLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
         selectionLayer = STCATiledLayer()
         selectionLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
+        lineAnnotationLayer = STCATiledLayer()
+        lineAnnotationLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
 
         isEditable = true
         isSelectable = isEditable
@@ -242,6 +246,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         layer?.addSublayer(selectionLayer)
         layer?.addSublayer(contentLayer)
+        layer?.addSublayer(lineAnnotationLayer)
 
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
@@ -265,6 +270,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         updateContentScale(for: contentLayer, scale: backingScaleFactor)
         updateContentScale(for: selectionLayer, scale: backingScaleFactor)
+        updateContentScale(for: lineAnnotationLayer, scale: backingScaleFactor)
 
         textFinder.client = textFinderClient
         textFinder.findBarContainer = scrollView
@@ -273,11 +279,12 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     open override func hitTest(_ point: NSPoint) -> NSView? {
         let result = super.hitTest(point)
 
-        // click-through `contentLayer` and `selectionLayer` sublayers
+        // click-through `contentLayer`, `selectionLayer` and `lineAnnotationLayer` sublayers
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent
         // for interaction.
-        if let view = result, view != self, (view.layer!.isDescendant(of: contentLayer) || view.layer!.isDescendant(of: selectionLayer)) {
+        if let view = result, view != self, let viewLayer = view.layer,
+           (viewLayer.isDescendant(of: contentLayer) || viewLayer.isDescendant(of: selectionLayer) || viewLayer.isDescendant(of: lineAnnotationLayer)) {
             return self
         }
         return result
@@ -366,7 +373,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
             let fillRect = CGRect(
                 origin: CGPoint(
-                    x: 0,
+                    x: bounds.minX,
                     y: selectionFrame.origin.y
                 ),
                 size: CGSize(
@@ -570,18 +577,18 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
 
         if selectionTextRange.isEmpty {
-            if let selectionRect = textLayoutManager.textSelectionSegmentRect(at: selectionTextRange.location) {
+            if let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: selectionTextRange.location, type: .selection) {
                 scrollToVisible(selectionRect)
             }
         } else {
             switch selection.affinity {
             case .upstream:
-                if let selectionRect = textLayoutManager.textSelectionSegmentRect(at: selectionTextRange.location) {
+                if let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: selectionTextRange.location, type: .selection) {
                     scrollToVisible(selectionRect)
                 }
             case .downstream:
                 if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
-                   let selectionRect = textLayoutManager.textSelectionSegmentRect(at: location)
+                   let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: location, type: .selection)
                 {
                     scrollToVisible(selectionRect)
                 }

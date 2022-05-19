@@ -15,4 +15,6 @@ import Cocoa
     @objc optional func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool
     /// Sent when a text view did change text.
     @objc optional func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
+    ///
+    @objc optional func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STTextView.LineAnnotation, textLineFragment: NSTextLineFragment) -> CALayer?
 }

@@ -54,6 +54,10 @@ extension CGRect {
     func moved(by point: CGPoint) -> CGRect {
         applying(.init(translationX: point.x, y: point.y))
     }
+
+    func margin(top: CGFloat, left: CGFloat, bottom: CGFloat, right: CGFloat) -> CGRect {
+        inset(.init(top: -top, left: -left, bottom: -bottom, right: -right))
+    }
 }
 
 extension CGPoint {

@@ -43,15 +43,28 @@ extension NSTextLayoutManager {
         }
     }
 
-    public func textSelectionSegmentRect(at location: NSTextLocation) -> CGRect? {
+    ///  A text segment is both logically and visually contiguous portion of the text content inside a line fragment.
+    public func textSelectionSegmentFrame(at location: NSTextLocation, type: NSTextLayoutManager.SegmentType) -> CGRect? {
         var result: CGRect? = nil
-        enumerateTextSegments(in: NSTextRange(location: location), type: .selection, options: .rangeNotRequired) { _, textSegmentFrame, _, _ -> Bool in
+        enumerateTextSegments(in: NSTextRange(location: location), type: type, options: .rangeNotRequired) { _, textSegmentFrame, _, _ -> Bool in
             result = textSegmentFrame
             return false
         }
         return result
     }
 
+    func caretOffsetsInLineFragment(at location: NSTextLocation) -> CGFloat? {
+        var offset: CGFloat?
+        enumerateCaretOffsetsInLineFragment(at: location) { caretOffset, location, leadingEdge, stop in
+            offset = caretOffset
+            stop.pointee = true
+        }
+        return offset
+    }
+
+    func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
+        textLayoutFragment(for: location)?.textLineFragment(at: location)
+    }
 }
 
 extension NSTextLayoutFragment {
@@ -61,13 +74,13 @@ extension NSTextLayoutFragment {
         textLineFragments.contains(where: \.isExtraLineFragment)
     }
 
-    func textLineFragment(at searchLocation: NSTextLocation, in textContentManager: NSTextContentManager? = nil) -> NSTextLineFragment? {
+    func textLineFragment(at location: NSTextLocation, in textContentManager: NSTextContentManager? = nil) -> NSTextLineFragment? {
         guard let textContentManager = textContentManager ?? textLayoutManager?.textContentManager else {
             assertionFailure()
             return nil
         }
 
-        let searchNSLocation = NSRange(searchLocation, in: textContentManager).location
+        let searchNSLocation = NSRange(location, in: textContentManager).location
         let fragmentLocation = NSRange(rangeInElement.location, in: textContentManager).location
         return textLineFragments.first { lineFragment in
             let absoluteLineRange = NSRange(location: lineFragment.characterRange.location + fragmentLocation, length: lineFragment.characterRange.length)

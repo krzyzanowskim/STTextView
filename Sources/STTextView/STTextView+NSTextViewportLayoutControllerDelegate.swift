@@ -40,30 +40,23 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         updateFrameSizeIfNeeded()
         updateSelectionHighlights()
+        updateLineAnnotations()
         adjustViewportOffsetIfNeeded()
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
-        if let fragmentLayer = fragmentLayerMap.object(forKey: textLayoutFragment) as? STTextLayoutFragmentLayer {
-            let oldFrame = fragmentLayer.frame
+        let fragmentLayer = fragmentLayerMap.object(forKey: textLayoutFragment) as? STTextLayoutFragmentLayer ?? STTextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
+        fragmentLayer.contentsScale = backingScaleFactor
 
-            // Adjust position
-            fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
-
-            if oldFrame != fragmentLayer.frame {
-                fragmentLayer.needsDisplay()
-            }
-            contentLayer.addSublayer(fragmentLayer)
-        } else {
-            let fragmentLayer = STTextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
-            fragmentLayer.contentsScale = backingScaleFactor
-
-            // Adjust position
-            fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
-
-            contentLayer.addSublayer(fragmentLayer)
-            fragmentLayerMap.setObject(fragmentLayer, forKey: textLayoutFragment)
+        // Adjust position
+        let oldFrame = fragmentLayer.frame
+        fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
+        if oldFrame != fragmentLayer.frame {
+            fragmentLayer.needsDisplay()
         }
+
+        contentLayer.addSublayer(fragmentLayer)
+        fragmentLayerMap.setObject(fragmentLayer, forKey: textLayoutFragment)
     }
 
     internal func adjustViewportOffsetIfNeeded() {

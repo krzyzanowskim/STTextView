@@ -49,6 +49,13 @@ final class ViewController: NSViewController {
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+
+        do {
+            let lineAnnotation = STTextView.LineAnnotation(
+                location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 10)!
+            )
+            textView.addAnnotation(lineAnnotation)
+        }
     }
 
     @IBAction func toggleTextWrapMode(_ sender: Any?) {
@@ -57,11 +64,25 @@ final class ViewController: NSViewController {
 }
 
 extension ViewController: STTextViewDelegate {
+
     func textDidChange(_ notification: Notification) {
         //
     }
 
-    func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool {
-        true
+    func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STTextView.LineAnnotation, textLineFragment: NSTextLineFragment) -> CALayer? {
+        let decorationLayer = AnnotationLayer()
+        let segmentFrame = textView.textLayoutManager.textSelectionSegmentFrame(at: lineAnnotation.location, type: .standard)!
+        decorationLayer.frame = CGRect(
+            x: segmentFrame.origin.x,
+            y: segmentFrame.origin.y,
+            width: textView.bounds.width - segmentFrame.maxX,
+            height: textLineFragment.typographicBounds.height
+        )
+        decorationLayer.backgroundColor = NSColor.systemRed.cgColor
+        return decorationLayer
     }
+}
+
+class AnnotationLayer: STCALayer {
+    
 }
