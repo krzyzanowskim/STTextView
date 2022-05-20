@@ -13,7 +13,18 @@ extension STTextView {
     }
 
     public func addAnnotation(_ annotations: LineAnnotation...) {
-        lineAnnotations.append(contentsOf: annotations)        
+        lineAnnotations.append(contentsOf: annotations)
+        updateLineAnnotations()
+    }
+
+    public func removeAnnotation(_ annotations: LineAnnotation...) {
+        lineAnnotations.removeAll(where: { annotations.contains($0) })
+        updateLineAnnotations()
+    }
+
+    public func removeAllAnnotations() {
+        lineAnnotations.removeAll(keepingCapacity: true)
+        updateLineAnnotations()
     }
 
     internal func updateLineAnnotations() {

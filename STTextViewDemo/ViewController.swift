@@ -28,9 +28,7 @@ final class ViewController: NSViewController {
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         
-        // When first character font size is big enough, the text segment frame for first line is incorrect
-        // see README for bugs
-        textView.addAttributes([.font: NSFont.systemFont(ofSize: 50)], range: NSRange(location: 1, length: 1))
+        // textView.addAttributes([.font: NSFont.systemFont(ofSize: 50)], range: NSRange(location: 0, length: 1))
 
         textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 6, length: 5))
         textView.addAttributes([.foregroundColor: NSColor.systemMint], range: NSRange(location: 12, length: 5))
@@ -50,14 +48,23 @@ final class ViewController: NSViewController {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        let lineAnnotation = STTextView.LineAnnotation(
+        let lineAnnotation1 = STTextView.LineAnnotation(
             location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 10)!
         )
-        textView.addAnnotation(lineAnnotation)
+        textView.addAnnotation(lineAnnotation1)
+
+        let lineAnnotation2 = STTextView.LineAnnotation(
+            location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 1550)!
+        )
+        textView.addAnnotation(lineAnnotation2)
     }
 
     @IBAction func toggleTextWrapMode(_ sender: Any?) {
         textView.widthTracksTextView.toggle()
+    }
+
+    @objc func removeAnnotation(_ annotationView: AnnotationView) {
+        textView.removeAnnotation(annotationView.lineAnnotation)
     }
 
 }
@@ -69,23 +76,20 @@ extension ViewController: STTextViewDelegate {
     }
 
     func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STTextView.LineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
-        let decorationView = AnnotationView()
-        decorationView.wantsLayer = true
-        decorationView.layer?.backgroundColor = NSColor.systemRed.cgColor
+        let decorationView = AnnotationView(lineAnnotation: lineAnnotation)
+        decorationView.target = self
+        decorationView.action = #selector(removeAnnotation(_:))
 
         let segmentFrame = textView.textLayoutManager.textSelectionSegmentFrame(at: lineAnnotation.location, type: .standard)!
+        let annotationHeight = min(textLineFragment.typographicBounds.height, 20)
+
         decorationView.frame = CGRect(
             x: segmentFrame.origin.x,
-            y: segmentFrame.origin.y,
+            y: segmentFrame.origin.y + (segmentFrame.height - annotationHeight),
             width: textView.bounds.width - segmentFrame.maxX,
-            height: textLineFragment.typographicBounds.height
+            height: annotationHeight
         )
         return decorationView
     }
 }
 
-class AnnotationView: NSView {
-    override var isFlipped: Bool {
-        true
-    }
-}
