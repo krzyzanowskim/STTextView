@@ -50,17 +50,16 @@ final class ViewController: NSViewController {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        do {
-            let lineAnnotation = STTextView.LineAnnotation(
-                location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 10)!
-            )
-            textView.addAnnotation(lineAnnotation)
-        }
+        let lineAnnotation = STTextView.LineAnnotation(
+            location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 10)!
+        )
+        textView.addAnnotation(lineAnnotation)
     }
 
     @IBAction func toggleTextWrapMode(_ sender: Any?) {
         textView.widthTracksTextView.toggle()
     }
+
 }
 
 extension ViewController: STTextViewDelegate {
@@ -69,20 +68,24 @@ extension ViewController: STTextViewDelegate {
         //
     }
 
-    func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STTextView.LineAnnotation, textLineFragment: NSTextLineFragment) -> CALayer? {
-        let decorationLayer = AnnotationLayer()
+    func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STTextView.LineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
+        let decorationView = AnnotationView()
+        decorationView.wantsLayer = true
+        decorationView.layer?.backgroundColor = NSColor.systemRed.cgColor
+
         let segmentFrame = textView.textLayoutManager.textSelectionSegmentFrame(at: lineAnnotation.location, type: .standard)!
-        decorationLayer.frame = CGRect(
+        decorationView.frame = CGRect(
             x: segmentFrame.origin.x,
             y: segmentFrame.origin.y,
             width: textView.bounds.width - segmentFrame.maxX,
             height: textLineFragment.typographicBounds.height
         )
-        decorationLayer.backgroundColor = NSColor.systemRed.cgColor
-        return decorationLayer
+        return decorationView
     }
 }
 
-class AnnotationLayer: STCALayer {
-    
+class AnnotationView: NSView {
+    override var isFlipped: Bool {
+        true
+    }
 }

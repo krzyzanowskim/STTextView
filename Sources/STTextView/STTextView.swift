@@ -146,7 +146,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     public let textContainer: NSTextContainer
     internal let contentLayer: STCATiledLayer
     internal let selectionLayer: STCATiledLayer
-    internal let lineAnnotationLayer: STCATiledLayer
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
     internal var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
     internal var lineAnnotations: [LineAnnotation] = []
@@ -214,8 +213,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         contentLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
         selectionLayer = STCATiledLayer()
         selectionLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
-        lineAnnotationLayer = STCATiledLayer()
-        lineAnnotationLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
 
         isEditable = true
         isSelectable = isEditable
@@ -246,7 +243,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         layer?.addSublayer(selectionLayer)
         layer?.addSublayer(contentLayer)
-        layer?.addSublayer(lineAnnotationLayer)
 
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
@@ -270,7 +266,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         updateContentScale(for: contentLayer, scale: backingScaleFactor)
         updateContentScale(for: selectionLayer, scale: backingScaleFactor)
-        updateContentScale(for: lineAnnotationLayer, scale: backingScaleFactor)
 
         textFinder.client = textFinderClient
         textFinder.findBarContainer = scrollView
@@ -284,7 +279,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         // and ignore utility subviews that should remain transparent
         // for interaction.
         if let view = result, view != self, let viewLayer = view.layer,
-           (viewLayer.isDescendant(of: contentLayer) || viewLayer.isDescendant(of: selectionLayer) || viewLayer.isDescendant(of: lineAnnotationLayer)) {
+           (viewLayer.isDescendant(of: contentLayer) || viewLayer.isDescendant(of: selectionLayer)) {
             return self
         }
         return result
@@ -549,13 +544,13 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 height: scrollView.bounds.size.height
             )
         }
+
     }
 
     open override func resize(withOldSuperviewSize oldSize: NSSize) {
         super.resize(withOldSuperviewSize: oldSize)
         tile()
     }
-
 
     open override func layout() {
         super.layout()
@@ -569,6 +564,13 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 textLayoutManager.textViewportLayoutController.layoutViewport()
             }
         }
+    }
+
+    open override func viewWillDraw() {
+        super.viewWillDraw()
+
+        // deferred layout of line annotations
+        updateLineAnnotations()
     }
 
     internal func scrollToSelection(_ selection: NSTextSelection) {

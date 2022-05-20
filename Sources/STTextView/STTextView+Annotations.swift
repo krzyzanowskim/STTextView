@@ -13,12 +13,11 @@ extension STTextView {
     }
 
     public func addAnnotation(_ annotations: LineAnnotation...) {
-        lineAnnotations.append(contentsOf: annotations)
-        needsLayout = true
+        lineAnnotations.append(contentsOf: annotations)        
     }
 
     internal func updateLineAnnotations() {
-        lineAnnotationLayer.sublayers = lineAnnotations.compactMap { lineAnnotation in
+        subviews = lineAnnotations.compactMap { lineAnnotation -> NSView? in
             if let textLineFragment = textLayoutManager.textLineFragment(at: lineAnnotation.location) {
                 return delegate?.textView?(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
             }
