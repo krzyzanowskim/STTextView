@@ -148,7 +148,13 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     internal let selectionLayer: STCATiledLayer
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
     internal var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
-    internal var lineAnnotations: [STLineAnnotation] = []
+
+    /// Text line annotation views
+    public var annotations: [STLineAnnotation] = [] {
+        didSet {
+            updateLineAnnotations()
+        }
+    }
 
     public let textFinder: NSTextFinder
     internal let textFinderClient: STTextFinderClient

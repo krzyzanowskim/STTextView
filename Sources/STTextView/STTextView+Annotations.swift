@@ -13,22 +13,19 @@ public class STLineAnnotation: NSObject {
 extension STTextView {
 
     public func addAnnotation(_ annotations: STLineAnnotation...) {
-        lineAnnotations.append(contentsOf: annotations)
-        updateLineAnnotations()
+        self.annotations.append(contentsOf: annotations)
     }
 
     public func removeAnnotation(_ annotations: STLineAnnotation...) {
-        lineAnnotations.removeAll(where: { annotations.contains($0) })
-        updateLineAnnotations()
+        self.annotations.removeAll(where: { annotations.contains($0) })
     }
 
     public func removeAllAnnotations() {
-        lineAnnotations.removeAll(keepingCapacity: true)
-        updateLineAnnotations()
+        annotations.removeAll(keepingCapacity: true)
     }
 
     internal func updateLineAnnotations() {
-        subviews = lineAnnotations.compactMap { lineAnnotation -> NSView? in
+        subviews = annotations.compactMap { lineAnnotation -> NSView? in
             if let textLineFragment = textLayoutManager.textLineFragment(at: lineAnnotation.location) {
                 return delegate?.textView?(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
             }
