@@ -68,20 +68,23 @@ final class AnnotationView: NSControl {
 
     let lineAnnotation: STTextView.LineAnnotation
 
-    init(lineAnnotation: STTextView.LineAnnotation) {
+    init(lineAnnotation: STTextView.LineAnnotation, font: NSFont) {
         self.lineAnnotation = lineAnnotation
         super.init(frame: .zero)
+
+        self.font = font
 
         wantsLayer = true
         layer?.cornerRadius = 4
         layer?.backgroundColor = NSColor.systemRed.lighter(withLevel: 0.5).cgColor
 
         let hostingView = NSHostingView(rootView:
-                                            ContentView(message: "Annotation message") {
-            if let action = self.action, let target = self.target {
-                NSApp.sendAction(action, to: target, from: self)
+            ContentView(message: "Annotation message") {
+                if let action = self.action, let target = self.target {
+                    NSApp.sendAction(action, to: target, from: self)
+                }
             }
-        }
+            .font(Font(self.font!))
         )
         hostingView.autoresizingMask = [.height, .width]
         addSubview(hostingView)

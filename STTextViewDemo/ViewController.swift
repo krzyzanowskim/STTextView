@@ -76,12 +76,15 @@ extension ViewController: STTextViewDelegate {
     }
 
     func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STTextView.LineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
-        let decorationView = AnnotationView(lineAnnotation: lineAnnotation)
+
+        let messageFont = NSFont.preferredFont(forTextStyle: .body).withSize(textView.font!.pointSize)
+
+        let decorationView = AnnotationView(lineAnnotation: lineAnnotation, font: messageFont)
         decorationView.target = self
         decorationView.action = #selector(removeAnnotation(_:))
 
         let segmentFrame = textView.textLayoutManager.textSelectionSegmentFrame(at: lineAnnotation.location, type: .standard)!
-        let annotationHeight = min(textLineFragment.typographicBounds.height, 20)
+        let annotationHeight = min(textLineFragment.typographicBounds.height, textView.font?.boundingRectForFont.height ?? 24)
 
         decorationView.frame = CGRect(
             x: segmentFrame.origin.x,
