@@ -4,7 +4,8 @@ The goal of this project is to build [NSTextView](https://developer.apple.com/do
 
 The component is developed to serve [Swift Studio](https://swiftstudio.app) needs. (**ST** prefix stands for "**S**wift s**T**udio" because **SS** is not good prefix since 1939)
 
-https://user-images.githubusercontent.com/758033/166455337-644028c2-4ed4-46da-8730-6b021f9223b2.mov
+![Screen Shot 2022-05-21 at 11 44 25](https://user-images.githubusercontent.com/758033/169645959-3beabd29-502d-4db1-ad96-cbfd2238c41a.gif)
+
 
 [TextKit2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit2 and provide support along TextKit1 bits. As I started to learn more about `NSTextView` + TextKit2, I realized as of today (Feb 2022), neither NSTextView is fully functional, nor TextKit2 classes are fully functional. Along the way, I reported several bug reports to Apple requested DTS (support tickets). Eventually, I've got blocked by specific bugs that pushed me to start this project.
 
