@@ -3,6 +3,7 @@
 
 import Cocoa
 import STTextView
+import SwiftUI
 
 final class ViewController: NSViewController {
     private var textView: STTextView!
@@ -48,12 +49,12 @@ final class ViewController: NSViewController {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        let lineAnnotation1 = STTextView.LineAnnotation(
+        let lineAnnotation1 = STLineAnnotation(
             location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 10)!
         )
         textView.addAnnotation(lineAnnotation1)
 
-        let lineAnnotation2 = STTextView.LineAnnotation(
+        let lineAnnotation2 = STLineAnnotation(
             location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 1550)!
         )
         textView.addAnnotation(lineAnnotation2)
@@ -63,8 +64,8 @@ final class ViewController: NSViewController {
         textView.widthTracksTextView.toggle()
     }
 
-    @objc func removeAnnotation(_ annotationView: AnnotationView) {
-        textView.removeAnnotation(annotationView.lineAnnotation)
+    @objc func removeAnnotation(_ annotationView: STAnnotationLabelView) {
+        textView.removeAnnotation(annotationView.annotation)
     }
 
 }
@@ -75,14 +76,40 @@ extension ViewController: STTextViewDelegate {
         //
     }
 
-    func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STTextView.LineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
+    func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STLineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
 
         let messageFont = NSFont.preferredFont(forTextStyle: .body).withSize(textView.font!.pointSize)
+        
+        let decorationView = STAnnotationLabelView(annotation: lineAnnotation) {
+            Label {
+                Text("That's what she said")
+            } icon: {
+                Button {
+                    textView.removeAnnotation(lineAnnotation)
+                } label: {
+                    ZStack {
+                        // the way it draws bothers me
+                        // https://twitter.com/krzyzanowskim/status/1527723492002643969
+                        Image(systemName: "octagon")
+                            .symbolVariant(.fill)
+                            .foregroundStyle(.red)
 
-        let decorationView = AnnotationView(lineAnnotation: lineAnnotation, font: messageFont)
-        decorationView.target = self
-        decorationView.action = #selector(removeAnnotation(_:))
+                        Image(systemName: "xmark.octagon")
+                            .foregroundStyle(.white)
+                    }
+                    .font(Font(messageFont))
+                }
+                .buttonStyle(.plain)
+            }
+            .font(Font(messageFont))
+        }
 
+        decorationView.wantsLayer = true
+        decorationView.layer?.cornerRadius = 4
+        decorationView.layer?.backgroundColor = NSColor.systemRed.lighter(withLevel: 0.5).cgColor
+
+        // Position
+        
         let segmentFrame = textView.textLayoutManager.textSelectionSegmentFrame(at: lineAnnotation.location, type: .standard)!
         let annotationHeight = min(textLineFragment.typographicBounds.height, textView.font?.boundingRectForFont.height ?? 24)
 
@@ -96,3 +123,18 @@ extension ViewController: STTextViewDelegate {
     }
 }
 
+
+private extension NSColor {
+
+    func lighter(withLevel value: CGFloat = 0.3) -> NSColor {
+        guard let color = usingColorSpace(.deviceRGB) else {
+            return self
+        }
+
+        return NSColor(
+            hue: color.hueComponent,
+            saturation: max(color.saturationComponent - value, 0.0),
+            brightness: color.brightnessComponent,
+            alpha: color.alphaComponent)
+    }
+}

@@ -1,23 +1,23 @@
 import Cocoa
 
+public class STLineAnnotation: NSObject {
+
+    /// Location in content storage
+    public let location: NSTextLocation
+
+    public init(location: NSTextLocation) {
+        self.location = location
+    }
+}
+
 extension STTextView {
 
-    public class LineAnnotation: NSObject {
-
-        /// Location in content storage
-        public let location: NSTextLocation
-
-        public init(location: NSTextLocation) {
-            self.location = location
-        }
-    }
-
-    public func addAnnotation(_ annotations: LineAnnotation...) {
+    public func addAnnotation(_ annotations: STLineAnnotation...) {
         lineAnnotations.append(contentsOf: annotations)
         updateLineAnnotations()
     }
 
-    public func removeAnnotation(_ annotations: LineAnnotation...) {
+    public func removeAnnotation(_ annotations: STLineAnnotation...) {
         lineAnnotations.removeAll(where: { annotations.contains($0) })
         updateLineAnnotations()
     }
