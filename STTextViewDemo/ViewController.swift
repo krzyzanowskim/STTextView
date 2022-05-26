@@ -102,11 +102,9 @@ extension ViewController: STTextViewDelegate {
                 .buttonStyle(.plain)
             }
             .font(Font(messageFont))
+            .background(.yellow)
+            .clipShape(RoundedRectangle(cornerRadius:4))
         }
-
-        decorationView.wantsLayer = true
-        decorationView.layer?.cornerRadius = 4
-        decorationView.layer?.backgroundColor = NSColor.systemRed.lighter(withLevel: 0.5).cgColor
 
         // Position
         

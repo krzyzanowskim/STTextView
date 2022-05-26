@@ -49,11 +49,7 @@ public final class STAnnotationLabelView: NSView {
         self.annotation = annotation
 
         super.init(frame: .zero)
-
-        wantsLayer = true
-        layer?.cornerRadius = 4
-        layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
-
+        
         let hostingView = NSHostingView(rootView: ContentView(label: label))
         hostingView.autoresizingMask = [.height, .width]
         addSubview(hostingView)
