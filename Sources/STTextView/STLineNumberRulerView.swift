@@ -25,6 +25,12 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var backgroundColor: NSColor = NSColor.controlBackgroundColor
 
+    @Invalidating(.display)
+    open var separatorColor: NSColor = NSColor.separatorColor
+
+    @Invalidating(.display)
+    open var baselineOffset: CGFloat = 0
+
     private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
 
     public required init(textView: STTextView, scrollView: NSScrollView) {
@@ -87,7 +93,7 @@ open class STLineNumberRulerView: NSRulerView {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return (
-                textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rulePadding), dy: 0),
+                textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rulePadding), dy: baselineOffset),
                 ctLine: $0.ctLine
             )
         }
@@ -109,7 +115,7 @@ open class STLineNumberRulerView: NSRulerView {
 
         if drawSeparator {
             context.setLineWidth(1)
-            context.setStrokeColor(NSColor.separatorColor.cgColor)
+            context.setStrokeColor(separatorColor.cgColor)
             context.addLines(between: [CGPoint(x: ruleThickness, y: 0), CGPoint(x: ruleThickness, y: frame.maxY) ])
             context.strokePath()
         }
