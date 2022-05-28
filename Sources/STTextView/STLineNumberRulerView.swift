@@ -93,7 +93,7 @@ open class STLineNumberRulerView: NSRulerView {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return (
-                textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rulePadding), dy: baselineOffset),
+                textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rulePadding), dy: -baselineOffset),
                 ctLine: $0.ctLine
             )
         }
