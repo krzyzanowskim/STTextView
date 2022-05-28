@@ -3,31 +3,43 @@
 
 import Cocoa
 
+/// A ruler view to display line numbers to the side of the text view.
 open class STLineNumberRulerView: NSRulerView {
 
     private var textView: STTextView? {
         clientView as? STTextView
     }
 
+    /// The font used to draw line numbers
     open var font: NSFont {
         textView?.font ?? NSFont.controlContentFont(ofSize: NSFont.labelFontSize)
     }
 
+    /// The horizontal padding of the ruler view.
     @Invalidating(.display)
     open var rulePadding: CGFloat = 6
 
+    /// The text color of the line numbers.
     @Invalidating(.display)
     open var textColor: NSColor = .secondaryLabelColor
 
+    /// A Boolean indicating whether to draw a separator or not.
     @Invalidating(.display)
     open var drawSeparator: Bool = true
 
+    /// The background color of the ruler view.
     @Invalidating(.display)
     open var backgroundColor: NSColor = NSColor.controlBackgroundColor
 
+    /// The color of the separator.
+    ///
+    /// Needs ``drawSeparator`` to be set to `true`.
     @Invalidating(.display)
     open var separatorColor: NSColor = NSColor.separatorColor
 
+    /// The bottom baseline offset of each line number.
+    ///
+    /// Use this to offset the line number when the line height is not the default of the used font.
     @Invalidating(.display)
     open var baselineOffset: CGFloat = 0
 

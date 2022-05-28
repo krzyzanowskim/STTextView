@@ -12,31 +12,36 @@
 
 import Cocoa
 
+/// A TextKit2 text view without NSTextView baggage
 open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
     public static let willChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
     public static let didChangeNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
-    /// A Boolean value that controls whether the text view allow the user to edit text.
+    /// A Boolean value that controls whether the text view allows the user to edit text.
     open var isEditable: Bool {
         didSet {
             isSelectable = isEditable
         }
     }
-    
+
+    /// A Boolean value that controls whether the text views allows the user to select text.
     open var isSelectable: Bool {
         didSet {
             updateInsertionPointStateAndRestartTimer()
         }
     }
 
+    /// A Boolean value that determines whether the text view should draw its insertion point.
     open var shouldDrawInsertionPoint: Bool {
         isFirstResponder && isSelectable
     }
 
+    /// The color of the insertion point.
     open var insertionPointColor: NSColor
 
+    /// The font of the text view.
     public var font: NSFont? {
         get {
             typingAttributes[.font] as? NSFont
@@ -48,6 +53,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    /// The text color of the text view.
     public var textColor: NSColor? {
         get {
             typingAttributes[.foregroundColor] as? NSColor
@@ -59,6 +65,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    /// The text view’s default paragraph style.
     public var defaultParagraphStyle: NSParagraphStyle? {
         get {
             typingAttributes[.paragraphStyle] as? NSParagraphStyle
@@ -69,6 +76,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    /// The text view's typing attributes
     public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
             needsLayout = true
@@ -76,6 +84,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    /// The ``textContentStorage``'s string content.
     public var string: String {
         set {
             let prevLocation = textLayoutManager.textSelections.first?.textRanges.first?.location
@@ -117,16 +126,22 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    /// A Boolean that controls whether the text view highlights the currently selected line.
     open var highlightSelectedLine: Bool {
         didSet {
             needsDisplay = true
         }
     }
 
+    /// The highlight color of the selected line.
+    ///
+    /// Note: Needs ``highlightSelectedLine`` to be set to `true`
     public var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
 
+    /// The background color of a text selection.
     public var selectionBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor
 
+    /// The text view's background color
     public var backgroundColor: NSColor? {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
@@ -143,11 +158,18 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     /// A flag
     internal var processingKeyEvent: Bool = false
 
+    /// The delegate for all text views sharing the same layout manager.
     public weak var delegate: STTextViewDelegate?
 
+    /// The manager that lays out text for the text view's text container.
     public let textLayoutManager: NSTextLayoutManager
+
+    /// The text view's text storage object.
     public let textContentStorage: NSTextContentStorage
+
+    /// The text view's text container
     public let textContainer: NSTextContainer
+
     internal let contentLayer: STCATiledLayer
     internal let selectionLayer: STCATiledLayer
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
@@ -176,6 +198,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         true
     }
 
+    /// Generates and returns a scroll view with a STTextView set as its document view.
     public static func scrollableTextView() -> NSScrollView {
         let scrollView = NSScrollView()
         let textView = STTextView()
@@ -210,6 +233,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         return menu
     }
 
+    /// Initializes a text view.
+    /// - Parameter frameRect: The frame rectangle of the text view.
     override public init(frame frameRect: NSRect) {
         fragmentLayerMap = .weakToWeakObjects()
 
@@ -347,6 +372,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         super.draw(dirtyRect)
     }
 
+    /// Draws the background of the text view.
     open func drawBackground(in rect: NSRect) {
         if highlightSelectedLine {
             drawHighlightedLine(in: rect)
