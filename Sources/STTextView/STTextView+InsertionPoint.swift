@@ -33,6 +33,7 @@ extension STTextView {
 
                     let insertionLayer = STInsertionPointLayer(frame: selectionFrame)
                     insertionLayer.insertionPointColor = insertionPointColor
+                    insertionLayer.insertionPointWidth = insertionPointWidth
                     insertionLayer.updateGeometry()
 
                     if isFirstResponder {

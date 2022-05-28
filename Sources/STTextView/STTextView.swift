@@ -41,6 +41,9 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     /// The color of the insertion point.
     open var insertionPointColor: NSColor
 
+    /// The width of the insertion point.
+    open var insertionPointWidth: CGFloat = 1.0
+
     /// The font of the text view.
     public var font: NSFont? {
         get {
