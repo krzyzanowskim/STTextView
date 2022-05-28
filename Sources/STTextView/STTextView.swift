@@ -123,6 +123,10 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    public var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
+
+    public var selectionBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor
+
     public var backgroundColor: NSColor? {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
@@ -370,7 +374,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             }
 
             context.saveGState()
-            context.setFillColor(NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25).cgColor)
+            context.setFillColor(selectedLineHighlightColor.cgColor)
 
             let fillRect = CGRect(
                 origin: CGPoint(
@@ -456,7 +460,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 if highlightFrame.size.width > 0 {
                     let highlightLayer = STCALayer(frame: highlightFrame)
                     highlightLayer.contentsScale = backingScaleFactor
-                    highlightLayer.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
+                    highlightLayer.backgroundColor = selectionBackgroundColor.cgColor
                     selectionLayer.addSublayer(highlightLayer)
                 } else {
                     updateInsertionPointStateAndRestartTimer()
