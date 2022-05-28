@@ -12,11 +12,9 @@ public final class STAnnotationLabelView: NSView {
         @ViewBuilder var label: () -> Label
 
         var body: some View {
-            HStack(spacing: 0) {
-                label().labelStyle(AnnotationLabelStyle())
-                Spacer()
-            }
-            .disabled(!isEnabled)
+            label()
+                .labelStyle(AnnotationLabelStyle())
+                .disabled(!isEnabled)
         }
     }
 
@@ -40,6 +38,7 @@ public final class STAnnotationLabelView: NSView {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
