@@ -20,9 +20,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
     // Returns the type of layer used by the receiver.
-    open class var insertionPointLayerClass: STInsertionPointLayer.Type {
-        STInsertionPointLayer.self
-    }
+    open var insertionPointLayerClass = STInsertionPointLayer.self
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
     open var isEditable: Bool {
