@@ -62,7 +62,7 @@ extension NSTextLayoutManager {
         return offset
     }
 
-    func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
+    public func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
         textLayoutFragment(for: location)?.textLineFragment(at: location)
     }
 }
