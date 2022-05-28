@@ -6,13 +6,13 @@ import Cocoa
 
 open class STInsertionPointLayer: STCALayer {
     private var timer: Timer?
-    open var insertionPointWidth: CGFloat = 1 {
+    open internal(set) var insertionPointWidth: CGFloat = 1 {
         didSet {
             frame.size.width = insertionPointWidth
         }
     }
 
-    open var insertionPointColor: NSColor = .textColor {
+    open internal(set) var insertionPointColor: NSColor = .textColor {
         didSet {
             backgroundColor = insertionPointColor.cgColor
         }
