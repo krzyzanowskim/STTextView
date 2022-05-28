@@ -38,6 +38,7 @@ public final class STAnnotationLabelView: NSView {
                     .padding(.leading, 4)
                     .padding(.trailing, 16)
                     .lineLimit(1)
+                    .truncationMode(.tail)
                     .textSelection(.enabled)
             }
         }
