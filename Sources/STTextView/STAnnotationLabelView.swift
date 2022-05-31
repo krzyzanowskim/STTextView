@@ -9,10 +9,10 @@ public final class STAnnotationLabelView: NSView {
 
     private struct ContentView<Label: View>: View {
         @Environment(\.isEnabled) private var isEnabled
-        @ViewBuilder var label: () -> Label
+        var label: Label
 
         var body: some View {
-            label()
+            label
                 .labelStyle(AnnotationLabelStyle())
                 .disabled(!isEnabled)
         }
@@ -45,7 +45,7 @@ public final class STAnnotationLabelView: NSView {
 
     public let annotation: STLineAnnotation
 
-    public init<Label: View>(annotation: STLineAnnotation, @ViewBuilder label: @escaping () -> Label) {
+    public init<Label: View>(annotation: STLineAnnotation, label: Label) {
         self.annotation = annotation
 
         super.init(frame: .zero)

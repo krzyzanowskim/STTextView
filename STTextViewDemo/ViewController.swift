@@ -80,31 +80,16 @@ extension ViewController: STTextViewDelegate {
 
         let messageFont = NSFont.preferredFont(forTextStyle: .body).withSize(textView.font!.pointSize)
         
-        let decorationView = STAnnotationLabelView(annotation: lineAnnotation) {
-            Label {
-                Text("That's what she said")
-            } icon: {
-                Button {
-                    textView.removeAnnotation(lineAnnotation)
-                } label: {
-                    ZStack {
-                        // the way it draws bothers me
-                        // https://twitter.com/krzyzanowskim/status/1527723492002643969
-                        Image(systemName: "octagon")
-                            .symbolVariant(.fill)
-                            .foregroundStyle(.red)
-
-                        Image(systemName: "xmark.octagon")
-                            .foregroundStyle(.white)
-                    }
-                    .font(Font(messageFont))
-                }
-                .buttonStyle(.plain)
-            }
+        let decorationView = STAnnotationLabelView(
+            annotation: lineAnnotation,
+            label: AnnotationLabelView(
+                action: {
+                    textView.removeAnnotation($0)
+                },
+                lineAnnotation: lineAnnotation
+            )
             .font(Font(messageFont))
-            .background(.yellow)
-            .clipShape(RoundedRectangle(cornerRadius:4))
-        }
+        )
 
         // Position
         
@@ -118,6 +103,35 @@ extension ViewController: STTextViewDelegate {
             height: annotationHeight
         )
         return decorationView
+    }
+}
+
+private struct AnnotationLabelView: View {
+    let action: (STLineAnnotation) -> Void
+    let lineAnnotation: STLineAnnotation
+
+    var body: some View {
+        Label {
+            Text("That's what she said")
+        } icon: {
+            Button {
+                action(lineAnnotation)
+            } label: {
+                ZStack {
+                    // the way it draws bothers me
+                    // https://twitter.com/krzyzanowskim/status/1527723492002643969
+                    Image(systemName: "octagon")
+                        .symbolVariant(.fill)
+                        .foregroundStyle(.red)
+
+                    Image(systemName: "xmark.octagon")
+                        .foregroundStyle(.white)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+        .background(.yellow)
+        .clipShape(RoundedRectangle(cornerRadius:4))
     }
 }
 
