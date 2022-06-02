@@ -11,6 +11,10 @@ public final class STAnnotationLabelView: NSView {
         @Environment(\.isEnabled) private var isEnabled
         var label: Label
 
+        init(_ label: Label) {
+            self.label = label
+        }
+
         var body: some View {
             label
                 .labelStyle(AnnotationLabelStyle())
@@ -50,7 +54,7 @@ public final class STAnnotationLabelView: NSView {
 
         super.init(frame: .zero)
         
-        let hostingView = NSHostingView(rootView: ContentView(label: label))
+        let hostingView = NSHostingView(rootView: ContentView(label))
         hostingView.autoresizingMask = [.height, .width]
         addSubview(hostingView)
     }
