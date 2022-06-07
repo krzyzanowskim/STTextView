@@ -59,6 +59,7 @@ public final class STAnnotationLabelView: NSView {
         addSubview(hostingView)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

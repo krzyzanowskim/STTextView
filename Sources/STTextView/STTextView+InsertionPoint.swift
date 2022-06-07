@@ -7,7 +7,7 @@ import Cocoa
 extension STTextView {
 
     /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
-    open func updateInsertionPointStateAndRestartTimer() {
+    public func updateInsertionPointStateAndRestartTimer() {
         selectionLayer.sublayers?.removeAll(where: { layer in
             type(of: layer) == insertionPointLayerClass
         })
