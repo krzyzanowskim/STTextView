@@ -741,6 +741,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             }
         }
 
+        delegate?.textView?(self, willChangeTextIn: textRange, replacementString: replacementString.string)
+
         textContentStorage.textStorage?.replaceCharacters(
             in: NSRange(textRange, in: textContentStorage),
             with: replacementString

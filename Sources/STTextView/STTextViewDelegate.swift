@@ -13,6 +13,8 @@ import Cocoa
     @objc optional func textViewDidChangeSelection(_ notification: Notification)
     /// Sent when a text view needs to determine if text in a specified range should be changed.
     @objc optional func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool
+    /// Sent when a text view will change text.
+    @objc optional func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
     /// Sent when a text view did change text.
     @objc optional func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
     ///
