@@ -28,38 +28,40 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
     private var eventMonitor: Any?
 
     open override func loadView() {
-        view = NSView(frame: CGRect(x: 0, y: 0, width: 420, height: 220))
+        view = NSView(frame: CGRect(x: 0, y: 0, width: 320, height: 120))
         view.autoresizingMask = [.width, .height]
 
+        tableView.style = .plain
+        tableView.headerView = nil
+        tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
+        tableView.allowsColumnResizing = false
+        tableView.rowHeight = 22
+        tableView.backgroundColor = .windowBackgroundColor
+        tableView.action = #selector(tableViewAction(_:))
+        tableView.doubleAction = #selector(tableViewDoubleAction(_:))
+        tableView.target = self
+
         do {
-            tableView.style = .inset
-            tableView.headerView = nil
-            tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
-            tableView.allowsColumnResizing = false
-            tableView.rowHeight = 22
-            tableView.backgroundColor = .windowBackgroundColor
-            tableView.action = #selector(tableViewAction(_:))
-            tableView.doubleAction = #selector(tableViewDoubleAction(_:))
-            tableView.target = self
-
-            do {
-                let nameColumn = NSTableColumn(identifier: .labelColumn)
-                nameColumn.resizingMask = .autoresizingMask
-                tableView.addTableColumn(nameColumn)
-            }
-
-            tableView.dataSource = self
-            tableView.delegate = self
-
-            let scrollView = NSScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
-            scrollView.automaticallyAdjustsContentInsets = false
-            scrollView.drawsBackground = false
-            scrollView.autoresizingMask = [.width, .height]
-            scrollView.hasVerticalScroller = true
-            scrollView.documentView = tableView
-            view.addSubview(scrollView)
-            contentScrollView = scrollView
+            let nameColumn = NSTableColumn(identifier: .labelColumn)
+            nameColumn.resizingMask = .autoresizingMask
+            tableView.addTableColumn(nameColumn)
         }
+
+        tableView.dataSource = self
+        tableView.delegate = self
+
+        let scrollView = NSScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
+        scrollView.automaticallyAdjustsContentInsets = false
+        scrollView.contentInsets = .init(top: 5, left: 5, bottom: 5, right: 5)
+        scrollView.drawsBackground = false
+        scrollView.wantsLayer = true
+        scrollView.layer?.cornerRadius = 5
+        scrollView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+        scrollView.autoresizingMask = [.width, .height]
+        scrollView.hasVerticalScroller = true
+        scrollView.documentView = tableView
+        view.addSubview(scrollView)
+        contentScrollView = scrollView
     }
 
     @objc func tableViewAction(_ sender: Any?) {
@@ -166,11 +168,27 @@ extension STCompletionViewController: NSTableViewDelegate {
         }
     }
 
+    public func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+        STTableRowView()
+    }
+
 }
 
 extension STCompletionViewController: NSTableViewDataSource {
     open func numberOfRows(in tableView: NSTableView) -> Int {
         items.count
+    }
+}
+
+private class STTableRowView: NSTableRowView {
+
+    override func drawSelection(in dirtyRect: NSRect) {
+        guard let context = NSGraphicsContext.current?.cgContext else { return }
+        context.saveGState()
+        let path = NSBezierPath(roundedRect: dirtyRect, xRadius: 4, yRadius: 4)
+        context.setFillColor(NSColor.selectedContentBackgroundColor.cgColor)
+        path.fill()
+        context.restoreGState()
     }
 }
 

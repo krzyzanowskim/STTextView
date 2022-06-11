@@ -16,10 +16,10 @@ internal final class CompletionWindowController: NSWindowController {
         let contentViewController = viewController
 
         let window = CompletionWindow(contentViewController: contentViewController)
-        window.styleMask = [.resizable, .fullSizeContentView, .titled]
+        window.styleMask = [.resizable, .fullSizeContentView]
         window.autorecalculatesKeyViewLoop = true
         window.level = .popUpMenu
-        window.backgroundColor = .windowBackgroundColor
+        window.backgroundColor = .clear
         window.isExcludedFromWindowsMenu = true
         window.tabbingMode = .disallowed
         window.titleVisibility = .hidden
