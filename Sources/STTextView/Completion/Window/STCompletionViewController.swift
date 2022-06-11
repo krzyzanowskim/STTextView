@@ -30,6 +30,9 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
     open override func loadView() {
         view = NSView(frame: CGRect(x: 0, y: 0, width: 320, height: 120))
         view.autoresizingMask = [.width, .height]
+        view.wantsLayer = true
+        view.layer?.cornerRadius = 5
+        view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
 
         tableView.style = .plain
         tableView.headerView = nil
@@ -54,9 +57,6 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         scrollView.automaticallyAdjustsContentInsets = false
         scrollView.contentInsets = .init(top: 5, left: 5, bottom: 5, right: 5)
         scrollView.drawsBackground = false
-        scrollView.wantsLayer = true
-        scrollView.layer?.cornerRadius = 5
-        scrollView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
         scrollView.autoresizingMask = [.width, .height]
         scrollView.hasVerticalScroller = true
         scrollView.documentView = tableView
