@@ -23,7 +23,8 @@ extension STTextView {
             return
         }
 
-        let characterSegmentFrame = textCharacterSegmentRect.applying(.init(translationX: 0, y: textCharacterSegmentRect.height))
+        // move left by arbitrary 14px
+        let characterSegmentFrame = textCharacterSegmentRect.moved(dx: -14, dy: textCharacterSegmentRect.height)
 
         let completions = delegate?.textView(self, completionItemsAtLocation: insertionPointLocation) ?? []
 
