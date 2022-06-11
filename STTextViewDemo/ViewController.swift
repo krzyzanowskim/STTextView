@@ -104,6 +104,20 @@ extension ViewController: STTextViewDelegate {
         )
         return decorationView
     }
+
+    // Completion
+
+    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [Any]? {
+        [
+            STCompletion.Item(id: UUID().uuidString, label: "One", insertText: "one"),
+            STCompletion.Item(id: UUID().uuidString, label: "Two", insertText: "two"),
+            STCompletion.Item(id: UUID().uuidString, label: "Three", insertText: "three")
+        ]
+    }
+
+    func textView(_ textView: STTextView, insertCompletionItem item: Any) {
+        textView.insertText((item as! STCompletion.Item).insertText)
+    }
 }
 
 private struct AnnotationLabelView: View {

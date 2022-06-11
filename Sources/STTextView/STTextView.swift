@@ -181,6 +181,11 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
     internal var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
 
+    internal lazy var completionWindowController: CompletionWindowController = {
+        let viewController = delegate?.textViewCompletionViewController(self) ?? STCompletionViewController()
+        return CompletionWindowController(viewController)
+    }()
+
     /// Text line annotation views
     public var annotations: [STLineAnnotation] = [] {
         didSet {
@@ -290,7 +295,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
             let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
             NotificationCenter.default.post(notification)
-            self.delegate?.textViewDidChangeSelection?(notification)
+            self.delegate?.textViewDidChangeSelection(notification)
         }
     }
 
@@ -649,7 +654,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         let notification = Notification(name: STTextView.willChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
-        delegate?.textWillChange?(notification)
+        delegate?.textWillChange(notification)
     }
 
     open func didChangeText() {
@@ -741,14 +746,14 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             }
         }
 
-        delegate?.textView?(self, willChangeTextIn: textRange, replacementString: replacementString.string)
+        delegate?.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
         textContentStorage.textStorage?.replaceCharacters(
             in: NSRange(textRange, in: textContentStorage),
             with: replacementString
         )
 
-        delegate?.textView?(self, didChangeTextIn: textRange, replacementString: replacementString.string)
+        delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
@@ -767,7 +772,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             return false
         }
 
-        let result = delegate?.textView?(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString) ?? true
+        let result = delegate?.textView(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString) ?? true
         if !result {
             return result
         }

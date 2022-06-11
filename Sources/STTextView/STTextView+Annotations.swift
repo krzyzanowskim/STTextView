@@ -30,7 +30,7 @@ extension STTextView {
     internal func updateLineAnnotations() {
         subviews = annotations.compactMap { lineAnnotation -> NSView? in
             if let textLineFragment = textLayoutManager.textLineFragment(at: lineAnnotation.location) {
-                return delegate?.textView?(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
+                return delegate?.textView(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
             }
 
             return nil
