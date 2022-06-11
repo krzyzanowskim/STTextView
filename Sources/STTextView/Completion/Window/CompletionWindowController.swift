@@ -60,6 +60,10 @@ internal final class CompletionWindowController: NSWindowController {
 
         completionViewController.items = items
         window.setFrameTopLeftPoint(origin)
+
+        NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: parentWindow, queue: .main) { [weak self] notification in
+            self?.close()
+        }
     }
 
     override func close() {
