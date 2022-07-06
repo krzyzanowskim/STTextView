@@ -452,9 +452,13 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+    public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
         textContentStorage.performEditingTransaction {
             textContentStorage.textStorage?.addAttributes(attrs, range: range)
+        }
+
+        if updateLayout {
+            needsLayout = true
         }
     }
 
