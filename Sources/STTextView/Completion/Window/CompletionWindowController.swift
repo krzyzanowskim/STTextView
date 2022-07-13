@@ -61,15 +61,22 @@ internal final class CompletionWindowController: NSWindowController {
         completionViewController.items = items
         window.setFrameTopLeftPoint(origin)
 
+        NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] notification in
+            self?.cleanupOnClose()
+        }
+
         NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: parentWindow, queue: .main) { [weak self] notification in
             self?.close()
         }
     }
 
+    private func cleanupOnClose() {
+        completionViewController.items.removeAll(keepingCapacity: true)
+    }
+
     override func close() {
         guard isVisible else { return }
         super.close()
-        completionViewController.items.removeAll(keepingCapacity: true)
     }
 
     deinit {
