@@ -78,10 +78,6 @@ internal final class CompletionWindowController: NSWindowController {
         guard isVisible else { return }
         super.close()
     }
-
-    deinit {
-        assertionFailure()
-    }
 }
 
 protocol CompletionWindowDelegate: AnyObject {
