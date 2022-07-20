@@ -12,7 +12,7 @@ internal final class CompletionWindowController: NSWindowController {
         window?.isVisible ?? false
     }
 
-    init(_ viewController: some STCompletionViewControllerProtocol) {
+    init<T: STCompletionViewControllerProtocol>(_ viewController: T) {
         let contentViewController = viewController
 
         let window = CompletionWindow(contentViewController: contentViewController)
@@ -85,7 +85,7 @@ protocol CompletionWindowDelegate: AnyObject {
 }
 
 extension CompletionWindowController: STCompletionViewControllerDelegate {
-    func completionViewController(_ viewController: some STCompletionViewControllerProtocol, complete item: Any, movement: NSTextMovement) {
+    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: Any, movement: NSTextMovement) {
         delegate?.completionWindowController(self, complete: item, movement: movement)
     }
 }

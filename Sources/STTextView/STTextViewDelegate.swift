@@ -25,7 +25,8 @@ public protocol STTextViewDelegate: AnyObject {
 
     func textView(_ textView: STTextView, insertCompletionItem item: Any)
 
-    func textViewCompletionViewController(_ textView: STTextView) -> STCompletionViewControllerProtocol?
+    // Due to Swift 5.6 generics limitation it can't return STCompletionViewControllerProtocol
+    func textViewCompletionViewController(_ textView: STTextView) -> STAnyCompletionViewController?
 }
 
 public extension STTextViewDelegate {
@@ -66,7 +67,7 @@ public extension STTextViewDelegate {
         
     }
 
-    func textViewCompletionViewController(_ textView: STTextView) -> STCompletionViewControllerProtocol? {
+    func textViewCompletionViewController(_ textView: STTextView) -> STAnyCompletionViewController? {
         nil
     }
 }

@@ -2,7 +2,7 @@ import Cocoa
 import SwiftUI
 
 public protocol STCompletionViewControllerDelegate: AnyObject {
-    func completionViewController(_ viewController: some STCompletionViewControllerProtocol, complete item: Any, movement: NSTextMovement)
+    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: Any, movement: NSTextMovement)
 }
 
 public protocol STCompletionViewControllerProtocol: NSViewController {
@@ -10,9 +10,14 @@ public protocol STCompletionViewControllerProtocol: NSViewController {
     var delegate: STCompletionViewControllerDelegate? { get set }
 }
 
-open class STCompletionViewController: NSViewController, STCompletionViewControllerProtocol {
+open class STAnyCompletionViewController: NSViewController, STCompletionViewControllerProtocol {
+    open var items: [Any] = []
+    open weak var delegate: STCompletionViewControllerDelegate?
+}
 
-    open var items: [Any] = [] {
+open class STCompletionViewController: STAnyCompletionViewController {
+
+    open override var items: [Any] {
         didSet {
             tableView.reloadData()
 
@@ -21,7 +26,6 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         }
     }
 
-    public weak var delegate: STCompletionViewControllerDelegate?
     private let tableView = NSTableView()
     private var contentScrollView: NSScrollView!
 
