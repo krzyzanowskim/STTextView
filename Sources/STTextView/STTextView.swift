@@ -297,6 +297,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             NotificationCenter.default.post(notification)
             self.delegate?.textViewDidChangeSelection(notification)
         }
+
+        delegate?.textView(self, didMoveCaretTo: 0, column: 0)
     }
 
     open override func viewDidMoveToWindow() {
@@ -390,12 +392,65 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    private func getCaretPosition(inText: String, nsTextLocation: NSTextLocation) {
+        var row = 0
+        var col = 0
+
+        guard let carretPosStr = textLayoutManager.insertionPointLocation?.description as? String,
+              let carretPos = Int.init(carretPosStr)
+        else {
+            print("Failed to get position")
+            return
+        }
+
+        /// Create the range
+        let range = NSRange.init(location: 0, length: carretPos)
+
+        // Get only the text before the caret
+        guard let txtStr = textContentStorage.documentString[range] else {
+            fatalError("Failed to get caret position in document")
+        }
+
+        /// Split newlines
+        let splitValue = txtStr.split(separator: "\n")
+
+        // Check on what row we are
+        row = splitValue.count
+
+        if splitValue.count > 0 {
+            // We are > row 0, so count with the correct row
+            // splitValue[row - 1], is the row contents.
+            // .utf8.count gives us the (current) length of the string
+            col = splitValue[row - 1].utf8.count
+        } else {
+            // .count gives us the (current) length of the string
+            col = txtStr.count
+        }
+
+        // This seems weird, but if we split \n into an empty line,
+        // it doesn't count, so we check if the character in range
+        // before the caret has a \n, in that case we are on a new
+        // row, without any contents. (row + 1, col = 0)
+        if txtStr.hasSuffix("\n") {
+            row += 1
+            col = 0
+        }
+
+        // Update value to delegate
+        delegate?.textView(self, didMoveCaretTo: row, column: col)
+    }
+
     private func drawHighlightedLine(in rect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext,
               let caretLocation = textLayoutManager.insertionPointLocation
         else {
             return
         }
+
+        getCaretPosition(
+            inText: textContentStorage.documentString,
+            nsTextLocation: caretLocation
+        )
 
         textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, baselinePosition, textContainer -> Bool in
             // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`

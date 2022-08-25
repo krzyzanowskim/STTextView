@@ -25,6 +25,9 @@ public protocol STTextViewDelegate: AnyObject {
 
     func textView(_ textView: STTextView, insertCompletionItem item: Any)
 
+    /// Sent when the caret is moved
+    func textView(_ textView: STTextView, didMoveCaretTo row: Int, column: Int)
+
     // Due to Swift 5.6 generics limitation it can't return STCompletionViewControllerProtocol
     func textViewCompletionViewController(_ textView: STTextView) -> STAnyCompletionViewController?
 }
@@ -67,6 +70,10 @@ public extension STTextViewDelegate {
         
     }
 
+    func textView(_ textView: STTextView, didMoveCaretTo row: Int, column: Int) {
+
+    }
+    
     func textViewCompletionViewController(_ textView: STTextView) -> STAnyCompletionViewController? {
         nil
     }
