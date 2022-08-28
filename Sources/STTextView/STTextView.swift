@@ -528,7 +528,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             // not necessarly need to layout whole thing, is's enough to enumerate over visible area
             let startLocation = textLayoutManager.textViewportLayoutController.viewportRange?.location ?? textLayoutManager.documentRange.location
             let endLocation = textLayoutManager.textViewportLayoutController.viewportRange?.endLocation ?? textLayoutManager.documentRange.endLocation
-            textLayoutManager.enumerateTextLayoutFragments(from: startLocation, options: .ensuresLayout) { layoutFragment in
+            textLayoutManager.enumerateTextLayoutFragments(from: startLocation, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 proposedWidth = max(proposedWidth, layoutFragment.layoutFragmentFrame.maxX)
                 return layoutFragment.rangeInElement.location < endLocation
             }
@@ -538,13 +538,17 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         let proposedSize = CGSize(width: proposedWidth, height: proposedHeight)
 
+        // FIXME: Frame should not shrink to the text content, unless it's updated by the layout
+        //        It can't only grow too because that would brewk wrapping.
+        //        maybe a frame should match the viewport, and we should
+        //        adjust only textContainer size
         if !currentSize.isAlmostEqual(to: proposedSize) {
             setFrameSize(proposedSize)
         }
     }
 
     // Update textContainer width to match textview width if track textview width
-    private func updateTextContainerSizeIfNeeded() {
+    internal func updateTextContainerSizeIfNeeded() {
         var proposedSize = textContainer.size
 
         if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: bounds.width) {
