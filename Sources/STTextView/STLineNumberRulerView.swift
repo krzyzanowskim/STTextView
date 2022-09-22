@@ -10,10 +10,11 @@ open class STLineNumberRulerView: NSRulerView {
         clientView as? STTextView
     }
 
-    /// The font used to draw line numbers
-    open var font: NSFont {
-        textView?.font ?? NSFont.controlContentFont(ofSize: NSFont.labelFontSize)
-    }
+    /// The font used to draw line numbers.
+    ///
+    /// Initialized with a textView font value and does not update automatically when
+    /// text view font changes.
+    open var font: NSFont
 
     /// The horizontal padding of the ruler view.
     @Invalidating(.display)
@@ -46,6 +47,8 @@ open class STLineNumberRulerView: NSRulerView {
     private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
 
     public required init(textView: STTextView, scrollView: NSScrollView) {
+        font = textView.font ?? NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.labelFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.labelFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.labelFontSize, weight: .regular)
+
         super.init(scrollView: scrollView, orientation: .verticalRuler)
 
         clientView = textView

@@ -16,10 +16,6 @@ final class ViewController: NSViewController {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.hasVerticalScroller = true
 
-        // Line numbers
-        scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
-        scrollView.rulersVisible = true
-
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.1
         paragraph.defaultTabInterval = 28 // default
@@ -28,7 +24,11 @@ final class ViewController: NSViewController {
         textView.font = NSFont.monospacedSystemFont(ofSize: 20, weight: .regular)
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        
+
+        // Line numbers
+        scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+        scrollView.rulersVisible = true
+
         // textView.addAttributes([.font: NSFont.systemFont(ofSize: 50)], range: NSRange(location: 0, length: 1))
 
         textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 6, length: 5))
