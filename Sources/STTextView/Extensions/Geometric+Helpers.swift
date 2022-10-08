@@ -55,7 +55,7 @@ extension CGRect {
         applying(.init(translationX: point.x, y: point.y))
     }
 
-    func margin(top: CGFloat, left: CGFloat, bottom: CGFloat, right: CGFloat) -> CGRect {
+    func margin(top: CGFloat = 0, left: CGFloat = 0, bottom: CGFloat = 0, right: CGFloat = 0) -> CGRect {
         inset(.init(top: -top, left: -left, bottom: -bottom, right: -right))
     }
 }
