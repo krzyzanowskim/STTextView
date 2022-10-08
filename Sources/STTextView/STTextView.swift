@@ -673,7 +673,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         needsDisplay = true
     }
 
-    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
+    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
         if allowsUndo, let undoManager = undoManager {
             // typing coalescing
             if processingKeyEvent, allowsTypingCoalescing,
@@ -716,7 +716,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                         textView.replaceCharacters(
                             in: typingTextUndo.textRange,
                             with: typingTextUndo.attribugedString ?? NSAttributedString(),
-                            useTypingAttributes: false,
                             allowsTypingCoalescing: false
                         )
 
@@ -745,7 +744,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                     textView.replaceCharacters(
                         in: undoRange,
                         with: previousStringInRange,
-                        useTypingAttributes: false,
                         allowsTypingCoalescing: false
                     )
 
@@ -765,7 +763,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
-        replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: typingAttributes), useTypingAttributes: useTypingAttributes, allowsTypingCoalescing: allowsTypingCoalescing)
+        self.replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]), allowsTypingCoalescing: allowsTypingCoalescing)
     }
 
     open func replaceCharacters(in textRange: NSTextRange, with replacementString: String) {
