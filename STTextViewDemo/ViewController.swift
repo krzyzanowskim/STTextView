@@ -17,7 +17,7 @@ final class ViewController: NSViewController {
         scrollView.hasVerticalScroller = true
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        paragraph.lineHeightMultiple = 1.1
+        paragraph.lineHeightMultiple = 1.2
         paragraph.defaultTabInterval = 28 // default
 
         textView.defaultParagraphStyle = paragraph
