@@ -26,7 +26,8 @@ extension STTextView {
                     if textRange == textContentStorage.documentRange {
                         if let font = typingAttributes[.font] as? NSFont {
                             let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
-                            let lineHeight = NSLayoutManager().defaultLineHeight(for: font) * paragraphStyle.lineHeightMultiple
+                            let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
+                            let lineHeight = NSLayoutManager().defaultLineHeight(for: font) * lineHeightMultiple
                             selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: lineHeight)).pixelAligned
                         }
                     }
