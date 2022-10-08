@@ -672,6 +672,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         let notification = Notification(name: STTextView.didChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         needsDisplay = true
+        delegate?.textDidChange(notification)
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
