@@ -80,13 +80,18 @@ open class STLineNumberRulerView: NSRulerView {
         textView?.textLayoutManager.enumerateTextLayoutFragments(from: textView?.textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
 
             for textLineFragment in textLayoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == textLineFragment) {
+                var baselineOffset: CGFloat = 0
+                if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                    baselineOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                }
+
                 let locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
                 let attributedString = CFAttributedStringCreate(nil, "\(lines.count + 1)" as CFString, attributes as CFDictionary)!
                 let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                 lines.append(
                     (
-                        textPosition: textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y),
+                        textPosition: textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
                         ctLine: ctLine
                     )
                 )
