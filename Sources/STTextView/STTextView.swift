@@ -474,6 +474,60 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    public func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+        textContentStorage.performEditingTransaction {
+            textContentStorage.textStorage?.setAttributes(attrs, range: range)
+        }
+        // This doesn't work
+        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentStorage)!)
+
+
+        if updateLayout {
+            needsLayout = true
+        }
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    public func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+        textContentStorage.performEditingTransaction {
+            textContentStorage.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentStorage))
+        }
+        // This doesn't work
+        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentStorage)!)
+
+        if updateLayout {
+            needsLayout = true
+        }
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    public func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
+        textContentStorage.performEditingTransaction {
+            textContentStorage.textStorage?.removeAttribute(attribute, range: range)
+        }
+        // This doesn't work
+        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentStorage)!)
+
+
+        if updateLayout {
+            needsLayout = true
+        }
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    public func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
+        textContentStorage.performEditingTransaction {
+            textContentStorage.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentStorage))
+        }
+        // This doesn't work
+        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentStorage)!)
+
+        if updateLayout {
+            needsLayout = true
+        }
+    }
+
     public func setSelectedRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
         textLayoutManager.textSelections = [
             NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
