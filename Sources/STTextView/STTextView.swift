@@ -570,6 +570,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     // Update text view frame size
     internal func updateFrameSizeIfNeeded() {
         let currentSize = frame.size
+        let viewportBounds = textLayoutManager.textViewportLayoutController.viewportBounds
 
         var proposedHeight: CGFloat = 0
         textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
@@ -577,7 +578,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             return false // stop
         }
 
-        var proposedWidth: CGFloat = 0
+        var proposedWidth: CGFloat = viewportBounds.width
         if !textContainer.widthTracksTextView {
             // TODO: if offset didn't change since last time, it is not necessary to relayout
             // not necessarly need to layout whole thing, is's enough to enumerate over visible area
@@ -588,15 +589,10 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 return layoutFragment.rangeInElement.location < endLocation
             }
         } else {
-            proposedWidth = currentSize.width
+            proposedWidth = max(currentSize.width, proposedWidth)
         }
 
         let proposedSize = CGSize(width: proposedWidth, height: proposedHeight)
-
-        // FIXME: Frame should not shrink to the text content, unless it's updated by the layout
-        //        It can't only grow too because that would brewk wrapping.
-        //        maybe a frame should match the viewport, and we should
-        //        adjust only textContainer size
         if !currentSize.isAlmostEqual(to: proposedSize) {
             setFrameSize(proposedSize)
         }
