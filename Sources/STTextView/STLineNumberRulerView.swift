@@ -80,6 +80,7 @@ open class STLineNumberRulerView: NSRulerView {
         textView?.textLayoutManager.enumerateTextLayoutFragments(from: textView?.textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
 
             for textLineFragment in textLayoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == textLineFragment) {
+                if textLineFragment.attributedString.length == 0 { break }
                 var baselineOffset: CGFloat = 0
                 if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
                     baselineOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)

@@ -41,6 +41,7 @@ private final class STTextLayoutFragment: NSTextLayoutFragment {
         // Center vertically after applying lineHeightMultiple value
         // super.draw(at: point.moved(dx: 0, dy: offset), in: context)
         for lineFragment in textLineFragments {
+            if lineFragment.attributedString.length == 0 { break }
             if let paragraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
                 let offset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
                 lineFragment.draw(at: point.moved(dx: lineFragment.typographicBounds.origin.x, dy: lineFragment.typographicBounds.origin.y + offset), in: context)
