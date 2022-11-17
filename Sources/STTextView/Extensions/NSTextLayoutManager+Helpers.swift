@@ -75,7 +75,7 @@ extension NSTextLayoutFragment {
 
     @available(*, deprecated, message: "Unused")
     var hasExtraLineFragment: Bool {
-        textLineFragments.contains(where: \.isExtraLineFragment)
+        textLineFragments.last?.isExtraLineFragment ?? false
     }
 
     func textLineFragment(at location: NSTextLocation, in textContentManager: NSTextContentManager? = nil) -> NSTextLineFragment? {

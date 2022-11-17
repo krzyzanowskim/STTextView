@@ -24,12 +24,7 @@ extension STTextView {
                     // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
                     // therefore for empty override height with value manually calculated from font + paragraph style
                     if textRange == textContentStorage.documentRange {
-                        if let font = typingAttributes[.font] as? NSFont {
-                            let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
-                            let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
-                            let lineHeight = NSLayoutManager().defaultLineHeight(for: font) * lineHeightMultiple
-                            selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: lineHeight)).pixelAligned
-                        }
+                        selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
                     }
 
                     let insertionLayer = insertionPointLayerClass.init(frame: selectionFrame)

@@ -90,6 +90,15 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         }
     }
 
+    // line height based on current typing font and current typing paragraph
+    internal var typingLineHeight: CGFloat {
+        let font = typingAttributes[.font] as? NSFont ?? .preferredFont(forTextStyle: .body)
+        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
+        let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
+        return NSLayoutManager().defaultLineHeight(for: font) * lineHeightMultiple
+    }
+
+
     /// The ``textContentStorage``'s string content.
     public var string: String {
         set {
@@ -274,6 +283,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         super.init(frame: frameRect)
 
+        textLayoutManager.delegate = self
         textFinderClient.textView = self
 
         // Set insert point at the very beginning
@@ -403,12 +413,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             // therefore for empty override height with value manually calculated from font + paragraph style
             var selectionFrame: NSRect = textSegmentFrame
             if segmentRange == textContentStorage.documentRange {
-                if let font = typingAttributes[.font] as? NSFont {
-                    let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
-                    let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
-                    let lineHeight = NSLayoutManager().defaultLineHeight(for: font) * lineHeightMultiple
-                    selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: lineHeight))
-                }
+                selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
             }
 
             context.saveGState()
@@ -573,9 +578,13 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         let viewportBounds = textLayoutManager.textViewportLayoutController.viewportBounds
 
         var proposedHeight: CGFloat = 0
-        textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-            proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
-            return false // stop
+        if textLayoutManager.documentRange.isEmpty {
+            proposedHeight = typingLineHeight
+        } else {
+            textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+                proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
+                return false // stop
+            }
         }
 
         var proposedWidth: CGFloat = viewportBounds.width

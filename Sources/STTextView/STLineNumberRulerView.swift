@@ -77,27 +77,64 @@ open class STLineNumberRulerView: NSRulerView {
 
         lines.removeAll(keepingCapacity: true)
 
-        textView?.textLayoutManager.enumerateTextLayoutFragments(from: textView?.textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
+        guard let textLayoutManager = textView?.textLayoutManager else {
+            return
+        }
 
-            for textLineFragment in textLayoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == textLineFragment) {
-                var baselineOffset: CGFloat = 0
-                if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                    baselineOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+        if textLayoutManager.documentRange.isEmpty {
+            // For empty document, layout the extra line as if it has text in it
+            // the ExtraLineFragment doesn't have information about typing attributes hence layout manager uses a default values - not from text view
+            textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
+                for lineFragment in textLayoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == lineFragment) {
+
+                    var baselineOffset: CGFloat = 0
+                    if let paragraphStyle = textView?.defaultParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                        baselineOffset = -(textView!.typingLineHeight * (textView!.defaultParagraphStyle!.lineHeightMultiple - 1.0) / 2)
+                    }
+
+                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: attributes)
+                    let ctLine = CTLineCreateWithAttributedString(attributedString)
+
+                    var ascent: CGFloat = 0
+                    var descent: CGFloat = 0
+                    var leading: CGFloat = 0
+                    CTLineGetTypographicBounds(ctLine, &ascent, &descent, &leading)
+                    let locationForFirstCharacter = CGPoint(x: 0, y: ascent + descent + leading)
+
+                    lines.append(
+                        (
+                            textPosition: textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
+                            ctLine: ctLine
+                        )
+                    )
                 }
 
-                let locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
-                let attributedString = CFAttributedStringCreate(nil, "\(lines.count + 1)" as CFString, attributes as CFDictionary)!
-                let ctLine = CTLineCreateWithAttributedString(attributedString)
-
-                lines.append(
-                    (
-                        textPosition: textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
-                        ctLine: ctLine
-                    )
-                )
+                return false
             }
+        } else {
+            textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
 
-            return true
+                for lineFragment in textLayoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == lineFragment) {
+                    var baselineOffset: CGFloat = 0
+
+                    if let paragraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                        baselineOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                    }
+
+                    let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
+                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: attributes)
+                    let ctLine = CTLineCreateWithAttributedString(attributedString)
+
+                    lines.append(
+                        (
+                            textPosition: textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
+                            ctLine: ctLine
+                        )
+                    )
+                }
+
+                return true
+            }
         }
 
         // Adjust ruleThickness based on last (longest) value
