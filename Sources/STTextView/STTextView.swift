@@ -783,7 +783,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                         textView.didChangeText()
                     }
                 }
-            } else {
+            } else if !undoManager.isUndoing {
                 breakUndoCoalescing()
 
                 // Reach to NSTextStorage because NSTextContentStorage range extraction is cumbersome.
@@ -798,19 +798,17 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 // Register undo/redo
                 // I can't control internal redoStack, and coalescing messes up with the state
                 // resulting in broken undo/redo availability
-                if !undoManager.isUndoing {
-                    undoManager.registerUndo(withTarget: self) { textView in
-                        // Regular undo action
-                        textView.willChangeText()
+                undoManager.registerUndo(withTarget: self) { textView in
+                    // Regular undo action
+                    textView.willChangeText()
 
-                        textView.replaceCharacters(
-                            in: undoRange,
-                            with: previousStringInRange,
-                            allowsTypingCoalescing: false
-                        )
+                    textView.replaceCharacters(
+                        in: undoRange,
+                        with: previousStringInRange,
+                        allowsTypingCoalescing: false
+                    )
 
-                        textView.didChangeText()
-                    }
+                    textView.didChangeText()
                 }
             }
         }

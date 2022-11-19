@@ -2,7 +2,7 @@ import Foundation
 
 final class CoalescingUndoManager<T>: UndoManager {
 
-    private(set) var coalescing: (value: T?, action: ((T) -> Void)?)?
+    private(set) var coalescing: (value: T?, undoAction: ((T) -> Void)?)?
 
     private var coalescingIsUndoing: Bool = false
     private var coalescingIsRedoing: Bool = false
@@ -27,13 +27,13 @@ final class CoalescingUndoManager<T>: UndoManager {
 
         assert(isCoalescing, "Coalescing not started. Call startCoalescing(withTarget:_) first")
 
-        coalescing = (value: value, action: coalescing?.action)
+        coalescing = (value: value, undoAction: coalescing?.undoAction)
         return
     }
 
-    func startCoalescing<Target>(_ value: T, withTarget target: Target, _ action: @escaping (Target, T) -> Void) where Target: AnyObject {
+    func startCoalescing<Target>(_ value: T, withTarget target: Target, _ undoAction: @escaping (Target, T) -> Void) where Target: AnyObject {
         guard isUndoRegistrationEnabled else { return }
-        coalescing = (value: value, action: { action(target, $0) })
+        coalescing = (value: value, undoAction: { undoAction(target, $0) })
     }
 
     override var canRedo: Bool {
@@ -53,9 +53,9 @@ final class CoalescingUndoManager<T>: UndoManager {
     }
 
     override func undo() {
-        if let action = coalescing?.action, let value = coalescing?.value {
+        if let undoAction = coalescing?.undoAction, let value = coalescing?.value {
             coalescingIsUndoing = true
-            action(value)
+            undoAction(value)
             breakCoalescing()
             coalescingIsUndoing = false
         } else {
