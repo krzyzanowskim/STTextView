@@ -7,6 +7,8 @@ import Cocoa
 extension STTextView {
 
     open override func yank(_ sender: Any?) {
+        // TODO: Implement proper Kill and yank (yank: + yankAndSelect:)
+        // see https://www.cocoawithlove.com/2009/12/multiple-copy-buffers-cursor-and-tab.html
         cut(sender)
     }
 
