@@ -798,17 +798,19 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 // Register undo/redo
                 // I can't control internal redoStack, and coalescing messes up with the state
                 // resulting in broken undo/redo availability
-                undoManager.registerUndo(withTarget: self) { textView in
-                    // Regular undo action
-                    textView.willChangeText()
+                if !undoManager.isUndoing {
+                    undoManager.registerUndo(withTarget: self) { textView in
+                        // Regular undo action
+                        textView.willChangeText()
 
-                    textView.replaceCharacters(
-                        in: undoRange,
-                        with: previousStringInRange,
-                        allowsTypingCoalescing: false
-                    )
+                        textView.replaceCharacters(
+                            in: undoRange,
+                            with: previousStringInRange,
+                            allowsTypingCoalescing: false
+                        )
 
-                    textView.didChangeText()
+                        textView.didChangeText()
+                    }
                 }
             }
         }

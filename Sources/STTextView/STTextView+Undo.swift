@@ -14,11 +14,15 @@ extension STTextView {
     }
 
     @objc func undo(_ sender: AnyObject?) {
-        undoManager?.undo()
+        if allowsUndo {
+            undoManager?.undo()
+        }
     }
 
     @objc func redo(_ sender: AnyObject?) {
-        undoManager?.redo()
+        if allowsUndo {
+            undoManager?.redo()
+        }
     }
 
 }
