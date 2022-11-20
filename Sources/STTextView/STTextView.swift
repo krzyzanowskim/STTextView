@@ -753,6 +753,14 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                         ))
                         
                     } else {
+
+                        // register undo and break coalescing
+                        if let undoAction = undoManager.coalescing?.undoAction, let value = undoManager.coalescing?.value {
+                            undoManager.registerUndo(withTarget: self) { textView in
+                                undoAction(value)
+                            }
+                        }
+
                         breakUndoCoalescing()
                     }
                 }
