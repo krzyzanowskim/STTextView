@@ -1,8 +1,8 @@
 import Foundation
 
-final class CoalescingUndoManager<T>: UndoManager {
+final class CoalescingUndoManager: UndoManager {
 
-    private(set) var coalescing: (value: T?, undoAction: ((T) -> Void)?)?
+    private(set) var coalescing: (value: TypingTextUndo?, undoAction: ((TypingTextUndo) -> Void)?)?
 
     private var coalescingIsUndoing: Bool = false
     private var coalescingIsRedoing: Bool = false
@@ -12,6 +12,18 @@ final class CoalescingUndoManager<T>: UndoManager {
     }
 
     func breakCoalescing() {
+        // register undo and break coalescing
+        if !isUndoing, !isRedoing, let undoAction = coalescing?.undoAction, let value = coalescing?.value {
+            // Disable implicit grouping to avoid group coalescing and non-coalescing undo
+            groupsByEvent = false
+            beginUndoGrouping()
+            registerUndo(withTarget: self) { _ in
+                undoAction(value)
+            }
+            endUndoGrouping()
+            groupsByEvent = true
+        }
+
         coalescing = nil
     }
 
@@ -20,7 +32,7 @@ final class CoalescingUndoManager<T>: UndoManager {
         self.runLoopModes = [.default, .common, .eventTracking, .modalPanel]
     }
 
-    func coalesce(_ value: T) {
+    func coalesce(_ value: TypingTextUndo) {
         guard isUndoRegistrationEnabled else {
             return
         }
@@ -31,7 +43,7 @@ final class CoalescingUndoManager<T>: UndoManager {
         return
     }
 
-    func startCoalescing<Target>(_ value: T, withTarget target: Target, _ undoAction: @escaping (Target, T) -> Void) where Target: AnyObject {
+    func startCoalescing<Target>(_ value: TypingTextUndo, withTarget target: Target, _ undoAction: @escaping (Target, TypingTextUndo) -> Void) where Target: AnyObject {
         guard isUndoRegistrationEnabled else { return }
         coalescing = (value: value, undoAction: { undoAction(target, $0) })
     }

@@ -275,7 +275,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         highlightSelectedLine = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
         allowsUndo = true
-        _undoManager = CoalescingUndoManager<TypingTextUndo>()
+        _undoManager = CoalescingUndoManager()
         isFirstResponder = false
 
         textFinder = NSTextFinder()
@@ -738,7 +738,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         if allowsUndo, let undoManager = undoManager {
             // typing coalescing
             if processingKeyEvent, allowsTypingCoalescing,
-               let undoManager = undoManager as? CoalescingUndoManager<TypingTextUndo>
+               let undoManager = undoManager as? CoalescingUndoManager
             {
                 if undoManager.isCoalescing {
                     // Extend existing coalesce range
@@ -753,14 +753,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                         ))
                         
                     } else {
-
-                        // register undo and break coalescing
-                        if let undoAction = undoManager.coalescing?.undoAction, let value = undoManager.coalescing?.value {
-                            undoManager.registerUndo(withTarget: self) { textView in
-                                undoAction(value)
-                            }
-                        }
-
                         breakUndoCoalescing()
                     }
                 }
@@ -791,7 +783,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                         textView.didChangeText()
                     }
                 }
-            } else if !undoManager.isUndoing {
+            } else if !undoManager.isUndoing, !undoManager.isRedoing {
                 breakUndoCoalescing()
 
                 // Reach to NSTextStorage because NSTextContentStorage range extraction is cumbersome.
@@ -856,7 +848,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     }
 
     public func breakUndoCoalescing() {
-        (undoManager as? CoalescingUndoManager<TypingTextUndo>)?.breakCoalescing()
+        (undoManager as? CoalescingUndoManager)?.breakCoalescing()
     }
 }
 
