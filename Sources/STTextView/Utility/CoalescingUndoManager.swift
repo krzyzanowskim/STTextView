@@ -70,6 +70,10 @@ final class CoalescingUndoManager: UndoManager {
             undoAction(value)
             breakCoalescing()
             coalescingIsUndoing = false
+            // FIXME: call undo to register redo
+            // When the Undo system performs an undo action,
+            // it expects me to register the redo actions using the same code as for undo.
+            // That makes the coalescing flow tricky to make right right now
         } else {
             super.undo()
         }
