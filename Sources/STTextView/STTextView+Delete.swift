@@ -74,20 +74,10 @@ extension STTextView {
             return
         }
 
-        var didChange = false
         textContentStorage.performEditingTransaction {
             for textRange in textRanges where shouldChangeText(in: textRange, replacementString: nil) {
-                if didChange == false {
-                    willChangeText()
-                }
-
-                didChange = true
                 replaceCharacters(in: textRange, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)
             }
-        }
-
-        if didChange {
-            didChangeText()
         }
     }
 }
