@@ -6,9 +6,9 @@ import Cocoa
 
 public protocol STTextViewDelegate: AnyObject {
     /// Any keyDown or paste which changes the contents causes this
-    func textWillChange(_ notification: Notification)
+    func textViewWillChangeText(_ notification: Notification)
     /// Any keyDown or paste which changes the contents causes this
-    func textDidChange(_ notification: Notification)
+    func textViewDidChangeText(_ notification: Notification)
     /// Sent when the selection changes in the text view.
     func textViewDidChangeSelection(_ notification: Notification)
     /// Sent when a text view needs to determine if text in a specified range should be changed.
@@ -31,11 +31,11 @@ public protocol STTextViewDelegate: AnyObject {
 
 public extension STTextViewDelegate {
 
-    func textWillChange(_ notification: Notification) {
+    func textViewWillChangeText(_ notification: Notification) {
         //
     }
 
-    func textDidChange(_ notification: Notification) {
+    func textViewDidChangeText(_ notification: Notification) {
         //
     }
 

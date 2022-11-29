@@ -96,21 +96,17 @@ extension STTextView: NSTextInputClient {
     open func insertText(_ string: Any, replacementRange: NSRange) {
         guard isEditable else { return }
 
-        willChangeText()
-        var didChangeFlag = false
         textContentStorage.performEditingTransaction {
             switch string {
             case let string as String:
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string) {
                         replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
-                        didChangeFlag = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string) {
                             replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
-                            didChangeFlag = true
                         }
                     }
                 }
@@ -118,23 +114,17 @@ extension STTextView: NSTextInputClient {
                 if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
                     if shouldChangeText(in: textRange, replacementString: string.string) {
                         replaceCharacters(in: textRange, with: string, allowsTypingCoalescing: true)
-                        didChangeFlag = true
                     }
                 } else if !textLayoutManager.textSelections.isEmpty {
                     for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                         if shouldChangeText(in: textRange, replacementString: string.string) {
                             replaceCharacters(in: textRange, with: string, allowsTypingCoalescing: true)
-                            didChangeFlag = true
                         }
                     }
                 }
             default:
                 assertionFailure()
             }
-        }
-
-        if didChangeFlag {
-            didChangeText()
         }
     }
 
