@@ -15,8 +15,8 @@ import Cocoa
 /// A TextKit2 text view without NSTextView baggage
 open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
-    public static let willChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
-    public static let didChangeNotification = NSText.didChangeNotification
+    public static let willChangeTextNotification = NSNotification.Name("NSTextWillChangeNotification")
+    public static let didChangeTextNotification = NSText.didChangeNotification
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
     /// Returns the type of layer used by the receiver.
@@ -720,18 +720,18 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             textFinder.noteClientStringWillChange()
         }
 
-        let notification = Notification(name: STTextView.willChangeNotification, object: self, userInfo: nil)
+        let notification = Notification(name: STTextView.willChangeTextNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
-        delegate?.textWillChange(notification)
+        delegate?.textViewWillChangeText(notification)
     }
 
     open func didChangeText() {
         needScrollToSelection = true
 
-        let notification = Notification(name: STTextView.didChangeNotification, object: self, userInfo: nil)
+        let notification = Notification(name: STTextView.didChangeTextNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         needsDisplay = true
-        delegate?.textDidChange(notification)
+        delegate?.textViewDidChangeText(notification)
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
