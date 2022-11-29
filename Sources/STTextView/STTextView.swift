@@ -780,15 +780,11 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
                     undoManager.startCoalescing(startTypingUndo, withTarget: self) { textView, typingTextUndo in
                         // Undo coalesced session action
-                        textView.willChangeText()
-
                         textView.replaceCharacters(
                             in: typingTextUndo.textRange,
                             with: typingTextUndo.attribugedString ?? NSAttributedString(),
                             allowsTypingCoalescing: false
                         )
-
-                        textView.didChangeText()
                     }
                 }
             } else if !undoManager.isUndoing {
@@ -808,19 +804,16 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
                 // resulting in broken undo/redo availability
                 undoManager.registerUndo(withTarget: self) { textView in
                     // Regular undo action
-                    textView.willChangeText()
-
                     textView.replaceCharacters(
                         in: undoRange,
                         with: previousStringInRange,
                         allowsTypingCoalescing: false
                     )
-
-                    textView.didChangeText()
                 }
             }
         }
 
+        willChangeText()
         delegate?.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
         textContentStorage.textStorage?.replaceCharacters(
@@ -829,6 +822,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
         )
 
         delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
+        didChangeText()
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
