@@ -22,6 +22,7 @@ List of issues I reported to Apple so far:
 - FB9971054: NSLayoutManager.enumerateCaretOffsetsInLineFragment ignores starting location
 - FB9971054: NSTextView assert on selection when setup with TextKit2
 - FB9743449, FB10019859: NSTextContentStorage.textElements(for:) returns no element, while enumerateTextElements does return elements
+- FB11898356: textSelections(interactingAt:inContainerAt:anchors:modifiers:selecting:bounds:) produces wrong selections for certain locations  
 
 ... I'm aware that the list of issues is not complete.
 
