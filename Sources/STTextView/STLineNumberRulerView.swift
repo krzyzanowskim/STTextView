@@ -221,7 +221,7 @@ open class STLineNumberRulerView: NSRulerView {
             origin: originPoint,
             size: CGSize(
                 width: frame.width,
-                height: selectionFrame.height
+                height: textView!.typingLineHeight
                 )
             )
                 
