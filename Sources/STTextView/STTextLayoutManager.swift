@@ -11,4 +11,10 @@ final class STTextLayoutManager: NSTextLayoutManager {
             NotificationCenter.default.post(notification)
         }
     }
+
+    // lineFragmentRange return invalid ranges FB11898356 that result in broken selection
+    //override func lineFragmentRange(for point: CGPoint, inContainerAt location: NSTextLocation) -> NSTextRange? {
+    //    let textRange = super.lineFragmentRange(for: point, inContainerAt: location)
+    //    return textRange
+    //}
 }
