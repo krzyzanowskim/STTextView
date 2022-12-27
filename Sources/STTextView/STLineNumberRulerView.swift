@@ -221,7 +221,7 @@ open class STLineNumberRulerView: NSRulerView {
             origin: originPoint,
             size: CGSize(
                 width: frame.width,
-                height: textView!.typingLineHeight
+                height: selectionFrame.height
                 )
             )
                 
@@ -247,6 +247,11 @@ open class STLineNumberRulerView: NSRulerView {
             context.addLines(between: [CGPoint(x: ruleThickness, y: 0), CGPoint(x: ruleThickness, y: frame.maxY) ])
             context.strokePath()
         }
+        
+        // Needs to run before adding the lines, since it will not be set as the background otherwise
+        if drawHighlightedRuler {
+            drawHighlightedRuler(context, relativePoint, in: dirtyRect)
+        }
 
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
@@ -257,9 +262,6 @@ open class STLineNumberRulerView: NSRulerView {
 
         context.restoreGState()
 
-        if drawHighlightedRuler {
-            drawHighlightedRuler(context, relativePoint, in: dirtyRect)
-        }
         drawHashMarksAndLabels(in: dirtyRect)
 
         if let markers = markers, !markers.isEmpty {
