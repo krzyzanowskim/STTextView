@@ -2,7 +2,7 @@
 
 The goal of this project is to build [NSTextView](https://developer.apple.com/documentation/appkit/nstextview) replacement component utilizing TextKit2. Because reasons.
 
-The component is developed to serve [Swift Studio](https://swiftstudio.app) needs. (**ST** prefix stands for "**S**wift s**T**udio" because **SS** is not good prefix since 1939)
+The component is developed to serve [Swift Studio](https://swiftstudio.app) needs. (**ST** prefix stands for "**S**wift s**T**udio" because **[SS](https://en.wikipedia.org/wiki/Schutzstaffel)** is not good prefix since 1939)
 
 https://user-images.githubusercontent.com/758033/194773621-8d1a403e-b319-4a56-bd7e-e4e67f026343.mp4
 
@@ -22,6 +22,7 @@ List of issues I reported to Apple so far:
 - FB9971054: NSLayoutManager.enumerateCaretOffsetsInLineFragment ignores starting location
 - FB9971054: NSTextView assert on selection when setup with TextKit2
 - FB9743449, FB10019859: NSTextContentStorage.textElements(for:) returns no element, while enumerateTextElements does return elements
+- FB11898356: textSelections(interactingAt:inContainerAt:anchors:modifiers:selecting:bounds:) produces wrong selections for certain locations  
 
 ... I'm aware that the list of issues is not complete.
 

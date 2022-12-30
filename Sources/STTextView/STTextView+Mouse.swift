@@ -40,11 +40,13 @@ extension STTextView {
     open override func mouseDragged(with event: NSEvent) {
         if isSelectable, event.type == .leftMouseDragged, (!event.deltaY.isZero || !event.deltaX.isZero) {
             let point = convert(event.locationInWindow, from: nil)
+
             updateTextSelection(
                 interactingAt: point,
                 inContainerAt: textLayoutManager.documentRange.location,
                 anchors: textLayoutManager.textSelections,
                 extending: true,
+                isDragging: true,
                 visual: event.modifierFlags.contains(.option)
             )
 
