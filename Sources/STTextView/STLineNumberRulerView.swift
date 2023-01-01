@@ -33,13 +33,13 @@ open class STLineNumberRulerView: NSRulerView {
     open var backgroundColor: NSColor = NSColor.controlBackgroundColor
     
     @Invalidating(.display)
-    open var drawHighlightedRuler: Bool = true
+    open var drawHighlightedRuler: Bool = false
     
     @Invalidating(.display)
     open var highlightRulerBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
     
     @Invalidating(.display)
-    open var highlightRulerForegroundColor: NSColor = .textColor
+    open var highlightLineNumberColor: NSColor = .textColor
 
     /// The color of the separator.
     ///
@@ -92,7 +92,7 @@ open class STLineNumberRulerView: NSRulerView {
         
         let highlightAttributes: lineAttributes = [
             .font: font,
-            .foregroundColor: highlightRulerForegroundColor.cgColor
+            .foregroundColor: highlightLineNumberColor.cgColor
         ]
         lines.removeAll(keepingCapacity: true)
 
@@ -179,7 +179,8 @@ open class STLineNumberRulerView: NSRulerView {
     // Return text attributes depending on whether the rule line is highlighted or not.
     private func highlightAttribute(_ yPosition: CGFloat, _ attributes: lineAttributes, highlightWith highlightAttributes: lineAttributes) -> lineAttributes {
         guard let textLayoutManager = textView?.textLayoutManager,
-              let caretLocation = textLayoutManager.insertionPointLocation
+              let caretLocation = textLayoutManager.insertionPointLocation,
+              drawHighlightedRuler == true
         else {
             return attributes
         }
@@ -221,7 +222,7 @@ open class STLineNumberRulerView: NSRulerView {
             origin: originPoint,
             size: CGSize(
                 width: frame.width,
-                height: selectionFrame.height
+                height: textView?.typingLineHeight ?? selectionFrame.height
                 )
             )
                 

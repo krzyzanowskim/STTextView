@@ -28,7 +28,9 @@ final class ViewController: NSViewController {
         // Line numbers
         let rulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
         // Configure the ruler view
-        rulerView.highlightRulerForegroundColor = NSColor.white
+        rulerView.drawHighlightedRuler = true
+        rulerView.highlightLineNumberColor = .white
+
         scrollView.verticalRulerView = rulerView
         scrollView.rulersVisible = true
 
