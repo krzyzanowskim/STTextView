@@ -142,7 +142,7 @@ open class STLineNumberRulerView: NSRulerView {
 
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
                     let originPoint = textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset)
-                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: highlightAttribute(originPoint.y, attributes, highlightWith: highlightAttributes))
+                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, highlightWith: highlightAttributes))
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     lines.append(
@@ -176,18 +176,17 @@ open class STLineNumberRulerView: NSRulerView {
         }
     }
     
-    // Return text attributes depending on whether the rule line is highlighted or not.
-    private func highlightAttribute(_ yPosition: CGFloat, _ attributes: lineAttributes, highlightWith highlightAttributes: lineAttributes) -> lineAttributes {
+    // Return text attributes depending on whether the ruleline is highlighted or not.
+    private func determineLineNumberAttribute(_ yPosition: CGFloat, _ attributes: lineAttributes, highlightWith highlightAttributes: lineAttributes) -> lineAttributes {
         guard let textLayoutManager = textView?.textLayoutManager,
               let caretLocation = textLayoutManager.insertionPointLocation,
               drawHighlightedRuler == true
         else {
             return attributes
         }
-        
        var attr = attributes
         // Get the current highlight frame of the textContainer
-        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, baselinePosition, textContainer -> Bool in
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { _, textSegmentFrame, _, _ -> Bool in
             // If the y-coordinate of the Ctline is in between the top and bottom edge of the highlight frame, then that ruler line has to be highlighted.
             if textSegmentFrame.origin.y < yPosition && ((textSegmentFrame.origin.y + textSegmentFrame.height) > yPosition) {
                 attr = highlightAttributes
@@ -204,13 +203,18 @@ open class STLineNumberRulerView: NSRulerView {
     // Draw a background rectangle to highlight the selected ruler line
     open func drawHighlightedRuler(_ context: CGContext, _ relativePoint: NSPoint,  in rect: NSRect) {
         guard let textLayoutManager = textView?.textLayoutManager,
-              let caretLocation = textLayoutManager.insertionPointLocation
+              let caretLocation = textLayoutManager.insertionPointLocation,
+              let textView = textView
         else {
             return
         }
         
-        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, baselinePosition, textContainer -> Bool in
-            let selectionFrame: NSRect = textSegmentFrame
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, _, _ -> Bool in
+            var selectionFrame: NSRect = textSegmentFrame
+            
+            if segmentRange == textView.textLayoutManager.documentRange {
+                selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: textView.typingLineHeight)).pixelAligned
+            }
                 
             context.saveGState()
             context.setFillColor(highlightRulerBackgroundColor.cgColor)
@@ -222,7 +226,7 @@ open class STLineNumberRulerView: NSRulerView {
             origin: originPoint,
             size: CGSize(
                 width: frame.width,
-                height: textView?.typingLineHeight ?? selectionFrame.height
+                height: selectionFrame.height
                 )
             )
                 
