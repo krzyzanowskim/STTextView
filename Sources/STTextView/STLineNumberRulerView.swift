@@ -55,8 +55,6 @@ open class STLineNumberRulerView: NSRulerView {
 
     private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
     
-    typealias lineAttributes = [NSAttributedString.Key: Any]
-
     public required init(textView: STTextView, scrollView: NSScrollView) {
         font = textView.font ?? NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.labelFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.labelFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.labelFontSize, weight: .regular)
 
@@ -85,12 +83,12 @@ open class STLineNumberRulerView: NSRulerView {
     }
 
     private func invalidateLineNumbers() {
-        let attributes: lineAttributes = [
+        let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: textColor
         ]
         
-        let highlightAttributes: lineAttributes = [
+        let highlightAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: highlightLineNumberColor.cgColor
         ]
@@ -177,7 +175,8 @@ open class STLineNumberRulerView: NSRulerView {
     }
     
     // Return text attributes depending on whether the ruleline is highlighted or not.
-    private func determineLineNumberAttribute(_ yPosition: CGFloat, _ attributes: lineAttributes, highlightWith highlightAttributes: lineAttributes) -> lineAttributes {
+    private func determineLineNumberAttribute(_ yPosition: CGFloat, _ attributes: [NSAttributedString.Key: Any],
+                                              highlightWith highlightAttributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
         guard let textLayoutManager = textView?.textLayoutManager,
               let caretLocation = textLayoutManager.insertionPointLocation,
               drawHighlightedRuler == true
