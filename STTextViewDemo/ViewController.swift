@@ -26,7 +26,12 @@ final class ViewController: NSViewController {
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 
         // Line numbers
-        scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+        let rulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+        // Configure the ruler view
+        rulerView.drawHighlightedRuler = true
+        rulerView.highlightLineNumberColor = .textColor
+
+        scrollView.verticalRulerView = rulerView
         scrollView.rulersVisible = true
 
         // textView.addAttributes([.font: NSFont.systemFont(ofSize: 50)], range: NSRange(location: 0, length: 1))

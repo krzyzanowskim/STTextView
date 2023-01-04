@@ -31,6 +31,15 @@ open class STLineNumberRulerView: NSRulerView {
     /// The background color of the ruler view.
     @Invalidating(.display)
     open var backgroundColor: NSColor = NSColor.controlBackgroundColor
+    
+    @Invalidating(.display)
+    open var drawHighlightedRuler: Bool = false
+    
+    @Invalidating(.display)
+    open var highlightRulerBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
+    
+    @Invalidating(.display)
+    open var highlightLineNumberColor: NSColor = .textColor
 
     /// The color of the separator.
     ///
@@ -45,7 +54,7 @@ open class STLineNumberRulerView: NSRulerView {
     open var baselineOffset: CGFloat = 0
 
     private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
-
+    
     public required init(textView: STTextView, scrollView: NSScrollView) {
         font = textView.font ?? NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.labelFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.labelFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.labelFontSize, weight: .regular)
 
@@ -62,7 +71,11 @@ open class STLineNumberRulerView: NSRulerView {
             self?.invalidateLineNumbers()
             self?.needsDisplay = true
         }
-
+        
+        NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textView.textLayoutManager, queue: .main) { [weak self] _ in
+            self?.invalidateLineNumbers()
+            self?.needsDisplay = true
+        }
     }
 
     required public init(coder: NSCoder) {
@@ -74,7 +87,11 @@ open class STLineNumberRulerView: NSRulerView {
             .font: font,
             .foregroundColor: textColor
         ]
-
+        
+        let highlightAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: highlightLineNumberColor.cgColor
+        ]
         lines.removeAll(keepingCapacity: true)
 
         guard let textLayoutManager = textView?.textLayoutManager else {
@@ -122,7 +139,8 @@ open class STLineNumberRulerView: NSRulerView {
                     }
 
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
-                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: attributes)
+                    let originPoint = textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset)
+                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, highlightWith: highlightAttributes))
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     lines.append(
@@ -155,9 +173,66 @@ open class STLineNumberRulerView: NSRulerView {
             )
         }
     }
+    
+    // Return text attributes depending on whether the ruleline is highlighted or not.
+    private func determineLineNumberAttribute(_ yPosition: CGFloat, _ attributes: [NSAttributedString.Key: Any],
+                                              highlightWith highlightAttributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
+        guard let textLayoutManager = textView?.textLayoutManager,
+              let caretLocation = textLayoutManager.insertionPointLocation,
+              drawHighlightedRuler == true
+        else {
+            return attributes
+        }
+       var attr = attributes
+        // Get the current highlight frame of the textContainer
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { _, textSegmentFrame, _, _ -> Bool in
+            // If the y-coordinate of the Ctline is in between the top and bottom edge of the highlight frame, then that ruler line has to be highlighted.
+            if textSegmentFrame.origin.y < yPosition && ((textSegmentFrame.origin.y + textSegmentFrame.height) > yPosition) {
+                attr = highlightAttributes
+            }
+            return true
+        }
+        return attr
+    }
 
     open override func drawHashMarksAndLabels(in rect: NSRect) {
         //
+    }
+    
+    // Draw a background rectangle to highlight the selected ruler line
+    open func drawHighlightedRuler(_ context: CGContext, _ relativePoint: NSPoint,  in rect: NSRect) {
+        guard let textLayoutManager = textView?.textLayoutManager,
+              let caretLocation = textLayoutManager.insertionPointLocation,
+              let textView = textView
+        else {
+            return
+        }
+        
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, _, _ -> Bool in
+            var selectionFrame: NSRect = textSegmentFrame
+            
+            if segmentRange == textView.textLayoutManager.documentRange {
+                selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: textView.typingLineHeight)).pixelAligned
+            }
+                
+            context.saveGState()
+            context.setFillColor(highlightRulerBackgroundColor.cgColor)
+                
+            let originPoint = CGPoint(x: frame.minX, y: selectionFrame.origin.y).moved(dx: 0, dy: relativePoint.y)
+
+            // Create background rectangle for highlight
+            let fillRect = CGRect(
+            origin: originPoint,
+            size: CGSize(
+                width: frame.width,
+                height: selectionFrame.height
+                )
+            )
+                
+            context.fill(fillRect)
+            context.restoreGState()
+            return true
+        }
     }
 
     open override func draw(_ dirtyRect: NSRect) {
@@ -175,6 +250,11 @@ open class STLineNumberRulerView: NSRulerView {
             context.setStrokeColor(separatorColor.cgColor)
             context.addLines(between: [CGPoint(x: ruleThickness, y: 0), CGPoint(x: ruleThickness, y: frame.maxY) ])
             context.strokePath()
+        }
+        
+        // Needs to run before adding the lines, since it will not be set as the background otherwise
+        if drawHighlightedRuler {
+            drawHighlightedRuler(context, relativePoint, in: dirtyRect)
         }
 
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
