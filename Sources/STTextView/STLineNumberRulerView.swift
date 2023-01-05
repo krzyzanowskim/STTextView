@@ -18,7 +18,10 @@ open class STLineNumberRulerView: NSRulerView {
 
     /// The horizontal padding of the ruler view.
     @Invalidating(.display)
-    open var rulePadding: CGFloat = 6
+    open var leftRulePadding: CGFloat = 6
+    
+    @Invalidating(.display)
+    open var rightRulePadding: CGFloat = 6
 
     /// The text color of the line numbers.
     @Invalidating(.display)
@@ -158,8 +161,8 @@ open class STLineNumberRulerView: NSRulerView {
         // Adjust ruleThickness based on last (longest) value
         if let lastLine = lines.last {
             let ctLineWidth = CTLineGetTypographicBounds(lastLine.ctLine, nil, nil, nil)
-            if ruleThickness < (ctLineWidth + (rulePadding * 2)) {
-                self.ruleThickness = max(self.ruleThickness, ctLineWidth + (self.rulePadding * 2))
+            if ruleThickness < (ctLineWidth + (leftRulePadding + rightRulePadding)) {
+                self.ruleThickness = max(self.ruleThickness, ctLineWidth + (leftRulePadding + rightRulePadding))
             }
         }
 
@@ -168,7 +171,7 @@ open class STLineNumberRulerView: NSRulerView {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return (
-                textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rulePadding), dy: -baselineOffset),
+                textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rightRulePadding), dy: -baselineOffset),
                 ctLine: $0.ctLine
             )
         }
