@@ -15,13 +15,14 @@ final class ViewController: NSViewController {
         textView = scrollView.documentView as? STTextView
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.hasVerticalScroller = true
+        scrollView.drawsBackground = true
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        paragraph.lineHeightMultiple = 1.2
+        paragraph.lineHeightMultiple = 1.1
         paragraph.defaultTabInterval = 28 // default
 
         textView.defaultParagraphStyle = paragraph
-        textView.font = NSFont.monospacedSystemFont(ofSize: 20, weight: .regular)
+        textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 
@@ -34,10 +35,10 @@ final class ViewController: NSViewController {
         scrollView.verticalRulerView = rulerView
         scrollView.rulersVisible = true
 
-        // textView.addAttributes([.font: NSFont.systemFont(ofSize: 50)], range: NSRange(location: 0, length: 1))
+        textView.addAttributes([.foregroundColor: NSColor.systemBlue], range: NSRange(location: 0, length: 1))
+        textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 2, length: 10))
+        textView.addAttributes([.foregroundColor: NSColor.controlAccentColor, .font: NSFont.boldSystemFont(ofSize: 14)], range: NSRange(location: 18, length: 4))
 
-        textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 6, length: 5))
-        textView.addAttributes([.foregroundColor: NSColor.systemMint], range: NSRange(location: 12, length: 5))
         textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true
         textView.textFinder.isIncrementalSearchingEnabled = true
@@ -54,12 +55,14 @@ final class ViewController: NSViewController {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        let lineAnnotation1 = STLineAnnotation(
-            location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 10)!
+        let lineAnnotation1 = MyLineAnnotation(
+            message: "That's the goal",
+            location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 22)!
         )
         textView.addAnnotation(lineAnnotation1)
 
-        let lineAnnotation2 = STLineAnnotation(
+        let lineAnnotation2 = MyLineAnnotation(
+            message: "Fix It!",
             location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 1550)!
         )
         textView.addAnnotation(lineAnnotation2)
@@ -75,6 +78,15 @@ final class ViewController: NSViewController {
 
 }
 
+class MyLineAnnotation: STLineAnnotation {
+    let message: String
+
+    init(message: String, location: NSTextLocation) {
+        self.message = message
+        super.init(location: location)
+    }
+}
+
 extension ViewController: STTextViewDelegate {
 
     func textDidChange(_ notification: Notification) {
@@ -82,12 +94,16 @@ extension ViewController: STTextViewDelegate {
     }
 
     func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STLineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
+        guard let myLineAnnotation = lineAnnotation as? MyLineAnnotation else {
+            return nil
+        }
 
         let messageFont = NSFont.preferredFont(forTextStyle: .body).withSize(textView.font!.pointSize)
-        
+
         let decorationView = STAnnotationLabelView(
-            annotation: lineAnnotation,
+            annotation: myLineAnnotation,
             label: AnnotationLabelView(
+                message: myLineAnnotation.message,
                 action: {
                     textView.removeAnnotation($0)
                 },
@@ -126,12 +142,13 @@ extension ViewController: STTextViewDelegate {
 }
 
 private struct AnnotationLabelView: View {
+    let message: String
     let action: (STLineAnnotation) -> Void
     let lineAnnotation: STLineAnnotation
 
     var body: some View {
         Label {
-            Text("That's what she said")
+            Text(message)
         } icon: {
             Button {
                 action(lineAnnotation)
@@ -146,10 +163,11 @@ private struct AnnotationLabelView: View {
                     Image(systemName: "xmark.octagon")
                         .foregroundStyle(.white)
                 }
+                .shadow(radius: 1)
             }
             .buttonStyle(.plain)
         }
-        .background(.yellow)
+        .background(Color.yellow)
         .clipShape(RoundedRectangle(cornerRadius:4))
     }
 }

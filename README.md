@@ -88,8 +88,24 @@ Add line numbers using specialized `STLineNumberRulerView` (specialized subclass
 let textView = STTextView()
 let scrollView = NSScrollView()
 scrollView.documentView = textView
-scrollView.verticalRulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+
+// Line numbers
+let rulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+// Configure the ruler view
+rulerView.drawHighlightedRuler = true
+// Set text color of the selected line number
+rulerView.highlightLineNumberColor = .textColor
+
+// Add to NSScrollView containing STTextView
+scrollView.verticalRulerView = rulerView
 scrollView.rulersVisible = true
+```
+
+Enable an optional search-and-replace find interface inside a view, usually a scroll view.
+
+```swift
+textView.textFinder.isIncrementalSearchingEnabled = true
+textView.textFinder.incrementalSearchingShouldDimContentView = true
 ```
 
 ## 🐛 TextKit 2 Bug Reports List
