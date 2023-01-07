@@ -99,9 +99,8 @@ open class STCompletionViewController: STAnyCompletionViewController {
                         self.tableView.keyDown(with: event)
                         return nil
                     default:
-                        //self.window?.windowController?.insertText(c)
-                        //NSSound.beep()
-                        break
+                        self.cancelOperation(self)
+                        return nil
                     }
                 }
             }
