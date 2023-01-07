@@ -1,6 +1,6 @@
 # STTextView
 
-The goal of this project is to build [NSTextView](https://developer.apple.com/documentation/appkit/nstextview) replacement component utilizing TextKit2. Because reasons.
+The goal of this project is to build [NSTextView](https://developer.apple.com/documentation/appkit/nstextview) replacement component utilizing [TextKit 2](https://developer.apple.com/videos/play/wwdc2021/10061/). [because many good reasons](#-textkit-2-bug-reports-list).
 
 The component is developed to serve [Swift Studio](https://swiftstudio.app) needs. (**ST** prefix stands for "**S**wift s**T**udio" because **[SS](https://en.wikipedia.org/wiki/Schutzstaffel)** is not good prefix since 1939)
 
@@ -36,7 +36,7 @@ let package = Package(
 
 ## Usage
 
-### 1. Create a TextView
+### Create a TextView
 
 The STTextView is a subclass of NSView and as such can be initialized like any other view. It has an API that is similar to the one of NSTextView.
 
@@ -50,6 +50,8 @@ let textView = STTextView()
 let scrollView = NSScrollView()
 scrollView.documentView = textView
 ```
+
+### Customize
 
 The text view can be customized in a variety of ways. 
 
@@ -67,7 +69,7 @@ textView.defaultParagraphStyle = paragraph
 textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
 
 // Set default text color
-textView.textColor = .textColor
+textView.textColor = NSColor.textColor
 
 // Set text value
 textView.string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ornare lobortis sem a vulputate."
