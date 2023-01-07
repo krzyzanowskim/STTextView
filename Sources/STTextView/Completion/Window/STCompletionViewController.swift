@@ -100,7 +100,6 @@ open class STCompletionViewController: STAnyCompletionViewController {
                         return nil
                     default:
                         self.cancelOperation(self)
-                        return nil
                     }
                 }
             }
@@ -143,7 +142,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
 
     private func insertCompletion(movement: NSTextMovement) {
         defer {
-            self.view.window?.close()
+            self.cancelOperation(self)
         }
 
         guard tableView.selectedRow != -1 else { return }
