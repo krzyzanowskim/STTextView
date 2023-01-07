@@ -34,13 +34,13 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
     func replaceCharacters(in range: NSRange, with string: String) {
         guard let textContentManager = textContentManager,
-              let textRange = NSTextRange(range, in: textContentManager)
+              let textRange = NSTextRange(range, in: textContentManager),
+              let textView = textView
         else {
             return
         }
 
-        textView?.willChangeText()
-        textView?.replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
+        textView.replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
     }
 
     func didReplaceCharacters() {
