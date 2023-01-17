@@ -90,7 +90,7 @@ let scrollView = NSScrollView()
 scrollView.documentView = textView
 
 // Line numbers
-let rulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+let rulerView = STLineNumberRulerView(textView: textView)
 // Configure the ruler view
 rulerView.drawHighlightedRuler = true
 // Set text color of the selected line number

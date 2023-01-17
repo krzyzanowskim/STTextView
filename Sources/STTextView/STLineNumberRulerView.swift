@@ -14,7 +14,8 @@ open class STLineNumberRulerView: NSRulerView {
     ///
     /// Initialized with a textView font value and does not update automatically when
     /// text view font changes.
-    open var font: NSFont
+    @Invalidating(.display)
+    open var font: NSFont = NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.labelFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.labelFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.labelFontSize, weight: .regular)
 
     /// The horizontal padding of the ruler view.
     @Invalidating(.display)
@@ -55,10 +56,12 @@ open class STLineNumberRulerView: NSRulerView {
 
     private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
     
-    public required init(textView: STTextView, scrollView: NSScrollView) {
-        font = textView.font ?? NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.labelFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.labelFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.labelFontSize, weight: .regular)
+    public required init(textView: STTextView, scrollView: NSScrollView? = nil) {
+        super.init(scrollView: scrollView ?? textView.enclosingScrollView, orientation: .verticalRuler)
 
-        super.init(scrollView: scrollView, orientation: .verticalRuler)
+        if let textViewFont = textView.font {
+            font = textViewFont
+        }
 
         clientView = textView
 
