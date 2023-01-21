@@ -42,7 +42,7 @@ open class STLineNumberRulerView: NSRulerView {
     
     /// The text color of the highligted line numbers.
     @Invalidating(.display)
-    open var highlightLineTextColor: NSColor = .textColor
+    open var highlightLineTextColor: NSColor? = nil
 
     /// The color of the separator.
     ///
@@ -64,6 +64,10 @@ open class STLineNumberRulerView: NSRulerView {
         if let textViewFont = textView.font {
             font = textViewFont
         }
+
+        highlightSelectedLine = textView.highlightSelectedLine
+        selectedLineHighlightColor = textView.selectedLineHighlightColor
+        highlightLineTextColor = textView.textColor
 
         clientView = textView
 
@@ -95,7 +99,7 @@ open class STLineNumberRulerView: NSRulerView {
         
         let highlightAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
-            .foregroundColor: highlightLineTextColor.cgColor
+            .foregroundColor: (highlightLineTextColor ?? textColor).cgColor
         ]
         lines.removeAll(keepingCapacity: true)
 

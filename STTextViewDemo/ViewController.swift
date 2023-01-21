@@ -26,15 +26,6 @@ final class ViewController: NSViewController {
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 
-        // Line numbers
-        let rulerView = STLineNumberRulerView(textView: textView)
-        // Configure the ruler view
-        rulerView.highlightSelectedLine = true
-        rulerView.highlightLineTextColor = .textColor
-
-        scrollView.verticalRulerView = rulerView
-        scrollView.rulersVisible = true
-
         textView.addAttributes([.foregroundColor: NSColor.systemBlue], range: NSRange(location: 0, length: 1))
         textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 2, length: 10))
         textView.addAttributes([.foregroundColor: NSColor.controlAccentColor, .font: NSFont.boldSystemFont(ofSize: 14)], range: NSRange(location: 18, length: 4))
@@ -46,6 +37,12 @@ final class ViewController: NSViewController {
         textView.delegate = self
 
         scrollView.documentView = textView
+
+        // Line numbers
+        let rulerView = STLineNumberRulerView(textView: textView)
+        scrollView.verticalRulerView = rulerView
+        scrollView.rulersVisible = true
+
 
         view.addSubview(scrollView)
         NSLayoutConstraint.activate([
