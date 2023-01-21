@@ -32,15 +32,17 @@ open class STLineNumberRulerView: NSRulerView {
     /// The background color of the ruler view.
     @Invalidating(.display)
     open var backgroundColor: NSColor = NSColor.controlBackgroundColor
-    
+
     @Invalidating(.display)
-    open var drawHighlightedRuler: Bool = false
+    open var highlightSelectedLine: Bool = false
     
+    /// The background color of the highlighted line.
     @Invalidating(.display)
-    open var highlightRulerBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
+    open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
     
+    /// The text color of the highligted line numbers.
     @Invalidating(.display)
-    open var highlightLineNumberColor: NSColor = .textColor
+    open var highlightLineTextColor: NSColor = .textColor
 
     /// The color of the separator.
     ///
@@ -93,7 +95,7 @@ open class STLineNumberRulerView: NSRulerView {
         
         let highlightAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
-            .foregroundColor: highlightLineNumberColor.cgColor
+            .foregroundColor: highlightLineTextColor.cgColor
         ]
         lines.removeAll(keepingCapacity: true)
 
@@ -182,7 +184,7 @@ open class STLineNumberRulerView: NSRulerView {
                                               highlightWith highlightAttributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
         guard let textLayoutManager = textView?.textLayoutManager,
               let caretLocation = textLayoutManager.insertionPointLocation,
-              drawHighlightedRuler == true
+              highlightSelectedLine == true
         else {
             return attributes
         }
@@ -219,7 +221,7 @@ open class STLineNumberRulerView: NSRulerView {
             }
                 
             context.saveGState()
-            context.setFillColor(highlightRulerBackgroundColor.cgColor)
+            context.setFillColor(selectedLineHighlightColor.cgColor)
                 
             let originPoint = CGPoint(x: frame.minX, y: selectionFrame.origin.y).moved(dx: 0, dy: relativePoint.y)
 
@@ -256,7 +258,7 @@ open class STLineNumberRulerView: NSRulerView {
         }
         
         // Needs to run before adding the lines, since it will not be set as the background otherwise
-        if drawHighlightedRuler {
+        if highlightSelectedLine {
             drawHighlightedRuler(context, relativePoint, in: dirtyRect)
         }
 
