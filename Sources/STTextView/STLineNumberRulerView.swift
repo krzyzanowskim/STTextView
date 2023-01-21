@@ -97,7 +97,7 @@ open class STLineNumberRulerView: NSRulerView {
             .foregroundColor: textColor
         ]
         
-        let highlightAttributes: [NSAttributedString.Key: Any] = [
+        let selectedAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: (selectedLineTextColor ?? textColor).cgColor
         ]
@@ -149,7 +149,7 @@ open class STLineNumberRulerView: NSRulerView {
 
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
                     let originPoint = textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset)
-                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, highlightWith: highlightAttributes))
+                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, selectedAttributes: selectedAttributes))
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     lines.append(
@@ -185,19 +185,20 @@ open class STLineNumberRulerView: NSRulerView {
     
     // Return text attributes depending on whether the ruleline is highlighted or not.
     private func determineLineNumberAttribute(_ yPosition: CGFloat, _ attributes: [NSAttributedString.Key: Any],
-                                              highlightWith highlightAttributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
+                                              selectedAttributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
         guard let textLayoutManager = textView?.textLayoutManager,
               let caretLocation = textLayoutManager.insertionPointLocation,
               highlightSelectedLine == true
         else {
             return attributes
         }
-       var attr = attributes
+
+        var attr = attributes
         // Get the current highlight frame of the textContainer
         textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { _, textSegmentFrame, _, _ -> Bool in
             // If the y-coordinate of the Ctline is in between the top and bottom edge of the highlight frame, then that ruler line has to be highlighted.
             if textSegmentFrame.origin.y < yPosition && ((textSegmentFrame.origin.y + textSegmentFrame.height) > yPosition) {
-                attr = highlightAttributes
+                attr = selectedAttributes
             }
             return true
         }
@@ -231,11 +232,8 @@ open class STLineNumberRulerView: NSRulerView {
 
             // Create background rectangle for highlight
             let fillRect = CGRect(
-            origin: originPoint,
-            size: CGSize(
-                width: frame.width,
-                height: selectionFrame.height
-                )
+                origin: originPoint,
+                size: CGSize(width: frame.width,height: selectionFrame.height)
             )
                 
             context.fill(fillRect)
