@@ -33,6 +33,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
     open var isSelectable: Bool {
         didSet {
             updateInsertionPointStateAndRestartTimer()
+            window?.invalidateCursorRects(for: self)
         }
     }
 
@@ -306,6 +307,13 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
             let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
             NotificationCenter.default.post(notification)
             self.delegate?.textViewDidChangeSelection(notification)
+        }
+    }
+
+    open override func resetCursorRects() {
+        super.resetCursorRects()
+        if isSelectable {
+            addCursorRect(visibleRect, cursor: .iBeam)
         }
     }
 
