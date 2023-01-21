@@ -284,6 +284,8 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         super.init(frame: frameRect)
 
+        contentLayer.delegate = self
+        selectionLayer.delegate = self
         textLayoutManager.delegate = self
         textFinderClient.textView = self
 
@@ -568,7 +570,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
                 if highlightFrame.size.width > 0 {
                     let highlightLayer = STCALayer(frame: highlightFrame)
-                    highlightLayer.contentsScale = backingScaleFactor
+                    highlightLayer.delegate = self
                     highlightLayer.backgroundColor = selectionBackgroundColor.cgColor
                     selectionLayer.addSublayer(highlightLayer)
                 } else {
@@ -866,5 +868,11 @@ private extension CALayer {
         }
 
         return false
+    }
+}
+
+extension STTextView: NSViewLayerContentScaleDelegate {
+    public func layer(_ layer: CALayer, shouldInheritContentsScale newScale: CGFloat, from window: NSWindow) -> Bool {
+        true
     }
 }
