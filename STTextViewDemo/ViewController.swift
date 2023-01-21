@@ -149,6 +149,7 @@ private struct AnnotationLabelView: View {
     var body: some View {
         Label {
             Text(message)
+                .foregroundColor(.black)
         } icon: {
             Button {
                 action(lineAnnotation)
