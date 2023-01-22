@@ -46,7 +46,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
         let fragmentLayer = fragmentLayerMap.object(forKey: textLayoutFragment) as? STTextLayoutFragmentLayer ?? STTextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
         fragmentLayer.contentsScale = backingScaleFactor
-        fragmentLayer.delegate = self
 
         // Adjust position
         let oldFrame = fragmentLayer.frame

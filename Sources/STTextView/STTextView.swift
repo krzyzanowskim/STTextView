@@ -13,7 +13,7 @@
 import Cocoa
 
 /// A TextKit2 text view without NSTextView baggage
-open class STTextView: NSView, CALayerDelegate, NSTextInput {
+open class STTextView: NSView, NSTextInput {
 
     public static let willChangeTextNotification = NSNotification.Name("NSTextWillChangeNotification")
     public static let didChangeTextNotification = NSText.didChangeNotification
@@ -284,8 +284,6 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
         super.init(frame: frameRect)
 
-        contentLayer.delegate = self
-        selectionLayer.delegate = self
         textLayoutManager.delegate = self
         textFinderClient.textView = self
 
@@ -570,7 +568,7 @@ open class STTextView: NSView, CALayerDelegate, NSTextInput {
 
                 if highlightFrame.size.width > 0 {
                     let highlightLayer = STCALayer(frame: highlightFrame)
-                    highlightLayer.delegate = self
+                    highlightLayer.contentsScale = backingScaleFactor
                     highlightLayer.backgroundColor = selectionBackgroundColor.cgColor
                     selectionLayer.addSublayer(highlightLayer)
                 } else {
@@ -868,11 +866,5 @@ private extension CALayer {
         }
 
         return false
-    }
-}
-
-extension STTextView: NSViewLayerContentScaleDelegate {
-    public func layer(_ layer: CALayer, shouldInheritContentsScale newScale: CGFloat, from window: NSWindow) -> Bool {
-        true
     }
 }
