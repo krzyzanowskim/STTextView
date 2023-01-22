@@ -43,7 +43,8 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// The color of the insertion point.
-    open var insertionPointColor: NSColor
+    @Invalidating(.display)
+    open var insertionPointColor: NSColor = .textColor
 
     /// The width of the insertion point.
     open var insertionPointWidth: CGFloat = 1.0
@@ -143,22 +144,22 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
-    open var highlightSelectedLine: Bool {
-        didSet {
-            needsDisplay = true
-        }
-    }
+    @Invalidating(.display)
+    open var highlightSelectedLine: Bool = false
 
     /// The highlight color of the selected line.
     ///
     /// Note: Needs ``highlightSelectedLine`` to be set to `true`
+    @Invalidating(.display)
     public var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
 
     /// The background color of a text selection.
+    @Invalidating(.display)
     public var selectionBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor
 
     /// The text view's background color
-    public var backgroundColor: NSColor? {
+    @Invalidating(.display)
+    public var backgroundColor: NSColor? = nil {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
         }
@@ -216,7 +217,11 @@ open class STTextView: NSView, NSTextInput {
     }
 
     public override var isFlipped: Bool {
+        #if os(macOS)
         true
+        #else
+        false
+        #endif
     }
 
     /// Generates and returns a scroll view with a STTextView set as its document view.
@@ -272,8 +277,6 @@ open class STTextView: NSView, NSTextInput {
 
         isEditable = true
         isSelectable = isEditable
-        insertionPointColor = .textColor
-        highlightSelectedLine = false
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
