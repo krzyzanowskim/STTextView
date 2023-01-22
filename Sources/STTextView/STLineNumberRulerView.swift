@@ -195,10 +195,11 @@ open class STLineNumberRulerView: NSRulerView {
 
         var attr = attributes
         // Get the current highlight frame of the textContainer
-        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { _, textSegmentFrame, _, _ -> Bool in
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight, options: [.rangeNotRequired]) { _, textSegmentFrame, _, _ -> Bool in
             // If the y-coordinate of the Ctline is in between the top and bottom edge of the highlight frame, then that ruler line has to be highlighted.
             if textSegmentFrame.origin.y < yPosition && ((textSegmentFrame.origin.y + textSegmentFrame.height) > yPosition) {
                 attr = selectedAttributes
+                return false
             }
             return true
         }
