@@ -30,6 +30,7 @@ final class ViewController: NSViewController {
         // Configure the ruler view
         rulerView.drawHighlightedRuler = true
         rulerView.highlightLineNumberColor = .textColor
+        rulerView.rulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
 
         scrollView.verticalRulerView = rulerView
         scrollView.rulersVisible = true
