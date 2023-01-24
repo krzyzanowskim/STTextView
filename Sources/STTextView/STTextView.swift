@@ -92,6 +92,17 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    /// A Boolean indicator whether to hide the rulerView from layout
+    ///
+    /// Forces layout update which prevents the vertical ruler from taking up horizontal space
+    @Invalidating(.display)
+    public var showRuler: Bool = false {
+        didSet {
+            self.scrollView?.rulersVisible = showRuler
+            self.tile()
+        }
+    }
+
     // line height based on current typing font and current typing paragraph
     internal var typingLineHeight: CGFloat {
         let font = typingAttributes[.font] as? NSFont ?? .preferredFont(forTextStyle: .body)
@@ -663,10 +674,11 @@ open class STTextView: NSView, NSTextInput {
                 right: clipView.contentInsets.right
             )
 
+            let rulerWidth = self.showRuler ? verticalRulerView.frame.width : 0
             scrollView.contentView.frame = CGRect(
-                x: scrollView.bounds.origin.x + verticalRulerView.frame.width,
+                x: scrollView.bounds.origin.x + rulerWidth,
                 y: scrollView.bounds.origin.y,
-                width: scrollView.bounds.size.width - verticalRulerView.frame.width,
+                width: scrollView.bounds.size.width - rulerWidth,
                 height: scrollView.bounds.size.height
             )
         }
