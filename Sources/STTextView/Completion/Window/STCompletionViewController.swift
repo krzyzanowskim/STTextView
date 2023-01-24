@@ -26,7 +26,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
         }
     }
 
-    private let tableView = NSTableView()
+    public let tableView = NSTableView()
     private var contentScrollView: NSScrollView!
 
     private var eventMonitor: Any?
@@ -68,11 +68,11 @@ open class STCompletionViewController: STAnyCompletionViewController {
         contentScrollView = scrollView
     }
 
-    @objc func tableViewAction(_ sender: Any?) {
+    @objc open func tableViewAction(_ sender: Any?) {
         // select row
     }
 
-    @objc func tableViewDoubleAction(_ sender: Any?) {
+    @objc open func tableViewDoubleAction(_ sender: Any?) {
         insertCompletion(movement: .other)
     }
 
@@ -99,9 +99,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
                         self.tableView.keyDown(with: event)
                         return nil
                     default:
-                        //self.window?.windowController?.insertText(c)
-                        //NSSound.beep()
-                        break
+                        self.cancelOperation(self)
                     }
                 }
             }
@@ -118,33 +116,33 @@ open class STCompletionViewController: STAnyCompletionViewController {
         eventMonitor = nil
     }
 
-    public override func insertTab(_ sender: Any?) {
+    open override func insertTab(_ sender: Any?) {
         self.insertCompletion(movement: .tab)
     }
 
-    public override func insertLineBreak(_ sender: Any?) {
+    open override func insertLineBreak(_ sender: Any?) {
         self.insertCompletion(movement: .return)
     }
 
-    public override func insertNewline(_ sender: Any?) {
+    open override func insertNewline(_ sender: Any?) {
         self.insertCompletion(movement: .return)
     }
 
-    public override func deleteBackward(_ sender: Any?) {
+    open override func deleteBackward(_ sender: Any?) {
         view.window?.windowController?.close()
     }
 
-    public override func deleteForward(_ sender: Any?) {
+    open override func deleteForward(_ sender: Any?) {
         view.window?.windowController?.close()
     }
 
-    public override func cancelOperation(_ sender: Any?) {
+    open override func cancelOperation(_ sender: Any?) {
         view.window?.windowController?.close()
     }
 
     private func insertCompletion(movement: NSTextMovement) {
         defer {
-            self.view.window?.close()
+            self.cancelOperation(self)
         }
 
         guard tableView.selectedRow != -1 else { return }
@@ -172,7 +170,7 @@ extension STCompletionViewController: NSTableViewDelegate {
         }
     }
 
-    public func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+    open func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
         STTableRowView()
     }
 

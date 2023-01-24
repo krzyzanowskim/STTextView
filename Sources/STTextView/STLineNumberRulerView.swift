@@ -14,7 +14,8 @@ open class STLineNumberRulerView: NSRulerView {
     ///
     /// Initialized with a textView font value and does not update automatically when
     /// text view font changes.
-    open var font: NSFont
+    @Invalidating(.display)
+    open var font: NSFont = NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.labelFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.labelFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.labelFontSize, weight: .regular)
 
     /// The insets of the ruler view.
     @Invalidating(.display)
@@ -31,15 +32,17 @@ open class STLineNumberRulerView: NSRulerView {
     /// The background color of the ruler view.
     @Invalidating(.display)
     open var backgroundColor: NSColor = NSColor.controlBackgroundColor
-    
+
     @Invalidating(.display)
-    open var drawHighlightedRuler: Bool = false
+    open var highlightSelectedLine: Bool = false
     
+    /// The background color of the highlighted line.
     @Invalidating(.display)
-    open var highlightRulerBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
+    open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
     
+    /// The text color of the highligted line numbers.
     @Invalidating(.display)
-    open var highlightLineNumberColor: NSColor = .textColor
+    open var selectedLineTextColor: NSColor? = nil
 
     /// The color of the separator.
     ///
@@ -55,10 +58,16 @@ open class STLineNumberRulerView: NSRulerView {
 
     private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
     
-    public required init(textView: STTextView, scrollView: NSScrollView) {
-        font = textView.font ?? NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.labelFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.labelFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.labelFontSize, weight: .regular)
+    public required init(textView: STTextView, scrollView: NSScrollView? = nil) {
+        super.init(scrollView: scrollView ?? textView.enclosingScrollView, orientation: .verticalRuler)
 
-        super.init(scrollView: scrollView, orientation: .verticalRuler)
+        if let textViewFont = textView.font {
+            font = textViewFont
+        }
+
+        highlightSelectedLine = textView.highlightSelectedLine
+        selectedLineHighlightColor = textView.selectedLineHighlightColor
+        selectedLineTextColor = textView.textColor
 
         clientView = textView
 
@@ -88,9 +97,9 @@ open class STLineNumberRulerView: NSRulerView {
             .foregroundColor: textColor
         ]
         
-        let highlightAttributes: [NSAttributedString.Key: Any] = [
+        let selectedAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
-            .foregroundColor: highlightLineNumberColor.cgColor
+            .foregroundColor: (selectedLineTextColor ?? textColor).cgColor
         ]
         lines.removeAll(keepingCapacity: true)
 
@@ -140,7 +149,7 @@ open class STLineNumberRulerView: NSRulerView {
 
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
                     let originPoint = textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset)
-                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, highlightWith: highlightAttributes))
+                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, selectedAttributes: selectedAttributes))
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     lines.append(
@@ -176,19 +185,21 @@ open class STLineNumberRulerView: NSRulerView {
     
     // Return text attributes depending on whether the ruleline is highlighted or not.
     private func determineLineNumberAttribute(_ yPosition: CGFloat, _ attributes: [NSAttributedString.Key: Any],
-                                              highlightWith highlightAttributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
+                                              selectedAttributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
         guard let textLayoutManager = textView?.textLayoutManager,
               let caretLocation = textLayoutManager.insertionPointLocation,
-              drawHighlightedRuler == true
+              highlightSelectedLine == true
         else {
             return attributes
         }
-       var attr = attributes
+
+        var attr = attributes
         // Get the current highlight frame of the textContainer
-        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { _, textSegmentFrame, _, _ -> Bool in
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight, options: [.rangeNotRequired]) { _, textSegmentFrame, _, _ -> Bool in
             // If the y-coordinate of the Ctline is in between the top and bottom edge of the highlight frame, then that ruler line has to be highlighted.
             if textSegmentFrame.origin.y < yPosition && ((textSegmentFrame.origin.y + textSegmentFrame.height) > yPosition) {
-                attr = highlightAttributes
+                attr = selectedAttributes
+                return false
             }
             return true
         }
@@ -216,17 +227,14 @@ open class STLineNumberRulerView: NSRulerView {
             }
                 
             context.saveGState()
-            context.setFillColor(highlightRulerBackgroundColor.cgColor)
+            context.setFillColor(selectedLineHighlightColor.cgColor)
                 
             let originPoint = CGPoint(x: frame.minX, y: selectionFrame.origin.y).moved(dx: 0, dy: relativePoint.y)
 
             // Create background rectangle for highlight
             let fillRect = CGRect(
-            origin: originPoint,
-            size: CGSize(
-                width: frame.width,
-                height: selectionFrame.height
-                )
+                origin: originPoint,
+                size: CGSize(width: frame.width,height: selectionFrame.height)
             )
                 
             context.fill(fillRect)
@@ -253,7 +261,7 @@ open class STLineNumberRulerView: NSRulerView {
         }
         
         // Needs to run before adding the lines, since it will not be set as the background otherwise
-        if drawHighlightedRuler {
+        if highlightSelectedLine {
             drawHighlightedRuler(context, relativePoint, in: dirtyRect)
         }
 

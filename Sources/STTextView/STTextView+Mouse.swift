@@ -12,24 +12,21 @@ extension STTextView {
         }
 
         var handled = false
-
-        if event.modifierFlags.isEmpty {
-            if event.clickCount == 1 {
-                let point = convert(event.locationInWindow, from: nil)
-                updateTextSelection(
-                    interactingAt: point,
-                    inContainerAt: textLayoutManager.documentRange.location,
-                    anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                    extending: event.modifierFlags.contains(.shift)
-                )
-                handled = true
-            } else if event.clickCount == 2 {
-                selectWord(self)
-                handled = true
-            } else if event.clickCount == 3 {
-                selectLine(self)
-                handled = true
-            }
+        if event.clickCount == 1 {
+            let point = convert(event.locationInWindow, from: nil)
+            updateTextSelection(
+                interactingAt: point,
+                inContainerAt: textLayoutManager.documentRange.location,
+                anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
+                extending: event.modifierFlags.contains(.shift)
+            )
+            handled = true
+        } else if event.clickCount == 2 {
+            selectWord(self)
+            handled = true
+        } else if event.clickCount == 3 {
+            selectLine(self)
+            handled = true
         }
 
         if !handled {

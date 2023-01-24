@@ -1,99 +1,144 @@
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque at enim congue, lacinia diam ut, sollicitudin ex. Morbi ut ipsum vitae nisi eleifend suscipit. Nulla facilisi. Nunc eget urna tellus. Nullam bibendum faucibus eleifend. Curabitur sit amet odio commodo, molestie massa non, lobortis metus. Suspendisse potenti. Aenean a vulputate nunc. Integer interdum auctor ligula a accumsan. Donec a volutpat lacus, et porttitor felis. Suspendisse potenti. Praesent consectetur ex nec hendrerit hendrerit.
+# STTextView
 
-Aenean tempus lectus sit amet leo mollis lobortis vel quis felis. Quisque nec eros vitae risus venenatis varius. Sed rhoncus est nunc, sit amet facilisis erat ultrices et. Fusce a cursus nisl. Aliquam sed mauris nisi. Aliquam ac nibh egestas lacus fermentum sagittis nec ut urna. Suspendisse mauris erat, interdum in ante id, sagittis sollicitudin augue. Etiam odio nunc, iaculis ut erat dictum, euismod vestibulum odio. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam iaculis hendrerit velit, at semper nulla egestas vel. Etiam id aliquet mi.
+The goal of this project is to build [NSTextView](https://developer.apple.com/documentation/appkit/nstextview) replacement component utilizing [TextKit 2](https://developer.apple.com/videos/play/wwdc2021/10061/). [because many good reasons](#-textkit-2-bug-reports-list).
 
-Nunc euismod euismod mauris ut dignissim. Curabitur lacinia neque non hendrerit fringilla. Ut in nulla eu urna cursus efficitur a ut arcu. Suspendisse felis ipsum, placerat at sapien id, luctus posuere ante. Vivamus mattis finibus nisl ut consequat. Nam sagittis euismod quam, eget maximus urna pretium ultrices. Phasellus tincidunt luctus libero sit amet efficitur. Fusce mi odio, varius eu neque id, imperdiet pretium ante.
+The component is developed to serve [Swift Studio](https://swiftstudio.app) needs. (**ST** prefix stands for "**S**wift s**T**udio" because **[SS](https://en.wikipedia.org/wiki/Schutzstaffel)** is not good prefix since 1939)
 
-Maecenas turpis nibh, ultrices non mauris vel, pellentesque laoreet mi. In mattis massa sed dolor hendrerit tristique. Fusce magna lorem, pharetra id purus id, aliquam venenatis justo. Praesent et tellus nibh. Praesent augue nisi, mattis vel enim vitae, tincidunt faucibus lacus. Phasellus ac tincidunt nunc. Sed ornare mauris et leo tincidunt, malesuada hendrerit nisl porttitor. Sed et mi sit amet mauris consequat pellentesque vel non enim. Sed pellentesque viverra odio, quis sagittis magna dictum id. Nulla facilisi. Aliquam nunc ex, dignissim vulputate gravida ut, imperdiet vel lorem. Nulla velit elit, vehicula ut faucibus at, placerat id orci. Etiam lobortis porttitor libero quis aliquet. Morbi nec diam vitae leo scelerisque ullamcorper ac vitae tortor. Nullam sed est vitae massa luctus egestas.
+https://user-images.githubusercontent.com/758033/194773621-8d1a403e-b319-4a56-bd7e-e4e67f026343.mp4
 
-Fusce a magna bibendum, posuere ex in, efficitur nisi. Morbi faucibus fringilla arcu, sit amet luctus felis facilisis at. Nulla nunc magna, tristique et rhoncus vitae, euismod quis odio. Sed at erat viverra, ultricies velit eget, lobortis mi. Sed eget mi metus. In rhoncus auctor est nec pharetra. Cras sit amet consectetur ligula. Nam viverra consectetur lobortis.
+[TextKit2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit2 and provide support along TextKit1 bits. As I started to learn more about `NSTextView` + TextKit2, I realized as of today (Feb 2022), neither NSTextView is fully functional, nor TextKit2 classes are fully functional. Along the way, I reported several bug reports to Apple requested DTS (support tickets). Eventually, I've got blocked by specific bugs that pushed me to start this project.
 
-Duis quis lectus pretium, scelerisque dui feugiat, cursus est. Quisque malesuada maximus nisi, et bibendum risus dictum sit amet. Cras vitae cursus mauris, at congue neque. Praesent mi augue, pellentesque eu sem quis, scelerisque feugiat tellus. Nulla facilisi. Aliquam condimentum risus vel porta gravida. Suspendisse quis nulla turpis. Aliquam tempor odio vel aliquet posuere. Proin facilisis orci mauris, eget condimentum lectus pharetra sit amet. Nulla sapien eros, scelerisque et auctor in, placerat non orci. Vestibulum laoreet et leo vel dignissim.
+## ✨ Features
 
-Integer elementum ipsum non varius sodales. Vivamus leo tellus, interdum at placerat et, dictum sit amet sapien. Suspendisse sit amet congue quam, vel venenatis eros. Praesent eget cursus enim, id ultricies elit. Duis id erat lorem. Praesent tristique ut nunc ac convallis. In fringilla accumsan dui, a ornare urna porta sit amet. Suspendisse dapibus, mi id pretium vestibulum, purus leo lacinia sapien, id dictum purus neque sed quam. Cras hendrerit ac tellus a consequat. Vestibulum at dapibus sem, a viverra mi. Donec mattis faucibus lorem, in varius mauris convallis ac. Pellentesque vel leo eget ante cursus laoreet. Vivamus nec ante ac nisl hendrerit tincidunt. Curabitur quis volutpat tellus.
+- macOS text system integration
+- Text editing
+- Line numbers
+- Customization of colors and fonts
+- Toggle line wrapping on and off
+- Adjust height of lines
+- Highlight ranges in the text view
+- Search/Replace the text
+- Completion
+- Annotations
+- Undo/Redo
 
-Nunc ligula magna, imperdiet imperdiet velit sed, tincidunt mattis ante. Pellentesque blandit rutrum lacus ac aliquam. Aliquam erat volutpat. Duis tempor rhoncus ante, vel ultricies tellus hendrerit a. Aliquam placerat mattis metus, sed efficitur nibh rutrum et. Pellentesque lacinia dapibus rhoncus. Proin dictum, odio lobortis convallis egestas, augue nisl dapibus elit, in dignissim libero ligula ac justo. Nunc quis ultrices elit. Sed egestas, felis eget aliquet pharetra, leo neque pulvinar est, a fermentum lorem felis ac lacus. Donec eleifend, justo vitae aliquam finibus, neque quam rutrum magna, quis luctus nulla diam vitae ipsum.
+## 🚀 Getting Started
 
-Curabitur tempus vel arcu sed ornare. Mauris hendrerit, ipsum et blandit pretium, arcu felis convallis neque, a iaculis magna augue quis nibh. Phasellus et lacus nec nisi vestibulum rutrum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nullam vitae sapien vestibulum, finibus risus et, sollicitudin elit. Aliquam facilisis quam malesuada, rhoncus ipsum lobortis, laoreet elit. Nam sapien velit, accumsan ut accumsan eu, imperdiet nec tortor. Ut aliquam, nisi semper accumsan vulputate, lacus lectus lacinia ante, ac vehicula nisi augue ut tortor. Donec dapibus aliquam libero, efficitur placerat turpis facilisis vel. Nam ornare, purus nec congue gravida, justo diam consequat turpis, in gravida dui ante vel nisi.
+STTextView is distributed using the [Swift Package Manager](https://www.swift.org/package-manager/). Install it in a project by adding it as a dependency in your `Package.swift` manifest or through “Package Dependencies” in Xcode project settings
 
-Pellentesque consectetur felis turpis. Cras interdum auctor dolor sit amet consectetur. Proin leo arcu, iaculis eget orci nec, congue pharetra lacus. Sed dolor massa, mattis et fermentum vel, finibus sed lacus. Quisque non viverra nisi. Quisque quis justo nec quam dignissim interdum et ut arcu. Vivamus semper sit amet nulla eget vulputate. Maecenas ut metus vel quam tempus faucibus. Cras turpis libero, luctus vel mauris eu, luctus maximus sapien. Curabitur in purus ac ipsum ultricies mollis id sit amet turpis. Cras dui sem, porta nec ex in, lacinia vehicula ipsum. Integer pulvinar semper turpis, nec tristique tortor euismod eu.
+```swift
+let package = Package(
+    dependencies: [
+        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.1.2")
+    ]
+)
+```
 
-Nulla eros nunc, pulvinar rutrum luctus a, dignissim sit amet nulla. Vivamus ac vehicula risus. Sed eget dictum leo. Fusce dapibus elit quam, sit amet sagittis enim eleifend sed. Quisque nec nibh quis justo consectetur aliquet. Curabitur molestie blandit ligula. Curabitur lectus arcu, ultrices vel placerat sed, hendrerit in nibh. Suspendisse rhoncus pulvinar tortor ut posuere. Nullam eu velit pellentesque, volutpat sem a, consectetur dui. Nam id libero in arcu venenatis consectetur.
+## Usage
 
-Quisque pretium sed diam non interdum. In auctor, elit vitae viverra posuere, nisi lorem tristique sapien, sit amet condimentum turpis lacus tincidunt urna. Integer placerat varius quam eget ultrices. Ut sodales dui vel consectetur condimentum. Phasellus at tincidunt lacus, et bibendum dolor. Nunc eu leo eget magna tempor blandit. Nam faucibus, urna at hendrerit condimentum, urna lectus aliquam eros, at venenatis diam nibh in justo. Cras erat velit, accumsan in ex et, pulvinar mattis augue. Fusce magna odio, volutpat vel mi porttitor, fermentum posuere dolor. Nullam tortor diam, tempus ut dictum quis, pretium nec magna. Nulla at pellentesque metus. In sodales tortor eget mauris vehicula, in fringilla felis tincidunt. Donec id ex in tortor convallis rhoncus. Sed tempus, mi eu dignissim lobortis, lacus augue scelerisque risus, in interdum augue ipsum quis orci. Integer vestibulum nec nunc at ultricies. Phasellus vestibulum eros ut massa tempus sollicitudin.
+### Create a TextView
 
-Phasellus quis semper massa. Donec finibus, mi vel placerat lobortis, justo nibh pharetra lorem, quis maximus turpis arcu at ex. Fusce lacus tellus, tincidunt non nulla in, ultricies tristique lacus. Sed euismod lacus vitae ipsum tincidunt iaculis. Vestibulum non metus nec ex viverra aliquet. Cras ex elit, finibus ac nunc a, porta sollicitudin mauris. Fusce felis magna, tempor et mattis sed, malesuada vitae ex. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+The STTextView is a subclass of NSView and as such can be initialized like any other view. It has an API that is similar to the one of NSTextView.
 
-In mattis felis felis, euismod venenatis augue ultricies et. Phasellus mi urna, lobortis non nunc eu, imperdiet varius leo. Quisque mi lectus, porta ac vulputate ut, bibendum et velit. Suspendisse non suscipit tellus, sit amet convallis nunc. Duis euismod lectus in dolor cursus, vitae porttitor tellus commodo. Nullam tempor lacinia dui a viverra. Etiam quis tellus nec metus bibendum pulvinar quis sagittis est. In ornare pharetra nulla a gravida. Curabitur lectus lectus, varius et nisl eget, vehicula efficitur neque. Curabitur est ante, ultrices ullamcorper libero id, dapibus viverra velit.
+```swift
+let textView = STTextView()
+view.addSubView(textView)
+```
 
-Nullam id tortor mauris. Donec mollis dolor enim, cursus sagittis sem posuere at. Donec ut eros iaculis, interdum lorem et, tempor enim. Sed sit amet tincidunt justo. Aenean dictum dui massa. Integer sit amet dapibus ante, quis porta augue. Pellentesque eget pretium est. Vestibulum ut vestibulum turpis. Nullam hendrerit, nunc ut facilisis pulvinar, diam nisl condimentum est, eu venenatis tortor turpis sed enim. Ut tempor tristique mi, sodales rhoncus nisl pharetra quis. Integer ut est congue, tempus urna in, tempor nisi. Pellentesque massa tellus, dictum nec ligula a, mollis rutrum risus. Morbi in velit eget ante porttitor porttitor vitae mattis tellus.
+```swift
+let textView = STTextView()
+let scrollView = NSScrollView()
+scrollView.documentView = textView
+```
 
-Nullam eget nisi bibendum lacus imperdiet mattis eu eget risus. Quisque in porttitor nisl. Vestibulum commodo, nunc a posuere mollis, sapien tortor molestie neque, in fringilla enim quam vitae tellus. Morbi lobortis purus id ante suscipit tempus. Phasellus congue lorem id dictum blandit. Sed placerat vestibulum nisl, non molestie ante venenatis et. Cras suscipit condimentum nibh, nec ornare nibh varius quis. Aliquam erat volutpat. Sed in diam nisi. Aliquam semper pellentesque purus, non vestibulum sapien aliquet vel. Nam lacinia velit sed dolor consectetur fermentum. Etiam porttitor sollicitudin risus nec interdum. Suspendisse aliquet mi nec eros volutpat dapibus. Cras placerat, ligula et bibendum consequat, risus nisl finibus enim, id tristique diam lectus eu magna.
+### Customize
 
-Suspendisse elit quam, lobortis quis tempus nec, tincidunt id lectus. Vestibulum risus odio, lobortis ac placerat sit amet, dapibus et diam. Aenean congue dictum bibendum. Quisque facilisis mattis erat nec hendrerit. Integer in ultrices mi. Etiam vel volutpat purus. In hac habitasse platea dictumst. Sed dignissim semper urna, sed egestas magna elementum in. Donec leo lacus, porttitor at quam at, efficitur ullamcorper libero. Praesent non arcu in tortor ullamcorper facilisis a ac eros.
+The text view can be customized in a variety of ways.
 
-Maecenas gravida quis magna eu tempor. Nam ac aliquet mauris. Aenean vitae molestie sapien, sit amet tincidunt dolor. Mauris condimentum aliquet ex sit amet lobortis. Nulla facilisi. In hac habitasse platea dictumst. Praesent eget ultrices velit. Duis sed scelerisque urna, quis rutrum lacus. In vel enim eu sem accumsan venenatis.
+```swift
 
-Proin ac ultricies erat. Etiam ornare iaculis ipsum in ullamcorper. Fusce rutrum nisl vitae varius sagittis. Etiam viverra at nisl vel posuere. Quisque eros arcu, sodales tempor nisl vel, vulputate blandit arcu. Suspendisse consectetur tempus velit et semper. Nulla facilisi. Fusce eleifend vehicula augue, sit amet vulputate risus mollis nec. Donec tristique quam nisi, in varius diam viverra eget. Sed a iaculis ligula, vel malesuada lectus. Sed ornare dolor ac arcu elementum commodo eu at leo. Vestibulum dapibus nisl nec mauris aliquam sodales. Cras fermentum, diam non tempus condimentum, dolor diam rutrum velit, sit amet condimentum quam odio nec enim. Aenean vulputate est vel enim consequat fringilla. Duis sollicitudin nulla quis commodo convallis. Aenean rhoncus non augue non suscipit.
+let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+// Set the line-height to 110%
+paragraph.lineHeightMultiple = 1.1
+paragraph.defaultTabInterval = 28
 
-Sed ornare lacus neque, non viverra augue placerat et. Sed eget faucibus neque. Aliquam erat volutpat. Cras semper dolor a sem laoreet placerat. In molestie dictum commodo. Duis feugiat porttitor massa, ut rhoncus metus. Suspendisse semper felis aliquet mauris pellentesque aliquam. Aenean fringilla neque pulvinar tellus consequat tincidunt. Vivamus feugiat consectetur neque id tempus. In sed rhoncus quam, non tempus nulla. Praesent sit amet tortor at nisl accumsan consequat sit amet sed ex. Donec a lorem et leo viverra malesuada. Duis lorem nibh, porta et justo vel, gravida cursus nunc. Praesent tempor ante sit amet tincidunt rutrum.
+// Default Paragraph
+textView.defaultParagraphStyle = paragraph
 
-Duis ut ex sed lectus semper dictum ac in ipsum. Nam ut nunc porta, varius sem sed, feugiat velit. Morbi ac consectetur sem. Suspendisse facilisis tempor risus, eget luctus ante imperdiet sed. Vivamus interdum mattis faucibus. Nunc ac urna vulputate, interdum augue in, ultricies nibh. Ut congue est vestibulum massa tincidunt, eu vestibulum arcu facilisis. Cras suscipit, velit eu egestas eleifend, dui nunc tristique neque, et pretium felis turpis a purus. Maecenas sodales dictum aliquam. Nam at lorem viverra massa commodo pellentesque. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Phasellus bibendum lobortis urna, a interdum leo iaculis id. Vestibulum hendrerit felis in justo lobortis, sit amet consectetur orci pharetra.
+// Set default font
+textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
 
-Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec tristique, lorem vel elementum dictum, neque elit efficitur dolor, id sollicitudin enim leo in neque. Maecenas non est quam. Sed ut elit volutpat lacus molestie maximus et et justo. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Morbi dignissim et eros in interdum. Nulla vulputate sem nibh, tincidunt interdum sapien commodo luctus. Donec lorem arcu, euismod quis tristique sit amet, mollis nec tellus. Morbi eu sodales tellus. Nulla molestie, eros a convallis blandit, tortor magna gravida ex, in venenatis ligula nisl ut dui. Maecenas posuere lacinia leo, vitae dictum tellus pellentesque molestie. Maecenas nec tortor vel orci auctor fringilla. Maecenas et augue sagittis, sagittis ante vel, volutpat est. Quisque pulvinar augue sed porttitor condimentum.
+// Set default text color
+textView.textColor = NSColor.textColor
 
-Sed pellentesque, tortor ac gravida elementum, quam lacus varius augue, in suscipit mi lectus a nibh. Proin pretium sollicitudin ultricies. Donec nec elit vel odio posuere cursus vitae nec lacus. Morbi dictum, felis eu vestibulum dictum, augue felis venenatis mi, vitae pulvinar purus magna in purus. Maecenas nec urna interdum, faucibus ipsum non, bibendum risus. Cras fermentum ullamcorper porttitor. Sed eleifend porta eros, in dictum orci euismod eu. Suspendisse ac vehicula neque. Nulla facilisi. Pellentesque eget sodales velit, vel molestie massa. Donec lacinia id urna vitae commodo. Fusce a felis varius metus auctor dictum ac eu quam. Nam congue rhoncus aliquet. Donec eu tellus vitae turpis aliquam faucibus at et magna.
+// Set text value
+textView.string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ornare lobortis sem a vulputate."
+textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
 
-Donec lacinia risus diam, vitae vehicula justo rhoncus mollis. Duis sodales magna dolor, et consectetur magna rutrum eget. Duis a iaculis enim, eget pulvinar turpis. Nunc volutpat et lorem vitae pharetra. Vestibulum vitae dolor tincidunt, imperdiet nisl non, efficitur neque. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nullam tristique augue ipsum, sed auctor justo finibus sit amet. Fusce varius efficitur dui. Curabitur eget tortor dui. Fusce eu tempor leo. Ut ut velit lobortis, cursus nisi sed, gravida lacus. Mauris id dolor faucibus, blandit neque eget, rhoncus ligula. Mauris quis urna vel purus efficitur pharetra.
+// Set wrapping
+textView.widthTracksTextView = true
 
-Mauris pretium, ipsum a fermentum cursus, purus enim dapibus ante, non efficitur nisl ipsum nec purus. Pellentesque lacinia sem tellus, non sollicitudin dolor interdum vel. Cras risus arcu, porta sit amet nisi in, faucibus fringilla urna. Integer aliquam felis vel urna eleifend pellentesque. Nullam dapibus, mauris eget ornare varius, lorem nisl dictum ipsum, eget sollicitudin enim lectus quis velit. Suspendisse potenti. Phasellus molestie consectetur dui, ut ultricies ante luctus tempor. Maecenas semper lectus metus, at hendrerit ante bibendum in. Etiam ullamcorper erat id tempor laoreet.
+// Highlight the selected line.
+textView.highlightSelectedLine = true
+```
 
-Vivamus ornare arcu sed lectus pharetra, vitae consequat dui luctus. Phasellus dui nulla, dictum quis mauris in, sagittis aliquet felis. Duis ligula tellus, dignissim non convallis quis, facilisis quis dolor. Maecenas efficitur mauris libero, eu gravida risus lacinia at. Integer velit augue, convallis sit amet accumsan non, ornare eu neque. Vestibulum quis posuere eros. Pellentesque imperdiet consequat hendrerit. Quisque augue metus, dignissim nec rutrum vestibulum, accumsan lacinia ipsum. Sed maximus eget felis nec bibendum. Fusce dignissim ut sem lobortis finibus. Aliquam nec porta felis. Integer quis magna sit amet diam varius convallis nec quis lorem. Nunc sodales blandit nunc, id efficitur sapien cursus eu.
+Add line numbers using specialized `STLineNumberRulerView` (specialized subclass of `NSRulerView`)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras facilisis egestas orci vitae vehicula. Sed nec libero quis turpis fringilla euismod ut sit amet lacus. Vestibulum et maximus diam. Curabitur vestibulum, ante a pellentesque vestibulum, lorem nulla dictum libero, sed aliquet nunc elit sit amet leo. Curabitur fringilla ex ac malesuada cursus. Nullam porta at lorem ut posuere. Vestibulum sit amet sem eget nisi porta congue. Integer eget lectus id nibh imperdiet semper eu vel neque. Sed rutrum mauris orci, ac euismod diam scelerisque eu. Curabitur gravida nulla eget leo commodo consectetur. Sed faucibus augue vitae turpis placerat, ullamcorper efficitur lectus porttitor. In auctor feugiat elit vel laoreet. Nam vel est eu arcu elementum tincidunt at ac nulla.
+```swift
+let textView = STTextView()
+let scrollView = NSScrollView()
+scrollView.documentView = textView
 
-Nunc non leo mi. Proin ac orci ac dolor tempor mollis in in urna. Sed id consectetur purus, eu efficitur arcu. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus condimentum eget orci quis mollis. Sed ultricies ipsum id libero accumsan, ut interdum tellus aliquet. Donec ultricies mauris vitae fermentum vestibulum. Integer nec sapien ut lorem ullamcorper dictum et eget nunc.
+// Line numbers
+let rulerView = STLineNumberRulerView(textView: textView, scrollView: scrollView)
+// Configure the ruler view
+rulerView.drawHighlightedRuler = true
+// Set text color of the selected line number
+rulerView.highlightLineNumberColor = .textColor
 
-Quisque maximus pharetra rhoncus. Ut venenatis sit amet libero a rutrum. Nunc nulla diam, aliquet vitae neque at, semper venenatis leo. Nulla ultricies dolor quam, ac tincidunt eros euismod vel. Proin porttitor velit sapien, in semper ipsum semper a. Nulla tempor et nibh a sollicitudin. In mattis pulvinar dolor in varius. Proin iaculis tellus in massa auctor fermentum. Etiam hendrerit tempus quam, in volutpat libero commodo id. Ut sed hendrerit arcu, congue imperdiet nunc. Aenean vehicula, nibh eu dapibus tincidunt, lacus ex aliquet orci, eu suscipit ligula ante efficitur odio. Nulla rutrum, velit porta pretium rutrum, enim purus luctus ipsum, ac volutpat orci ligula maximus sem. Integer non pulvinar tellus, ac pretium leo. Integer eu imperdiet tortor. Aliquam iaculis tincidunt est, vel laoreet orci pretium eu. Praesent placerat nisi ut justo dictum laoreet.
+// Add to NSScrollView containing STTextView
+scrollView.verticalRulerView = rulerView
+scrollView.rulersVisible = true
+```
 
-Sed imperdiet mauris fermentum erat suscipit, a suscipit metus tincidunt. Fusce dictum laoreet enim a dignissim. In ut gravida tellus. Curabitur pellentesque gravida condimentum. Maecenas mollis lobortis nulla vitae venenatis. Proin tempus odio ut augue elementum mollis. Nulla convallis dui sit amet leo commodo luctus. In justo nibh, ornare et mi at, rutrum sollicitudin lorem. Donec varius nec nisi non ullamcorper. Proin et enim est. Donec eu mattis est. Vestibulum hendrerit lacinia placerat. Maecenas convallis vel neque in fringilla. Integer ultricies ipsum vestibulum tempus luctus.
+Enable an optional search-and-replace find interface inside a view, usually a scroll view.
 
-Vivamus quis rhoncus sapien. Donec ultricies et sapien sit amet consectetur. Cras finibus massa odio, et porttitor massa faucibus ornare. Donec mollis venenatis quam. Curabitur egestas tempus erat, eget sagittis purus pretium id. Phasellus bibendum convallis diam, at varius lectus blandit sit amet. Pellentesque vel tempus ipsum, a consectetur neque. Cras dolor elit, vulputate ut laoreet condimentum, facilisis vel leo. In eu dui arcu. Aenean faucibus et ex vitae euismod. Nullam vel bibendum tortor, in volutpat massa. Aenean lacinia neque et imperdiet aliquet. Nunc id elementum massa. Aenean id nunc tellus. Curabitur ut consectetur augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;
+```swift
+textView.textFinder.isIncrementalSearchingEnabled = true
+textView.textFinder.incrementalSearchingShouldDimContentView = true
+```
 
-Donec efficitur tortor velit, quis posuere augue bibendum faucibus. Fusce id lobortis ex. Nunc ut malesuada magna. Cras congue nibh ullamcorper turpis efficitur, eget ornare odio vehicula. Vivamus gravida nisi nec enim ullamcorper accumsan. Proin ac mauris suscipit, vestibulum odio a, dapibus mauris. Donec velit mi, semper ac augue commodo, accumsan euismod est. Sed at justo viverra, consequat arcu feugiat, maximus ipsum. Fusce porta tempus tortor a facilisis. Ut accumsan eu sem quis faucibus. Suspendisse metus augue, pharetra non odio ac, pulvinar egestas sem. Morbi eu quam ut metus finibus luctus. Ut feugiat viverra mi a rutrum. Curabitur maximus ornare ex ut pharetra. Phasellus maximus erat erat, blandit efficitur ipsum accumsan id. Quisque nec justo eu lacus feugiat pretium sit amet vitae nisl.
+## 🐛 TextKit 2 Bug Reports List
 
-Suspendisse viverra mollis gravida. Suspendisse dolor augue, gravida in nisl id, dapibus commodo lacus. In hac habitasse platea dictumst. Nunc scelerisque pharetra feugiat. Aliquam purus orci, porta ut nibh eget, congue imperdiet odio. Integer mi nulla, ultricies et aliquam placerat, ultricies nec massa. Sed lectus tellus, pulvinar sit amet ante vitae, faucibus blandit massa. Maecenas lacus leo, pellentesque ut metus et, sagittis fringilla purus.
+List of issues I reported to Apple so far:
 
-Mauris at urna justo. Sed volutpat et arcu in finibus. Nunc ac diam sed purus tempus posuere. Morbi leo elit, laoreet vel lacinia a, ornare a urna. Cras rutrum quam purus, in porta augue semper ac. Curabitur sollicitudin risus pellentesque, aliquet orci id, ullamcorper arcu. Aliquam nec scelerisque risus. Curabitur eget ultrices ante. Cras sagittis dolor eget enim vulputate, vel elementum lorem suscipit. Pellentesque eget fringilla est. Donec lobortis condimentum est, non cursus libero commodo et.
+- FB9856587: TextKit2 unexpected additional line fragment for last line
+- FB9925766: NSTextSelectionNavigation.deletionRanges only works at the end of the word
+- FB9925647: NSTextLayoutManager.replaceContents(in range: with attributedString:) is documented but is not part of the public API
+- FB9907261: NSTextElementProvider.replaceContents(in:with:) does not replace content as documented
+- FB9692714: Rendering attributes does not draw properly
+- FB9886911: NSTextView can't properly layout and display long lines (this one is nasty since it causes the view "jump" whenever text attribute updates)
+- FB9713415: NSTextView drawInsertionPoint(in:color:turnedOn) is never called
+- FB9971054: NSLayoutManager.enumerateCaretOffsetsInLineFragment ignores starting location
+- FB9971054: NSTextView assert on selection when setup with TextKit2
+- FB9743449, FB10019859: NSTextContentStorage.textElements(for:) returns no element, while enumerateTextElements does return elements
+- FB11898356: textSelections(interactingAt:inContainerAt:anchors:modifiers:selecting:bounds:) produces wrong selections for certain locations
 
-In hac habitasse platea dictumst. Praesent placerat pellentesque dignissim. Ut metus libero, cursus ut consectetur vel, viverra a justo. Quisque finibus et magna id suscipit. Cras mauris metus, rutrum quis lorem id, condimentum placerat tortor. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Integer a accumsan sapien. Morbi eget consectetur erat, a molestie nisi.
+... I'm aware that the list of issues is not complete.
 
-Phasellus quis tincidunt dui, ac varius ex. Proin sed enim dapibus, accumsan lacus nec, convallis nibh. Phasellus justo lacus, tempus eu sodales sit amet, pretium a arcu. Fusce suscipit leo quis efficitur cursus. Sed sed ante eu eros placerat facilisis. Morbi in tincidunt eros. Donec varius vel lacus eu mollis. Proin et felis tellus. Maecenas iaculis, quam at fringilla porttitor, magna nisl mattis enim, volutpat maximus nisl purus a libero. Etiam enim arcu, malesuada sit amet velit quis, lobortis blandit est. Suspendisse varius erat ac odio vulputate tincidunt. Sed ac mi dolor. Aenean vel nulla ut lorem feugiat rutrum ut sed odio. Integer quis nisl nisl. Curabitur ut cursus sapien, ac dignissim ipsum. Vestibulum ultrices risus sed lorem facilisis ultricies.
+## Suggestions or Feedback
 
-Quisque neque mauris, blandit ut accumsan eu, euismod sed purus. Proin ut luctus risus. Sed cursus orci id mauris dapibus, quis vulputate nunc laoreet. Duis iaculis tristique nisl eu venenatis. Aenean augue quam, iaculis eget neque eget, mollis gravida est. Nunc porttitor fermentum leo, quis accumsan dui laoreet quis. Proin condimentum massa nec velit mattis finibus. Suspendisse ut sem turpis. Donec nec dui tortor. Vivamus sit amet mi ut nulla pulvinar cursus. Donec fermentum ante enim, ac feugiat erat congue ac. Nunc in mi eget urna aliquam porttitor. Suspendisse faucibus auctor laoreet. Praesent vel justo eget eros finibus cursus. Praesent sagittis nisl tortor, vel aliquam eros aliquam sed.
+I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twitter.com/krzyzanowskim), or a pull request.
 
-Cras et tristique nunc. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam varius nisl ex, quis imperdiet felis porta suscipit. In malesuada interdum quam at posuere. Proin volutpat porttitor iaculis. Morbi consequat enim sit amet metus volutpat maximus. Nunc vel lorem mauris. Proin felis magna, pharetra non suscipit maximus, elementum quis ante. Donec iaculis sollicitudin nunc, sit amet cursus augue sollicitudin id. Morbi pulvinar vulputate lacus, eu sodales nunc pellentesque sit amet. Nulla eros erat, molestie a pellentesque vitae, commodo eget massa. Nam lobortis justo fermentum iaculis ultrices. Nullam sed felis tortor. Curabitur lobortis, nulla et rutrum vestibulum, orci nunc fermentum leo, eu iaculis ante risus a elit. Phasellus metus sem, ultricies nec est ultricies, congue imperdiet quam.
+## License
 
-Donec suscipit vitae ipsum id euismod. In blandit turpis nec vulputate condimentum. Nunc mattis mattis suscipit. Suspendisse consequat dolor et rhoncus venenatis. Proin varius, urna rutrum molestie pulvinar, ligula nunc auctor nunc, nec porta ex orci eu turpis. Nam id tincidunt ipsum, ut laoreet nisl. Aenean quis dolor ante. Integer ut purus vulputate, ultricies dui vel, iaculis libero. Quisque dictum tortor ac odio blandit lacinia. Quisque porta, massa lacinia ultricies egestas, velit quam hendrerit ipsum, vitae dictum orci purus in tortor. Sed in velit consectetur, consectetur leo at, sollicitudin massa.
+### Open Source license
+If you are creating an open source application under a license compatible with the [GNU GPL license v3](https://www.gnu.org/licenses/gpl-3.0.html), you may use STTextView under the terms of the GPLv3.
 
-Integer quis libero feugiat, tincidunt nisi nec, rutrum quam. Quisque sagittis sed orci nec bibendum. Vivamus varius et turpis quis placerat. Duis pellentesque et neque ut elementum. Donec viverra, ligula in scelerisque suscipit, dolor urna venenatis lectus, ut bibendum magna arcu eu quam. Nulla semper dapibus dui, faucibus rhoncus ipsum blandit eget. Nunc facilisis justo sed facilisis consectetur. Integer pulvinar ante ut tortor tristique, id facilisis urna pretium.
+### Commercial license
 
-Phasellus aliquam neque nunc, id vestibulum magna laoreet euismod. Integer mi nibh, posuere fermentum cursus non, tempus in nisl. Curabitur eu efficitur ipsum. Nunc in feugiat diam. In blandit dapibus ligula, in fermentum neque pharetra non. Aliquam scelerisque odio vitae risus euismod, in mattis est condimentum. Nam nulla ex, tincidunt at tincidunt ac, malesuada a nunc. Mauris malesuada nunc urna. Vivamus accumsan augue nec posuere tristique. In tortor libero, aliquet sit amet molestie vitae, congue sed libero. Donec ullamcorper at nulla eget pretium.
+Get one [starting from $5](https://krzyzanowskim.gumroad.com/l/sttextview).
 
-Suspendisse potenti. Aenean nec magna et odio finibus blandit convallis in magna. Nam bibendum libero in mauris placerat tristique. Duis mattis leo non lacus fermentum viverra. Fusce sit amet metus non ligula rutrum ornare. Nulla eu viverra elit. Nulla id eros orci. Cras pharetra in arcu vel placerat.
+If you want to use STTextView to develop non open sourced product, and applications, the Commercial license is the appropriate license. With this option, your source code is kept proprietary. Which means, you won't have to change your whole application source code to an open source license. [Purchase a STTextView Commercial License](https://krzyzanowskim.gumroad.com/l/sttextview)
 
-Cras euismod porttitor mattis. Phasellus non urna ac massa rhoncus placerat. Quisque rhoncus nisi dolor. Maecenas ultrices neque vel blandit ornare. Fusce vestibulum, libero in imperdiet auctor, ligula dui lobortis mi, quis bibendum risus nunc quis lacus. Nullam fringilla tincidunt sapien, sit amet lacinia nunc consectetur sed. Phasellus eget convallis lectus. Etiam ultricies, felis vitae pharetra dictum, augue enim sodales augue, vitae tincidunt risus felis nec sem.
 
-Pellentesque tempor neque et tempor rhoncus. Nam tincidunt leo nec felis pretium accumsan. Phasellus molestie, purus sit amet finibus interdum, libero nulla tincidunt mi, vel ultrices mauris felis nec lorem. Nunc sollicitudin ultricies tellus porttitor dictum. Pellentesque rhoncus urna cursus lacinia consectetur. Cras laoreet ante sed tempor auctor. Donec sodales arcu eu libero pretium, at iaculis est dapibus. Phasellus ac mauris quis metus pretium ultrices.
-
-Mauris non ligula erat. Cras venenatis dolor non neque egestas, a vulputate metus pretium. Mauris suscipit nibh nisi. Phasellus vitae dolor eu neque cursus volutpat. Vestibulum quis sem quis nibh consectetur tincidunt eu vel tortor. Duis vel scelerisque tortor. Mauris ut lorem fringilla, tristique enim non, cursus nunc. Aliquam a nibh et eros pellentesque hendrerit. Nam a lacus feugiat, porta mauris id, dapibus metus.
-
-Proin turpis nunc, cursus vel sem vel, tincidunt dapibus augue. Morbi urna orci, porttitor ac porttitor at, malesuada sed nunc. Suspendisse pharetra lectus diam, vitae volutpat ante iaculis at. Donec eu lacus eget massa aliquam bibendum. Etiam gravida feugiat massa in molestie. In sem ante, varius sed varius ut, cursus et risus. Nullam egestas vestibulum arcu in tincidunt.
-
-Praesent dapibus dignissim condimentum. Duis vulputate faucibus pretium. Fusce varius viverra nunc a dictum. Sed ac ipsum et nibh pharetra molestie id in eros. Fusce varius tellus nisi, ac tincidunt dolor congue vitae. Etiam non libero vitae ante auctor viverra. Aenean quis metus mauris. Nam faucibus tellus semper libero aliquam, eu fringilla nunc pulvinar. Vestibulum vulputate vitae ante vitae semper. Sed ultricies neque sit amet varius accumsan. Suspendisse finibus lectus eget venenatis iaculis. Fusce porta, odio in sollicitudin elementum, ex justo aliquet libero, sit amet rutrum eros lorem sit amet lacus. Donec iaculis, enim eget fringilla feugiat, diam tellus porta urna, id tempor nibh arcu nec nunc. Aenean et porttitor ante, tristique fermentum orci. Curabitur augue metus, tincidunt vitae nunc ut, sollicitudin rhoncus purus.
-
-Morbi gravida, elit vitae congue aliquet, tellus ex pulvinar lorem, quis consequat metus massa eget nunc. Aenean ac ante sed justo tincidunt luctus eget ut ipsum. Vestibulum faucibus tellus mi, ut mollis augue facilisis sed. In euismod nibh neque, sit amet semper est efficitur ac. Nullam ut nisi vitae justo rhoncus mattis nec ac orci. Cras in urna vulputate, placerat orci et, pellentesque turpis. Donec viverra nibh in quam molestie, ac congue nibh ultrices. Fusce ullamcorper finibus neque, eget suscipit enim egestas et. Pellentesque ornare consectetur sapien tincidunt efficitur.
-
-In turpis diam, tempus a vestibulum vel, viverra vitae neque. Donec in ornare urna, lobortis condimentum nisi. Vivamus vehicula enim ligula, auctor blandit purus semper id. Nunc non sagittis libero. Etiam suscipit vehicula enim, quis elementum quam condimentum id. Quisque hendrerit ipsum vitae enim consectetur egestas. Mauris sit amet dignissim nunc. Pellentesque vitae sem finibus ipsum efficitur dignissim. Duis magna neque, porta ut ultrices rhoncus, fringilla sed mauris. Aliquam tristique, tellus quis maximus finibus, sapien tellus posuere leo, vitae interdum risus purus sit amet quam.
-
-In quis tristique leo. Sed euismod efficitur augue, non vulputate arcu sodales quis. Pellentesque finibus purus sem, semper pulvinar massa tincidunt sed. Proin lacinia ultricies enim, porta mollis nulla auctor quis. Praesent est augue, convallis et dui commodo, porta bibendum purus. Pellentesque non bibendum velit. Suspendisse ut urna nibh. Morbi auctor, dolor in porta vulputate, libero nisl pharetra arcu, a aliquet diam nisi egestas enim. In tristique dignissim enim vel auctor. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Quisque vitae tempus lectus.

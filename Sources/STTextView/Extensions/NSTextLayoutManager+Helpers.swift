@@ -9,7 +9,11 @@ extension NSTextLayoutManager {
         guard let textSelection = textSelections.first(where: { !$0.isLogical }) else {
             return nil
         }
-        return textSelectionNavigation.resolvedInsertionLocation(for: textSelection, writingDirection: .leftToRight)
+
+        return textSelection.textRanges.first?.location
+
+        // FB11961508 NSTextSelectionNavigation.resolvedInsertionLocation sometimes crashes instead return nil
+        // return textSelectionNavigation.resolvedInsertionLocation(for: textSelection, writingDirection: .leftToRight)
     }
 
     func substring(for range: NSTextRange) -> String? {

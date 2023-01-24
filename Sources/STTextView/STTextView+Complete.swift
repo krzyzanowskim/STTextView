@@ -15,6 +15,7 @@ extension STTextView {
         self.complete(sender)
     }
 
+    @MainActor
     private func performCompletion() {
         guard let insertionPointLocation = textLayoutManager.insertionPointLocation,
               let textCharacterSegmentRect = textLayoutManager.textSelectionSegmentFrame(at: insertionPointLocation, type: .standard)
