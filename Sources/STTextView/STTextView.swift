@@ -165,6 +165,18 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    /// The empty space the receiver leaves around its container
+    /// Allows setup overscroll behavior.
+    ///
+    /// It is possible to set the text container and view sizes and resizing
+    /// behavior so that the inset cannot be maintained exactly, although
+    /// the text system tries to maintain the inset wherever possible
+    public var contentInsets: NSEdgeInsets = .init() {
+        didSet {
+            needsLayout = true
+        }
+    }
+
     /// A Boolean value that indicates whether the receiver allows undo.
     ///
     /// `true` if the receiver allows undo, otherwise `false`. Default `true`.
@@ -307,7 +319,7 @@ open class STTextView: NSView, NSTextInput {
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
-            let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: nil)
+            let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
             NotificationCenter.default.post(notification)
             self.delegate?.textViewDidChangeSelection(notification)
         }
@@ -650,27 +662,27 @@ open class STTextView: NSView, NSTextInput {
     private func tile() {
 
         // Update clipView to accomodate vertical ruler
-        if let scrollView = scrollView,
-           scrollView.hasVerticalRuler,
-           let verticalRulerView = scrollView.verticalRulerView
-        {
+        if let scrollView = scrollView {
+
+            // reset content inset
             let clipView = scrollView.contentView
             clipView.automaticallyAdjustsContentInsets = false
             clipView.contentInsets = NSEdgeInsets(
-                top: clipView.contentInsets.top,
-                left: 0, // reset content inset
-                bottom: clipView.contentInsets.bottom,
-                right: clipView.contentInsets.right
+                top: contentInsets.top,
+                left: contentInsets.left,
+                bottom: contentInsets.bottom,
+                right: contentInsets.right
             )
 
-            scrollView.contentView.frame = CGRect(
-                x: scrollView.bounds.origin.x + verticalRulerView.frame.width,
-                y: scrollView.bounds.origin.y,
-                width: scrollView.bounds.size.width - verticalRulerView.frame.width,
-                height: scrollView.bounds.size.height
-            )
+            if scrollView.hasVerticalRuler, let verticalRulerView = scrollView.verticalRulerView {
+                scrollView.contentView.frame = CGRect(
+                    x: scrollView.bounds.origin.x + verticalRulerView.frame.width,
+                    y: scrollView.bounds.origin.y,
+                    width: scrollView.bounds.size.width - verticalRulerView.frame.width,
+                    height: scrollView.bounds.size.height
+                )
+            }
         }
-
     }
 
     open override func resize(withOldSuperviewSize oldSize: NSSize) {

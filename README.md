@@ -80,6 +80,10 @@ textView.widthTracksTextView = true
 
 // Highlight the selected line.
 textView.highlightSelectedLine = true
+
+// Overscroll text content at the bottom
+textView.contentInsets = NSEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
+
 ```
 
 Add line numbers using specialized `STLineNumberRulerView` (specialized subclass of `NSRulerView`)
