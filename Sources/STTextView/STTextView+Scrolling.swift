@@ -32,11 +32,19 @@ extension STTextView {
     }
 
     open override func scrollPageDown(_ sender: Any?) {
-        scroll(visibleRect.moved(dx: 0, dy: visibleRect.height).origin)
+        scroll(visibleRect.moved(dy: visibleRect.height).origin)
     }
 
     open override func scrollPageUp(_ sender: Any?) {
-        scroll(visibleRect.moved(dx: 0, dy: -visibleRect.height).origin)
+        scroll(visibleRect.moved(dy: -visibleRect.height).origin)
+    }
+
+    open override func scrollToBeginningOfDocument(_ sender: Any?) {
+        scroll(CGPoint(x: visibleRect.origin.x, y: frame.minY))
+    }
+
+    open override func scrollToEndOfDocument(_ sender: Any?) {
+        scroll(CGPoint(x: visibleRect.origin.x, y: frame.maxY))
     }
 
 }
