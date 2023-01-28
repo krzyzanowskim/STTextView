@@ -7,28 +7,36 @@ import Cocoa
 extension STTextView {
 
     open override func centerSelectionInVisibleArea(_ sender: Any?) {
-        guard !textLayoutManager.textSelections.isEmpty else {
+        guard let firstTextSelection = textLayoutManager.textSelections.first else {
             return
         }
 
-        scrollToSelection(textLayoutManager.textSelections[0])
+        scrollToSelection(firstTextSelection)
         needsDisplay = true
     }
 
     open override func pageUp(_ sender: Any?) {
-        assertionFailure()
+        scrollPageUp(sender)
     }
 
     open override func pageUpAndModifySelection(_ sender: Any?) {
-        assertionFailure()
+        pageUp(sender)
     }
 
     open override func pageDown(_ sender: Any?) {
-        assertionFailure()
+        scrollPageDown(sender)
     }
 
     open override func pageDownAndModifySelection(_ sender: Any?) {
-        assertionFailure()
+        pageDown(sender)
+    }
+
+    open override func scrollPageDown(_ sender: Any?) {
+        scroll(visibleRect.moved(dx: 0, dy: visibleRect.height).origin)
+    }
+
+    open override func scrollPageUp(_ sender: Any?) {
+        scroll(visibleRect.moved(dx: 0, dy: -visibleRect.height).origin)
     }
 
 }

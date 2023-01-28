@@ -13,7 +13,7 @@ extension CGRect {
         case bottom(CGFloat)
     }
 
-    func inset(_ edgeInsets: NSEdgeInsets) -> CGRect {
+    func inset(by edgeInsets: NSEdgeInsets) -> CGRect {
         var result = self
         result.origin.x += edgeInsets.left
         result.origin.y += edgeInsets.top
@@ -27,13 +27,13 @@ extension CGRect {
         for inset in insets {
             switch inset {
                 case .left(let value):
-                    result = self.inset(NSEdgeInsets(top: 0, left: value, bottom: 0, right: 0))
+                    result = self.inset(by: NSEdgeInsets(top: 0, left: value, bottom: 0, right: 0))
                 case .right(let value):
-                    result = self.inset(NSEdgeInsets(top: 0, left: 0, bottom: 0, right: value))
+                    result = self.inset(by: NSEdgeInsets(top: 0, left: 0, bottom: 0, right: value))
                 case .top(let value):
-                    result = self.inset(NSEdgeInsets(top: value, left: 0, bottom: 0, right: 0))
+                    result = self.inset(by: NSEdgeInsets(top: value, left: 0, bottom: 0, right: 0))
                 case .bottom(let value):
-                    result = self.inset(NSEdgeInsets(top: 0, left: 0, bottom: value, right: 0))
+                    result = self.inset(by: NSEdgeInsets(top: 0, left: 0, bottom: value, right: 0))
             }
         }
         return result
@@ -47,7 +47,7 @@ extension CGRect {
         insetBy(dx: 0, dy: dy)
     }
 
-    func moved(dx: CGFloat, dy: CGFloat) -> CGRect {
+    func moved(dx: CGFloat = 0, dy: CGFloat = 0) -> CGRect {
         applying(.init(translationX: dx, y: dy))
     }
 
@@ -56,7 +56,7 @@ extension CGRect {
     }
 
     func margin(top: CGFloat = 0, left: CGFloat = 0, bottom: CGFloat = 0, right: CGFloat = 0) -> CGRect {
-        inset(.init(top: -top, left: -left, bottom: -bottom, right: -right))
+        inset(by: .init(top: -top, left: -left, bottom: -bottom, right: -right))
     }
 }
 
