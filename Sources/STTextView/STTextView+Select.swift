@@ -17,48 +17,45 @@ extension STTextView {
     }
 
     open override func selectLine(_ sender: Any?) {
-        guard let startSelection = textLayoutManager.textSelections.first else {
-            return
-        }
 
-        textLayoutManager.textSelections = [
-            textLayoutManager.textSelectionNavigation.textSelection(
-                for: .line,
-                enclosing: startSelection
+        for textSelection in textLayoutManager.textSelections {
+            textLayoutManager.textSelections.append(
+                textLayoutManager.textSelectionNavigation.textSelection(
+                    for: .line,
+                    enclosing: textSelection
+                )
             )
-        ]
+        }
 
         needScrollToSelection = true
         needsDisplay = true
     }
 
     open override func selectWord(_ sender: Any?) {
-        guard let startSelection = textLayoutManager.textSelections.first else {
-            return
-        }
 
-        textLayoutManager.textSelections = [
-            textLayoutManager.textSelectionNavigation.textSelection(
-                for: .word,
-                enclosing: startSelection
+        for textSelection in textLayoutManager.textSelections {
+            textLayoutManager.textSelections.append(
+                textLayoutManager.textSelectionNavigation.textSelection(
+                    for: .word,
+                    enclosing: textSelection
+                )
             )
-        ]
+        }
 
         needScrollToSelection = true
         needsDisplay = true
     }
 
     open override func selectParagraph(_ sender: Any?) {
-        guard let startSelection = textLayoutManager.textSelections.first else {
-            return
-        }
 
-        textLayoutManager.textSelections = [
-            textLayoutManager.textSelectionNavigation.textSelection(
-                for: .paragraph,
-                enclosing: startSelection
+        for textSelection in textLayoutManager.textSelections {
+            textLayoutManager.textSelections.append(
+                textLayoutManager.textSelectionNavigation.textSelection(
+                    for: .paragraph,
+                    enclosing: textSelection
+                )
             )
-        ]
+        }
 
         needScrollToSelection = true
         needsDisplay = true
