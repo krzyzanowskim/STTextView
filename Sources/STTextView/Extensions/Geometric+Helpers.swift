@@ -47,6 +47,14 @@ extension CGRect {
         insetBy(dx: 0, dy: dy)
     }
 
+    func scale(_ scale: CGSize) -> CGRect {
+        applying(.init(scaleX: scale.width, y: scale.height))
+    }
+
+    func margin(_ margin: CGSize) -> CGRect {
+        insetBy(dx: -margin.width / 2, dy: -margin.height / 2)
+    }
+
     func moved(dx: CGFloat = 0, dy: CGFloat = 0) -> CGRect {
         applying(.init(translationX: dx, y: dy))
     }

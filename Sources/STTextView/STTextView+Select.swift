@@ -7,6 +7,7 @@ import Cocoa
 extension STTextView {
     
     open override func selectAll(_ sender: Any?) {
+        
         if isSelectable {
             textLayoutManager.textSelections = [
                 NSTextSelection(range: textLayoutManager.documentRange, affinity: .downstream, granularity: .line)

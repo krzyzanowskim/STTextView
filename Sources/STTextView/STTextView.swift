@@ -718,19 +718,19 @@ open class STTextView: NSView, NSTextInput {
 
         if selectionTextRange.isEmpty {
             if let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: selectionTextRange.location, type: .selection) {
-                scrollToVisible(selectionRect)
+                scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
             }
         } else {
             switch selection.affinity {
             case .upstream:
                 if let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: selectionTextRange.location, type: .selection) {
-                    scrollToVisible(selectionRect)
+                    scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
                 }
             case .downstream:
                 if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
                    let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: location, type: .selection)
                 {
-                    scrollToVisible(selectionRect)
+                    scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
                 }
             @unknown default:
                 break
