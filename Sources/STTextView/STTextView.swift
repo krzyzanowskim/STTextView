@@ -165,18 +165,6 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    /// The empty space the receiver leaves around its container
-    /// Allows setup overscroll behavior.
-    ///
-    /// It is possible to set the text container and view sizes and resizing
-    /// behavior so that the inset cannot be maintained exactly, although
-    /// the text system tries to maintain the inset wherever possible
-    public var contentInsets: NSEdgeInsets = .init() {
-        didSet {
-            needsLayout = true
-        }
-    }
-
     /// A Boolean value that indicates whether the receiver allows undo.
     ///
     /// `true` if the receiver allows undo, otherwise `false`. Default `true`.
@@ -668,10 +656,10 @@ open class STTextView: NSView, NSTextInput {
             let clipView = scrollView.contentView
             clipView.automaticallyAdjustsContentInsets = false
             clipView.contentInsets = NSEdgeInsets(
-                top: contentInsets.top,
-                left: contentInsets.left,
-                bottom: contentInsets.bottom,
-                right: contentInsets.right
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0
             )
 
             if scrollView.hasVerticalRuler, let verticalRulerView = scrollView.verticalRulerView {

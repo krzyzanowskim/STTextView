@@ -32,7 +32,6 @@ final class ViewController: NSViewController {
 
         textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true
-        textView.contentInsets = NSEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         textView.textFinder.isIncrementalSearchingEnabled = true
         textView.textFinder.incrementalSearchingShouldDimContentView = true
         textView.delegate = self
