@@ -697,7 +697,7 @@ open class STTextView: NSView, NSTextInput {
 
         if needScrollToSelection {
             needScrollToSelection = false
-            if let textSelection = textLayoutManager.textSelections.first {
+            if let textSelection = textLayoutManager.textSelections.last {
                 scrollToSelection(textSelection)
                 textLayoutManager.textViewportLayoutController.layoutViewport()
             }
@@ -712,7 +712,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     internal func scrollToSelection(_ selection: NSTextSelection) {
-        guard let selectionTextRange = selection.textRanges.first else {
+        guard let selectionTextRange = selection.textRanges.last else {
             return
         }
 
