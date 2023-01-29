@@ -8,55 +8,60 @@ extension STTextView {
     
     open override func selectAll(_ sender: Any?) {
         
-        if isSelectable {
-            textLayoutManager.textSelections = [
-                NSTextSelection(range: textLayoutManager.documentRange, affinity: .downstream, granularity: .line)
-            ]
-
-            updateSelectionHighlights()
+        guard isSelectable else {
+            return
         }
+
+        textLayoutManager.textSelections = [
+            NSTextSelection(range: textLayoutManager.documentRange, affinity: .downstream, granularity: .line)
+        ]
+
+        updateSelectionHighlights()
     }
 
     open override func selectLine(_ sender: Any?) {
-
-        for textSelection in textLayoutManager.textSelections {
-            textLayoutManager.textSelections.append(
-                textLayoutManager.textSelectionNavigation.textSelection(
-                    for: .line,
-                    enclosing: textSelection
-                )
-            )
+        guard isSelectable, let enclosingSelection = textLayoutManager.textSelections.last else {
+            return
         }
+
+        textLayoutManager.textSelections = [
+            textLayoutManager.textSelectionNavigation.textSelection(
+                    for: .line,
+                    enclosing: enclosingSelection
+                )
+        ]
 
         needScrollToSelection = true
         needsDisplay = true
     }
 
     open override func selectWord(_ sender: Any?) {
-
-        for textSelection in textLayoutManager.textSelections {
-            textLayoutManager.textSelections.append(
-                textLayoutManager.textSelectionNavigation.textSelection(
-                    for: .word,
-                    enclosing: textSelection
-                )
-            )
+        guard isSelectable, let enclosingSelection = textLayoutManager.textSelections.last else {
+            return
         }
+
+        textLayoutManager.textSelections = [
+            textLayoutManager.textSelectionNavigation.textSelection(
+                for: .word,
+                enclosing: enclosingSelection
+            )
+        ]
 
         needScrollToSelection = true
         needsDisplay = true
     }
 
     open override func selectParagraph(_ sender: Any?) {
-
-        for textSelection in textLayoutManager.textSelections {
-            textLayoutManager.textSelections.append(
-                textLayoutManager.textSelectionNavigation.textSelection(
-                    for: .paragraph,
-                    enclosing: textSelection
-                )
-            )
+        guard isSelectable, let enclosingSelection = textLayoutManager.textSelections.last else {
+            return
         }
+
+        textLayoutManager.textSelections = [
+            textLayoutManager.textSelectionNavigation.textSelection(
+                for: .paragraph,
+                enclosing: enclosingSelection
+            )
+        ]
 
         needScrollToSelection = true
         needsDisplay = true
