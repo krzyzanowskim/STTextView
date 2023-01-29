@@ -6,49 +6,62 @@ import Cocoa
 
 extension STTextView {
 
-    open override func yank(_ sender: Any?) {
-        // TODO: Implement proper Kill and yank (yank: + yankAndSelect:)
-        // see https://www.cocoawithlove.com/2009/12/multiple-copy-buffers-cursor-and-tab.html
-        cut(sender)
-    }
-
     open override func deleteForward(_ sender: Any?) {
-        delete(direction: .forward, destination: .character, allowsDecomposition: false)
+        if let deletedString = delete(direction: .forward, destination: .character, allowsDecomposition: false) {
+            Yanking.shared.kill(action: .delete, string: deletedString)
+        }
     }
 
     open override func deleteBackward(_ sender: Any?) {
-        delete(direction: .backward, destination: .character, allowsDecomposition: false)
+        if let deletedString = delete(direction: .backward, destination: .character, allowsDecomposition: false) {
+            Yanking.shared.kill(action: .delete, string: deletedString)
+        }
     }
 
     open override func deleteBackwardByDecomposingPreviousCharacter(_ sender: Any?) {
-        delete(direction: .backward, destination: .character, allowsDecomposition: true)
+        if let deletedString = delete(direction: .backward, destination: .character, allowsDecomposition: true) {
+            Yanking.shared.kill(action: .delete, string: deletedString)
+        }
     }
 
     open override func deleteWordBackward(_ sender: Any?) {
-        delete(direction: .backward, destination: .word, allowsDecomposition: false)
+        if let deletedString = delete(direction: .backward, destination: .word, allowsDecomposition: false) {
+            Yanking.shared.kill(action: .deleteWordBackward, string: deletedString)
+        }
     }
 
     open override func deleteWordForward(_ sender: Any?) {
-        delete(direction: .forward, destination: .word, allowsDecomposition: false)
+        if let deletedString = delete(direction: .forward, destination: .word, allowsDecomposition: false) {
+            Yanking.shared.kill(action: .deleteWordForward, string: deletedString)
+        }
     }
 
     open override func deleteToBeginningOfLine(_ sender: Any?) {
-        delete(direction: .backward, destination: .line, allowsDecomposition: false)
+        if let deletedString = delete(direction: .backward, destination: .line, allowsDecomposition: false) {
+            Yanking.shared.kill(action: .deleteToBeginningOfLine, string: deletedString)
+        }
     }
 
     open override func deleteToEndOfLine(_ sender: Any?) {
-        delete(direction: .forward, destination: .line, allowsDecomposition: false)
+        if let deletedString = delete(direction: .forward, destination: .line, allowsDecomposition: false) {
+            Yanking.shared.kill(action: .deleteToEndOfLine, string: deletedString)
+        }
     }
 
     open override func deleteToBeginningOfParagraph(_ sender: Any?) {
-        delete(direction: .backward, destination: .paragraph, allowsDecomposition: false)
+        if let deletedString = delete(direction: .backward, destination: .paragraph, allowsDecomposition: false) {
+            Yanking.shared.kill(action: .deleteToBeginningOfLine, string: deletedString)
+        }
     }
 
     open override func deleteToEndOfParagraph(_ sender: Any?) {
-        delete(direction: .forward, destination: .paragraph, allowsDecomposition: false)
+        if let deletedString = delete(direction: .forward, destination: .paragraph, allowsDecomposition: false) {
+            Yanking.shared.kill(action: .deleteToEndOfParagraph, string: deletedString)
+        }
     }
 
-    private func delete(direction: NSTextSelectionNavigation.Direction, destination: NSTextSelectionNavigation.Destination, allowsDecomposition: Bool) {
+    @discardableResult
+    private func delete(direction: NSTextSelectionNavigation.Direction, destination: NSTextSelectionNavigation.Destination, allowsDecomposition: Bool) -> String? {
         let textRanges = textLayoutManager.textSelections.flatMap { textSelection -> [NSTextRange] in
             if destination == .word {
                 // FB9925766. deletionRanges only works correctly if textSelection is at the end of the word
@@ -71,7 +84,11 @@ extension STTextView {
         }
 
         if textRanges.isEmpty {
-            return
+            return nil
+        }
+
+        let deletedString = textRanges.reduce(into: "") { partialResult, textRange in
+            partialResult += textLayoutManager.substring(for: textRange) ?? ""
         }
 
         textContentStorage.performEditingTransaction {
@@ -79,5 +96,7 @@ extension STTextView {
                 replaceCharacters(in: textRange, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)
             }
         }
+
+        return deletedString
     }
 }

@@ -304,11 +304,15 @@ open class STTextView: NSView, NSTextInput {
         layer?.addSublayer(selectionLayer)
         layer?.addSublayer(contentLayer)
 
+        // Forward didChangeSelectionNotification from STTextLayoutManager
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
-            let notification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
-            NotificationCenter.default.post(notification)
+            Yanking.shared.selectionChanged()
+
+            NotificationCenter.default.post(
+                Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
+            )
             self.delegate?.textViewDidChangeSelection(notification)
         }
     }
@@ -743,6 +747,7 @@ open class STTextView: NSView, NSTextInput {
         NotificationCenter.default.post(notification)
         needsDisplay = true
         delegate?.textViewDidChangeText(notification)
+        Yanking.shared.textChanged()
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
