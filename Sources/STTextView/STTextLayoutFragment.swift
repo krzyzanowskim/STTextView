@@ -16,11 +16,6 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
         super.init(coder: coder)
     }
 
-    override var layoutFragmentFrame: CGRect {
-        let fragmentFrame = super.layoutFragmentFrame
-        return fragmentFrame
-    }
-
     override func draw(at point: CGPoint, in context: CGContext) {
         // Layout fragment draw text at the bottom (after apply baselineOffset) but ignore the paragraph line height
         // This is a workaround/patch to position text nicely in the line
