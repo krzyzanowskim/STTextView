@@ -685,14 +685,14 @@ open class STTextView: NSView, NSTextInput {
     open override func layout() {
         super.layout()
 
-        textLayoutManager.textViewportLayoutController.layoutViewport()
-
         if needScrollToSelection {
             needScrollToSelection = false
             if let textSelection = textLayoutManager.textSelections.last {
                 scrollToSelection(textSelection)
                 textLayoutManager.textViewportLayoutController.layoutViewport()
             }
+        } else {
+            textLayoutManager.textViewportLayoutController.layoutViewport()
         }
     }
 
