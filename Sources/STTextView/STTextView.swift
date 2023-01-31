@@ -602,7 +602,6 @@ open class STTextView: NSView, NSTextInput {
         if textLayoutManager.documentRange.isEmpty {
             proposedHeight = typingLineHeight
         } else {
-            textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation)) // despite .ensuresLayout below
             textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
                 return false // stop
