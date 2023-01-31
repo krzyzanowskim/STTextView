@@ -51,6 +51,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         let oldFrame = fragmentLayer.frame
         fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
         if oldFrame != fragmentLayer.frame {
+            fragmentLayer.needsLayout()
             fragmentLayer.needsDisplay()
         }
 
