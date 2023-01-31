@@ -596,6 +596,8 @@ open class STTextView: NSView, NSTextInput {
         if textLayoutManager.documentRange.isEmpty {
             proposedHeight = typingLineHeight
         } else {
+            // enumerateTextLayoutFragments .ensureLayout doesn't seem to work/be what I expect hence force layout
+            textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
             textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
                 return false // stop
@@ -648,7 +650,7 @@ open class STTextView: NSView, NSTextInput {
     open override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
         adjustViewportOffsetIfNeeded()
-        updateTextContainerSizeIfNeeded()
+        updateFrameSizeIfNeeded()
     }
 
     private func tile() {
