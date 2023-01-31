@@ -73,6 +73,10 @@ extension NSTextLayoutManager {
     public func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
         textLayoutFragment(for: location)?.textLineFragment(at: location)
     }
+
+    public func textLineFragment(at location: CGPoint) -> NSTextLineFragment? {
+        textLayoutFragment(for: location)?.textLineFragment(at: location)
+    }
 }
 
 extension NSTextLayoutFragment {
@@ -96,6 +100,11 @@ extension NSTextLayoutFragment {
         }
     }
 
+    func textLineFragment(at location: CGPoint, in textContentManager: NSTextContentManager? = nil) -> NSTextLineFragment? {
+        textLineFragments.first { lineFragment in
+            CGRect(origin: layoutFragmentFrame.origin, size: lineFragment.typographicBounds.size).contains(location)
+        }
+    }
 }
 
 extension NSTextLineFragment {

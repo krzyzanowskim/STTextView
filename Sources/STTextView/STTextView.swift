@@ -191,6 +191,7 @@ open class STTextView: NSView, NSTextInput {
     internal let selectionLayer: STCATiledLayer
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
     internal var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
+    private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
     internal lazy var completionWindowController: CompletionWindowController = {
         let viewController = delegate?.textViewCompletionViewController(self) ?? STCompletionViewController()
@@ -315,7 +316,12 @@ open class STTextView: NSView, NSTextInput {
             )
             self.delegate?.textViewDidChangeSelection(notification)
         }
+
+        usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.new]) { [weak self] textLayoutManager, change in
+            self?.needsUpdateConstraints = true
+        }
     }
+
 
     open override func resetCursorRects() {
         super.resetCursorRects()
@@ -592,12 +598,10 @@ open class STTextView: NSView, NSTextInput {
         let currentSize = frame.size
         let viewportBounds = textLayoutManager.textViewportLayoutController.viewportBounds
 
-        var proposedHeight: CGFloat = 0
+        var proposedHeight: CGFloat = viewportBounds.height
         if textLayoutManager.documentRange.isEmpty {
             proposedHeight = typingLineHeight
         } else {
-            // enumerateTextLayoutFragments .ensureLayout doesn't seem to work/be what I expect hence force layout
-            textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
             textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
                 return false // stop
