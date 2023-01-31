@@ -829,10 +829,12 @@ open class STTextView: NSView, NSTextInput {
         willChangeText()
         delegate?.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
-        textContentStorage.textStorage?.replaceCharacters(
-            in: NSRange(textRange, in: textContentStorage),
-            with: replacementString
-        )
+        textContentStorage.performEditingTransaction {
+            textContentStorage.textStorage?.replaceCharacters(
+                in: NSRange(textRange, in: textContentStorage),
+                with: replacementString
+            )
+        }
 
         delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
         didChangeText()

@@ -98,35 +98,33 @@ extension STTextView: NSTextInputClient {
     open func insertText(_ string: Any, replacementRange: NSRange) {
         guard isEditable else { return }
 
-        textContentStorage.performEditingTransaction {
-            switch string {
-            case let string as String:
-                if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
+        switch string {
+        case let string as String:
+            if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
+                if shouldChangeText(in: textRange, replacementString: string) {
+                    replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
+                }
+            } else if !textLayoutManager.textSelections.isEmpty {
+                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                     if shouldChangeText(in: textRange, replacementString: string) {
                         replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
                     }
-                } else if !textLayoutManager.textSelections.isEmpty {
-                    for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-                        if shouldChangeText(in: textRange, replacementString: string) {
-                            replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
-                        }
-                    }
                 }
-            case let string as NSAttributedString:
-                if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
+            }
+        case let string as NSAttributedString:
+            if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
+                if shouldChangeText(in: textRange, replacementString: string.string) {
+                    replaceCharacters(in: textRange, with: string, allowsTypingCoalescing: true)
+                }
+            } else if !textLayoutManager.textSelections.isEmpty {
+                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
                     if shouldChangeText(in: textRange, replacementString: string.string) {
                         replaceCharacters(in: textRange, with: string, allowsTypingCoalescing: true)
                     }
-                } else if !textLayoutManager.textSelections.isEmpty {
-                    for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-                        if shouldChangeText(in: textRange, replacementString: string.string) {
-                            replaceCharacters(in: textRange, with: string, allowsTypingCoalescing: true)
-                        }
-                    }
                 }
-            default:
-                assertionFailure()
             }
+        default:
+            assertionFailure()
         }
     }
 
