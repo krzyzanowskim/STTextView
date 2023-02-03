@@ -124,10 +124,8 @@ open class STTextView: NSView, NSTextInput {
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
 
-                if newValue == true {
-                    textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
-                } else {
-                    textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
+                if textContainer.widthTracksTextView == true {
+                    textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: textContainer.size.height)
                 }
 
                 if let scrollView = scrollView {
@@ -602,7 +600,9 @@ open class STTextView: NSView, NSTextInput {
         if textLayoutManager.documentRange.isEmpty {
             proposedHeight = typingLineHeight
         } else {
-            textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+            let endLocation = textLayoutManager.documentRange.endLocation
+            textLayoutManager.ensureLayout(for: NSTextRange(location: endLocation))
+            textLayoutManager.enumerateTextLayoutFragments(from: endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
                 return false // stop
             }
