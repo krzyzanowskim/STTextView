@@ -56,7 +56,13 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var baselineOffset: CGFloat = 0
 
-    private var lines: [(textPosition: CGPoint, ctLine: CTLine)] = []
+    struct Line {
+        let textPosition: CGPoint
+        let textRange: NSTextRange
+        let ctLine: CTLine
+    }
+    
+    private var lines: [Line] = []
     
     public required init(textView: STTextView, scrollView: NSScrollView? = nil) {
         super.init(scrollView: scrollView ?? textView.enclosingScrollView, orientation: .verticalRuler)
@@ -71,27 +77,38 @@ open class STLineNumberRulerView: NSRulerView {
 
         clientView = textView
 
-        NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: textView, queue: .main) { [weak self] _ in
-            self?.invalidateLineNumbers()
-            self?.needsDisplay = true
-        }
-
-        NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: textView, queue: .main) { [weak self] _ in
-            self?.invalidateLineNumbers()
-            self?.needsDisplay = true
-        }
-        
-        NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textView.textLayoutManager, queue: .main) { [weak self] _ in
-            self?.invalidateLineNumbers()
-            self?.needsDisplay = true
-        }
+//        NotificationCenter.default.addObserver(forName: NSView.frameDidChangeNotification, object: textView, queue: .main) { [weak self] _ in
+//            self?.invalidateLineNumbers()
+//            self?.needsDisplay = true
+//        }
+//
+//        NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: textView, queue: .main) { [weak self] _ in
+//            self?.invalidateLineNumbers()
+//            self?.needsDisplay = true
+//        }
+//
+//        NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textView.textLayoutManager, queue: .main) { [weak self] _ in
+//            self?.invalidateLineNumbers()
+//            self?.needsDisplay = true
+//        }
     }
 
     required public init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
+    open override func invalidateHashMarks() {
+        invalidateLineNumbers()
+    }
+
     private func invalidateLineNumbers() {
+        guard let textLayoutManager = textView?.textLayoutManager,
+              let textContentManager = textLayoutManager.textContentManager,
+              let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange
+        else {
+            return
+        }
+
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: textColor
@@ -101,17 +118,14 @@ open class STLineNumberRulerView: NSRulerView {
             .font: font,
             .foregroundColor: (selectedLineTextColor ?? textColor).cgColor
         ]
-        lines.removeAll(keepingCapacity: true)
 
-        guard let textLayoutManager = textView?.textLayoutManager else {
-            return
-        }
+        lines.removeAll(keepingCapacity: true)
 
         if textLayoutManager.documentRange.isEmpty {
             // For empty document, layout the extra line as if it has text in it
             // the ExtraLineFragment doesn't have information about typing attributes hence layout manager uses a default values - not from text view
-            textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
-                for lineFragment in textLayoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == lineFragment) {
+            textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+                for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
 
                     var baselineOffset: CGFloat = 0
                     if let paragraphStyle = textView?.defaultParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
@@ -128,8 +142,9 @@ open class STLineNumberRulerView: NSRulerView {
                     let locationForFirstCharacter = CGPoint(x: 0, y: ascent + descent + leading)
 
                     lines.append(
-                        (
-                            textPosition: textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
+                        Line(
+                            textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
+                            textRange: layoutFragment.rangeInElement,
                             ctLine: ctLine
                         )
                     )
@@ -138,9 +153,13 @@ open class STLineNumberRulerView: NSRulerView {
                 return false
             }
         } else {
-            textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { textLayoutFragment in
+            let textElements = textContentManager.textElements(for: NSTextRange(location: textLayoutManager.documentRange.location, end: viewportRange.location)!)
+            let startLineIndex = textElements.count
+            let firstFragmentLayout = textLayoutManager.textLayoutFragment(for: viewportRange.location)!
 
-                for lineFragment in textLayoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || textLayoutFragment.textLineFragments.first == lineFragment) {
+            textLayoutManager.enumerateTextLayoutFragments(from: firstFragmentLayout.rangeInElement.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+
+                for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
                     var baselineOffset: CGFloat = 0
 
                     if let paragraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
@@ -148,19 +167,20 @@ open class STLineNumberRulerView: NSRulerView {
                     }
 
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
-                    let originPoint = textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset)
-                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, selectedAttributes: selectedAttributes))
+                    let originPoint = layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset)
+                    let attributedString = NSAttributedString(string: "\(startLineIndex + lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, selectedAttributes: selectedAttributes))
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     lines.append(
-                        (
-                            textPosition: textLayoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
+                        Line(
+                            textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
+                            textRange: layoutFragment.rangeInElement,
                             ctLine: ctLine
                         )
                     )
                 }
 
-                return true
+                return layoutFragment.rangeInElement.location <= viewportRange.endLocation
             }
         }
 
@@ -176,8 +196,9 @@ open class STLineNumberRulerView: NSRulerView {
         lines = lines.map {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
-            return (
+            return Line(
                 textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rulerInsets.trailing), dy: -baselineOffset),
+                textRange: $0.textRange,
                 ctLine: $0.ctLine
             )
         }

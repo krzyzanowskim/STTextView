@@ -41,6 +41,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         updateFrameSizeIfNeeded()
         updateSelectionHighlights()
         adjustViewportOffsetIfNeeded()
+        scrollView?.verticalRulerView?.invalidateHashMarks()
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
