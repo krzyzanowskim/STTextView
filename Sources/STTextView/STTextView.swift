@@ -642,7 +642,6 @@ open class STTextView: NSView, NSTextInput {
 
         if textContainer.size != proposedSize {
             textContainer.size = proposedSize
-            needsLayout = true
         }
     }
 
