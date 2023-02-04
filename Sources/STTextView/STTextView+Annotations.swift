@@ -28,12 +28,17 @@ extension STTextView {
     }
 
     internal func updateLineAnnotations() {
-        subviews = annotations.compactMap { lineAnnotation -> NSView? in
-            if let textLineFragment = textLayoutManager.textLineFragment(at: lineAnnotation.location) {
-                return delegate?.textView(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
+        subviews = annotations
+            .filter { lineAnnotation in
+                textLayoutManager.textViewportLayoutController.viewportRange?.contains(lineAnnotation.location) ?? false
             }
+            .compactMap { lineAnnotation -> NSView? in
+                textLayoutManager.ensureLayout(for: NSTextRange(location: lineAnnotation.location))
+                if let textLineFragment = textLayoutManager.textLineFragment(at: lineAnnotation.location) {
+                    return delegate?.textView(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
+                }
 
-            return nil
-        }
+                return nil
+            }
     }
 }
