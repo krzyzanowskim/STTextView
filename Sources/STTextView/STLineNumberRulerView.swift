@@ -76,6 +76,11 @@ open class STLineNumberRulerView: NSRulerView {
         selectedLineTextColor = textView.textColor
 
         clientView = textView
+
+        NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textView.textLayoutManager, queue: .main) { [weak self] _ in
+            self?.invalidateLineNumbers()
+            self?.needsDisplay = true
+        }
     }
 
     required public init(coder: NSCoder) {
