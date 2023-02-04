@@ -699,13 +699,6 @@ open class STTextView: NSView, NSTextInput {
         needScrollToSelection = false
     }
 
-    open override func viewWillDraw() {
-        super.viewWillDraw()
-
-        // deferred layout of line annotations
-        updateLineAnnotations()
-    }
-
     internal func scrollToSelection(_ selection: NSTextSelection) {
         guard let selectionTextRange = selection.textRanges.last else {
             return
