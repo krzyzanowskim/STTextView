@@ -665,10 +665,10 @@ open class STTextView: NSView, NSTextInput {
             let clipView = scrollView.contentView
             clipView.automaticallyAdjustsContentInsets = false
             clipView.contentInsets = NSEdgeInsets(
-                top: 0,
+                top: clipView.contentInsets.top,
                 left: 0,
-                bottom: 0,
-                right: 0
+                bottom: clipView.contentInsets.bottom,
+                right: clipView.contentInsets.right
             )
 
             if scrollView.hasVerticalRuler, let verticalRulerView = scrollView.verticalRulerView {
