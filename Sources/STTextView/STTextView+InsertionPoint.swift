@@ -8,13 +8,14 @@ extension STTextView {
 
     /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
     public func updateInsertionPointStateAndRestartTimer() {
+        // Remove insertion point layers
         selectionLayer.sublayers?.removeAll(where: { layer in
             type(of: layer) == insertionPointLayerClass
         })
 
         if shouldDrawInsertionPoint {
-            for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-                textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, textContainer) in
+            for textRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) {
+                textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, _) in
                     var selectionFrame = textSegmentFrame.intersection(frame).pixelAligned
                     guard !selectionFrame.isNull, !selectionFrame.isInfinite else {
                         return true
@@ -33,9 +34,9 @@ extension STTextView {
                     insertionLayer.updateGeometry()
 
                     if isFirstResponder {
-                        insertionLayer.enable()
+                        insertionLayer.blinkStart()
                     } else {
-                        insertionLayer.disable()
+                        insertionLayer.blinkStop()
                     }
 
                     selectionLayer.addSublayer(insertionLayer)

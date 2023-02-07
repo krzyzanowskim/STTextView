@@ -697,6 +697,12 @@ open class STTextView: NSView, NSTextInput {
         textLayoutManager.textViewportLayoutController.layoutViewport()
 
         needScrollToSelection = false
+
+//        Task { @MainActor in
+//            // A workaround (temporary) to escape layout()
+//            // and layout annotations right after layout
+//            updateLineAnnotations()
+//        }
     }
 
     internal func scrollToSelection(_ selection: NSTextSelection) {

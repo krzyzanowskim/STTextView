@@ -42,12 +42,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         updateSelectionHighlights()
         adjustViewportOffsetIfNeeded()
         scrollView?.verticalRulerView?.invalidateHashMarks()
-
-        Task { @MainActor in
-            // A workaround (temporary) to escape layout()
-            // and layout annotations right after layout
-            updateLineAnnotations()
-        }
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {

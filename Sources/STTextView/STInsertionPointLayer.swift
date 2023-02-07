@@ -43,14 +43,19 @@ open class STInsertionPointLayer: STCALayer {
         backgroundColor = insertionPointColor.cgColor
     }
 
-    open func enable() {
+    open func blinkStart() {
+        if timer != nil {
+            return
+        }
+
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
             guard let self = self else { return }
             self.isHidden.toggle()
         }
     }
 
-    open func disable() {
+    open func blinkStop() {
+        isHidden = false
         timer = nil
     }
 }
