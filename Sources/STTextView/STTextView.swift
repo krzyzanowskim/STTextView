@@ -199,7 +199,7 @@ open class STTextView: NSView, NSTextInput {
     /// Text line annotation views
     public var annotations: [STLineAnnotation] = [] {
         didSet {
-            updateLineAnnotations()
+            updateLineAnnotationViews()
         }
     }
 
@@ -207,13 +207,15 @@ open class STTextView: NSView, NSTextInput {
     internal let textFinderClient: STTextFinderClient
 
     /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
-    internal var needScrollToSelection: Bool = false {
+    internal var needsScrollToSelection: Bool = false {
         didSet {
-            if needScrollToSelection {
+            if needsScrollToSelection {
                 needsLayout = true
             }
         }
     }
+
+    internal var needsAnnotationsLayout: Bool = false
 
     public override var isFlipped: Bool {
         #if os(macOS)
@@ -690,19 +692,22 @@ open class STTextView: NSView, NSTextInput {
     open override func layout() {
         super.layout()
 
-        if needScrollToSelection, let textSelection = textLayoutManager.textSelections.last {
+        if needsScrollToSelection, let textSelection = textLayoutManager.textSelections.last {
             scrollToSelection(textSelection)
         }
 
         textLayoutManager.textViewportLayoutController.layoutViewport()
 
-        needScrollToSelection = false
+        needsScrollToSelection = false
 
-//        Task { @MainActor in
-//            // A workaround (temporary) to escape layout()
-//            // and layout annotations right after layout
-//            updateLineAnnotations()
-//        }
+        if needsAnnotationsLayout {
+            Task { @MainActor in
+                // A workaround (temporary) to escape layout()
+                // and layout annotations right after layout
+                updateLineAnnotationViews()
+            }
+            needsAnnotationsLayout = false
+        }
     }
 
     internal func scrollToSelection(_ selection: NSTextSelection) {
@@ -743,13 +748,14 @@ open class STTextView: NSView, NSTextInput {
     }
 
     open func didChangeText() {
-        needScrollToSelection = true
+        needsScrollToSelection = true
 
         let notification = Notification(name: STTextView.didChangeTextNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
-        needsDisplay = true
         delegate?.textViewDidChangeText(notification)
         Yanking.shared.textChanged()
+        needsAnnotationsLayout = true
+        needsDisplay = true
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {

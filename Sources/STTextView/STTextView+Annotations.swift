@@ -5,6 +5,8 @@ import Cocoa
 /// needed for the annotation view
 open class STLineAnnotation: NSObject {
 
+    internal var view: NSView?
+
     /// Location in content storage
     public let location: NSTextLocation
 
@@ -17,28 +19,36 @@ extension STTextView {
 
     public func addAnnotation(_ annotations: STLineAnnotation...) {
         self.annotations.append(contentsOf: annotations)
+        needsAnnotationsLayout = true
     }
 
     public func removeAnnotation(_ annotations: STLineAnnotation...) {
-        self.annotations.removeAll(where: { annotations.contains($0) })
+        self.annotations.removeAll {
+            annotations.contains($0)
+        }
+        needsAnnotationsLayout = true
     }
 
     public func removeAllAnnotations() {
         annotations.removeAll(keepingCapacity: true)
+        needsAnnotationsLayout = true
     }
 
-    internal func updateLineAnnotations() {
-        subviews = annotations
+    internal func updateLineAnnotationViews() {
+        let lineAnnotations = annotations
             .filter { lineAnnotation in
                 textLayoutManager.textViewportLayoutController.viewportRange?.contains(lineAnnotation.location) ?? false
             }
-            .compactMap { lineAnnotation -> NSView? in
+
+        if let delegate = delegate {
+            for lineAnnotation in lineAnnotations {
                 textLayoutManager.ensureLayout(for: NSTextRange(location: lineAnnotation.location))
                 if let textLineFragment = textLayoutManager.textLineFragment(at: lineAnnotation.location) {
-                    return delegate?.textView(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
+                    lineAnnotation.view = delegate.textView(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
                 }
-
-                return nil
             }
+        }
+
+        subviews = lineAnnotations.compactMap(\.view)
     }
 }

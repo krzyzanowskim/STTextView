@@ -31,7 +31,7 @@ extension STTextView {
                 )
         ]
 
-        needScrollToSelection = true
+        needsScrollToSelection = true
         needsDisplay = true
     }
 
@@ -47,7 +47,7 @@ extension STTextView {
             )
         ]
 
-        needScrollToSelection = true
+        needsScrollToSelection = true
         needsDisplay = true
     }
 
@@ -63,7 +63,7 @@ extension STTextView {
             )
         ]
 
-        needScrollToSelection = true
+        needsScrollToSelection = true
         needsDisplay = true
 
     }
@@ -385,7 +385,7 @@ extension STTextView {
             )
         }
 
-        needScrollToSelection = true
+        needsScrollToSelection = true
         needsDisplay = true
     }
 
