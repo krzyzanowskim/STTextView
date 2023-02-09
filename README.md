@@ -1,6 +1,6 @@
 # STTextView
 
-Performant #macOS TextView with line numbers and much more. (NSTextView replacement)
+Performant [macOS](https://www.apple.com/macos) TextView with line numbers and much more. (NSTextView replacement)
 
 The goal of this project is to build [NSTextView](https://developer.apple.com/documentation/appkit/nstextview) replacement component utilizing [TextKit 2](https://developer.apple.com/videos/play/wwdc2021/10061/) framework. [due to many good reasons](#-textkit-2-bug-reports-list).
 
