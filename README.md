@@ -26,13 +26,14 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - Undo/Redo
 
 
-## Roadmap
+## 🗓️ Roadmap
 
 STTextView is already well suited as a text editor component, however it still need improvements before release v1.0
 
 **Suggest** or **vote** for new features: [Feature Requests](https://github.com/krzyzanowskim/STTextView/discussions/14)
 
-### Known issues:
+#### Known issues
+
 * Improve Undo/Redo. Current fail in some scenario to redo text at the correct location. Updates are incremental and uses custom implementation.
 * The Find/Replace controls cover top part of the content.
 * Find highlight may appear at incorrect location in the view
