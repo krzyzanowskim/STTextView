@@ -1,5 +1,4 @@
 # STTextView
-(**ST** prefix stands for "**S**wift s**T**udio" because **[SS](https://en.wikipedia.org/wiki/Schutzstaffel)** is not good prefix since 1939)
 
 Performant #macOS TextView with line numbers and much more. (NSTextView replacement)
 
@@ -25,6 +24,18 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - Smooth scrolling of long content
 - Anchored annotations
 - Undo/Redo
+
+
+## Roadmap
+
+STTextView is already well suited as a text editor component, however it still need improvements before release v1.0
+
+**Suggest** or **vote** for new features: [Feature Requests](https://github.com/krzyzanowskim/STTextView/discussions/14)
+
+### Known issues:
+* Improve Undo/Redo. Current fail in some scenario to redo text at the correct location. Updates are incremental and uses custom implementation.
+* The Find/Replace controls cover top part of the content.
+* Find highlight may appear at incorrect location in the view
 
 ## 🚀 Getting Started
 
@@ -134,13 +145,21 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 
 ... I'm aware that the list of issues is not complete. I managed to workaround most of the problems in STTextView.
 
+## Why ST?
+
+(**ST** prefix stands for "**S**wift s**T**udio" because **[SS](https://en.wikipedia.org/wiki/Schutzstaffel)** is not good prefix since 1939)
+
+
 ## Suggestions or Feedback
 
-I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twitter.com/krzyzanowskim), or a pull request.
+Start a new [discussion topic](https://github.com/krzyzanowskim/STTextView/discussions) or a pull request.
+
+I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twitter.com/krzyzanowskim), mastodon [@krzyzanowskim@mastodon.social](https://mastodon.social/@krzyzanowskim). 
 
 ## License
 
 ### Open Source license
+
 If you are creating an open source application under a license compatible with the [GNU GPL license v3](https://www.gnu.org/licenses/gpl-3.0.html), you may use STTextView under the terms of the GPLv3.
 
 ### Commercial license
