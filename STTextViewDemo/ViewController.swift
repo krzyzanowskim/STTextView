@@ -60,7 +60,7 @@ final class ViewController: NSViewController {
 
         let lineAnnotation2 = MyLineAnnotation(
             message: "Fix It!",
-            location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 1550)!
+            location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 550)!
         )
         textView.addAnnotation(lineAnnotation2)
     }
