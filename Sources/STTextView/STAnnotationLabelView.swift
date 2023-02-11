@@ -64,4 +64,8 @@ public final class STAnnotationLabelView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    public override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .arrow)
+    }
 }
