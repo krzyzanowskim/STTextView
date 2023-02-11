@@ -14,9 +14,12 @@ final class STTextContentStorage: NSTextContentStorage {
             return
         }
 
-        let replacementString = paragraphElements.map(\.attributedString).reduce(into: NSMutableAttributedString()) { partialResult, attributedString in
-            partialResult.append(attributedString)
+        let replacementString = NSMutableAttributedString()
+        replacementString.beginEditing()
+        for paragraphElement in paragraphElements {
+            replacementString.append(paragraphElement.attributedString)
         }
+        replacementString.endEditing()
 
         textStorage?.replaceCharacters(
             in: NSRange(range, in: self),
