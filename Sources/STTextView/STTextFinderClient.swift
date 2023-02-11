@@ -7,21 +7,12 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
     weak var textView: STTextView?
 
-    // cached value
-    private var stringCount: Int = 0
-
     private var textContentManager: NSTextContentManager? {
         textView?.textContentStorage
     }
 
     var string: String {
-        let str = textView?.string ?? ""
-        stringCount = str.count
-        return str
-    }
-
-    func stringLength() -> Int {
-        stringCount
+        textView?.string ?? ""
     }
 
     var isSelectable: Bool {
@@ -83,9 +74,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
                 .flatMap(\.textRanges)
                 .compactMap {
                     NSRange($0, in: textContentManager)
-                }.map {
-                    NSValue(range: $0)
-                }
+                }.map(\.nsValue)
         }
     }
 
@@ -109,7 +98,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
             return []
         }
 
-        return [NSRange(viewportTextRange, in: textContentManager)].map { NSValue(range: $0) }
+        return [NSRange(viewportTextRange, in: textContentManager).nsValue]
     }
 
     func rects(forCharacterRange range: NSRange) -> [NSValue]? {

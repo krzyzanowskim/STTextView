@@ -22,6 +22,9 @@ extension NSRange {
         self.init(location: offset, length: 0)
     }
 
+    var nsValue: NSValue {
+        NSValue(range: self)
+    }
 }
 
 

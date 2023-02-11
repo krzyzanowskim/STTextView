@@ -806,9 +806,9 @@ open class STTextView: NSView, NSTextInput {
         delegate?.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
         textContentStorage.performEditingTransaction {
-            textContentStorage.textStorage?.replaceCharacters(
-                in: NSRange(textRange, in: textContentStorage),
-                with: replacementString
+            textContentStorage.replaceContents(
+                in: textRange,
+                with: [NSTextParagraph(attributedString: replacementString)]
             )
         }
 
