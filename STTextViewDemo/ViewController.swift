@@ -39,10 +39,8 @@ final class ViewController: NSViewController {
         scrollView.documentView = textView
 
         // Line numbers
-        let rulerView = STLineNumberRulerView(textView: textView)
-        scrollView.verticalRulerView = rulerView
+        scrollView.verticalRulerView = STLineNumberRulerView(textView: textView)
         scrollView.rulersVisible = true
-
 
         view.addSubview(scrollView)
         NSLayoutConstraint.activate([
