@@ -35,8 +35,6 @@ STTextView is already well suited as a text editor component, however it still n
 #### Known issues
 
 * Improve Undo/Redo. Current fail in some scenario to redo text at the correct location. Updates are incremental and uses custom implementation.
-* The Find/Replace controls cover top part of the content.
-* Find highlight may appear at incorrect location in the view
 
 ## 🚀 Getting Started
 
