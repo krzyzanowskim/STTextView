@@ -76,6 +76,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 let adjustmentDelta = bounds.minY - layoutYPoint
                 viewportLayoutController.adjustViewport(byVerticalOffset: adjustmentDelta)
                 scroll(CGPoint(x: clipView.bounds.minX, y: clipView.bounds.minY + adjustmentDelta))
+                scrollView.reflectScrolledClipView(scrollView.contentView)
             }
         }
 

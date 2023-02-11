@@ -33,17 +33,29 @@ extension STTextView {
 
     open override func scrollPageDown(_ sender: Any?) {
         scroll(visibleRect.moved(dy: visibleRect.height).origin)
+        if let clipView = scrollView?.contentView {
+            scrollView?.reflectScrolledClipView(clipView)
+        }
     }
 
     open override func scrollPageUp(_ sender: Any?) {
         scroll(visibleRect.moved(dy: -visibleRect.height).origin)
+        if let clipView = scrollView?.contentView {
+            scrollView?.reflectScrolledClipView(clipView)
+        }
     }
 
     open override func scrollToBeginningOfDocument(_ sender: Any?) {
         scroll(CGPoint(x: visibleRect.origin.x, y: frame.minY))
+        if let clipView = scrollView?.contentView {
+            scrollView?.reflectScrolledClipView(clipView)
+        }
     }
 
     open override func scrollToEndOfDocument(_ sender: Any?) {
         scroll(CGPoint(x: visibleRect.origin.x, y: frame.maxY))
+        if let clipView = scrollView?.contentView {
+            scrollView?.reflectScrolledClipView(clipView)
+        }
     }
 }
