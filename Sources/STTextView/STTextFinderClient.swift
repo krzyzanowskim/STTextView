@@ -43,10 +43,6 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         textView.replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
     }
 
-    func didReplaceCharacters() {
-        textView?.didChangeText()
-    }
-
     public var firstSelectedRange: NSRange {
         guard let firstTextSelectionRange = textView?.textLayoutManager.textSelections.first?.textRanges.first,
               let textContentManager = textContentManager else {
