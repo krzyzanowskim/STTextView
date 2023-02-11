@@ -187,11 +187,12 @@ open class STLineNumberRulerView: NSRulerView {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return Line(
-                textPosition: $0.textPosition.moved(dx: ruleThickness - (ctLineWidth + rulerInsets.trailing), dy: -baselineOffset),
+                textPosition: $0.textPosition.moved(dx: requiredThickness - (ctLineWidth + rulerInsets.trailing), dy: -baselineOffset),
                 textRange: $0.textRange,
                 ctLine: $0.ctLine
             )
         }
+
     }
     
     // Return text attributes depending on whether the ruleline is highlighted or not.
@@ -267,7 +268,7 @@ open class STLineNumberRulerView: NSRulerView {
         if drawSeparator {
             context.setLineWidth(1)
             context.setStrokeColor(separatorColor.cgColor)
-            context.addLines(between: [CGPoint(x: ruleThickness, y: 0), CGPoint(x: ruleThickness, y: frame.maxY) ])
+            context.addLines(between: [CGPoint(x: requiredThickness, y: 0), CGPoint(x: requiredThickness, y: frame.maxY) ])
             context.strokePath()
         }
         
