@@ -199,7 +199,7 @@ open class STTextView: NSView, NSTextInput {
     /// Text line annotation views
     public var annotations: [STLineAnnotation] = [] {
         didSet {
-            updateLineAnnotationViews()
+            needsAnnotationsLayout = true
         }
     }
 
@@ -215,7 +215,11 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    internal var needsAnnotationsLayout: Bool = false
+    internal var needsAnnotationsLayout: Bool = false {
+        didSet {
+            needsLayout = true
+        }
+    }
 
     public override var isFlipped: Bool {
         #if os(macOS)
