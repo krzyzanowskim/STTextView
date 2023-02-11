@@ -662,37 +662,6 @@ open class STTextView: NSView, NSTextInput {
         updateFrameSizeIfNeeded()
     }
 
-    private func tile() {
-
-        // Update clipView to accomodate vertical ruler
-        if let scrollView = scrollView {
-
-            // reset content inset
-            let clipView = scrollView.contentView
-            clipView.automaticallyAdjustsContentInsets = false
-            clipView.contentInsets = NSEdgeInsets(
-                top: clipView.contentInsets.top,
-                left: 0,
-                bottom: clipView.contentInsets.bottom,
-                right: clipView.contentInsets.right
-            )
-
-            if scrollView.hasVerticalRuler, let verticalRulerView = scrollView.verticalRulerView {
-                scrollView.contentView.frame = CGRect(
-                    x: scrollView.bounds.origin.x + verticalRulerView.frame.width,
-                    y: scrollView.bounds.origin.y,
-                    width: scrollView.bounds.size.width - verticalRulerView.frame.width,
-                    height: scrollView.bounds.size.height
-                )
-            }
-        }
-    }
-
-    open override func resize(withOldSuperviewSize oldSize: NSSize) {
-        super.resize(withOldSuperviewSize: oldSize)
-        tile()
-    }
-
     open override func layout() {
         super.layout()
 
