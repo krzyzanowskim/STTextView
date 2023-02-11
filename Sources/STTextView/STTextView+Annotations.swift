@@ -42,8 +42,8 @@ extension STTextView {
 
         if let delegate = delegate {
             for lineAnnotation in lineAnnotations {
-                textLayoutManager.ensureLayout(for: NSTextRange(location: lineAnnotation.location))
                 if let textLineFragment = textLayoutManager.textLineFragment(at: lineAnnotation.location) {
+                    textLayoutManager.ensureLayout(for: NSTextRange(location: lineAnnotation.location))
                     lineAnnotation.view = delegate.textView(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
                 }
             }

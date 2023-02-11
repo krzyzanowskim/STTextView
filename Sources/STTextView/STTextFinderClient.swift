@@ -59,7 +59,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
     public var selectedRanges: [NSValue] {
         set {
             guard let textContentManager = textContentManager,
-                  let textLayoutManager = textView?.textLayoutManager as? STTextLayoutManager else {
+                  let textLayoutManager = textView?.textLayoutManager else {
                 assertionFailure()
                 return
             }
@@ -124,8 +124,15 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
     }
 
     func contentView(at index: Int, effectiveCharacterRange outRange: NSRangePointer) -> NSView {
-        outRange.pointee = NSRange(location: 0, length: stringLength())
-        return textView!
+        guard let textView = textView,
+              let viewportRange = textView.textLayoutManager.textViewportLayoutController.viewportRange
+        else {
+            assertionFailure()
+            return textView!
+        }
+
+        outRange.pointee = NSRange(viewportRange, in: textView.textContentStorage)
+        return textView
     }
 
     func drawCharacters(in range: NSRange, forContentView view: NSView) {
