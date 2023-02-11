@@ -80,7 +80,16 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
                 return []
             }
 
-            return textLayoutManager.textSelections.flatMap(\.textRanges).compactMap({ NSRange($0, in: textContentManager) }).map({ NSValue(range: $0) })
+            return textLayoutManager.textSelections
+                .filter {
+                    !$0.isTransient
+                }
+                .flatMap(\.textRanges)
+                .compactMap {
+                    NSRange($0, in: textContentManager)
+                }.map {
+                    NSValue(range: $0)
+                }
         }
     }
 
@@ -104,7 +113,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
             return []
         }
 
-        return [NSRange(viewportTextRange, in: textContentManager)].map({ NSValue(range: $0) })
+        return [NSRange(viewportTextRange, in: textContentManager)].map { NSValue(range: $0) }
     }
 
     func rects(forCharacterRange range: NSRange) -> [NSValue]? {
@@ -120,7 +129,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
             return true
         })
 
-        return rangeRects.map({ NSValue(rect: $0) })
+        return rangeRects.map { NSValue(rect: $0) }
     }
 
     func contentView(at index: Int, effectiveCharacterRange outRange: NSRangePointer) -> NSView {
