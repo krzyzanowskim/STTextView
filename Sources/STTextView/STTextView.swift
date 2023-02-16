@@ -101,7 +101,10 @@ open class STTextView: NSView, NSTextInput {
     }
 
 
-    /// The ``textContentStorage``'s string content.
+    /// The characters of the receiver’s text.
+    ///
+    /// For performance reasons, this value is the current backing store of the text object.
+    /// If you want to maintain a snapshot of this as you manipulate the text storage, you should make a copy of the appropriate substring.
     public var string: String {
         set {
             let prevLocation = textLayoutManager.textSelections.first?.textRanges.first?.location
@@ -203,7 +206,9 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    /// Search-and-replace find interface inside a view.
     public let textFinder: NSTextFinder
+
     internal let textFinderClient: STTextFinderClient
 
     /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.

@@ -55,6 +55,11 @@ extension STTextView {
         }
     }
 
+    open override func menu(for event: NSEvent) -> NSMenu? {
+        let proposedMenu = super.menu(for: event) ?? NSMenu()
+        return self.delegate?.textView(self, menu: proposedMenu, for: event) ?? proposedMenu
+    }
+
     open override func rightMouseDown(with event: NSEvent) {
 
         if menu(for: event) != nil {
