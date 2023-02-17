@@ -2,6 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import Cocoa
+import UniformTypeIdentifiers
 
 extension STTextView: NSMenuItemValidation {
 
@@ -15,6 +16,12 @@ extension STTextView: NSUserInterfaceValidations {
 
     public func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
         switch item.action {
+        case #selector(copy(_:)), #selector(cut(_:)), #selector(delete(_:)):
+            return !textContentStorage.documentRange.isEmpty && !selectedRange().isEmpty
+        case #selector(selectAll(_:)):
+            return !textContentStorage.documentRange.isEmpty
+        case #selector(paste(_:)):
+            return isEditable && NSPasteboard.general.canReadItem(withDataConformingToTypes: [UTType.plainText.identifier])
         case #selector(undo(_:)):
             let result = allowsUndo ? undoManager?.canUndo ?? false : false
 

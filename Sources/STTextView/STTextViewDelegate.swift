@@ -4,6 +4,8 @@
 import Foundation
 import Cocoa
 
+/// A set of optional methods that text view delegates can use to manage selection,
+/// set text attributes and more.
 public protocol STTextViewDelegate: AnyObject {
     /// Any keyDown or paste which changes the contents causes this
     func textViewWillChangeText(_ notification: Notification)
@@ -17,7 +19,7 @@ public protocol STTextViewDelegate: AnyObject {
     func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
     /// Sent when a text view did change text.
     func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
-    ///
+    /// View for annotaion
     func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STLineAnnotation, textLineFragment: NSTextLineFragment) -> NSView?
 
     /// Allows delegate to control the context menu returned by the text view.

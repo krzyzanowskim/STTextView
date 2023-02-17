@@ -172,7 +172,6 @@ open class STTextView: NSView, NSTextInput {
     open var allowsUndo: Bool
     internal var _undoManager: UndoManager?
 
-
     /// A flag
     internal var processingKeyEvent: Bool = false
 
