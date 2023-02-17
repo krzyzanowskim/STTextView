@@ -7,6 +7,13 @@ import Cocoa
 /// A set of optional methods that text view delegates can use to manage selection,
 /// set text attributes and more.
 public protocol STTextViewDelegate: AnyObject {
+    /// Returns the undo manager for the specified text view.
+    ///
+    /// This method provides the flexibility to return a custom undo manager for the text view.
+    /// Although STTextView implements undo and redo for changes to text,
+    /// applications may need a custom undo manager to handle interactions between changes
+    /// to text and changes to other items in the application.
+    func undoManager(for textView: STTextView) -> UndoManager?
     /// Any keyDown or paste which changes the contents causes this
     func textViewWillChangeText(_ notification: Notification)
     /// Any keyDown or paste which changes the contents causes this
@@ -40,6 +47,10 @@ public protocol STTextViewDelegate: AnyObject {
 }
 
 public extension STTextViewDelegate {
+
+    func undoManager(for textView: STTextView) -> UndoManager? {
+        nil
+    }
 
     func textViewWillChangeText(_ notification: Notification) {
         //

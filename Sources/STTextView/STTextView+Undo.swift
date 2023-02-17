@@ -10,7 +10,11 @@ import Cocoa
 extension STTextView {
 
     open override var undoManager: UndoManager? {
-        allowsUndo ? _undoManager : nil
+        guard allowsUndo else {
+            return nil
+        }
+
+        return delegate?.undoManager(for: self) ?? _undoManager
     }
 
     @objc func undo(_ sender: AnyObject?) {
