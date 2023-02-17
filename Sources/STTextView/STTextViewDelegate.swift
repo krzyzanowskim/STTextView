@@ -26,7 +26,7 @@ public protocol STTextViewDelegate: AnyObject {
     ///   - menu: The proposed contextual menu.
     ///   - event: The mouse-down event that initiated the contextual menu’s display.
     /// - Returns: A menu to use as the contextual menu. You can return `menu` unaltered, or you can return a customized menu.
-    func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent) -> NSMenu?
+    func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu?
 
     /// Completion items
     func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [Any]?
@@ -67,7 +67,7 @@ public extension STTextViewDelegate {
         nil
     }
 
-    func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent) -> NSMenu? {
+    func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu? {
         menu
     }
 

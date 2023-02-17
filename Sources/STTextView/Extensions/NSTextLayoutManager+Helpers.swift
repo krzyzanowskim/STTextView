@@ -65,15 +65,6 @@ extension NSTextLayoutManager {
         return result
     }
 
-    func caretOffsetsInLineFragment(at location: NSTextLocation) -> CGFloat? {
-        var offset: CGFloat?
-        enumerateCaretOffsetsInLineFragment(at: location) { caretOffset, location, leadingEdge, stop in
-            offset = caretOffset
-            stop.pointee = true
-        }
-        return offset
-    }
-
     public func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
         textLayoutFragment(for: location)?.textLineFragment(at: location)
     }
