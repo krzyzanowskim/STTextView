@@ -180,7 +180,7 @@ open class STLineNumberRulerView: NSRulerView {
 
         // Adjust ruleThickness based on last (longest) value
         let prevThickness = ruleThickness
-        var calculatedThickness: CGFloat = 16.0 // default
+        var calculatedThickness: CGFloat = ruleThickness
         if let lastLine = lines.last {
             let ctLineWidth = CTLineGetTypographicBounds(lastLine.ctLine, nil, nil, nil)
             if calculatedThickness < (ctLineWidth + (rulerInsets.leading + rulerInsets.trailing)) {
