@@ -54,7 +54,7 @@ open class STRulerMarker: NSRulerMarker {
         bezierPath.line(to: NSPoint(x: 0, y: rect.height))
         bezierPath.close()
 
-        NSColor.selectedContentBackgroundColor.withAlphaComponent(0.85).setFill()
+        NSColor.selectedContentBackgroundColor.withAlphaComponent(0.75).setFill()
         bezierPath.fill()
 
         context.restoreGState()

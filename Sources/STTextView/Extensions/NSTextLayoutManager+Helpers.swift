@@ -69,8 +69,8 @@ extension NSTextLayoutManager {
         textLayoutFragment(for: location)?.textLineFragment(at: location)
     }
 
-    public func textLineFragment(at location: CGPoint) -> NSTextLineFragment? {
-        textLayoutFragment(for: location)?.textLineFragment(at: location)
+    public func textLineFragment(at point: CGPoint) -> NSTextLineFragment? {
+        textLayoutFragment(for: point)?.textLineFragment(at: point)
     }
 }
 
