@@ -35,6 +35,10 @@ open class STLineNumberRulerView: NSRulerView {
 
     @Invalidating(.display)
     open var highlightSelectedLine: Bool = false
+
+    /// A Boolean value that indicates whether the receiver draws its background.
+    @Invalidating(.display)
+    open var drawsBackground: Bool = true
     
     /// The background color of the highlighted line.
     @Invalidating(.display)
@@ -267,15 +271,26 @@ open class STLineNumberRulerView: NSRulerView {
         }
     }
 
+    open func drawBackground(in rect: NSRect) {
+        guard drawsBackground, let context = NSGraphicsContext.current?.cgContext else {
+            return
+        }
+
+        context.saveGState()
+        context.setFillColor(backgroundColor.cgColor)
+        context.fill(rect)
+        context.restoreGState()
+    }
+
     open override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext, let textView = textView else { return }
 
+        drawBackground(in: dirtyRect)
+        drawHashMarksAndLabels(in: dirtyRect)
+        drawMarkers(in: dirtyRect)
+
         let relativePoint = self.convert(NSZeroPoint, from: textView)
-
         context.saveGState()
-
-        context.setFillColor(backgroundColor.cgColor)
-        context.fill(bounds)
 
         if drawSeparator {
             context.setLineWidth(1)
@@ -297,11 +312,5 @@ open class STLineNumberRulerView: NSRulerView {
         }
 
         context.restoreGState()
-
-        drawHashMarksAndLabels(in: dirtyRect)
-
-        if let markers = markers, !markers.isEmpty {
-            drawMarkers(in: dirtyRect)
-        }
     }
 }
