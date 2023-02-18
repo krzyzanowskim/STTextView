@@ -39,9 +39,17 @@ open class STRulerMarker: NSRulerMarker {
 
         let bezierPath = NSBezierPath()
         bezierPath.move(to: NSPoint(x: 0, y: rect.height))
-        bezierPath.line(to: NSPoint(x: rect.width * 0.75, y: rect.height))
-        bezierPath.line(to: NSPoint(x: rect.width, y: rect.height / 2))
-        bezierPath.line(to: NSPoint(x: rect.width * 0.75, y: 0))
+        bezierPath.line(to: NSPoint(x: rect.width * 0.85, y: rect.height))
+        bezierPath.curve(
+            to: NSPoint(x: rect.width, y: rect.height / 2),
+            controlPoint1: NSPoint(x: rect.width * 0.85, y: rect.height),
+            controlPoint2: NSPoint(x: rect.width, y: rect.height * 0.60)
+        )
+        bezierPath.curve(
+            to: NSPoint(x: rect.width * 0.85, y: 0),
+            controlPoint1: NSPoint(x: rect.width, y: rect.height * 0.40 ),
+            controlPoint2: NSPoint(x: rect.width * 0.85, y: 0)
+        )
         bezierPath.line(to: NSPoint(x: 0, y: 0))
         bezierPath.line(to: NSPoint(x: 0, y: rect.height))
         bezierPath.close()
