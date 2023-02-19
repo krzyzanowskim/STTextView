@@ -14,13 +14,14 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 
 - macOS text system integration
 - Performant Text editing
-- Line numbers
+- Line numbers in a ruler view
+- Ruler Markers support
 - Customization of colors and fonts
 - Toggle line wrapping on and off
 - Adjust height of lines
 - Highlight/Select ranges in the text view
 - Search/Replace the text
-- Completion
+- Customizable Completion support
 - Smooth scrolling of long content
 - Anchored annotations
 - Undo/Redo
@@ -113,6 +114,8 @@ let rulerView = STLineNumberRulerView(textView: textView)
 rulerView.drawHighlightedRuler = true
 // Set text color of the selected line number
 rulerView.highlightLineNumberColor = .textColor
+// Allows to set markers.
+rulerView.allowsMarkers
 
 // Add to NSScrollView containing STTextView
 scrollView.verticalRulerView = rulerView
