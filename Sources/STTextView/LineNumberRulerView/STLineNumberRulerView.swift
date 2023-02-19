@@ -279,7 +279,7 @@ open class STLineNumberRulerView: NSRulerView {
         else {
             return
         }
-        
+
         textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, _, _ -> Bool in
             var selectionFrame: NSRect = textSegmentFrame
             

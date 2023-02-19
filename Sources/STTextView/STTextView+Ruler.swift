@@ -52,23 +52,20 @@ extension STTextView {
 
     open override func rulerView(_ ruler: NSRulerView, handleMouseDownWith event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
-        guard let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point) else {
+        guard let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point),
+              let textSegmentFrame = textLayoutManager.textSelectionSegmentFrame(in: textLayoutFragment.rangeInElement, type: .highlight)?.pixelAligned
+        else {
             return
         }
 
-        var baselineOffset: CGFloat = 0
-        if let paragraphStyle = defaultParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-            baselineOffset = -(typingLineHeight * (defaultParagraphStyle!.lineHeightMultiple - 1.0) / 2)
-        }
-
-        let effectiveFrame = textLayoutFragment.layoutFragmentFrame.moved(dy: baselineOffset).pixelAligned
+        let selectionFrame = textSegmentFrame.pixelAligned
 
         let markerLocation = (ruler.markers ?? []).filter { marker in
-            effectiveFrame.maxY.isAlmostEqual(to: marker.markerLocation)
+            selectionFrame.maxY.isAlmostEqual(to: marker.markerLocation)
         }
 
         if markerLocation.isEmpty {
-            let marker = STRulerMarker(rulerView: ruler, markerLocation: effectiveFrame.maxY, height: effectiveFrame.height)
+            let marker = STRulerMarker(rulerView: ruler, markerLocation: selectionFrame.maxY, height: selectionFrame.height)
             marker.isMovable = true
             marker.isRemovable = true
 
