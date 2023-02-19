@@ -11,20 +11,18 @@ open class STRulerMarker: NSRulerMarker {
         }
     }
 
-    public init(rulerView ruler: NSRulerView, markerLocation location: CGFloat) {
+    public init(rulerView ruler: NSRulerView, markerLocation location: CGFloat, height: CGFloat = 15) {
         super.init(rulerView: ruler, markerLocation: location, image: NSImage(), imageOrigin: .zero)
 
-        self.image = NSImage(size: size, flipped: true) { rect in
-            self.drawImage(rect)
+        self.image = NSImage(size: CGSize(width: ruler.ruleThickness, height: height), flipped: true) { [weak self] rect in
+            self?.drawImage(rect)
             return true
         }
-
-        self.setSize(CGSize(width: ruler.ruleThickness, height: 15))
     }
 
     private func setSize(_ newSize: CGSize) {
         image.size = newSize
-        ruler?.setNeedsDisplay(imageRectInRuler)
+        ruler?.needsDisplay = true
     }
 
     @available(*, unavailable)
@@ -54,7 +52,7 @@ open class STRulerMarker: NSRulerMarker {
         bezierPath.line(to: NSPoint(x: 0, y: rect.height))
         bezierPath.close()
 
-        NSColor.selectedContentBackgroundColor.withAlphaComponent(0.75).setFill()
+        NSColor.controlAccentColor.withAlphaComponent(0.7).setFill()
         bezierPath.fill()
 
         context.restoreGState()

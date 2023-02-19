@@ -60,6 +60,21 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var baselineOffset: CGFloat = 0
 
+    /// Allows to set markers. Enabled by default.
+    open var allowsMarkers: Bool = true
+
+    public override var reservedThicknessForMarkers: CGFloat {
+        get {
+            // Never called anyway
+            super.reservedThicknessForMarkers
+        }
+
+        set {
+            // Sadly something from addMarker adds 2px and there's no easy way to fix it
+            // super.reservedThicknessForMarkers = newValue
+        }
+    }
+
     struct Line {
         let textPosition: CGPoint
         let textRange: NSTextRange
@@ -93,6 +108,24 @@ open class STLineNumberRulerView: NSRulerView {
 
     open override func invalidateHashMarks() {
         invalidateLineNumbers()
+    }
+
+    open override func addMarker(_ marker: NSRulerMarker) {
+        guard allowsMarkers else {
+            return
+        }
+
+        guard clientView != nil else {
+            assertionFailure("receiver has no client view")
+            return
+        }
+
+        if markers == nil {
+            markers = [marker]
+        } else {
+            markers?.append(marker)
+        }
+        enclosingScrollView?.tile()
     }
 
     private func invalidateLineNumbers() {
@@ -182,7 +215,7 @@ open class STLineNumberRulerView: NSRulerView {
         let prevThickness = ruleThickness
         var calculatedThickness: CGFloat = ruleThickness
         if let lastLine = lines.last {
-            let ctLineWidth = CTLineGetTypographicBounds(lastLine.ctLine, nil, nil, nil)
+            let ctLineWidth = ceil(CTLineGetTypographicBounds(lastLine.ctLine, nil, nil, nil))
             if calculatedThickness < (ctLineWidth + (rulerInsets.leading + rulerInsets.trailing)) {
                 calculatedThickness = max(calculatedThickness, ctLineWidth + (rulerInsets.leading + rulerInsets.trailing))
             }
@@ -287,7 +320,10 @@ open class STLineNumberRulerView: NSRulerView {
 
         drawBackground(in: dirtyRect)
         drawHashMarksAndLabels(in: dirtyRect)
-        drawMarkers(in: dirtyRect)
+
+        if markers?.isEmpty == false {
+            drawMarkers(in: dirtyRect)
+        }
 
         let relativePoint = self.convert(NSZeroPoint, from: textView)
         context.saveGState()
@@ -313,4 +349,5 @@ open class STLineNumberRulerView: NSRulerView {
 
         context.restoreGState()
     }
+    
 }

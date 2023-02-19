@@ -20,11 +20,37 @@ extension STTextView {
         }
     }
 
-    open override func rulerView(_ ruler: NSRulerView, handleMouseDownWith event: NSEvent) {
-        guard isRulerVisible else {
-            return
+    open override func rulerView(_ ruler: NSRulerView, willAdd marker: NSRulerMarker, atLocation location: CGFloat) -> CGFloat {
+        location
+    }
+
+    open override func rulerView(_ ruler: NSRulerView, shouldAdd marker: NSRulerMarker) -> Bool {
+        isEditable && ((ruler as? STLineNumberRulerView)?.allowsMarkers ?? true)
+    }
+
+    open override func rulerView(_ ruler: NSRulerView, didAdd marker: NSRulerMarker) {
+        ruler.invalidateHashMarks()
+    }
+
+    open override func rulerView(_ ruler: NSRulerView, didRemove marker: NSRulerMarker) {
+        ruler.invalidateHashMarks()
+    }
+
+    open override func rulerView(_ ruler: NSRulerView, locationFor point: NSPoint) -> CGFloat {
+        if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point) {
+            var baselineOffset: CGFloat = 0
+            if let paragraphStyle = defaultParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                baselineOffset = -(typingLineHeight * (defaultParagraphStyle!.lineHeightMultiple - 1.0) / 2)
+            }
+
+            let effectiveFrame = textLayoutFragment.layoutFragmentFrame.moved(dy: baselineOffset)
+            return effectiveFrame.maxY
         }
 
+        return point.y
+    }
+
+    open override func rulerView(_ ruler: NSRulerView, handleMouseDownWith event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         guard let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point) else {
             return
@@ -35,19 +61,31 @@ extension STTextView {
             baselineOffset = -(typingLineHeight * (defaultParagraphStyle!.lineHeightMultiple - 1.0) / 2)
         }
 
-        let effectiveFrame = textLayoutFragment.layoutFragmentFrame.moved(dy: baselineOffset)
+        let effectiveFrame = textLayoutFragment.layoutFragmentFrame.moved(dy: baselineOffset).pixelAligned
 
-        let existingMarkers = (ruler.markers ?? []).filter { marker in
-            marker.imageRectInRuler.intersects(textLayoutFragment.layoutFragmentFrame)
+        let markerLocation = (ruler.markers ?? []).filter { marker in
+            effectiveFrame.maxY.isAlmostEqual(to: marker.markerLocation)
         }
 
-        if existingMarkers.isEmpty {
-            let marker = STRulerMarker(rulerView: ruler, markerLocation: effectiveFrame.maxY)
+        if markerLocation.isEmpty {
+            let marker = STRulerMarker(rulerView: ruler, markerLocation: effectiveFrame.maxY, height: effectiveFrame.height)
+            marker.isMovable = true
+            marker.isRemovable = true
+
+            // For unknown reason an NSRulerView automatically increases the reservedThicknessForMarkers to 2.0
+            // Adds 2px in the marker.imageRectInRuler to the left in
+            ruler.clientView?.rulerView(ruler, willAdd: marker, atLocation: marker.markerLocation)
             ruler.addMarker(marker)
-        } else {
-            existingMarkers.forEach(ruler.removeMarker)
-            ruler.needsDisplay = true
-        }
+            ruler.clientView?.rulerView(ruler, didAdd: marker)
 
+            // track not supported until solve tracking visual glithes
+            // ruler.trackMarker(marker, withMouseEvent: event)
+        } else {
+            markerLocation.forEach { marker in
+                ruler.removeMarker(marker)
+                ruler.clientView?.rulerView(ruler, didRemove: marker)
+            }
+        }
+        ruler.needsDisplay = true
     }
 }
