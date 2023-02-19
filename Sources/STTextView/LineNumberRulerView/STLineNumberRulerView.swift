@@ -60,7 +60,7 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var baselineOffset: CGFloat = 0
 
-    /// Allows to set markers. Enabled by default.
+    /// Allows to set markers. Disabled by default.
     @Invalidating(.layout)
     open var allowsMarkers: Bool = false
 

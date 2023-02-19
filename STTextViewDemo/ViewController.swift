@@ -39,7 +39,10 @@ final class ViewController: NSViewController {
         scrollView.documentView = textView
 
         // Line numbers
-        scrollView.verticalRulerView = STLineNumberRulerView(textView: textView)
+        let rulerView = STLineNumberRulerView(textView: textView)
+        rulerView.allowsMarkers = true
+        rulerView.highlightSelectedLine = true
+        scrollView.verticalRulerView = rulerView
         scrollView.rulersVisible = true
 
         view.addSubview(scrollView)
