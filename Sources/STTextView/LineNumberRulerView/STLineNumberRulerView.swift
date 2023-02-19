@@ -61,6 +61,7 @@ open class STLineNumberRulerView: NSRulerView {
     open var baselineOffset: CGFloat = 0
 
     /// Allows to set markers. Enabled by default.
+    @Invalidating(.layout)
     open var allowsMarkers: Bool = true
 
     public override var reservedThicknessForMarkers: CGFloat {

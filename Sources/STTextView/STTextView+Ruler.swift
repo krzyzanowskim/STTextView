@@ -53,11 +53,12 @@ extension STTextView {
     open override func rulerView(_ ruler: NSRulerView, handleMouseDownWith event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         guard let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point),
-              let textSegmentFrame = textLayoutManager.textSelectionSegmentFrame(in: textLayoutFragment.rangeInElement, type: .highlight)?.pixelAligned
+              let textSegmentFrame = textLayoutManager.textSelectionSegmentFrame(in: NSTextRange(location: textLayoutFragment.rangeInElement.location), type: .highlight)?.pixelAligned
         else {
             return
         }
 
+        let relativePoint = convert(NSZeroPoint, from: self)
         let selectionFrame = textSegmentFrame.pixelAligned
 
         let markerLocation = (ruler.markers ?? []).filter { marker in
@@ -65,7 +66,7 @@ extension STTextView {
         }
 
         if markerLocation.isEmpty {
-            let marker = STRulerMarker(rulerView: ruler, markerLocation: selectionFrame.maxY, height: selectionFrame.height)
+            let marker = STRulerMarker(rulerView: ruler, markerLocation: selectionFrame.maxY + relativePoint.y, height: selectionFrame.height)
             marker.isMovable = true
             marker.isRemovable = true
 
