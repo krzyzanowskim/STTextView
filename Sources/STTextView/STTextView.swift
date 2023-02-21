@@ -424,7 +424,10 @@ open class STTextView: NSView, NSTextInput {
 
     /// Draws the background of the text view.
     open func drawBackground(in rect: NSRect) {
-        if highlightSelectedLine {
+        if highlightSelectedLine,
+           // don't highlight when there's selection
+           textLayoutManager.insertionPointSelections.flatMap(\.textRanges).allSatisfy({ $0.isEmpty })
+        {
             drawHighlightedLine(in: rect)
         }
     }
