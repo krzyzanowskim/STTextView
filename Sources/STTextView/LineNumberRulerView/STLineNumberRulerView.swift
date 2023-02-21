@@ -139,12 +139,12 @@ open class STLineNumberRulerView: NSRulerView {
             return
         }
 
-        let attributes: [NSAttributedString.Key: Any] = [
+        let lineTextAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: textColor
         ]
         
-        let selectedAttributes: [NSAttributedString.Key: Any] = [
+        let selectedLineTextAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: (selectedLineTextColor ?? textColor).cgColor
         ]
@@ -163,7 +163,7 @@ open class STLineNumberRulerView: NSRulerView {
                     }
 
                     let lineNumber = lines.count + 1
-                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: attributes)
+                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes)
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     var ascent: CGFloat = 0
@@ -201,8 +201,13 @@ open class STLineNumberRulerView: NSRulerView {
 
                     let lineNumber = startLineIndex + lines.count + 1
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
-                    let originPoint = layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset)
-                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: determineLineNumberAttribute(originPoint.y, attributes, selectedAttributes: selectedAttributes))
+
+                    var attr = lineTextAttributes
+                    if textLayoutManager.insertionPointSelections.flatMap(\.textRanges).contains(where: { layoutFragment.rangeInElement.intersects($0) || layoutFragment.rangeInElement.contains($0) }) {
+                        attr = selectedLineTextAttributes
+                    }
+
+                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: attr)
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     lines.append(
@@ -265,29 +270,6 @@ open class STLineNumberRulerView: NSRulerView {
         for marker in markers {
             (marker as? STRulerMarker)?.size.width = ruleThickness
         }
-    }
-    
-    // Return text attributes depending on whether the ruleline is highlighted or not.
-    private func determineLineNumberAttribute(_ yPosition: CGFloat, _ attributes: [NSAttributedString.Key: Any],
-                                              selectedAttributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
-        guard let textLayoutManager = textView?.textLayoutManager,
-              let caretLocation = textLayoutManager.insertionPointLocation,
-              highlightSelectedLine == true
-        else {
-            return attributes
-        }
-
-        var attr = attributes
-        // Get the current highlight frame of the textContainer
-        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight, options: [.rangeNotRequired]) { _, textSegmentFrame, _, _ -> Bool in
-            // If the y-coordinate of the Ctline is in between the top and bottom edge of the highlight frame, then that ruler line has to be highlighted.
-            if textSegmentFrame.origin.y < yPosition && ((textSegmentFrame.origin.y + textSegmentFrame.height) > yPosition) {
-                attr = selectedAttributes
-                return false
-            }
-            return true
-        }
-        return attr
     }
 
     open override func drawHashMarksAndLabels(in rect: NSRect) {
