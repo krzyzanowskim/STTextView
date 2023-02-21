@@ -14,7 +14,8 @@ open class STRulerMarker: NSRulerMarker {
     public init(rulerView ruler: NSRulerView, markerLocation location: CGFloat, height: CGFloat = 15) {
         super.init(rulerView: ruler, markerLocation: location, image: NSImage(), imageOrigin: .zero)
 
-        self.image = NSImage(size: CGSize(width: ruler.ruleThickness, height: height), flipped: true) { [weak self] rect in
+        self.size = CGSize(width: ruler.ruleThickness, height: height)
+        self.image = NSImage(size: size, flipped: true) { [weak self] rect in
             self?.drawImage(rect)
             return true
         }

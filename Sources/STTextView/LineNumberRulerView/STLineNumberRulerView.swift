@@ -229,6 +229,8 @@ open class STLineNumberRulerView: NSRulerView {
                 let clipView = scrollView.contentView
                 scrollView.contentView.bounds.origin.x = -clipView.contentInsets.left
                 scrollView.reflectScrolledClipView(clipView)
+
+                invalidateMarkersRect()
             }
         }
 
@@ -243,6 +245,16 @@ open class STLineNumberRulerView: NSRulerView {
             )
         }
 
+    }
+
+    private func invalidateMarkersRect() {
+        guard let markers = markers, !markers.isEmpty else {
+            return
+        }
+
+        for marker in markers {
+            (marker as? STRulerMarker)?.size.width = ruleThickness
+        }
     }
     
     // Return text attributes depending on whether the ruleline is highlighted or not.
