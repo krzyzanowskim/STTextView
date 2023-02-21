@@ -430,38 +430,38 @@ open class STTextView: NSView, NSTextInput {
     }
 
     private func drawHighlightedLine(in rect: NSRect) {
-        guard let context = NSGraphicsContext.current?.cgContext,
-              let caretLocation = textLayoutManager.insertionPointLocation
-        else {
+        guard let context = NSGraphicsContext.current?.cgContext else {
             return
         }
 
-        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, baselinePosition, textContainer -> Bool in
-            // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
-            // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
-            // therefore for empty override height with value manually calculated from font + paragraph style
-            var selectionFrame: NSRect = textSegmentFrame
-            if segmentRange == textContentStorage.documentRange {
-                selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
-            }
+        for insertionRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) {
+            textLayoutManager.enumerateTextSegments(in: insertionRange, type: .highlight) { segmentRange, textSegmentFrame, baselinePosition, textContainer -> Bool in
+                // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
+                // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
+                // therefore for empty override height with value manually calculated from font + paragraph style
+                var selectionFrame: NSRect = textSegmentFrame
+                if segmentRange == textContentStorage.documentRange {
+                    selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
+                }
 
-            context.saveGState()
-            context.setFillColor(selectedLineHighlightColor.cgColor)
+                context.saveGState()
+                context.setFillColor(selectedLineHighlightColor.cgColor)
 
-            let fillRect = CGRect(
-                origin: CGPoint(
-                    x: bounds.minX,
-                    y: selectionFrame.origin.y
-                ),
-                size: CGSize(
-                    width: textContainer.size.width,
-                    height: selectionFrame.height
+                let fillRect = CGRect(
+                    origin: CGPoint(
+                        x: bounds.minX,
+                        y: selectionFrame.origin.y
+                    ),
+                    size: CGSize(
+                        width: textContainer.size.width,
+                        height: selectionFrame.height
+                    )
                 )
-            )
 
-            context.fill(fillRect)
-            context.restoreGState()
-            return false
+                context.fill(fillRect)
+                context.restoreGState()
+                return true
+            }
         }
     }
 

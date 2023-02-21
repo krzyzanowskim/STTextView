@@ -77,8 +77,10 @@ open class STLineNumberRulerView: NSRulerView {
     }
 
     struct Line {
+        let number: Int
         let textPosition: CGPoint
         let textRange: NSTextRange
+        let layoutFragmentFrame: CGRect
         let ctLine: CTLine
     }
     
@@ -160,7 +162,8 @@ open class STLineNumberRulerView: NSRulerView {
                         baselineOffset = -(textView!.typingLineHeight * (textView!.defaultParagraphStyle!.lineHeightMultiple - 1.0) / 2)
                     }
 
-                    let attributedString = NSAttributedString(string: "\(lines.count + 1)", attributes: attributes)
+                    let lineNumber = lines.count + 1
+                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: attributes)
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     var ascent: CGFloat = 0
@@ -171,8 +174,10 @@ open class STLineNumberRulerView: NSRulerView {
 
                     lines.append(
                         Line(
+                            number: lineNumber,
                             textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
                             textRange: layoutFragment.rangeInElement,
+                            layoutFragmentFrame: layoutFragment.layoutFragmentFrame,
                             ctLine: ctLine
                         )
                     )
@@ -194,15 +199,18 @@ open class STLineNumberRulerView: NSRulerView {
                         baselineOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
                     }
 
+                    let lineNumber = startLineIndex + lines.count + 1
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
                     let originPoint = layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset)
-                    let attributedString = NSAttributedString(string: "\(startLineIndex + lines.count + 1)", attributes: determineLineNumberAttribute(originPoint.y, attributes, selectedAttributes: selectedAttributes))
+                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: determineLineNumberAttribute(originPoint.y, attributes, selectedAttributes: selectedAttributes))
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     lines.append(
                         Line(
+                            number: lineNumber,
                             textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
                             textRange: layoutFragment.rangeInElement,
+                            layoutFragmentFrame: layoutFragment.layoutFragmentFrame,
                             ctLine: ctLine
                         )
                     )
@@ -239,8 +247,10 @@ open class STLineNumberRulerView: NSRulerView {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
             return Line(
+                number: $0.number,
                 textPosition: $0.textPosition.moved(dx: requiredThickness - (ctLineWidth + rulerInsets.trailing), dy: -baselineOffset),
                 textRange: $0.textRange,
+                layoutFragmentFrame: $0.layoutFragmentFrame,
                 ctLine: $0.ctLine
             )
         }
@@ -284,38 +294,6 @@ open class STLineNumberRulerView: NSRulerView {
         //
     }
     
-    // Draw a background rectangle to highlight the selected ruler line
-    open func drawHighlightedRuler(_ context: CGContext, _ relativePoint: NSPoint,  in rect: NSRect) {
-        guard let textLayoutManager = textView?.textLayoutManager,
-              let caretLocation = textLayoutManager.insertionPointLocation,
-              let textView = textView
-        else {
-            return
-        }
-
-        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: caretLocation), type: .highlight) { segmentRange, textSegmentFrame, _, _ -> Bool in
-            var selectionFrame: NSRect = textSegmentFrame
-            
-            if segmentRange == textView.textLayoutManager.documentRange {
-                selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: textView.typingLineHeight)).pixelAligned
-            }
-                
-            context.saveGState()
-            context.setFillColor(selectedLineHighlightColor.cgColor)
-                
-            let originPoint = CGPoint(x: frame.minX, y: selectionFrame.origin.y).moved(dx: 0, dy: relativePoint.y)
-
-            // Create background rectangle for highlight
-            let fillRect = CGRect(
-                origin: originPoint,
-                size: CGSize(width: frame.width,height: selectionFrame.height)
-            )
-                
-            context.fill(fillRect)
-            context.restoreGState()
-            return true
-        }
-    }
 
     open func drawBackground(in rect: NSRect) {
         guard drawsBackground, let context = NSGraphicsContext.current?.cgContext else {
@@ -325,6 +303,25 @@ open class STLineNumberRulerView: NSRulerView {
         context.saveGState()
         context.setFillColor(backgroundColor.cgColor)
         context.fill(rect)
+        context.restoreGState()
+    }
+
+    private func drawHighlightedRuler(line: Line, at relativePoint: NSPoint, in dirtyRect: NSRect) {
+        guard let context = NSGraphicsContext.current?.cgContext else {
+            return
+        }
+
+        context.saveGState()
+        context.setFillColor(selectedLineHighlightColor.cgColor)
+
+        let fillRect = CGRect(
+            origin: line.layoutFragmentFrame.moved(dx: 0, dy: relativePoint.y).origin,
+            size: CGSize(
+                width: bounds.width,
+                height: line.layoutFragmentFrame.height
+            )
+        )
+        context.fill(fillRect)
         context.restoreGState()
     }
 
@@ -344,18 +341,21 @@ open class STLineNumberRulerView: NSRulerView {
         if drawSeparator {
             context.setLineWidth(1)
             context.setStrokeColor(separatorColor.cgColor)
-            context.addLines(between: [CGPoint(x: requiredThickness, y: 0), CGPoint(x: requiredThickness, y: frame.maxY) ])
+            context.addLines(between: [CGPoint(x: requiredThickness, y: 0), CGPoint(x: requiredThickness, y: bounds.maxY) ])
             context.strokePath()
         }
         
-        // Needs to run before adding the lines, since it will not be set as the background otherwise
-        if highlightSelectedLine {
-            drawHighlightedRuler(context, relativePoint, in: dirtyRect)
-        }
-
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
         for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dx: 0, dy: relativePoint.y)) {
+
+            // Draw a background rectangle to highlight the selected ruler line
+            if highlightSelectedLine {
+                if textView.textLayoutManager.insertionPointSelections.flatMap(\.textRanges).contains(where: { line.textRange.intersects($0) || line.textRange.contains($0) }) {
+                    drawHighlightedRuler(line: line, at: relativePoint, in: dirtyRect)
+                }
+            }
+
             context.textPosition = line.textPosition.moved(dx: 0, dy: relativePoint.y)
             CTLineDraw(line.ctLine, context)
         }
