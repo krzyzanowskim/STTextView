@@ -13,6 +13,10 @@ extension STTextView  {
         .textArea
     }
 
+    open override func accessibilityLabel() -> String? {
+        NSLocalizedString("Text Editor", comment: "")
+    }
+
     open override func accessibilityValue() -> Any? {
         string
     }
