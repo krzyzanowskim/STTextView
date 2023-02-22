@@ -9,6 +9,10 @@ extension STTextView  {
         true
     }
 
+    open override func isAccessibilityEnabled() -> Bool {
+        isEditable || isSelectable
+    }
+
     open override func accessibilityRole() -> NSAccessibility.Role? {
         .textArea
     }
@@ -37,4 +41,15 @@ extension STTextView  {
         attributedSubstring(forProposedRange: range, actualRange: nil)?.string
     }
 
+    open override func accessibilityNumberOfCharacters() -> Int {
+        string.count
+    }
+
+    open override func accessibilitySelectedText() -> String? {
+        textLayoutManager.textSelectionsString()
+    }
+
+    open override func accessibilitySelectedTextRange() -> NSRange {
+        selectedRange()
+    }
 }
