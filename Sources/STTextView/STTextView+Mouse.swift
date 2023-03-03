@@ -18,7 +18,9 @@ extension STTextView {
                 interactingAt: point,
                 inContainerAt: textLayoutManager.documentRange.location,
                 anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                extending: event.modifierFlags.contains(.shift)
+                extending: event.modifierFlags.contains(.shift),
+                isDragging: false,
+                visual: event.modifierFlags.contains(.option)
             )
             handled = true
         } else if event.clickCount == 2 {
