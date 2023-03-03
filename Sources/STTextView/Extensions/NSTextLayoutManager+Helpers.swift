@@ -5,6 +5,7 @@ import Cocoa
 
 extension NSTextLayoutManager {
 
+    @available(*, deprecated, message: "Use insertionPointLocations")
     public var insertionPointLocation: NSTextLocation? {
         guard let textSelection = insertionPointSelections.first else {
             return nil
@@ -14,6 +15,10 @@ extension NSTextLayoutManager {
 
         // FB11961508 NSTextSelectionNavigation.resolvedInsertionLocation sometimes crashes instead return nil
         // return textSelectionNavigation.resolvedInsertionLocation(for: textSelection, writingDirection: .leftToRight)
+    }
+
+    public var insertionPointLocations: [NSTextLocation] {
+        insertionPointSelections.flatMap(\.textRanges).map(\.location)
     }
 
     public var insertionPointSelections: [NSTextSelection] {

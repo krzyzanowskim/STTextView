@@ -20,7 +20,7 @@ extension STTextView {
 
     @MainActor
     private func performCompletion() {
-        guard let insertionPointLocation = textLayoutManager.insertionPointLocation,
+        guard let insertionPointLocation = textLayoutManager.insertionPointLocations.first,
               let textCharacterSegmentRect = textLayoutManager.textSelectionSegmentFrame(at: insertionPointLocation, type: .standard)
         else {
             self.completionWindowController.close()
