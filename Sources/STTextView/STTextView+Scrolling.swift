@@ -7,7 +7,7 @@ import Cocoa
 extension STTextView {
 
     open override func centerSelectionInVisibleArea(_ sender: Any?) {
-        guard let firstTextSelection = textLayoutManager.textSelections.first else {
+        guard let firstTextSelection = textLayoutManager.textSelections.last else {
             return
         }
 

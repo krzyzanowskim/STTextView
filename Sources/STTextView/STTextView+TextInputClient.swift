@@ -130,10 +130,22 @@ extension STTextView: NSTextInputClient {
                     replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: true)
                 }
             } else if !textLayoutManager.textSelections.isEmpty {
+                var offset = 0
                 for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
-                    if shouldChangeText(in: textRange, replacementString: attributedString.string) {
-                        replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: true)
+                    let newTextRange: NSTextRange
+                    if let newLocation = textLayoutManager.location(textRange.location, offsetBy: offset),
+                       let offsetTextRange = NSTextRange(location: newLocation, end: textLayoutManager.location(textRange.endLocation, offsetBy: offset))
+                    {
+                        newTextRange = offsetTextRange
+                    } else {
+                        newTextRange = textRange
                     }
+
+                    if shouldChangeText(in: newTextRange, replacementString: attributedString.string) {
+                        replaceCharacters(in: newTextRange, with: attributedString, allowsTypingCoalescing: true)
+                    }
+
+                    offset += attributedString.length
                 }
             }
         default:
