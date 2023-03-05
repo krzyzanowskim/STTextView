@@ -14,14 +14,29 @@ extension STTextView {
         var handled = false
         if event.clickCount == 1 {
             let point = convert(event.locationInWindow, from: nil)
-            updateTextSelection(
-                interactingAt: point,
-                inContainerAt: textLayoutManager.documentRange.location,
-                anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                extending: event.modifierFlags.contains(.shift),
-                isDragging: false,
-                visual: event.modifierFlags.contains(.option)
-            )
+            if event.modifierFlags.isSuperset(of: [.control, .shift]) {
+                // add cursor selection
+                textLayoutManager.textSelections += textLayoutManager.textSelectionNavigation.textSelections(
+                    interactingAt: point,
+                    inContainerAt: textLayoutManager.documentRange.location,
+                    anchors: [],
+                    modifiers: .visual,
+                    selecting: false,
+                    bounds: bounds
+                )
+
+                updateSelectionHighlights()
+                needsDisplay = true
+            } else {
+                updateTextSelection(
+                    interactingAt: point,
+                    inContainerAt: textLayoutManager.documentRange.location,
+                    anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
+                    extending: event.modifierFlags.contains(.shift),
+                    isDragging: false,
+                    visual: event.modifierFlags.contains(.option)
+                )
+            }
             handled = true
         } else if event.clickCount == 2 {
             selectWord(self)
@@ -59,6 +74,11 @@ extension STTextView {
 
     open override func menu(for event: NSEvent) -> NSMenu? {
         let proposedMenu = super.menu(for: event)
+
+        // Disable context menu when adding an insertion point in mouseDown
+        if proposedMenu != nil, event.type == .leftMouseDown && event.modifierFlags.isSuperset(of: [.shift, .control]) {
+            return nil
+        }
 
         let point = convert(event.locationInWindow, from: nil)
         if let delegate = delegate,

@@ -748,7 +748,7 @@ open class STTextView: NSView, NSTextInput {
                     // Extend existing coalesce range
                     if let coalescingValue = undoManager.coalescing?.value,
                        textRange.location == coalescingValue.textRange.endLocation,
-                       let undoEndLocation = textContentStorage.location(textRange.location, offsetBy: replacementString.string.count),
+                       let undoEndLocation = textContentStorage.location(textRange.location, offsetBy: replacementString.string.utf16.count),
                        let undoTextRange = NSTextRange(location: coalescingValue.textRange.location, end: undoEndLocation)
                     {
                         undoManager.coalesce(TypingTextUndo(
@@ -764,7 +764,7 @@ open class STTextView: NSView, NSTextInput {
                 if !undoManager.isCoalescing {
                     let undoRange = NSTextRange(
                         location: textRange.location,
-                        end: textContentStorage.location(textRange.location, offsetBy: replacementString.string.count)
+                        end: textContentStorage.location(textRange.location, offsetBy: replacementString.string.utf16.count)
                     ) ?? textRange
 
                     let previousStringInRange = textContentStorage.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentStorage))
@@ -790,7 +790,7 @@ open class STTextView: NSView, NSTextInput {
                 // A range that is as long as replacement string, so when undo it undo
                 let undoRange = NSTextRange(
                     location: textRange.location,
-                    end: textContentStorage.location(textRange.location, offsetBy: replacementString.string.count)
+                    end: textContentStorage.location(textRange.location, offsetBy: replacementString.string.utf16.count)
                 ) ?? textRange
 
                 let previousStringInRange = textContentStorage.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentStorage))

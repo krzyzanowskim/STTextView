@@ -105,21 +105,34 @@ extension STTextView: NSTextInputClient {
                     replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
                 }
             } else if !textLayoutManager.textSelections.isEmpty {
+                // The text range need offset on each loop to accommodate the series changes from multiple cursors
+                var offset = 0
                 for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-                    if shouldChangeText(in: textRange, replacementString: string) {
-                        replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
+                    let newTextRange: NSTextRange
+                    if let newLocation = textLayoutManager.location(textRange.location, offsetBy: offset),
+                       let offsetTextRange = NSTextRange(location: newLocation, end: textLayoutManager.location(textRange.endLocation, offsetBy: offset))
+                    {
+                        newTextRange = offsetTextRange
+                    } else {
+                        newTextRange = textRange
                     }
+
+                    if shouldChangeText(in: newTextRange, replacementString: string) {
+                        replaceCharacters(in: newTextRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
+                    }
+
+                    offset += string.utf16.count
                 }
             }
-        case let string as NSAttributedString:
+        case let attributedString as NSAttributedString:
             if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
-                if shouldChangeText(in: textRange, replacementString: string.string) {
-                    replaceCharacters(in: textRange, with: string, allowsTypingCoalescing: true)
+                if shouldChangeText(in: textRange, replacementString: attributedString.string) {
+                    replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: true)
                 }
             } else if !textLayoutManager.textSelections.isEmpty {
                 for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
-                    if shouldChangeText(in: textRange, replacementString: string.string) {
-                        replaceCharacters(in: textRange, with: string, allowsTypingCoalescing: true)
+                    if shouldChangeText(in: textRange, replacementString: attributedString.string) {
+                        replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: true)
                     }
                 }
             }
