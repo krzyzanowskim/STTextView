@@ -107,7 +107,7 @@ extension STTextView: NSTextInputClient {
             } else if !textLayoutManager.textSelections.isEmpty {
                 // The text range need offset on each loop to accommodate the series changes from multiple cursors
                 var offset = 0
-                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
                     let newTextRange: NSTextRange
                     if let newLocation = textLayoutManager.location(textRange.location, offsetBy: offset),
                        let offsetTextRange = NSTextRange(location: newLocation, end: textLayoutManager.location(textRange.endLocation, offsetBy: offset))
@@ -130,7 +130,7 @@ extension STTextView: NSTextInputClient {
                     replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: true)
                 }
             } else if !textLayoutManager.textSelections.isEmpty {
-                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
                     if shouldChangeText(in: textRange, replacementString: attributedString.string) {
                         replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: true)
                     }
