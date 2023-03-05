@@ -107,7 +107,7 @@ open class STTextView: NSView, NSTextInput {
     /// If you want to maintain a snapshot of this as you manipulate the text storage, you should make a copy of the appropriate substring.
     public var string: String {
         set {
-            let prevLocation = textLayoutManager.textSelections.first?.textRanges.first?.location
+            let prevLocation = textLayoutManager.insertionPointLocations.first
 
             setString(newValue)
 
@@ -583,7 +583,7 @@ open class STTextView: NSView, NSTextInput {
 
         selectionLayer.sublayers = nil
 
-        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
                 let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
                 guard !highlightFrame.isNull else {

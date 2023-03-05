@@ -21,6 +21,10 @@ final class STTextContentStorage: NSTextContentStorage {
         }
         replacementString.endEditing()
 
+        // Replace text and (unexpectedly) reset textSelections in
+        // -[NSTextLayoutManager _fixSelectionAfterChangeInCharacterRange:changeInLength:]
+        // that breaks multi cursor setup
+        // TODO: restore cursor positions
         textStorage?.replaceCharacters(
             in: NSRange(range, in: self),
             with: replacementString

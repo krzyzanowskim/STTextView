@@ -22,6 +22,7 @@ extension STTextView {
             return
         }
 
+        // TODO: multi-cursor paste
         replaceCharacters(in: firstTextSelectionRange, with: string, useTypingAttributes: false, allowsTypingCoalescing: false)
     }
 
@@ -31,7 +32,7 @@ extension STTextView {
     }
 
     @objc open func delete(_ sender: Any?) {
-        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
+        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
             // "replaceContents" doesn't work with NSTextContentStorage at all
             // textLayoutManager.replaceContents(in: textRange, with: NSAttributedString())
             let nsrange = NSRange(textRange, in: textContentStorage)
