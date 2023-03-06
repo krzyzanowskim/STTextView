@@ -91,10 +91,7 @@ extension STTextView {
             partialResult += textLayoutManager.substring(for: textRange) ?? ""
         }
 
-        for textRange in textRanges where shouldChangeText(in: textRange, replacementString: nil) {
-            replaceCharacters(in: textRange, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)
-        }
-
+        replaceCharacters(in: textRanges, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)
         return deletedString
     }
 }

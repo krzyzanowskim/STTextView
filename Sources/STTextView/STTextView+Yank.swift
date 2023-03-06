@@ -9,11 +9,12 @@ extension STTextView {
     ///
     /// https://www.gnu.org/software/emacs/manual/html_node/emacs/Yanking.html
     open override func yank(_ sender: Any?) {
-        guard let firstTextSelectionRange = textLayoutManager.textSelections.first?.textRanges.first else {
-            return
-        }
-
-        replaceCharacters(in: firstTextSelectionRange, with: Yanking.shared.yank(), useTypingAttributes: true, allowsTypingCoalescing: false)
+        replaceCharacters(
+            in: textLayoutManager.insertionPointSelections.flatMap(\.textRanges),
+            with: Yanking.shared.yank(),
+            useTypingAttributes: true,
+            allowsTypingCoalescing: false
+        )
     }
 
 }
