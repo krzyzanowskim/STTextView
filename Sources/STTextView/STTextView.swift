@@ -590,7 +590,7 @@ open class STTextView: NSView, NSTextInput {
                     return true
                 }
 
-                if highlightFrame.size.width > 0 {
+                if !highlightFrame.size.width.isZero {
                     let highlightLayer = STCALayer(frame: highlightFrame)
                     highlightLayer.contentsScale = backingScaleFactor
                     highlightLayer.backgroundColor = selectionBackgroundColor.cgColor

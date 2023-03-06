@@ -25,10 +25,46 @@ final class STTextContentStorage: NSTextContentStorage {
         // -[NSTextLayoutManager _fixSelectionAfterChangeInCharacterRange:changeInLength:]
         // that breaks multi cursor setup
         // Workaround: restore cursor positions
+
         textStorage?.replaceCharacters(
             in: NSRange(range, in: self),
             with: replacementString
         )
-    }
 
+        // Remove duplicated selections that are result of _fixSelectionAfterChangeInCharacterRange
+        do {
+            let origSelections = textLayoutManagers.first?.textSelections ?? []
+            var uniqueSelections: [NSTextSelection] = []
+            uniqueSelections.reserveCapacity(origSelections.count)
+
+            // Remove duplicated selections
+            for selection in origSelections {
+                if !uniqueSelections.contains(where: { $0.textRanges == selection.textRanges }) {
+                    uniqueSelections.append(selection)
+                }
+            }
+
+            // Remove duplicated textRanges in selections
+            var finalSelections: [NSTextSelection] = []
+            finalSelections.reserveCapacity(uniqueSelections.count)
+            for selection in uniqueSelections {
+                
+                var uniqueRanges: [NSTextRange] = []
+                uniqueRanges.reserveCapacity(selection.textRanges.count)
+                for textRange in selection.textRanges {
+                    if !uniqueRanges.contains(where: { $0 == textRange }) {
+                        uniqueRanges.append(textRange)
+                    }
+                }
+
+                let selectionCopy = NSTextSelection(uniqueRanges, affinity: selection.affinity, granularity: selection.granularity)
+                selectionCopy.anchorPositionOffset = selection.anchorPositionOffset
+                selectionCopy.isLogical = selection.isLogical
+                selectionCopy.typingAttributes = selection.typingAttributes
+                finalSelections.append(selectionCopy)
+            }
+
+            textLayoutManagers.first?.textSelections = finalSelections
+        }
+    }
 }
