@@ -739,20 +739,9 @@ open class STTextView: NSView, NSTextInput {
     }
 
     internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
-        var offset = 0
-        for textRange in textRanges.sorted(by: { $0.location < $1.location }) {
-            let newTextRange: NSTextRange
-            if let newLocation = textLayoutManager.location(textRange.location, offsetBy: offset),
-               let offsetTextRange = NSTextRange(location: newLocation, end: textLayoutManager.location(textRange.endLocation, offsetBy: offset))
-            {
-                newTextRange = offsetTextRange
-            } else {
-                newTextRange = textRange
-            }
-
-            replaceCharacters(in: newTextRange, with: replacementString, allowsTypingCoalescing: true)
-
-            offset += replacementString.length
+        // Replace from the end to beginning of the document
+        for textRange in textRanges.sorted(by: { $0.location > $1.location }) {
+            replaceCharacters(in: textRange, with: replacementString, allowsTypingCoalescing: true)
         }
     }
 
