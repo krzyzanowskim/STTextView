@@ -98,54 +98,24 @@ extension STTextView: NSTextInputClient {
     open func insertText(_ string: Any, replacementRange: NSRange) {
         guard isEditable else { return }
 
+        let replacementTextRange = NSTextRange(replacementRange, in: textContentStorage)
+        var textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
+        if let replacementTextRange {
+            textRanges.append(replacementTextRange)
+        }
+        textRanges.sort(by: { $0.location < $1.location })
+
         switch string {
         case let string as String:
-            if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
+            for textRange in textRanges {
                 if shouldChangeText(in: textRange, replacementString: string) {
                     replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
                 }
-            } else if !textLayoutManager.textSelections.isEmpty {
-                // The text range need offset on each loop to accommodate the series changes from multiple cursors
-                var offset = 0
-                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
-                    let newTextRange: NSTextRange
-                    if let newLocation = textLayoutManager.location(textRange.location, offsetBy: offset),
-                       let offsetTextRange = NSTextRange(location: newLocation, end: textLayoutManager.location(textRange.endLocation, offsetBy: offset))
-                    {
-                        newTextRange = offsetTextRange
-                    } else {
-                        newTextRange = textRange
-                    }
-
-                    if shouldChangeText(in: newTextRange, replacementString: string) {
-                        replaceCharacters(in: newTextRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
-                    }
-
-                    offset += string.utf16.count
-                }
             }
         case let attributedString as NSAttributedString:
-            if let textRange = NSTextRange(replacementRange, in: textContentStorage) {
+            for textRange in textRanges {
                 if shouldChangeText(in: textRange, replacementString: attributedString.string) {
                     replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: true)
-                }
-            } else if !textLayoutManager.textSelections.isEmpty {
-                var offset = 0
-                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
-                    let newTextRange: NSTextRange
-                    if let newLocation = textLayoutManager.location(textRange.location, offsetBy: offset),
-                       let offsetTextRange = NSTextRange(location: newLocation, end: textLayoutManager.location(textRange.endLocation, offsetBy: offset))
-                    {
-                        newTextRange = offsetTextRange
-                    } else {
-                        newTextRange = textRange
-                    }
-
-                    if shouldChangeText(in: newTextRange, replacementString: attributedString.string) {
-                        replaceCharacters(in: newTextRange, with: attributedString, allowsTypingCoalescing: true)
-                    }
-
-                    offset += attributedString.length
                 }
             }
         default:
