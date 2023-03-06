@@ -738,6 +738,24 @@ open class STTextView: NSView, NSTextInput {
         needsDisplay = true
     }
 
+    internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
+        var offset = 0
+        for textRange in textRanges.sorted(by: { $0.location < $1.location }) {
+            let newTextRange: NSTextRange
+            if let newLocation = textLayoutManager.location(textRange.location, offsetBy: offset),
+               let offsetTextRange = NSTextRange(location: newLocation, end: textLayoutManager.location(textRange.endLocation, offsetBy: offset))
+            {
+                newTextRange = offsetTextRange
+            } else {
+                newTextRange = textRange
+            }
+
+            replaceCharacters(in: newTextRange, with: replacementString, allowsTypingCoalescing: true)
+
+            offset += replacementString.length
+        }
+    }
+
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
         if allowsUndo, let undoManager = undoManager {
             // typing coalescing
@@ -827,6 +845,10 @@ open class STTextView: NSView, NSTextInput {
         self.replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]), allowsTypingCoalescing: allowsTypingCoalescing)
     }
 
+    internal func replaceCharacters(in textRange: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
+        self.replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]), allowsTypingCoalescing: allowsTypingCoalescing)
+    }
+
     open func replaceCharacters(in textRange: NSTextRange, with replacementString: String) {
         self.replaceCharacters(in: textRange, with: replacementString, useTypingAttributes: true, allowsTypingCoalescing: true)
     }
@@ -845,6 +867,12 @@ open class STTextView: NSView, NSTextInput {
         }
 
         return result
+    }
+
+    internal func shouldChangeText(in affectedTextRanges: [NSTextRange], replacementString: String?) -> Bool {
+        affectedTextRanges.allSatisfy { textRange in
+            shouldChangeText(in: textRange, replacementString: replacementString)
+        }
     }
 
     public func breakUndoCoalescing() {

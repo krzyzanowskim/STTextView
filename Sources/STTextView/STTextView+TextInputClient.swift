@@ -103,20 +103,15 @@ extension STTextView: NSTextInputClient {
         if let replacementTextRange {
             textRanges.append(replacementTextRange)
         }
-        textRanges.sort(by: { $0.location < $1.location })
 
         switch string {
         case let string as String:
-            for textRange in textRanges {
-                if shouldChangeText(in: textRange, replacementString: string) {
-                    replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
-                }
+            if shouldChangeText(in: textRanges, replacementString: string) {
+                replaceCharacters(in: textRanges, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
             }
         case let attributedString as NSAttributedString:
-            for textRange in textRanges {
-                if shouldChangeText(in: textRange, replacementString: attributedString.string) {
-                    replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: true)
-                }
+            if shouldChangeText(in: textRanges, replacementString: attributedString.string) {
+                replaceCharacters(in: textRanges, with: attributedString, allowsTypingCoalescing: true)
             }
         default:
             assertionFailure()
