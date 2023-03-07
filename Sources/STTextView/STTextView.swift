@@ -278,6 +278,7 @@ open class STTextView: NSView, NSTextInput {
         textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = textContainer
         textContentStorage.addTextLayoutManager(textLayoutManager)
+        textContentStorage.primaryTextLayoutManager = textLayoutManager
 
         contentLayer = STCATiledLayer()
         contentLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
