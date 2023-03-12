@@ -23,17 +23,19 @@ final class STTextContentStorage: NSTextContentStorage {
 
         // Replace text and (unexpectedly) reset textSelections in
         // -[NSTextLayoutManager _fixSelectionAfterChangeInCharacterRange:changeInLength:]
+        // that breaks multi cursor setup
+        // Workaround: Fix _fixSelectionAfterChangeInCharacterRange nad fix selection by myself
         textStorage?.replaceCharacters(
             in: NSRange(range, in: self),
             with: replacementString
         )
 
-        fixFixSelectionAfterChangeInCharacterRange()
+        fix_fixSelectionAfterChangeInCharacterRange()
     }
 
-    // that breaks multi cursor setup
-    // Workaround: restore cursor positions
-    private func fixFixSelectionAfterChangeInCharacterRange() {
+    // Fix a result of the NSTextLayoutManager._fixSelectionAfterChangeInCharacterRange
+    // specifically: duplicated (identical) ranges and selections
+    private func fix_fixSelectionAfterChangeInCharacterRange() {
         // Remove duplicated selections that are result of _fixSelectionAfterChangeInCharacterRange
         for textLayoutManager in textLayoutManagers {
             let origSelections = textLayoutManager.textSelections
@@ -67,7 +69,7 @@ final class STTextContentStorage: NSTextContentStorage {
                 finalSelections.append(selectionCopy)
             }
 
-            textLayoutManagers.first?.textSelections = finalSelections
+            textLayoutManager.textSelections = finalSelections
         }
     }
 }

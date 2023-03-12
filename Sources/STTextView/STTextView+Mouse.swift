@@ -15,16 +15,7 @@ extension STTextView {
         if event.clickCount == 1 {
             let point = convert(event.locationInWindow, from: nil)
             if event.modifierFlags.isSuperset(of: [.control, .shift]) {
-                // add cursor selection
-                textLayoutManager.textSelections += textLayoutManager.textSelectionNavigation.textSelections(
-                    interactingAt: point,
-                    inContainerAt: textLayoutManager.documentRange.location,
-                    anchors: [],
-                    modifiers: .visual,
-                    selecting: false,
-                    bounds: bounds
-                )
-
+                textLayoutManager.appendInsertionPointSelection(at: point)
                 updateSelectionHighlights()
                 needsDisplay = true
             } else {

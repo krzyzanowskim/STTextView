@@ -22,7 +22,23 @@ extension NSTextLayoutManager {
     }
 
     public var insertionPointSelections: [NSTextSelection] {
-        textSelections.filter({ !$0.isLogical })
+        textSelections.filter {
+            !$0.isLogical && !$0.isTransient
+        }
+    }
+
+    internal func appendInsertionPointSelection(at point: CGPoint) {
+        // Insertion points are either tge selections with a single empty range
+        // or single selection with multiple empty ranges. Both cases are handled.
+        // I didn't find an advantage of one approach over the other
+        textSelections += textSelectionNavigation.textSelections(
+            interactingAt: point,
+            inContainerAt: documentRange.location,
+            anchors: [],
+            modifiers: .visual,
+            selecting: false,
+            bounds: usageBoundsForTextContainer
+        )
     }
 
     func substring(for range: NSTextRange) -> String? {
@@ -76,6 +92,36 @@ extension NSTextLayoutManager {
 
     public func textLineFragment(at point: CGPoint) -> NSTextLineFragment? {
         textLayoutFragment(for: point)?.textLineFragment(at: point)
+    }
+
+
+
+}
+
+extension NSTextLayoutManager {
+
+    /// Returns a location of text produced by a tap or click at the point you specify.
+    public func location(interactingAt point: CGPoint, inContainerAt containerLocation: NSTextLocation) -> NSTextLocation? {
+        guard let lineFragmentRange = lineFragmentRange(for: point, inContainerAt: containerLocation)
+        else {
+            return nil
+        }
+
+        var distance: CGFloat = CGFloat.infinity
+        var caretLocation: NSTextLocation? = nil
+        enumerateCaretOffsetsInLineFragment(at: lineFragmentRange.location) { caretOffset, location, leadingEdge, stop in
+            let localDistance = abs(caretOffset - point.x)
+            if leadingEdge {
+                if localDistance < distance{
+                    distance = localDistance
+                    caretLocation = location
+                } else if localDistance > distance{
+                    stop.pointee = true
+                }
+            }
+        }
+
+        return caretLocation
     }
 }
 
