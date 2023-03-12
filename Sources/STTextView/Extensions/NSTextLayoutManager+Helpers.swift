@@ -5,42 +5,6 @@ import Cocoa
 
 extension NSTextLayoutManager {
 
-    @available(*, deprecated, message: "Use insertionPointLocations")
-    public var insertionPointLocation: NSTextLocation? {
-        guard let textSelection = insertionPointSelections.first else {
-            return nil
-        }
-
-        return textSelection.textRanges.first?.location
-
-        // FB11961508 NSTextSelectionNavigation.resolvedInsertionLocation sometimes crashes instead return nil
-        // return textSelectionNavigation.resolvedInsertionLocation(for: textSelection, writingDirection: .leftToRight)
-    }
-
-    public var insertionPointLocations: [NSTextLocation] {
-        insertionPointSelections.flatMap(\.textRanges).map(\.location)
-    }
-
-    public var insertionPointSelections: [NSTextSelection] {
-        textSelections.filter {
-            !$0.isLogical && !$0.isTransient
-        }
-    }
-
-    internal func appendInsertionPointSelection(at point: CGPoint) {
-        // Insertion points are either tge selections with a single empty range
-        // or single selection with multiple empty ranges. Both cases are handled.
-        // I didn't find an advantage of one approach over the other
-        textSelections += textSelectionNavigation.textSelections(
-            interactingAt: point,
-            inContainerAt: documentRange.location,
-            anchors: [],
-            modifiers: .visual,
-            selecting: false,
-            bounds: usageBoundsForTextContainer
-        )
-    }
-
     func substring(for range: NSTextRange) -> String? {
         guard !range.isEmpty else { return nil }
         var output = String()

@@ -112,7 +112,9 @@ open class STTextView: NSView, NSTextInput {
             setString(newValue)
 
             // restore selection location
-            setSelectedRange(NSTextRange(location: prevLocation ?? textLayoutManager.documentRange.location))
+            if let prevLocation {
+                setSelectedRange(NSTextRange(location: prevLocation))
+            }
         }
         get {
             textContentStorage.attributedString?.string ?? ""
@@ -567,6 +569,10 @@ open class STTextView: NSView, NSTextInput {
     }
 
     public func setSelectedRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
+        guard isSelectable else {
+            return
+        }
+
         textLayoutManager.textSelections = [
             NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
         ]

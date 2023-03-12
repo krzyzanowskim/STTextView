@@ -15,7 +15,7 @@ extension STTextView {
         if event.clickCount == 1 {
             let point = convert(event.locationInWindow, from: nil)
             if event.modifierFlags.isSuperset(of: [.control, .shift]) {
-                textLayoutManager.appendInsertionPointSelection(at: point)
+                textLayoutManager.appendInsertionPointSelection(interactingAt: point)
                 updateSelectionHighlights()
                 needsDisplay = true
             } else {
