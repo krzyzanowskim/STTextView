@@ -47,7 +47,7 @@ extension NSTextLayoutManager {
             interactingAt: point,
             inContainerAt: documentRange.location,
             anchors: [],
-            modifiers: .visual,
+            modifiers: [],
             selecting: false,
             bounds: usageBoundsForTextContainer
         )
