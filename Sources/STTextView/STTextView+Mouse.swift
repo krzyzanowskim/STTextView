@@ -75,7 +75,7 @@ extension STTextView {
         if let delegate = delegate,
            let proposedMenu = proposedMenu,
            let eventLocation = textLayoutManager.lineFragmentRange(for: point, inContainerAt: textLayoutManager.documentRange.location)?.location,
-           let location = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point, inContainerAt: eventLocation, anchors: [], modifiers: [], selecting: false, bounds: bounds).first?.textRanges.first?.location {
+           let location = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point, inContainerAt: eventLocation, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.first?.location {
             return delegate.textView(self, menu: proposedMenu, for: event, at: location)
         }
 

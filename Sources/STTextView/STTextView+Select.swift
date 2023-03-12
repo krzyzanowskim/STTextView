@@ -430,7 +430,7 @@ extension STTextView {
             anchors: anchors,
             modifiers: modifiers,
             selecting: isDragging,
-            bounds: bounds
+            bounds: textLayoutManager.usageBoundsForTextContainer
         )
 
         if !selections.isEmpty {
