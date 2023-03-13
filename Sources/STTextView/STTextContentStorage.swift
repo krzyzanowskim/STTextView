@@ -6,8 +6,11 @@ import Cocoa
 final class STTextContentStorage: NSTextContentStorage {
 
     override func replaceContents(in range: NSTextRange, with textElements: [NSTextElement]?) {
+        assert(hasEditingTransaction, "Not called inside performEditingTransaction")
 
-        guard let paragraphElements = textElements?.compactMap({ $0 as? NSTextParagraph }) else {
+        guard let textStorage = textStorage,
+              let paragraphElements = textElements?.compactMap({ $0 as? NSTextParagraph })
+        else {
             // Non-functional (FB9925647)
             super.replaceContents(in: range, with: textElements)
             assertionFailure()
@@ -25,10 +28,13 @@ final class STTextContentStorage: NSTextContentStorage {
         // -[NSTextLayoutManager _fixSelectionAfterChangeInCharacterRange:changeInLength:]
         // that breaks multi cursor setup
         // Workaround: Fix _fixSelectionAfterChangeInCharacterRange nad fix selection by myself
-        textStorage?.replaceCharacters(
+
+        textStorage.beginEditing()
+        textStorage.replaceCharacters(
             in: NSRange(range, in: self),
             with: replacementString
         )
+        textStorage.endEditing()
 
         fix_fixSelectionAfterChangeInCharacterRange()
     }

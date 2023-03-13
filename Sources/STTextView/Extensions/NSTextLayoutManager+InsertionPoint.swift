@@ -33,12 +33,11 @@ extension NSTextLayoutManager {
     }
 
     public var insertionPointSelections: [NSTextSelection] {
-        textSelections.filter {
-            !$0.isLogical && !$0.isTransient
-        }
+        textSelections.filter(_textSelectionInsertionPointFilter)
     }
 
-    /// Append insertion point at
+    /// Append insertion point.
+    /// - Parameter point: A CGPoint that represents the location of the tap or click.
     internal func appendInsertionPointSelection(interactingAt point: CGPoint) {
         // Insertion points are either tge selections with a single empty range
         // or single selection with multiple empty ranges. Both cases are handled.
@@ -53,4 +52,12 @@ extension NSTextLayoutManager {
         )
     }
     
+}
+
+internal var _textSelectionInsertionPointFilter: (NSTextSelection) -> Bool = {
+    !$0.isLogical &&
+    !$0.isTransient &&
+    $0.textRanges.contains {
+        $0.isEmpty
+    }
 }
