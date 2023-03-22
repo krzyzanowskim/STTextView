@@ -112,11 +112,11 @@ scrollView.documentView = textView
 // Line numbers
 let rulerView = STLineNumberRulerView(textView: textView)
 // Configure the ruler view
-rulerView.drawHighlightedRuler = true
+rulerView.highlightSelectedLine = true
 // Set text color of the selected line number
 rulerView.highlightLineNumberColor = .textColor
 // Allows to set markers.
-rulerView.allowsMarkers
+// rulerView.allowsMarkers = true
 
 // Add to NSScrollView containing STTextView
 scrollView.verticalRulerView = rulerView
