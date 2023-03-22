@@ -39,7 +39,7 @@ open class STTextView: NSView, NSTextInput {
 
     /// A Boolean value that determines whether the text view should draw its insertion point.
     open var shouldDrawInsertionPoint: Bool {
-        isFirstResponder && isSelectable
+        isFirstResponder && isEditable
     }
 
     /// The color of the insertion point.
