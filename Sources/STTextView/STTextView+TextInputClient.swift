@@ -101,8 +101,6 @@ extension STTextView: NSTextInputClient {
     }
 
     open func insertText(_ string: Any, replacementRange: NSRange) {
-        guard isEditable else { return }
-
         let replacementTextRange = NSTextRange(replacementRange, in: textContentStorage)
         var textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
         if let replacementTextRange {

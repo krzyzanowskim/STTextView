@@ -853,10 +853,6 @@ open class STTextView: NSView, NSTextInput {
     /// this method should be called with information on the change.
     /// Coalesce consecutive typing events
     open func shouldChangeText(in affectedTextRange: NSTextRange, replacementString: String?) -> Bool {
-        if !isEditable {
-            return false
-        }
-
         let result = delegate?.textView(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString) ?? true
         if !result {
             return result
