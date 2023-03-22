@@ -67,6 +67,11 @@ extension STTextView: NSTextInputClient {
         textContentStorage.attributedString ?? NSAttributedString()
     }
 
+    public func setAttributedString(_ attributedString: NSAttributedString) {
+        textContentStorage.attributedString = attributedString
+        needsLayout = true
+    }
+
     public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
         [.font, .foregroundColor, .glyphInfo, .kern, .ligature, .link, .markedClauseSegment, .obliqueness, .paragraphStyle, .shadow, .spellingState,  .strikethroughColor, .strikethroughStyle, .strokeColor, .strokeWidth, .superscript, .textAlternatives, .textEffect, .toolTip, .underlineColor, .underlineStyle, .verticalGlyphForm, .writingDirection]
     }
