@@ -135,11 +135,15 @@ extension STTextView: NSTextInputClient {
 
     open func insertText(_ string: Any, replacementRange: NSRange) {
         var textRanges: [NSTextRange]
+
         if hasMarkedText() {
             textRanges = [NSTextRange(markedText!.replacementRange, in: textContentStorage)!]
-        } else {
+        } else if replacementRange == .notFound {
             textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
+        } else {
+            textRanges = []
         }
+
         let replacementTextRange = NSTextRange(replacementRange, in: textContentStorage)
         if let replacementTextRange, !textRanges.contains(where: { $0 == replacementTextRange }) {
             textRanges.append(replacementTextRange)
