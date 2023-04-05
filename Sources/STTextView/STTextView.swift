@@ -476,19 +476,19 @@ open class STTextView: NSView, NSTextInput {
         defer {
             undoManager?.enableUndoRegistration()
         }
-        let documentNSRange = NSRange(textContentStorage.documentRange, in: textContentStorage)
+
         if case .some(let string) = string {
             switch string {
             case is NSAttributedString:
-                insertText(string as! NSAttributedString, replacementRange: documentNSRange)
+                insertText(string as! NSAttributedString, replacementRange: NSRange.notFound)
             case is String:
-                insertText(NSAttributedString(string: string as! String, attributes: typingAttributes), replacementRange: documentNSRange)
+                insertText(NSAttributedString(string: string as! String, attributes: typingAttributes), replacementRange: NSRange.notFound)
             default:
                 assertionFailure()
                 return
             }
         } else if case .none = string {
-            insertText("", replacementRange: documentNSRange)
+            insertText("", replacementRange: NSRange.notFound)
         }
     }
 

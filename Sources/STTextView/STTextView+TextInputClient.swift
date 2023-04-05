@@ -101,9 +101,10 @@ extension STTextView: NSTextInputClient {
     }
 
     open func insertText(_ string: Any, replacementRange: NSRange) {
-        let replacementTextRange = NSTextRange(replacementRange, in: textContentStorage)
         var textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
-        if let replacementTextRange {
+        
+        let replacementTextRange = NSTextRange(replacementRange, in: textContentStorage)
+        if let replacementTextRange, !textRanges.contains(where: { $0 == replacementTextRange }) {
             textRanges.append(replacementTextRange)
         }
 
