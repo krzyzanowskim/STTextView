@@ -175,9 +175,9 @@ open class STTextView: NSView, NSTextInput {
     internal var _undoManager: UndoManager?
 
     struct MarkedText {
-        let string: Any
-        let selectedRange: NSRange
-        let replacementRange: NSRange
+        var string: Any
+        var selectedRange: NSRange
+        var replacementRange: NSRange
     }
 
     var markedText: MarkedText? = nil

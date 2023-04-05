@@ -31,16 +31,46 @@ extension STTextView: NSTextInputClient {
     /// selectedRange specifies the selection inside the string being inserted;
     /// hence, the location is relative to the beginning of string.
     /// When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
+    ///
+    /// The receiver inserts string replacing the content specified by replacementRange.
+    /// string can be either an NSString or NSAttributedString instance.
+    /// selectedRange specifies the selection inside the string being inserted; hence, the location is relative to the beginning of string.
+    /// When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
     public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
-        markedText = MarkedText(
-            string: string,
-            selectedRange: selectedRange,
-            replacementRange: replacementRange
-        )
+
+        if replacementRange != .notFound {
+            markedText = MarkedText(
+                string: string,
+                selectedRange: selectedRange,
+                replacementRange: replacementRange
+            )
+        } else {
+            markedText?.string = string
+            markedText?.selectedRange = selectedRange
+        }
+
+        guard let markedText = markedText,
+              let replacementTextRange = NSTextRange(markedText.replacementRange, in: textContentStorage) else {
+            return
+        }
+
+        switch string {
+        case is NSAttributedString:
+            replaceCharacters(in: replacementTextRange, with: string as! NSAttributedString, allowsTypingCoalescing: false)
+        case is String:
+            replaceCharacters(in: replacementTextRange, with: NSAttributedString(string: string as! String, attributes: typingAttributes), allowsTypingCoalescing: false)
+        default:
+            assertionFailure()
+            return
+        }
     }
 
-    /// The receiver unmarks the marked text. If no marked text, the invocation of this method has no effect.
+    /// The receiver unmarks the markaed text. If no marked text, the invocation of this method has no effect.
     public func unmarkText() {
+        if !hasMarkedText() {
+            return
+        }
+
         markedText = nil
     }
 
@@ -54,16 +84,12 @@ extension STTextView: NSTextInputClient {
 
     /// Returns the marked range. Returns {NSNotFound, 0} if no marked range.
     public func markedRange() -> NSRange {
-        if hasMarkedText() == false {
-            return NSRange.notFound
-        }
-
-        return markedText?.selectedRange ?? .notFound
+        markedText?.replacementRange ?? .notFound
     }
 
     /// Returns whether or not the receiver has marked text.
     public func hasMarkedText() -> Bool {
-        markedText != nil
+        markedText != nil && markedText!.replacementRange.location != NSNotFound
     }
 
     public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
@@ -80,7 +106,7 @@ extension STTextView: NSTextInputClient {
     }
 
     public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
-        [.font, .foregroundColor, .glyphInfo, .kern, .ligature, .link, .markedClauseSegment, .obliqueness, .paragraphStyle, .shadow, .spellingState,  .strikethroughColor, .strikethroughStyle, .strokeColor, .strokeWidth, .superscript, .textAlternatives, .textEffect, .toolTip, .underlineColor, .underlineStyle, .verticalGlyphForm, .writingDirection]
+        [.backgroundColor, .foregroundColor, .font]
     }
 
     public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
@@ -108,6 +134,11 @@ extension STTextView: NSTextInputClient {
     }
 
     open func insertText(_ string: Any, replacementRange: NSRange) {
+        if hasMarkedText() {
+            unmarkText()
+            return
+        }
+
         var textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
         
         let replacementTextRange = NSTextRange(replacementRange, in: textContentStorage)
