@@ -154,15 +154,15 @@ open class STTextView: NSView, NSTextInput {
     ///
     /// Note: Needs ``highlightSelectedLine`` to be set to `true`
     @Invalidating(.display)
-    public var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
+    open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
 
     /// The background color of a text selection.
     @Invalidating(.display)
-    public var selectionBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor
+    open var selectionBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor
 
     /// The text view's background color
     @Invalidating(.display)
-    public var backgroundColor: NSColor? = nil {
+    open var backgroundColor: NSColor? = nil {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
         }
@@ -173,6 +173,14 @@ open class STTextView: NSView, NSTextInput {
     /// `true` if the receiver allows undo, otherwise `false`. Default `true`.
     open var allowsUndo: Bool
     internal var _undoManager: UndoManager?
+
+    struct MarkedText {
+        let string: Any
+        let selectedRange: NSRange
+        let replacementRange: NSRange
+    }
+
+    var markedText: MarkedText? = nil
 
     /// A flag
     internal var processingKeyEvent: Bool = false

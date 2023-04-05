@@ -32,13 +32,16 @@ extension STTextView: NSTextInputClient {
     /// hence, the location is relative to the beginning of string.
     /// When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
     public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
-        // print("setMarkedText")
+        markedText = MarkedText(
+            string: string,
+            selectedRange: selectedRange,
+            replacementRange: replacementRange
+        )
     }
 
     /// The receiver unmarks the marked text. If no marked text, the invocation of this method has no effect.
     public func unmarkText() {
-        // print("unmarkText")
-
+        markedText = nil
     }
 
     public func selectedRange() -> NSRange {
@@ -51,12 +54,16 @@ extension STTextView: NSTextInputClient {
 
     /// Returns the marked range. Returns {NSNotFound, 0} if no marked range.
     public func markedRange() -> NSRange {
-        NSRange.notFound
+        if hasMarkedText() == false {
+            return NSRange.notFound
+        }
+
+        return markedText?.selectedRange ?? .notFound
     }
 
     /// Returns whether or not the receiver has marked text.
     public func hasMarkedText() -> Bool {
-        false
+        markedText != nil
     }
 
     public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
