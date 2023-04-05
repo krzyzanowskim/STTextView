@@ -134,16 +134,20 @@ extension STTextView: NSTextInputClient {
     }
 
     open func insertText(_ string: Any, replacementRange: NSRange) {
+        var textRanges: [NSTextRange]
         if hasMarkedText() {
-            unmarkText()
-            return
+            textRanges = [NSTextRange(markedText!.replacementRange, in: textContentStorage)!]
+        } else {
+            textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
         }
-
-        var textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
-        
         let replacementTextRange = NSTextRange(replacementRange, in: textContentStorage)
         if let replacementTextRange, !textRanges.contains(where: { $0 == replacementTextRange }) {
             textRanges.append(replacementTextRange)
+        }
+
+        let temporaryDisableUndoRegistration = hasMarkedText() && undoManager?.isUndoRegistrationEnabled == true
+        if temporaryDisableUndoRegistration {
+            undoManager?.disableUndoRegistration()
         }
 
         switch string {
@@ -157,6 +161,13 @@ extension STTextView: NSTextInputClient {
             }
         default:
             assertionFailure()
+        }
+
+        if hasMarkedText() {
+            if temporaryDisableUndoRegistration {
+                undoManager?.enableUndoRegistration()
+            }
+            unmarkText()
         }
     }
 
