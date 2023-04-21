@@ -21,7 +21,7 @@ extension STTextView {
         }
 
         replaceCharacters(
-            in: textLayoutManager.insertionPointSelections.flatMap(\.textRanges),
+            in: textLayoutManager.textSelections.flatMap(\.textRanges),
             with: string,
             useTypingAttributes: false,
             allowsTypingCoalescing: false

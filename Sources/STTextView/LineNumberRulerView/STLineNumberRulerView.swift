@@ -203,7 +203,7 @@ open class STLineNumberRulerView: NSRulerView {
 
                     var effectiveAttributes = lineTextAttributes
                     if highlightSelectedLine, !selectedLineTextAttributes.isEmpty {
-                        if textLayoutManager.insertionPointSelections.flatMap(\.textRanges).contains(where: { layoutFragment.rangeInElement.intersects($0) || layoutFragment.rangeInElement.contains($0) }) {
+                        if textLayoutManager.textSelections.flatMap(\.textRanges).contains(where: { layoutFragment.rangeInElement.intersects($0) || layoutFragment.rangeInElement.contains($0) }) {
                             effectiveAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                         }
                     }
