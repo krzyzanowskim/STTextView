@@ -22,7 +22,7 @@ final class ViewController: NSViewController {
         paragraph.defaultTabInterval = 28 // default
 
         textView.defaultParagraphStyle = paragraph
-        textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
+        textView.font = NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 

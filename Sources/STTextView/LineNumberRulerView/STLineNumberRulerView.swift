@@ -15,7 +15,7 @@ open class STLineNumberRulerView: NSRulerView {
     /// Initialized with a textView font value and does not update automatically when
     /// text view font changes.
     @Invalidating(.display)
-    open var font: NSFont = NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.labelFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.labelFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.labelFontSize, weight: .regular)
+    open var font: NSFont = NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.systemFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
 
     /// The insets of the ruler view.
     @Invalidating(.display)
@@ -90,7 +90,7 @@ open class STLineNumberRulerView: NSRulerView {
         super.init(scrollView: scrollView ?? textView.enclosingScrollView, orientation: .verticalRuler)
 
         if let textViewFont = textView.font {
-            font = textViewFont
+            font = adjustFont(textViewFont)
         }
 
         highlightSelectedLine = textView.highlightSelectedLine
@@ -347,4 +347,40 @@ open class STLineNumberRulerView: NSRulerView {
         context.restoreGState()
     }
     
+}
+
+private extension STLineNumberRulerView {
+    func adjustFont(_ font: NSFont) -> NSFont {
+        // https://useyourloaf.com/blog/ios-9-proportional-numbers/
+        // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html
+        let features: [[NSFontDescriptor.FeatureKey: Int]] = [
+            [
+                .typeIdentifier: kTextSpacingType,
+                .selectorIdentifier: kMonospacedTextSelector
+            ],
+            [
+                .typeIdentifier: kNumberSpacingType,
+                .selectorIdentifier: kMonospacedNumbersSelector
+            ],
+            [
+                .typeIdentifier: kNumberCaseType,
+                .selectorIdentifier: kUpperCaseNumbersSelector
+            ],
+            [
+                .typeIdentifier: kStylisticAlternativesType,
+                .selectorIdentifier: kStylisticAltOneOnSelector
+            ],
+            [
+                .typeIdentifier: kStylisticAlternativesType,
+                .selectorIdentifier: kStylisticAltTwoOnSelector
+            ],
+            [
+                .typeIdentifier: kTypographicExtrasType,
+                .selectorIdentifier: kSlashedZeroOnSelector
+            ]
+        ]
+
+        let adjustedFont = NSFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: 0)
+        return adjustedFont ?? font
+    }
 }
