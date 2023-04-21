@@ -28,7 +28,7 @@ final class ViewController: NSViewController {
 
         textView.addAttributes([.foregroundColor: NSColor.systemBlue], range: NSRange(location: 0, length: 1))
         textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 2, length: 10))
-        textView.addAttributes([.foregroundColor: NSColor.controlAccentColor, .font: NSFont.boldSystemFont(ofSize: 14)], range: NSRange(location: 18, length: 4))
+        textView.addAttributes([.foregroundColor: NSColor.controlAccentColor, .font: NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)], range: NSRange(location: 18, length: 4))
 
         textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true

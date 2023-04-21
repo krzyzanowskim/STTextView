@@ -54,10 +54,10 @@ extension NSTextLayoutManager {
     
 }
 
-internal var _textSelectionInsertionPointFilter: (NSTextSelection) -> Bool = {
-    !$0.isLogical &&
-    !$0.isTransient &&
-    $0.textRanges.contains {
-        $0.isEmpty
+internal var _textSelectionInsertionPointFilter: (NSTextSelection) -> Bool = { textSelection in
+    !textSelection.isLogical &&
+    !textSelection.isTransient &&
+    textSelection.textRanges.contains { textRange in
+        textRange.isEmpty
     }
 }

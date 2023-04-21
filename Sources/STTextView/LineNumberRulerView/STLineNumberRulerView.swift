@@ -141,11 +141,10 @@ open class STLineNumberRulerView: NSRulerView {
 
         let lineTextAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
-            .foregroundColor: textColor
+            .foregroundColor: textColor.cgColor
         ]
         
         let selectedLineTextAttributes: [NSAttributedString.Key: Any] = [
-            .font: font,
             .foregroundColor: (selectedLineTextColor ?? textColor).cgColor
         ]
 
@@ -202,12 +201,14 @@ open class STLineNumberRulerView: NSRulerView {
                     let lineNumber = startLineIndex + lines.count + 1
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
 
-                    var attr = lineTextAttributes
-                    if highlightSelectedLine, textLayoutManager.insertionPointSelections.flatMap(\.textRanges).contains(where: { layoutFragment.rangeInElement.intersects($0) || layoutFragment.rangeInElement.contains($0) }) {
-                        attr = selectedLineTextAttributes
+                    var effectiveAttributes = lineTextAttributes
+                    if highlightSelectedLine, !selectedLineTextAttributes.isEmpty {
+                        if textLayoutManager.insertionPointSelections.flatMap(\.textRanges).contains(where: { layoutFragment.rangeInElement.intersects($0) || layoutFragment.rangeInElement.contains($0) }) {
+                            effectiveAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
+                        }
                     }
 
-                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: attr)
+                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: effectiveAttributes)
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     lines.append(
