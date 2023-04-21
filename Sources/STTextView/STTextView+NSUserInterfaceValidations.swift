@@ -41,6 +41,10 @@ extension STTextView: NSUserInterfaceValidations {
             return result
         case #selector(performFindPanelAction(_:)), #selector(performTextFinderAction(_:)):
             return textFinder.validateAction(NSTextFinder.Action(rawValue: item.tag)!)
+        case #selector(stopSpeaking(_:)):
+            return speechSynthesizer.isSpeaking
+        case #selector(startSpeaking(_:)):
+            return !textContentStorage.documentRange.isEmpty
         default:
             return true
         }
