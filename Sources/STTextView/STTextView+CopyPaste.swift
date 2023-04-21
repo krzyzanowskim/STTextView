@@ -28,6 +28,19 @@ extension STTextView {
         )
     }
 
+    @objc func pasteAsPlainText(_ sender: Any?) {
+        guard let string = NSPasteboard.general.string(forType: .string) else {
+            return
+        }
+
+        replaceCharacters(
+            in: textLayoutManager.textSelections.flatMap(\.textRanges),
+            with: string,
+            useTypingAttributes: true,
+            allowsTypingCoalescing: false
+        )
+    }
+
     @objc open func cut(_ sender: Any?) {
         copy(sender)
         delete(sender)
