@@ -50,7 +50,7 @@ extension STTextView: NSTextInputClient {
         }
 
         guard let markedText = markedText,
-              let replacementTextRange = NSTextRange(markedText.replacementRange, in: textContentStorage) else {
+              let replacementTextRange = NSTextRange(markedText.replacementRange, in: textContentManager) else {
             return
         }
 
@@ -76,7 +76,7 @@ extension STTextView: NSTextInputClient {
 
     public func selectedRange() -> NSRange {
         if let selectionTextRange = textLayoutManager.textSelections.first?.textRanges.first {
-            return NSRange(selectionTextRange, in: textContentStorage)
+            return NSRange(selectionTextRange, in: textContentManager)
         }
 
         return NSRange.notFound
@@ -93,15 +93,15 @@ extension STTextView: NSTextInputClient {
     }
 
     public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
-        textContentStorage.attributedString?.attributedSubstring(from: range)
+        (textContentManager as? NSTextContentStorage)?.attributedString?.attributedSubstring(from: range)
     }
 
     public func attributedString() -> NSAttributedString {
-        textContentStorage.attributedString ?? NSAttributedString()
+        (textContentManager as? NSTextContentStorage)?.attributedString ?? NSAttributedString()
     }
 
     public func setAttributedString(_ attributedString: NSAttributedString) {
-        textContentStorage.attributedString = attributedString
+        (textContentManager as? NSTextContentStorage)?.attributedString = attributedString
         needsLayout = true
     }
 
@@ -110,7 +110,7 @@ extension STTextView: NSTextInputClient {
     }
 
     public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
-        guard let textRange = NSTextRange(range, in: textContentStorage) else {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
             return .zero
         }
 
@@ -137,14 +137,14 @@ extension STTextView: NSTextInputClient {
         var textRanges: [NSTextRange]
 
         if hasMarkedText() {
-            textRanges = [NSTextRange(markedText!.replacementRange, in: textContentStorage)!]
+            textRanges = [NSTextRange(markedText!.replacementRange, in: textContentManager)!]
         } else if replacementRange == .notFound {
             textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
         } else {
             textRanges = []
         }
 
-        let replacementTextRange = NSTextRange(replacementRange, in: textContentStorage)
+        let replacementTextRange = NSTextRange(replacementRange, in: textContentManager)
         if let replacementTextRange, !textRanges.contains(where: { $0 == replacementTextRange }) {
             textRanges.append(replacementTextRange)
         }

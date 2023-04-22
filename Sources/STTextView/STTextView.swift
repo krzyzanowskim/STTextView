@@ -117,7 +117,7 @@ open class STTextView: NSView, NSTextInput {
             }
         }
         get {
-            textContentStorage.attributedString?.string ?? ""
+            (textContentManager as? NSTextContentStorage)?.attributedString?.string ?? ""
         }
     }
 
@@ -192,7 +192,7 @@ open class STTextView: NSView, NSTextInput {
     public let textLayoutManager: NSTextLayoutManager
 
     /// The text view's text storage object.
-    public let textContentStorage: NSTextContentStorage
+    public let textContentManager: NSTextContentManager
 
     /// The text view's text container
     public let textContainer: NSTextContainer
@@ -291,12 +291,12 @@ open class STTextView: NSView, NSTextInput {
     override public init(frame frameRect: NSRect) {
         fragmentLayerMap = .weakToWeakObjects()
 
-        textContentStorage = STTextContentStorage()
+        textContentManager = STTextContentStorage()
         textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude)))
         textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = textContainer
-        textContentStorage.addTextLayoutManager(textLayoutManager)
-        textContentStorage.primaryTextLayoutManager = textLayoutManager
+        textContentManager.addTextLayoutManager(textLayoutManager)
+        textContentManager.primaryTextLayoutManager = textLayoutManager
 
         contentLayer = STCATiledLayer()
         contentLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
@@ -319,7 +319,7 @@ open class STTextView: NSView, NSTextInput {
         textFinderClient.textView = self
 
         // Set insert point at the very beginning
-        setSelectedRange(NSTextRange(location: textContentStorage.documentRange.location))
+        setSelectedRange(NSTextRange(location: textContentManager.documentRange.location))
 
         postsBoundsChangedNotifications = true
         postsFrameChangedNotifications = true
@@ -462,7 +462,7 @@ open class STTextView: NSView, NSTextInput {
                 // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
                 // therefore for empty override height with value manually calculated from font + paragraph style
                 var selectionFrame: NSRect = textSegmentFrame
-                if segmentRange == textContentStorage.documentRange {
+                if segmentRange == textContentManager.documentRange {
                     selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
                 }
 
@@ -510,8 +510,8 @@ open class STTextView: NSView, NSTextInput {
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
-        textContentStorage.performEditingTransaction {
-            textContentStorage.textStorage?.addAttributes(attrs, range: range)
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: range)
         }
 
         if updateLayout {
@@ -521,8 +521,8 @@ open class STTextView: NSView, NSTextInput {
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
-        textContentStorage.performEditingTransaction {
-            textContentStorage.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentStorage))
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
 
         if updateLayout {
@@ -532,11 +532,11 @@ open class STTextView: NSView, NSTextInput {
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     public func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
-        textContentStorage.performEditingTransaction {
-            textContentStorage.textStorage?.setAttributes(attrs, range: range)
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: range)
         }
         // This doesn't work
-        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentStorage)!)
+        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
 
         if updateLayout {
@@ -546,11 +546,11 @@ open class STTextView: NSView, NSTextInput {
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     public func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
-        textContentStorage.performEditingTransaction {
-            textContentStorage.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentStorage))
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
         // This doesn't work
-        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentStorage)!)
+        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
         if updateLayout {
             needsLayout = true
@@ -559,11 +559,11 @@ open class STTextView: NSView, NSTextInput {
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     public func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
-        textContentStorage.performEditingTransaction {
-            textContentStorage.textStorage?.removeAttribute(attribute, range: range)
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: range)
         }
         // This doesn't work
-        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentStorage)!)
+        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
 
         if updateLayout {
@@ -573,11 +573,11 @@ open class STTextView: NSView, NSTextInput {
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     public func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
-        textContentStorage.performEditingTransaction {
-            textContentStorage.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentStorage))
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
         }
         // This doesn't work
-        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentStorage)!)
+        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
         if updateLayout {
             needsLayout = true
@@ -778,7 +778,7 @@ open class STTextView: NSView, NSTextInput {
                     // Extend existing coalesce range
                     if let coalescingValue = undoManager.coalescing?.value,
                        textRange.location == coalescingValue.textRange.endLocation,
-                       let undoEndLocation = textContentStorage.location(textRange.location, offsetBy: replacementString.string.utf16.count),
+                       let undoEndLocation = textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count),
                        let undoTextRange = NSTextRange(location: coalescingValue.textRange.location, end: undoEndLocation)
                     {
                         undoManager.coalesce(TypingTextUndo(
@@ -794,10 +794,10 @@ open class STTextView: NSView, NSTextInput {
                 if !undoManager.isCoalescing {
                     let undoRange = NSTextRange(
                         location: textRange.location,
-                        end: textContentStorage.location(textRange.location, offsetBy: replacementString.string.utf16.count)
+                        end: textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count)
                     ) ?? textRange
 
-                    let previousStringInRange = textContentStorage.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentStorage))
+                    let previousStringInRange = (textContentManager as? NSTextContentStorage)?.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
 
                     let startTypingUndo = TypingTextUndo(
                         textRange: undoRange,
@@ -820,10 +820,10 @@ open class STTextView: NSView, NSTextInput {
                 // A range that is as long as replacement string, so when undo it undo
                 let undoRange = NSTextRange(
                     location: textRange.location,
-                    end: textContentStorage.location(textRange.location, offsetBy: replacementString.string.utf16.count)
+                    end: textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count)
                 ) ?? textRange
 
-                let previousStringInRange = textContentStorage.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentStorage))
+                let previousStringInRange = (textContentManager as! NSTextContentStorage).textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
 
                 // Register undo/redo
                 // I can't control internal redoStack, and coalescing messes up with the state
@@ -842,8 +842,8 @@ open class STTextView: NSView, NSTextInput {
         willChangeText()
         delegate?.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
-        textContentStorage.performEditingTransaction {
-            textContentStorage.replaceContents(
+        textContentManager.performEditingTransaction {
+            textContentManager.replaceContents(
                 in: textRange,
                 with: [NSTextParagraph(attributedString: replacementString)]
             )

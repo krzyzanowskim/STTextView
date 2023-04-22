@@ -8,7 +8,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
     weak var textView: STTextView?
 
     private var textContentManager: NSTextContentManager? {
-        textView?.textContentStorage
+        textView?.textContentManager
     }
 
     var string: String {
@@ -125,13 +125,13 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
             return textView!
         }
 
-        outRange.pointee = NSRange(viewportRange, in: textView.textContentStorage)
+        outRange.pointee = NSRange(viewportRange, in: textView.textContentManager)
         return textView
     }
 
     func drawCharacters(in range: NSRange, forContentView view: NSView) {
         guard let textView = view as? STTextView,
-              let textRange = NSTextRange(range, in: textView.textContentStorage),
+              let textRange = NSTextRange(range, in: textView.textContentManager),
               let context = NSGraphicsContext.current?.cgContext
         else {
             assertionFailure()

@@ -6,7 +6,7 @@ import Cocoa
 extension STTextView {
 
     @objc open func copy(_ sender: Any?) {
-        if textLayoutManager.textSelections.isEmpty, let documentString = textContentStorage.attributedString?.string, !documentString.isEmpty {
+        if textLayoutManager.textSelections.isEmpty, let documentString = textContentManager.attributedString?.string, !documentString.isEmpty {
             updatePasteboard(with: documentString)
         } else if !textLayoutManager.textSelections.isEmpty {
             if let textSelectionsString = textLayoutManager.textSelectionsString(), !textSelectionsString.isEmpty {
@@ -50,7 +50,7 @@ extension STTextView {
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) {
             // "replaceContents" doesn't work with NSTextContentStorage at all
             // textLayoutManager.replaceContents(in: textRange, with: NSAttributedString())
-            let nsrange = NSRange(textRange, in: textContentStorage)
+            let nsrange = NSRange(textRange, in: textContentManager)
             insertText("", replacementRange: nsrange)
         }
     }
