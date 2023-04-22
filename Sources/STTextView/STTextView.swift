@@ -50,7 +50,7 @@ open class STTextView: NSView, NSTextInput {
     open var insertionPointWidth: CGFloat = 1.0
 
     /// The font of the text view.
-    public var font: NSFont? {
+    @objc public var font: NSFont? {
         get {
             typingAttributes[.font] as? NSFont
         }
@@ -62,7 +62,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// The text color of the text view.
-    public var textColor: NSColor? {
+    @objc public var textColor: NSColor? {
         get {
             typingAttributes[.foregroundColor] as? NSColor
         }
@@ -271,10 +271,17 @@ open class STTextView: NSView, NSTextInput {
 
     open override class var defaultMenu: NSMenu? {
         let menu = super.defaultMenu ?? NSMenu()
+
+        let pasteAsPlainText = NSMenuItem(title: NSLocalizedString("Paste and Match Style", comment: ""), action: #selector(pasteAsPlainText(_:)), keyEquivalent: "V")
+        pasteAsPlainText.keyEquivalentModifierMask = [.option, .command, .shift]
+
         menu.items = [
             NSMenuItem(title: NSLocalizedString("Cut", comment: ""), action: #selector(cut(_:)), keyEquivalent: "x"),
             NSMenuItem(title: NSLocalizedString("Copy", comment: ""), action: #selector(copy(_:)), keyEquivalent: "c"),
-            NSMenuItem(title: NSLocalizedString("Paste", comment: ""), action: #selector(paste(_:)), keyEquivalent: "v")
+            NSMenuItem(title: NSLocalizedString("Paste", comment: ""), action: #selector(paste(_:)), keyEquivalent: "v"),
+            pasteAsPlainText,
+            NSMenuItem.separator(),
+            NSMenuItem(title: NSLocalizedString("Select All", comment: ""), action: #selector(selectAll(_:)), keyEquivalent: "a"),
         ]
         return menu
     }

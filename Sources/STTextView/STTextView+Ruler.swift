@@ -6,7 +6,7 @@ import Cocoa
 extension STTextView {
 
     /// This action method shows or hides the ruler, if the receiver is enclosed in a scroll view.
-    public func toggleRuler(_ sender: Any?) {
+    @objc public func toggleRuler(_ sender: Any?) {
         isRulerVisible.toggle()
     }
 

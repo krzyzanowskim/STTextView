@@ -20,7 +20,7 @@ extension STTextView: NSUserInterfaceValidations {
             return !textContentStorage.documentRange.isEmpty && !selectedRange().isEmpty
         case #selector(selectAll(_:)):
             return !textContentStorage.documentRange.isEmpty
-        case #selector(paste(_:)):
+        case #selector(paste(_:)), #selector(pasteAsPlainText(_:)):
             return isEditable && NSPasteboard.general.canReadItem(withDataConformingToTypes: [UTType.plainText.identifier])
         case #selector(undo(_:)):
             let result = allowsUndo ? undoManager?.canUndo ?? false : false
