@@ -26,9 +26,15 @@ final class ViewController: NSViewController {
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 
-        textView.addAttributes([.foregroundColor: NSColor.systemBlue], range: NSRange(location: 0, length: 1))
-        textView.addAttributes([.foregroundColor: NSColor.systemRed], range: NSRange(location: 2, length: 10))
-        textView.addAttributes([.foregroundColor: NSColor.controlAccentColor, .font: NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)], range: NSRange(location: 18, length: 4))
+        // highlight STTextView
+        do {
+            var currentRange = textView.string.startIndex..<textView.string.endIndex
+            while let range = textView.string.range(of: "STTextView", range: currentRange) {
+                textView.addAttributes([.foregroundColor: NSColor.systemGray], range: NSRange(range, in: textView.string))
+                currentRange = range.upperBound..<currentRange.upperBound
+            }
+        }
+        textView.addAttributes([.foregroundColor: NSColor.black, .font: textView.font!.bold], range: NSRange(location: 0, length: 20))
 
         textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true
@@ -184,5 +190,15 @@ private extension NSColor {
             saturation: max(color.saturationComponent - value, 0.0),
             brightness: color.brightnessComponent,
             alpha: color.alphaComponent)
+    }
+}
+
+private extension NSFont {
+    var bold: NSFont {
+        NSFont(descriptor: fontDescriptor.withSymbolicTraits(.bold), size: 0)!
+    }
+
+    var italic: NSFont {
+        NSFont(descriptor: fontDescriptor.withSymbolicTraits(.italic), size: 0)!
     }
 }
