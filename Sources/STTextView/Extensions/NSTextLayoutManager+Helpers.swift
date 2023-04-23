@@ -36,6 +36,20 @@ extension NSTextLayoutManager {
         }
     }
 
+    func textSelectionsAttributedString() -> NSAttributedString? {
+        let attributedString = textSelections.flatMap(\.textRanges).reduce(NSMutableAttributedString()) { partialResult, range in
+            if let attributedString = textContentManager?.attributedString(in: range) {
+                partialResult.append(attributedString)
+            }
+            return partialResult
+        }
+
+        if attributedString.length == 0 {
+            return nil
+        }
+        return attributedString
+    }
+
     ///  A text segment is both logically and visually contiguous portion of the text content inside a line fragment.
     public func textSelectionSegmentFrame(at location: NSTextLocation, type: NSTextLayoutManager.SegmentType) -> CGRect? {
         textSelectionSegmentFrame(in: NSTextRange(location: location), type: type)

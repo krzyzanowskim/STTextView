@@ -117,7 +117,7 @@ open class STTextView: NSView, NSTextInput {
             }
         }
         get {
-            (textContentManager as? NSTextContentStorage)?.attributedString?.string ?? ""
+            textContentManager.documentString
         }
     }
 
@@ -797,7 +797,7 @@ open class STTextView: NSView, NSTextInput {
                         end: textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count)
                     ) ?? textRange
 
-                    let previousStringInRange = (textContentManager as? NSTextContentStorage)?.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
+                    let previousStringInRange = (textContentManager as? NSTextContentStorage)!.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
 
                     let startTypingUndo = TypingTextUndo(
                         textRange: undoRange,

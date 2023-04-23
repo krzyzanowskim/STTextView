@@ -6,11 +6,11 @@ import Cocoa
 extension STTextView {
 
     @objc open func copy(_ sender: Any?) {
-        if textLayoutManager.textSelections.isEmpty, let documentString = (textContentManager as? NSTextContentStorage)?.attributedString {
-            updatePasteboard(with: documentString)
+        if textLayoutManager.textSelections.isEmpty, let attributedString = textContentManager.attributedString(in: nil) {
+            updatePasteboard(with: attributedString)
         } else if !textLayoutManager.textSelections.isEmpty {
-            if let textSelectionsString = textLayoutManager.textSelectionsString(), !textSelectionsString.isEmpty {
-                updatePasteboard(with: textSelectionsString)
+            if let textSelectionsAttributedString = textLayoutManager.textSelectionsAttributedString() {
+                updatePasteboard(with: textSelectionsAttributedString)
             }
         }
     }
