@@ -15,22 +15,27 @@ import Cocoa
 /// A TextKit2 text view without NSTextView baggage
 open class STTextView: NSView, NSTextInput {
 
-    public static let willChangeTextNotification = NSNotification.Name("NSTextWillChangeNotification")
-    public static let didChangeTextNotification = NSText.didChangeNotification
+    /// Posted before an object performs any operation that changes characters or formatting attributes.
+    public static let textWillChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
+
+    /// Posted after an object performs any operation that changes characters or formatting attributes.
+    public static let textDidChangeNotification = NSText.didChangeNotification
+
+    /// Posted when the selected range of characters changes.
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
     /// Returns the type of layer used by the receiver.
     open var insertionPointLayerClass = STInsertionPointLayer.self
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
-    open var isEditable: Bool {
+    @objc dynamic open var isEditable: Bool {
         didSet {
             isSelectable = isEditable
         }
     }
 
     /// A Boolean value that controls whether the text views allows the user to select text.
-    open var isSelectable: Bool {
+    @objc dynamic open var isSelectable: Bool {
         didSet {
             updateInsertionPointStateAndRestartTimer()
             window?.invalidateCursorRects(for: self)
@@ -44,13 +49,13 @@ open class STTextView: NSView, NSTextInput {
 
     /// The color of the insertion point.
     @Invalidating(.display)
-    open var insertionPointColor: NSColor = .textColor
+    @objc dynamic open var insertionPointColor: NSColor = .textColor
 
     /// The width of the insertion point.
-    open var insertionPointWidth: CGFloat = 1.0
+    @objc dynamic open var insertionPointWidth: CGFloat = 1.0
 
     /// The font of the text view.
-    @objc public var font: NSFont? {
+    @objc dynamic public var font: NSFont? {
         get {
             typingAttributes[.font] as? NSFont
         }
@@ -62,7 +67,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// The text color of the text view.
-    @objc public var textColor: NSColor? {
+    @objc dynamic public var textColor: NSColor? {
         get {
             typingAttributes[.foregroundColor] as? NSColor
         }
@@ -74,7 +79,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// The text view’s default paragraph style.
-    public var defaultParagraphStyle: NSParagraphStyle? {
+    @objc dynamic public var defaultParagraphStyle: NSParagraphStyle? {
         get {
             typingAttributes[.paragraphStyle] as? NSParagraphStyle
         }
@@ -85,7 +90,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// The text view's typing attributes
-    public var typingAttributes: [NSAttributedString.Key: Any] {
+    @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
             needsLayout = true
             needsDisplay = true
@@ -124,7 +129,7 @@ open class STTextView: NSView, NSTextInput {
     /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
     ///
     /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.
-    public var widthTracksTextView: Bool {
+    @objc dynamic public var widthTracksTextView: Bool {
         set {
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
@@ -148,21 +153,21 @@ open class STTextView: NSView, NSTextInput {
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
     @Invalidating(.display)
-    open var highlightSelectedLine: Bool = false
+    @objc dynamic open var highlightSelectedLine: Bool = false
 
     /// The highlight color of the selected line.
     ///
     /// Note: Needs ``highlightSelectedLine`` to be set to `true`
     @Invalidating(.display)
-    open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
+    @objc dynamic open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
 
     /// The background color of a text selection.
     @Invalidating(.display)
-    open var selectionBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor
+    @objc dynamic open var selectionBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor
 
     /// The text view's background color
     @Invalidating(.display)
-    open var backgroundColor: NSColor? = nil {
+    @objc dynamic open var backgroundColor: NSColor? = nil {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
         }
@@ -171,7 +176,7 @@ open class STTextView: NSView, NSTextInput {
     /// A Boolean value that indicates whether the receiver allows undo.
     ///
     /// `true` if the receiver allows undo, otherwise `false`. Default `true`.
-    open var allowsUndo: Bool
+    @objc dynamic open var allowsUndo: Bool
     internal var _undoManager: UndoManager?
 
     struct MarkedText {
@@ -210,7 +215,7 @@ open class STTextView: NSView, NSTextInput {
     }()
 
     /// Text line annotation views
-    public var annotations: [STLineAnnotation] = [] {
+    @objc dynamic public var annotations: [STLineAnnotation] = [] {
         didSet {
             needsAnnotationsLayout = true
         }
@@ -220,6 +225,16 @@ open class STTextView: NSView, NSTextInput {
     public let textFinder: NSTextFinder
 
     internal let textFinderClient: STTextFinderClient
+
+    /// A Boolean value that indicates whether incremental searching is enabled.
+    public var isIncrementalSearchingEnabled: Bool {
+        get {
+            textFinder.isIncrementalSearchingEnabled
+        }
+        set {
+            textFinder.isIncrementalSearchingEnabled = newValue
+        }
+    }
 
     /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
     internal var needsScrollToSelection: Bool = false {
@@ -740,20 +755,20 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    open func willChangeText() {
+    open func textWillChange(_ sender: Any?) {
         if textFinder.isIncrementalSearchingEnabled {
             textFinder.noteClientStringWillChange()
         }
 
-        let notification = Notification(name: STTextView.willChangeTextNotification, object: self, userInfo: nil)
+        let notification = Notification(name: STTextView.textWillChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         delegate?.textViewWillChangeText(notification)
     }
 
-    open func didChangeText() {
+    open func textDidChange(_ sender: Any?) {
         needsScrollToSelection = true
 
-        let notification = Notification(name: STTextView.didChangeTextNotification, object: self, userInfo: nil)
+        let notification = Notification(name: STTextView.textDidChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         delegate?.textViewDidChangeText(notification)
         Yanking.shared.textChanged()
@@ -839,7 +854,7 @@ open class STTextView: NSView, NSTextInput {
             }
         }
 
-        willChangeText()
+        textWillChange(self)
         delegate?.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
         textContentManager.performEditingTransaction {
@@ -850,7 +865,7 @@ open class STTextView: NSView, NSTextInput {
         }
 
         delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
-        didChangeText()
+        textDidChange(self)
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
