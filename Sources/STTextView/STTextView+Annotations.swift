@@ -7,9 +7,6 @@ import Cocoa
 /// Usually work with subclass that carry more information about the annotation
 /// needed for the annotation view
 open class STLineAnnotation: NSObject {
-
-    internal var view: NSView?
-
     /// Location in content storage
     public let location: NSTextLocation
 
@@ -26,32 +23,40 @@ extension STTextView {
     }
 
     public func removeAnnotation(_ annotations: STLineAnnotation...) {
-        self.annotations.removeAll {
-            annotations.contains($0)
+        for annotation in annotations {
+            annotationViewMap.object(forKey: annotation)?.removeFromSuperview()
+            annotationViewMap.removeObject(forKey: annotation)
         }
-        needsAnnotationsLayout = true
+
+        self.annotations.removeAll { annotation in
+            annotations.contains(annotation)
+        }
     }
 
     public func removeAllAnnotations() {
+        for annotation in self.annotations {
+            annotationViewMap.object(forKey: annotation)?.removeFromSuperview()
+            annotationViewMap.removeObject(forKey: annotation)
+        }
         annotations.removeAll(keepingCapacity: true)
-        needsAnnotationsLayout = true
     }
 
-    internal func updateLineAnnotationViews() {
-        let lineAnnotations = annotations
-            .filter { lineAnnotation in
-                textLayoutManager.textViewportLayoutController.viewportRange?.contains(lineAnnotation.location) ?? false
-            }
+    internal func layoutAnnotationViews() {
+        guard let delegate = delegate else {
+            return
+        }
 
-        if let delegate = delegate {
-            for lineAnnotation in lineAnnotations {
-                if let textLineFragment = textLayoutManager.textLineFragment(at: lineAnnotation.location) {
-                    textLayoutManager.ensureLayout(for: NSTextRange(location: lineAnnotation.location))
-                    lineAnnotation.view = delegate.textView(self, viewForLineAnnotation: lineAnnotation, textLineFragment: textLineFragment)
+        for annotation in self.annotations {
+            textLayoutManager.ensureLayout(for: NSTextRange(location: annotation.location))
+            if let textLineFragment = textLayoutManager.textLineFragment(at: annotation.location) {
+                if let annotationView = delegate.textView(self, viewForLineAnnotation: annotation, textLineFragment: textLineFragment) {
+                    annotationViewMap.object(forKey: annotation)?.removeFromSuperview()
+                    annotationViewMap.setObject(annotationView, forKey: annotation)
+                    addSubview(annotationView)
+                } else {
+                    assertionFailure()
                 }
             }
         }
-
-        subviews = lineAnnotations.compactMap(\.view)
     }
 }

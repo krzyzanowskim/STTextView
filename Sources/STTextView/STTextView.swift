@@ -221,6 +221,8 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    internal var annotationViewMap: NSMapTable<STLineAnnotation, NSView>
+
     /// Search-and-replace find interface inside a view.
     public let textFinder: NSTextFinder
 
@@ -245,9 +247,11 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    internal var needsAnnotationsLayout: Bool = false {
+    internal var needsAnnotationsLayout: Bool = true {
         didSet {
-            needsLayout = true
+            if needsAnnotationsLayout == true {
+                needsLayout = true
+            }
         }
     }
 
@@ -305,6 +309,7 @@ open class STTextView: NSView, NSTextInput {
     /// - Parameter frameRect: The frame rectangle of the text view.
     override public init(frame frameRect: NSRect) {
         fragmentLayerMap = .weakToWeakObjects()
+        annotationViewMap = .weakToWeakObjects()
 
         textContentManager = STTextContentStorage()
         textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude)))
@@ -699,6 +704,7 @@ open class STTextView: NSView, NSTextInput {
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         updateTextContainerSizeIfNeeded()
+        layoutAnnotationViews()
     }
 
     open override func viewDidEndLiveResize() {
@@ -719,12 +725,8 @@ open class STTextView: NSView, NSTextInput {
         needsScrollToSelection = false
 
         if needsAnnotationsLayout {
-            Task { @MainActor in
-                // A workaround (temporary) to escape layout()
-                // and layout annotations right after layout
-                updateLineAnnotationViews()
-            }
             needsAnnotationsLayout = false
+            layoutAnnotationViews()
         }
     }
 
