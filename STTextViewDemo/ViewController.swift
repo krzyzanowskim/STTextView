@@ -26,15 +26,31 @@ final class ViewController: NSViewController {
         textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 
-        // highlight STTextView
+        // highlight occurence of STTextView
         do {
             var currentRange = textView.string.startIndex..<textView.string.endIndex
-            while let range = textView.string.range(of: "STTextView", range: currentRange) {
-                textView.addAttributes([.foregroundColor: NSColor.systemGray], range: NSRange(range, in: textView.string))
-                currentRange = range.upperBound..<currentRange.upperBound
+            while let ocurrenceRange = textView.string.range(of: "STTextView", range: currentRange) {
+                textView.addAttributes([.foregroundColor: NSColor.controlAccentColor], range: NSRange(ocurrenceRange, in: textView.string))
+
+                let characterLocationOffset = textView.string.distance(from: textView.string.startIndex, to: ocurrenceRange.upperBound)
+                let annotation = LineAnnotation(
+                    message: "ready!",
+                    location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: characterLocationOffset)!
+                )
+                textView.addAnnotation(annotation)
+
+                currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
             }
         }
-        textView.addAttributes([.foregroundColor: NSColor.black, .font: textView.font!.bold], range: NSRange(location: 0, length: 20))
+
+        // Emphasize first line
+        textView.addAttributes(
+            [
+                .foregroundColor: NSColor.controlAccentColor,
+                .font: NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize * 1.2, weight: .bold)
+            ],
+            range: NSRange(textView.string.linesRanges().first!, in: textView.string)
+        )
 
         textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true
@@ -58,18 +74,6 @@ final class ViewController: NSViewController {
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-
-        let lineAnnotation1 = MyLineAnnotation(
-            message: "That's the goal",
-            location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 22)!
-        )
-        textView.addAnnotation(lineAnnotation1)
-
-        let lineAnnotation2 = MyLineAnnotation(
-            message: "Fix It!",
-            location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: 550)!
-        )
-        textView.addAnnotation(lineAnnotation2)
     }
 
     @IBAction func toggleTextWrapMode(_ sender: Any?) {
@@ -82,14 +86,7 @@ final class ViewController: NSViewController {
 
 }
 
-class MyLineAnnotation: STLineAnnotation {
-    let message: String
-
-    init(message: String, location: NSTextLocation) {
-        self.message = message
-        super.init(location: location)
-    }
-}
+// MARK: - STTextViewDelegate
 
 extension ViewController: STTextViewDelegate {
 
@@ -98,7 +95,7 @@ extension ViewController: STTextViewDelegate {
     }
 
     func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STLineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
-        guard let myLineAnnotation = lineAnnotation as? MyLineAnnotation else {
+        guard let myLineAnnotation = lineAnnotation as? LineAnnotation else {
             return nil
         }
 
@@ -122,8 +119,8 @@ extension ViewController: STTextViewDelegate {
         let annotationHeight = min(textLineFragment.typographicBounds.height, textView.font?.boundingRectForFont.height ?? 24)
 
         decorationView.frame = CGRect(
-            x: segmentFrame.origin.x,
-            y: segmentFrame.origin.y + (segmentFrame.height - annotationHeight),
+            x: segmentFrame.maxX,
+            y: segmentFrame.minY + (segmentFrame.height - annotationHeight),
             width: textView.bounds.width - segmentFrame.maxX,
             height: annotationHeight
         )
@@ -145,60 +142,20 @@ extension ViewController: STTextViewDelegate {
     }
 }
 
-private struct AnnotationLabelView: View {
-    let message: String
-    let action: (STLineAnnotation) -> Void
-    let lineAnnotation: STLineAnnotation
-
-    var body: some View {
-        Label {
-            Text(message)
-                .foregroundColor(.black)
-        } icon: {
-            Button {
-                action(lineAnnotation)
-            } label: {
-                ZStack {
-                    // the way it draws bothers me
-                    // https://twitter.com/krzyzanowskim/status/1527723492002643969
-                    Image(systemName: "octagon")
-                        .symbolVariant(.fill)
-                        .foregroundStyle(.red)
-
-                    Image(systemName: "xmark.octagon")
-                        .foregroundStyle(.white)
-                }
-                .shadow(radius: 1)
+private extension StringProtocol {
+    func linesRanges() -> [Range<String.Index>] {
+        var ranges: [Range<String.Index>] = []
+        let stringRange = startIndex..<endIndex
+        var currentIndex = startIndex
+        while true {
+            let lineRange = lineRange(for: currentIndex..<currentIndex)
+            ranges.append(lineRange)
+            if !stringRange.overlaps(lineRange) {
+                break
             }
-            .buttonStyle(.plain)
+            currentIndex = lineRange.upperBound
         }
-        .background(Color.yellow)
-        .clipShape(RoundedRectangle(cornerRadius:4))
+        return ranges
     }
 }
 
-
-private extension NSColor {
-
-    func lighter(withLevel value: CGFloat = 0.3) -> NSColor {
-        guard let color = usingColorSpace(.deviceRGB) else {
-            return self
-        }
-
-        return NSColor(
-            hue: color.hueComponent,
-            saturation: max(color.saturationComponent - value, 0.0),
-            brightness: color.brightnessComponent,
-            alpha: color.alphaComponent)
-    }
-}
-
-private extension NSFont {
-    var bold: NSFont {
-        NSFont(descriptor: fontDescriptor.withSymbolicTraits(.bold), size: 0)!
-    }
-
-    var italic: NSFont {
-        NSFont(descriptor: fontDescriptor.withSymbolicTraits(.italic), size: 0)!
-    }
-}
