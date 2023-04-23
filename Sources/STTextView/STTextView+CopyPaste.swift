@@ -18,12 +18,9 @@ extension STTextView {
 
     @objc open func paste(_ sender: Any?) {
         let pasteboard = NSPasteboard.general
-        if pasteboard.canReadItem(withDataConformingToTypes: [UTType.rtf.identifier]), let attributedString = pasteboard.readObjects(forClasses: [NSAttributedString.self])?.first as? NSAttributedString {
-            replaceCharacters(
-                in: textLayoutManager.textSelections.flatMap(\.textRanges),
-                with: attributedString,
-                allowsTypingCoalescing: false
-            )
+
+        if pasteboard.canReadItem(withDataConformingToTypes: [UTType.rtf.identifier]) {
+            pasteAsRichText(sender)
         } else if pasteboard.canReadItem(withDataConformingToTypes: [UTType.plainText.identifier]) {
             pasteAsPlainText(sender)
         }
@@ -40,6 +37,17 @@ extension STTextView {
             useTypingAttributes: true,
             allowsTypingCoalescing: false
         )
+    }
+
+    @objc func pasteAsRichText(_ sender: Any?) {
+        let pasteboard = NSPasteboard.general
+        if pasteboard.canReadItem(withDataConformingToTypes: [UTType.rtf.identifier]), let attributedString = pasteboard.readObjects(forClasses: [NSAttributedString.self])?.first as? NSAttributedString {
+            replaceCharacters(
+                in: textLayoutManager.textSelections.flatMap(\.textRanges),
+                with: attributedString,
+                allowsTypingCoalescing: false
+            )
+        }
     }
 
     @objc open func cut(_ sender: Any?) {
