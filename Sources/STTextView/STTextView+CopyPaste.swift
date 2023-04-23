@@ -24,13 +24,8 @@ extension STTextView {
                 with: attributedString,
                 allowsTypingCoalescing: false
             )
-        } else if pasteboard.canReadItem(withDataConformingToTypes: [UTType.plainText.identifier]), let string = pasteboard.string(forType: .string) {
-            replaceCharacters(
-                in: textLayoutManager.textSelections.flatMap(\.textRanges),
-                with: string,
-                useTypingAttributes: true,
-                allowsTypingCoalescing: false
-            )
+        } else if pasteboard.canReadItem(withDataConformingToTypes: [UTType.plainText.identifier]) {
+            pasteAsPlainText(sender)
         }
     }
 
