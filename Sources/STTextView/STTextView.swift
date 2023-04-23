@@ -117,7 +117,7 @@ open class STTextView: NSView, NSTextInput {
             setString(newValue)
 
             // restore selection location
-            if let prevLocation {
+            if let prevLocation = prevLocation {
                 setSelectedRange(NSTextRange(location: prevLocation))
             }
         }
@@ -515,16 +515,16 @@ open class STTextView: NSView, NSTextInput {
 
         if case .some(let string) = string {
             switch string {
-            case is NSAttributedString:
-                insertText(string as! NSAttributedString, replacementRange: NSRange.notFound)
-            case is String:
-                insertText(NSAttributedString(string: string as! String, attributes: typingAttributes), replacementRange: NSRange.notFound)
+            case let attributedString as NSAttributedString:
+                replaceCharacters(in: textContentManager.documentRange, with: attributedString, allowsTypingCoalescing: false)
+            case let string as String:
+                replaceCharacters(in: textContentManager.documentRange, with: string)
             default:
                 assertionFailure()
                 return
             }
         } else if case .none = string {
-            insertText("", replacementRange: NSRange.notFound)
+            replaceCharacters(in: textContentManager.documentRange, with: "")
         }
     }
 
@@ -605,7 +605,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     public func setSelectedRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
-        guard isSelectable else {
+        guard isSelectable, textRange.endLocation <= textContentManager.documentRange.endLocation else {
             return
         }
 

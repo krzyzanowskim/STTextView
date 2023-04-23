@@ -147,7 +147,7 @@ private extension StringProtocol {
         var ranges: [Range<String.Index>] = []
         let stringRange = startIndex..<endIndex
         var currentIndex = startIndex
-        while true {
+        while currentIndex < stringRange.upperBound {
             let lineRange = lineRange(for: currentIndex..<currentIndex)
             ranges.append(lineRange)
             if !stringRange.overlaps(lineRange) {

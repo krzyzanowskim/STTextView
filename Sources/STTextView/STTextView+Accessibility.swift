@@ -25,6 +25,14 @@ extension STTextView  {
         string
     }
 
+    open override func setAccessibilityValue(_ accessibilityValue: Any?) {
+        guard let string = accessibilityValue as? String else {
+            return
+        }
+
+        self.string = string
+    }
+
     open override func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
         attributedSubstring(forProposedRange: range, actualRange: nil)
     }
@@ -51,5 +59,13 @@ extension STTextView  {
 
     open override func accessibilitySelectedTextRange() -> NSRange {
         selectedRange()
+    }
+
+    open override func setAccessibilitySelectedTextRange(_ accessibilitySelectedTextRange: NSRange) {
+        if let textRange = NSTextRange(accessibilitySelectedTextRange, in: textContentManager) {
+            setSelectedRange(textRange)
+        } else {
+            assertionFailure()
+        }
     }
 }
