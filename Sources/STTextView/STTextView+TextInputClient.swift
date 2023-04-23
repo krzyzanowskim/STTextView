@@ -93,11 +93,11 @@ extension STTextView: NSTextInputClient {
     }
 
     public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
-        (textContentManager as? NSTextContentStorage)?.attributedString?.attributedSubstring(from: range)
+        textContentManager.attributedString(in: NSTextRange(range, in: textContentManager))
     }
 
     public func attributedString() -> NSAttributedString {
-        (textContentManager as? NSTextContentStorage)?.attributedString ?? NSAttributedString()
+        textContentManager.attributedString(in: nil) ?? NSAttributedString()
     }
 
     public func setAttributedString(_ attributedString: NSAttributedString) {
