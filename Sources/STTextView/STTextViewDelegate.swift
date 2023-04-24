@@ -26,8 +26,6 @@ public protocol STTextViewDelegate: AnyObject {
     func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
     /// Sent when a text view did change text.
     func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
-    /// View for annotaion
-    func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STLineAnnotation, textLineFragment: NSTextLineFragment) -> NSView?
 
     /// Allows delegate to control the context menu returned by the text view.
     /// - Parameters:
@@ -74,10 +72,6 @@ public extension STTextViewDelegate {
 
     func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
 
-    }
-
-    func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STLineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
-        nil
     }
 
     func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu? {

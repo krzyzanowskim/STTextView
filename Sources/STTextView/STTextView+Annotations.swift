@@ -17,44 +17,54 @@ open class STLineAnnotation: NSObject {
 
 extension STTextView {
 
-    public func addAnnotation(_ annotations: STLineAnnotation...) {
-        self.annotations.append(contentsOf: annotations)
-        needsAnnotationsLayout = true
+    // Reloads the rows and sections of the table view.
+    //
+    // Performs the layout for annotation views.
+    public func reloadData() {
+        layoutAnnotationViewsIfNeeded(forceLayout: true)
     }
 
-    public func removeAnnotation(_ annotations: STLineAnnotation...) {
-        for annotation in annotations {
-            annotationViewMap.object(forKey: annotation)?.removeFromSuperview()
-            annotationViewMap.removeObject(forKey: annotation)
-        }
-
-        self.annotations.removeAll { annotation in
-            annotations.contains(annotation)
-        }
-    }
-
-    public func removeAllAnnotations() {
-        for annotation in self.annotations {
-            annotationViewMap.object(forKey: annotation)?.removeFromSuperview()
-            annotationViewMap.removeObject(forKey: annotation)
-        }
-        annotations.removeAll(keepingCapacity: true)
-    }
-
-    internal func layoutAnnotationViews() {
-        guard let delegate = delegate else {
+    /// Layout annotations views if annotations changed since last time.
+    ///
+    /// Called from layout()
+    internal func layoutAnnotationViewsIfNeeded(forceLayout: Bool = false) {
+        guard let dataSource = dataSource else {
             return
         }
 
-        for annotation in self.annotations {
-            textLayoutManager.ensureLayout(for: NSTextRange(location: annotation.location))
-            if let textLineFragment = textLayoutManager.textLineFragment(at: annotation.location) {
-                if let annotationView = delegate.textView(self, viewForLineAnnotation: annotation, textLineFragment: textLineFragment) {
-                    annotationViewMap.object(forKey: annotation)?.removeFromSuperview()
-                    annotationViewMap.setObject(annotationView, forKey: annotation)
-                    addSubview(annotationView)
-                } else {
-                    assertionFailure()
+        let oldAnnotations = {
+            var result: [STLineAnnotation] = []
+            result.reserveCapacity(self.annotationViewMap.count)
+
+            let enumerator = self.annotationViewMap.keyEnumerator()
+            while let key = enumerator.nextObject() as? STLineAnnotation {
+                result.append(key)
+            }
+            return result
+        }()
+
+        let newAnnotations = dataSource.textViewAnnotations(self)
+        let change = Set(oldAnnotations).symmetricDifference(Set(newAnnotations))
+        if forceLayout || !change.isEmpty {
+
+            for element in change {
+                if oldAnnotations.contains(element) {
+                    annotationViewMap.object(forKey: element)?.removeFromSuperview()
+                    annotationViewMap.removeObject(forKey: element)
+                }
+            }
+
+            for annotation in newAnnotations {
+                textLayoutManager.ensureLayout(for: NSTextRange(location: annotation.location))
+                if let textLineFragment = textLayoutManager.textLineFragment(at: annotation.location) {
+                    if let annotationView = dataSource.textView(self, viewForLineAnnotation: annotation, textLineFragment: textLineFragment) {
+                        // Set or Update view
+                        annotationViewMap.object(forKey: annotation)?.removeFromSuperview()
+                        annotationViewMap.setObject(annotationView, forKey: annotation)
+                        addSubview(annotationView)
+                    } else {
+                        assertionFailure()
+                    }
                 }
             }
         }

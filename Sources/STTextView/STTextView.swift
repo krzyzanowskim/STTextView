@@ -192,6 +192,7 @@ open class STTextView: NSView, NSTextInput {
 
     /// The delegate for all text views sharing the same layout manager.
     public weak var delegate: STTextViewDelegate?
+    public weak var dataSource: STTextViewDataSource?
 
     /// The manager that lays out text for the text view's text container.
     public let textLayoutManager: NSTextLayoutManager
@@ -219,18 +220,12 @@ open class STTextView: NSView, NSTextInput {
         return CompletionWindowController(viewController)
     }()
 
-    /// Text line annotation views
-    @objc dynamic public var annotations: [STLineAnnotation] = [] {
-        didSet {
-            needsAnnotationsLayout = true
-        }
-    }
-
     internal var annotationViewMap: NSMapTable<STLineAnnotation, NSView>
 
     /// Search-and-replace find interface inside a view.
     public let textFinder: NSTextFinder
 
+    /// NSTextFinderClient
     internal let textFinderClient: STTextFinderClient
 
     /// A Boolean value that indicates whether incremental searching is enabled.
@@ -247,14 +242,6 @@ open class STTextView: NSView, NSTextInput {
     internal var needsScrollToSelection: Bool = false {
         didSet {
             if needsScrollToSelection {
-                needsLayout = true
-            }
-        }
-    }
-
-    internal var needsAnnotationsLayout: Bool = true {
-        didSet {
-            if needsAnnotationsLayout == true {
                 needsLayout = true
             }
         }
@@ -314,7 +301,7 @@ open class STTextView: NSView, NSTextInput {
     /// - Parameter frameRect: The frame rectangle of the text view.
     override public init(frame frameRect: NSRect) {
         fragmentLayerMap = .weakToWeakObjects()
-        annotationViewMap = .weakToWeakObjects()
+        annotationViewMap = .strongToWeakObjects()
 
         textContentManager = STTextContentStorage()
         textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude)))
@@ -709,7 +696,7 @@ open class STTextView: NSView, NSTextInput {
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         updateTextContainerSizeIfNeeded()
-        layoutAnnotationViews()
+        layoutAnnotationViewsIfNeeded(forceLayout: true)
     }
 
     open override func viewDidEndLiveResize() {
@@ -726,13 +713,8 @@ open class STTextView: NSView, NSTextInput {
         }
 
         textLayoutManager.textViewportLayoutController.layoutViewport()
-
         needsScrollToSelection = false
-
-        if needsAnnotationsLayout {
-            needsAnnotationsLayout = false
-            layoutAnnotationViews()
-        }
+        layoutAnnotationViewsIfNeeded()
     }
 
     internal func scrollToSelection(_ selection: NSTextSelection) {
@@ -779,7 +761,6 @@ open class STTextView: NSView, NSTextInput {
         NotificationCenter.default.post(notification)
         delegate?.textViewDidChangeText(notification)
         Yanking.shared.textChanged()
-        needsAnnotationsLayout = true
         needsDisplay = true
     }
 
