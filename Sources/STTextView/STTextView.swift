@@ -761,6 +761,12 @@ open class STTextView: NSView, NSTextInput {
         NotificationCenter.default.post(notification)
         delegate?.textViewDidChangeText(notification)
         Yanking.shared.textChanged()
+
+        // Because annotation location position changed
+        // we need to reposition all views that may be
+        // affected by the text change
+        layoutAnnotationViewsIfNeeded(forceLayout: true)
+
         needsDisplay = true
     }
 
