@@ -196,6 +196,11 @@ open class STTextView: NSView, NSTextInput {
     /// The manager that lays out text for the text view's text container.
     public let textLayoutManager: NSTextLayoutManager
 
+    @available(*, deprecated, renamed: "textContentManager")
+    public var textContentStorage: NSTextContentStorage {
+        textContentManager as! NSTextContentStorage
+    }
+
     /// The text view's text storage object.
     public let textContentManager: NSTextContentManager
 
