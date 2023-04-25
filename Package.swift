@@ -13,7 +13,11 @@ let package = Package(
     dependencies: [],
     targets: [
         .target(
-            name: "STTextView",
-            dependencies: [])
+            name: "STTextView"
+        ),
+        .testTarget(
+            name: "STTextViewTests",
+            dependencies: ["STTextView"]
+        )
     ]
 )
