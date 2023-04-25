@@ -126,6 +126,15 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    public var attributedString: NSAttributedString {
+        get {
+            textContentManager.attributedString(in: nil) ?? NSAttributedString()
+        }
+        set {
+            setString(newValue)
+        }
+    }
+
     /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
     ///
     /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.

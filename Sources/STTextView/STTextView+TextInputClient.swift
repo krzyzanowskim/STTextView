@@ -96,12 +96,9 @@ extension STTextView: NSTextInputClient {
         textContentManager.attributedString(in: NSTextRange(range, in: textContentManager))
     }
 
-    public func attributedString() -> NSAttributedString {
+    @_implements(NSTextInputClient, attributedString())
+    public func attributedString_() -> NSAttributedString {
         textContentManager.attributedString(in: nil) ?? NSAttributedString()
-    }
-
-    public func setAttributedString(_ attributedString: NSAttributedString) {
-        setString(attributedString)
     }
 
     public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
