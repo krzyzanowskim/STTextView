@@ -126,6 +126,7 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    @nonobjc
     public var attributedString: NSAttributedString {
         get {
             textContentManager.attributedString(in: nil) ?? NSAttributedString()

@@ -96,6 +96,7 @@ extension STTextView: NSTextInputClient {
         textContentManager.attributedString(in: NSTextRange(range, in: textContentManager))
     }
 
+    @objc(attributedString)
     @_implements(NSTextInputClient, attributedString())
     public func attributedString_() -> NSAttributedString {
         textContentManager.attributedString(in: nil) ?? NSAttributedString()
