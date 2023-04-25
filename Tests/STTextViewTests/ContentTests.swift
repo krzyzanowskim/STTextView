@@ -36,4 +36,24 @@ class ContentTests : XCTestCase {
         XCTAssertEqual(textView.string.count, 0)
         XCTAssertEqual(textView.attributedString.length, 0)
     }
+
+    func testFontChange() {
+        let textView = STTextView()
+        XCTAssertNil(textView.font)
+        XCTAssertNil(textView.typingAttributes[.font])
+
+        textView.font = NSFont.systemFont(ofSize: 24)
+        XCTAssertNotNil(textView.font)
+        XCTAssertEqual(textView.font, NSFont.systemFont(ofSize: 24))
+        XCTAssertEqual(textView.typingAttributes[.font] as! NSFont, NSFont.systemFont(ofSize: 24))
+
+        textView.font = NSFont.systemFont(ofSize: 96)
+        XCTAssertNotNil(textView.font)
+        XCTAssertEqual(textView.font, NSFont.systemFont(ofSize: 96))
+        XCTAssertEqual(textView.typingAttributes[.font] as! NSFont, NSFont.systemFont(ofSize: 96))
+
+        textView.font = nil
+        XCTAssertNil(textView.font)
+        XCTAssertNil(textView.typingAttributes[.font])
+    }
 }
