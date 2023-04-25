@@ -499,7 +499,7 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    private func setString(_ string: Any?) {
+    internal func setString(_ string: Any?) {
         undoManager?.disableUndoRegistration()
         defer {
             undoManager?.enableUndoRegistration()
@@ -510,13 +510,13 @@ open class STTextView: NSView, NSTextInput {
             case let attributedString as NSAttributedString:
                 replaceCharacters(in: textContentManager.documentRange, with: attributedString, allowsTypingCoalescing: false)
             case let string as String:
-                replaceCharacters(in: textContentManager.documentRange, with: string)
+                replaceCharacters(in: textContentManager.documentRange, with: string, allowsTypingCoalescing: false)
             default:
                 assertionFailure()
                 return
             }
         } else if case .none = string {
-            replaceCharacters(in: textContentManager.documentRange, with: "")
+            replaceCharacters(in: textContentManager.documentRange, with: "", allowsTypingCoalescing: false)
         }
     }
 
@@ -806,7 +806,7 @@ open class STTextView: NSView, NSTextInput {
                         end: textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count)
                     ) ?? textRange
 
-                    let previousStringInRange = (textContentManager as? NSTextContentStorage)!.textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
+                    let previousStringInRange = (textContentManager as? NSTextContentStorage)!.attributedString!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
 
                     let startTypingUndo = TypingTextUndo(
                         textRange: undoRange,
@@ -832,7 +832,7 @@ open class STTextView: NSView, NSTextInput {
                     end: textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count)
                 ) ?? textRange
 
-                let previousStringInRange = (textContentManager as! NSTextContentStorage).textStorage!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
+                let previousStringInRange = (textContentManager as! NSTextContentStorage).attributedString!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
 
                 // Register undo/redo
                 // I can't control internal redoStack, and coalescing messes up with the state
@@ -862,16 +862,12 @@ open class STTextView: NSView, NSTextInput {
         textDidChange(self)
     }
 
-    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
+    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool = true, allowsTypingCoalescing: Bool = true) {
         self.replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]), allowsTypingCoalescing: allowsTypingCoalescing)
     }
 
     internal func replaceCharacters(in textRange: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
         self.replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]), allowsTypingCoalescing: allowsTypingCoalescing)
-    }
-
-    open func replaceCharacters(in textRange: NSTextRange, with replacementString: String) {
-        self.replaceCharacters(in: textRange, with: replacementString, useTypingAttributes: true, allowsTypingCoalescing: true)
     }
 
     /// Whenever text is to be changed due to some user-induced action,
