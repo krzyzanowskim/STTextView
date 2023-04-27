@@ -6,7 +6,7 @@ import Cocoa
 extension STTextView {
 
     @objc public func changeFont(_ sender: Any?) {
-        guard usesFontPanel, let fontManager = sender as? NSFontManager else {
+        guard isEditable, usesFontPanel, let fontManager = sender as? NSFontManager else {
             return
         }
 
