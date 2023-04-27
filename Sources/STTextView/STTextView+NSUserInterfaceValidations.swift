@@ -45,6 +45,8 @@ extension STTextView: NSUserInterfaceValidations {
             return speechSynthesizer.isSpeaking
         case #selector(startSpeaking(_:)):
             return !textContentManager.documentRange.isEmpty
+        case #selector(toggleRuler(_:)):
+            return usesRuler && enclosingScrollView?.hasHorizontalRuler == true || enclosingScrollView?.hasVerticalRuler == true
         default:
             return true
         }

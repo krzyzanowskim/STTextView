@@ -195,7 +195,7 @@ open class STTextView: NSView, NSTextInput {
         var replacementRange: NSRange
     }
 
-    var markedText: MarkedText? = nil
+    internal var markedText: MarkedText? = nil
 
     /// A flag
     internal var processingKeyEvent: Bool = false
@@ -247,6 +247,14 @@ open class STTextView: NSView, NSTextInput {
             textFinder.isIncrementalSearchingEnabled = newValue
         }
     }
+
+    /// A Boolean value that controls whether the text views sharing the receiver’s layout manager use the Font panel and Font menu.
+    public var usesFontPanel: Bool = true
+
+    /// A Boolean value that controls whether the text views sharing the receiver’s layout manager use a ruler.
+    ///
+    /// true to cause text views sharing the receiver's layout manager to respond to NSRulerView client messages and to paragraph-related menu actions, and update the ruler (when visible) as the selection changes with its paragraph and tab attributes, otherwise false.
+    public var usesRuler: Bool = true
 
     /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
     internal var needsScrollToSelection: Bool = false {
