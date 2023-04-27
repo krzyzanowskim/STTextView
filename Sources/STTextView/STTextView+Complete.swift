@@ -6,6 +6,9 @@ import Cocoa
 
 extension STTextView {
 
+    /// Supporting Autocomplete
+    ///
+    /// see NSStandardKeyBindingResponding
     open override func complete(_ sender: Any?) {
         if completionWindowController.isVisible {
             completionWindowController.close()
