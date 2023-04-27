@@ -14,9 +14,17 @@ extension STTextView {
             let newFont = fontManager.convert(currentTypingFont)
             if !textLayoutManager.insertionPointLocations.isEmpty {
                 typingAttributes[.font] = newFont
+
+                undoManager?.registerUndo(withTarget: self) { textView in
+                    textView.typingAttributes[.font] = currentTypingFont
+                }
             } else {
                 for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) where !textRange.isEmpty {
                     addAttributes([.font: newFont], range: textRange)
+
+                    undoManager?.registerUndo(withTarget: self) { textView in
+                        textView.addAttributes([.font: currentTypingFont], range: textRange)
+                    }
                 }
             }
         }
