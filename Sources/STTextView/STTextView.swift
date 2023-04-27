@@ -565,7 +565,7 @@ open class STTextView: NSView, NSTextInput {
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: range)
         }
-        // This doesn't work
+        // FB9692714 This doesn't work
         // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
 
@@ -579,7 +579,7 @@ open class STTextView: NSView, NSTextInput {
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
-        // This doesn't work
+        // FB9692714 This doesn't work
         // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
         if updateLayout {
@@ -592,7 +592,7 @@ open class STTextView: NSView, NSTextInput {
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: range)
         }
-        // This doesn't work
+        // FB9692714 This doesn't work
         // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
 
@@ -606,7 +606,7 @@ open class STTextView: NSView, NSTextInput {
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
         }
-        // This doesn't work
+        // FB9692714 This doesn't work
         // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
         if updateLayout {

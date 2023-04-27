@@ -14,16 +14,18 @@ extension STTextView {
             let newFont = fontManager.convert(currentTypingFont)
             if !textLayoutManager.insertionPointLocations.isEmpty {
                 typingAttributes[.font] = newFont
+            }
+        }
 
-                undoManager?.registerUndo(withTarget: self) { textView in
-                    textView.typingAttributes[.font] = currentTypingFont
-                }
-            } else {
-                for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) where !textRange.isEmpty {
-                    addAttributes([.font: newFont], range: textRange)
-
-                    undoManager?.registerUndo(withTarget: self) { textView in
-                        textView.addAttributes([.font: currentTypingFont], range: textRange)
+        // FB9692714: if rendering attribute would work, use this: textLayoutManager.enumerateRenderingAttributes(from: , reverse: , using: )
+        // Assumption: self.attributedString map 1:1 with the storage range. May or may not be true all the time (I can imagine it won't)
+        for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) where !textRange.isEmpty {
+            let selectionNSRange = NSRange(textRange, in: textContentManager)
+            attributedString.enumerateAttribute(.font, in: selectionNSRange, options: []) { value, runRange, stop in
+                if let currentFont = value as? NSFont {
+                    if let runTextRange = NSTextRange(runRange, in: textContentManager) {
+                        let newFont = fontManager.convert(currentFont)
+                        addAttributes([.font: newFont], range: runTextRange)
                     }
                 }
             }
