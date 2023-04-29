@@ -55,7 +55,7 @@ open class STTextView: NSView, NSTextInput {
     @objc dynamic open var insertionPointWidth: CGFloat = 1.0
 
     /// The font of the text view.
-    @objc dynamic public var font: NSFont? {
+    @objc dynamic open var font: NSFont? {
         get {
             typingAttributes[.font] as? NSFont
         }
@@ -66,8 +66,12 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    open func setFont(_ font: NSFont, range: NSRange) {
+        addAttributes([.font: font], range: range)
+    }
+
     /// The text color of the text view.
-    @objc dynamic public var textColor: NSColor? {
+    @objc dynamic open var textColor: NSColor? {
         get {
             typingAttributes[.foregroundColor] as? NSColor
         }
@@ -75,6 +79,14 @@ open class STTextView: NSView, NSTextInput {
         set {
             typingAttributes[.foregroundColor] = newValue
             // TODO: update storage
+        }
+    }
+
+    open func setTextColor(_ color: NSColor?, range: NSRange) {
+        if let color {
+            addAttributes([.foregroundColor: color], range: range)
+        } else {
+            removeAttribute(.foregroundColor, range: range)
         }
     }
 
@@ -208,7 +220,7 @@ open class STTextView: NSView, NSTextInput {
     public let textLayoutManager: NSTextLayoutManager
 
     @available(*, deprecated, renamed: "textContentManager")
-    public var textContentStorage: NSTextContentStorage {
+    open var textContentStorage: NSTextContentStorage {
         textContentManager as! NSTextContentStorage
     }
 
@@ -249,12 +261,12 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// A Boolean value that controls whether the text views sharing the receiver’s layout manager use the Font panel and Font menu.
-    public var usesFontPanel: Bool = true
+    open var usesFontPanel: Bool = true
 
     /// A Boolean value that controls whether the text views sharing the receiver’s layout manager use a ruler.
     ///
     /// true to cause text views sharing the receiver's layout manager to respond to NSRulerView client messages and to paragraph-related menu actions, and update the ruler (when visible) as the selection changes with its paragraph and tab attributes, otherwise false.
-    public var usesRuler: Bool = true
+    open var usesRuler: Bool = true
 
     /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
     internal var needsScrollToSelection: Bool = false {
@@ -265,7 +277,7 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    public override var isFlipped: Bool {
+    open override var isFlipped: Bool {
         #if os(macOS)
         true
         #else
@@ -539,7 +551,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -548,7 +560,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
         for attr in attrs {
             textLayoutManager.addRenderingAttribute(attr.key, value: attr.value, for: range)
@@ -564,7 +576,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    public func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -573,7 +585,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    public func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
         // FB9692714 This doesn't work
         textLayoutManager.setRenderingAttributes(attrs, for: range)
@@ -588,7 +600,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    public func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
+    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -597,7 +609,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    public func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
+    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
 
         // FB9692714 This doesn't work
         textLayoutManager.removeRenderingAttribute(attribute, for: range)
@@ -611,7 +623,7 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    public func setSelectedRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
+    open func setSelectedRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
         guard isSelectable, textRange.endLocation <= textContentManager.documentRange.endLocation else {
             return
         }
@@ -757,6 +769,14 @@ open class STTextView: NSView, NSTextInput {
                 break
             }
         }
+    }
+
+    open func scrollRangeToVisible(_ range: NSRange) {
+        textFinderClient.scrollRangeToVisible(range)
+    }
+
+    open func scrollRangeToVisible(_ range: NSTextRange) {
+        scrollRangeToVisible(NSRange(range, in: textContentManager))
     }
 
     open func textWillChange(_ sender: Any?) {
