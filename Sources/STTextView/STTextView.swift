@@ -540,17 +540,20 @@ open class STTextView: NSView, NSTextInput {
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
-        textContentManager.performEditingTransaction {
-            (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: range)
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            preconditionFailure("Invalid range \(range)")
         }
 
-        if updateLayout {
-            needsLayout = true
-        }
+        addAttributes(attrs, range: textRange, updateLayout: updateLayout)
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     public func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+
+        for attr in attrs {
+            textLayoutManager.addRenderingAttribute(attr.key, value: attr.value, for: range)
+        }
+
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
@@ -562,25 +565,22 @@ open class STTextView: NSView, NSTextInput {
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     public func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
-        textContentManager.performEditingTransaction {
-            (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: range)
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            preconditionFailure("Invalid range \(range)")
         }
-        // FB9692714 This doesn't work
-        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
-
-        if updateLayout {
-            needsLayout = true
-        }
+        setAttributes(attrs, range: textRange, updateLayout: updateLayout)
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     public func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+
+        // FB9692714 This doesn't work
+        textLayoutManager.setRenderingAttributes(attrs, for: range)
+
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
-        // FB9692714 This doesn't work
-        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
         if updateLayout {
             needsLayout = true
@@ -589,25 +589,22 @@ open class STTextView: NSView, NSTextInput {
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     public func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
-        textContentManager.performEditingTransaction {
-            (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: range)
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            preconditionFailure("Invalid range \(range)")
         }
-        // FB9692714 This doesn't work
-        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
-
-        if updateLayout {
-            needsLayout = true
-        }
+        removeAttribute(attribute, range: textRange, updateLayout: updateLayout)
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     public func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
+
+        // FB9692714 This doesn't work
+        textLayoutManager.removeRenderingAttribute(attribute, for: range)
+
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
         }
-        // FB9692714 This doesn't work
-        // textLayoutManager.setRenderingAttributes(attrs, for: NSTextRange(range, in: textContentManager)!)
 
         if updateLayout {
             needsLayout = true
