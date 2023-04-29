@@ -623,20 +623,6 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    open func setSelectedRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
-        guard isSelectable, textRange.endLocation <= textContentManager.documentRange.endLocation else {
-            return
-        }
-
-        textLayoutManager.textSelections = [
-            NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
-        ]
-
-        if updateLayout {
-            needsLayout = true
-        }
-    }
-
     internal func updateSelectionHighlights() {
         guard !textLayoutManager.textSelections.isEmpty else {
             selectionLayer.sublayers = nil

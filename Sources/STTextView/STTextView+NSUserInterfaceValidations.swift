@@ -17,7 +17,7 @@ extension STTextView: NSUserInterfaceValidations {
     public func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
         switch item.action {
         case #selector(copy(_:)), #selector(cut(_:)), #selector(delete(_:)):
-            return !textContentManager.documentRange.isEmpty && !selectedRange().isEmpty
+            return !textContentManager.documentRange.isEmpty && !selectedRange.isEmpty
         case #selector(selectAll(_:)):
             return !textContentManager.documentRange.isEmpty
         case #selector(paste(_:)), #selector(pasteAsPlainText(_:)), #selector(pasteAsRichText(_:)):

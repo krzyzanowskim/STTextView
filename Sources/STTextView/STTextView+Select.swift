@@ -5,6 +5,38 @@
 import Cocoa
 
 extension STTextView {
+
+    public func setSelectedRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
+        guard isSelectable, textRange.endLocation <= textContentManager.documentRange.endLocation else {
+            return
+        }
+
+        textLayoutManager.textSelections = [
+            NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
+        ]
+
+        if updateLayout {
+            needsLayout = true
+        }
+    }
+
+    @nonobjc
+    public var selectedRange: NSRange {
+        get {
+            if let selectionTextRange = textLayoutManager.textSelections.first?.textRanges.first {
+                return NSRange(selectionTextRange, in: textContentManager)
+            }
+
+            return NSRange.notFound
+        }
+
+        set {
+            guard let textRange = NSTextRange(newValue, in: textContentManager) else {
+                preconditionFailure("Invalid range \(newValue)")
+            }
+            setSelectedRange(textRange)
+        }
+    }
     
     open override func selectAll(_ sender: Any?) {
         

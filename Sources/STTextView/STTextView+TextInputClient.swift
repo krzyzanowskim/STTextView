@@ -74,12 +74,10 @@ extension STTextView: NSTextInputClient {
         markedText = nil
     }
 
-    public func selectedRange() -> NSRange {
-        if let selectionTextRange = textLayoutManager.textSelections.first?.textRanges.first {
-            return NSRange(selectionTextRange, in: textContentManager)
-        }
-
-        return NSRange.notFound
+    @objc(selectedRange)
+    @_implements(NSTextInputClient, selectedRange())
+    public func selectedRange_() -> NSRange {
+        selectedRange
     }
 
     /// Returns the marked range. Returns {NSNotFound, 0} if no marked range.
