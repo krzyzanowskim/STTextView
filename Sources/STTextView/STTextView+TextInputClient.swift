@@ -76,7 +76,7 @@ extension STTextView: NSTextInputClient {
 
     @objc(selectedRange)
     @_implements(NSTextInputClient, selectedRange())
-    public func selectedRange_() -> NSRange {
+    public func textInputClient_selectedRange() -> NSRange {
         selectedRange
     }
 
