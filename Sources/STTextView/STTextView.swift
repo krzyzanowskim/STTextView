@@ -195,6 +195,16 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    @objc open dynamic var allowsDocumentBackgroundColorChange: Bool = true
+
+    @objc open func changeDocumentBackgroundColor(_ sender: Any?) {
+        guard allowsDocumentBackgroundColorChange, let color = sender as? NSColor else {
+            return
+        }
+
+        backgroundColor = color
+    }
+
     /// A Boolean value that indicates whether the receiver allows undo.
     ///
     /// `true` if the receiver allows undo, otherwise `false`. Default `true`.
