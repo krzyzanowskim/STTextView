@@ -26,7 +26,7 @@ extension STTextView {
         }
     }
 
-    @objc func pasteAsPlainText(_ sender: Any?) {
+    @objc open func pasteAsPlainText(_ sender: Any?) {
         guard let string = NSPasteboard.general.string(forType: .string) else {
             return
         }

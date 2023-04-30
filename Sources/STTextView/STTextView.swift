@@ -42,6 +42,10 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    @objc public let isRichText: Bool = true
+    @objc public let isFieldEditor: Bool = false
+    @objc public let importsGraphics: Bool = false
+
     /// A Boolean value that determines whether the text view should draw its insertion point.
     open var shouldDrawInsertionPoint: Bool {
         isFirstResponder && isEditable
