@@ -52,6 +52,7 @@ open class STTextView: NSView, NSTextInput {
     @objc dynamic open var insertionPointColor: NSColor = .textColor
 
     /// The width of the insertion point.
+    @Invalidating(.display)
     @objc dynamic open var insertionPointWidth: CGFloat = 1.0
 
     /// The font of the text view.
@@ -158,12 +159,14 @@ open class STTextView: NSView, NSTextInput {
 
                 if textContainer.widthTracksTextView == true {
                     textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: textContainer.size.height)
+                } else {
+                    textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
                 }
 
                 if let scrollView = scrollView {
                     setFrameSize(scrollView.contentSize)
                 }
-                
+
                 needsLayout = true
                 needsDisplay = true
             }

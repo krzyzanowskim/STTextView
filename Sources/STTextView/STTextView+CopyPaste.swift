@@ -39,7 +39,8 @@ extension STTextView {
         )
     }
 
-    @objc func pasteAsRichText(_ sender: Any?) {
+    /// This action method inserts the contents of the pasteboard into the receiver’s text as rich text, maintaining its attributes.
+    @objc open func pasteAsRichText(_ sender: Any?) {
         let pasteboard = NSPasteboard.general
         if pasteboard.canReadItem(withDataConformingToTypes: [UTType.rtf.identifier]), let attributedString = pasteboard.readObjects(forClasses: [NSAttributedString.self])?.first as? NSAttributedString {
             replaceCharacters(

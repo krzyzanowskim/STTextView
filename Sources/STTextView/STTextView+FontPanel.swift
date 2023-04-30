@@ -5,6 +5,7 @@ import Cocoa
 
 extension STTextView {
 
+    /// This action method changes the font of the selection for a rich text object, or of all text for a plain text object.
     @objc public func changeFont(_ sender: Any?) {
         guard isEditable, usesFontPanel, let fontManager = sender as? NSFontManager else {
             return
