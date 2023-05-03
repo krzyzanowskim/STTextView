@@ -23,7 +23,7 @@
 		7544423C27B9332E00901C0E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7544423E27B9332F00901C0E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7544424127B9332F00901C0E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		7544424327B9332F00901C0E /* STTextViewDemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = STTextViewDemo.entitlements; sourceTree = "<group>"; };
+		7544424327B9332F00901C0E /* TextEdit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TextEdit.entitlements; sourceTree = "<group>"; };
 		7544424927B9387300901C0E /* content.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = content.txt; sourceTree = "<group>"; };
 		755B613F29F5B78800EDD45F /* LineAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineAnnotation.swift; sourceTree = "<group>"; };
 		755B614129F5B7B800EDD45F /* AnnotationLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationLabelView.swift; sourceTree = "<group>"; };
@@ -46,7 +46,7 @@
 			isa = PBXGroup;
 			children = (
 				75F8128227BD644E0029BDC0 /* STTextView */,
-				7544423927B9332E00901C0E /* STTextViewDemo */,
+				7544423927B9332E00901C0E /* TextEdit */,
 				7544423827B9332E00901C0E /* Products */,
 				7547090C27BD54B8001CA5B1 /* Frameworks */,
 			);
@@ -60,7 +60,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		7544423927B9332E00901C0E /* STTextViewDemo */ = {
+		7544423927B9332E00901C0E /* TextEdit */ = {
 			isa = PBXGroup;
 			children = (
 				7544423A27B9332E00901C0E /* AppDelegate.swift */,
@@ -70,9 +70,9 @@
 				7544424927B9387300901C0E /* content.txt */,
 				7544423E27B9332F00901C0E /* Assets.xcassets */,
 				7544424027B9332F00901C0E /* Main.storyboard */,
-				7544424327B9332F00901C0E /* STTextViewDemo.entitlements */,
+				7544424327B9332F00901C0E /* TextEdit.entitlements */,
 			);
-			name = STTextViewDemo;
+			name = TextEdit;
 			sourceTree = "<group>";
 		};
 		7547090C27BD54B8001CA5B1 /* Frameworks */ = {
@@ -85,9 +85,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7544423627B9332E00901C0E /* STTextViewDemo */ = {
+		7544423627B9332E00901C0E /* TextEdit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7544424627B9332F00901C0E /* Build configuration list for PBXNativeTarget "STTextViewDemo" */;
+			buildConfigurationList = 7544424627B9332F00901C0E /* Build configuration list for PBXNativeTarget "TextEdit" */;
 			buildPhases = (
 				7544423327B9332E00901C0E /* Sources */,
 				7544423427B9332E00901C0E /* Frameworks */,
@@ -97,7 +97,7 @@
 			);
 			dependencies = (
 			);
-			name = STTextViewDemo;
+			name = TextEdit;
 			packageProductDependencies = (
 				75F8128327BD64590029BDC0 /* STTextView */,
 			);
@@ -133,7 +133,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7544423627B9332E00901C0E /* STTextViewDemo */,
+				7544423627B9332E00901C0E /* TextEdit */,
 			);
 		};
 /* End PBXProject section */
@@ -361,7 +361,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7544424627B9332F00901C0E /* Build configuration list for PBXNativeTarget "STTextViewDemo" */ = {
+		7544424627B9332F00901C0E /* Build configuration list for PBXNativeTarget "TextEdit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7544424727B9332F00901C0E /* Debug */,

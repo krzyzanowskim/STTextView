@@ -8,12 +8,16 @@ let package = Package(
     products: [
         .library(
             name: "STTextView",
-            targets: ["STTextView"]),
+            targets: ["STTextView"]
+        )
     ],
-    dependencies: [],
     targets: [
         .target(
             name: "STTextView"
+        ),
+        .target(
+            name: "TextView",
+            dependencies: ["STTextView"]
         ),
         .testTarget(
             name: "STTextViewTests",

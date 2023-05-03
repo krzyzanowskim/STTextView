@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:STTextViewDemo/STTextViewDemo.xcodeproj">
+      location = "group:TextEdit/TextEdit.xcodeproj">
    </FileRef>
 </Workspace>
