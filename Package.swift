@@ -8,7 +8,7 @@ let package = Package(
     products: [
         .library(
             name: "STTextView",
-            targets: ["STTextView"]
+            targets: ["STTextView", "TextView"]
         )
     ],
     targets: [

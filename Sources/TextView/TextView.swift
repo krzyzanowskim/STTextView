@@ -6,28 +6,32 @@ import SwiftUI
 import STTextView
 
 public struct TextView: SwiftUI.View {
-    @State private var string: String = ""
+    @Binding private var text: String
+
+    public init(text: Binding<String>) {
+        _text = text
+    }
 
     public var body: some View {
         TextViewRepresentable(
-            string: $string
+            text: $text
         )
     }
 
 }
 
 private struct TextViewRepresentable: NSViewRepresentable {
-    @Binding var string: String
+    @Binding var text: String
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = STTextView.scrollableTextView()
         let textView = scrollView.documentView as! STTextView
-        textView.string = string
+        textView.string = text
         return scrollView
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
         let textView = scrollView.documentView as! STTextView
-        textView.string = string
+        textView.string = text
     }
 }
