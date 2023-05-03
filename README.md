@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="128" src="https://user-images.githubusercontent.com/758033/235909140-3589bb7d-51a0-4df3-8d71-2dc30fcabc8c.png">
+</p>
+
 # STTextView
 
 Performant [macOS](https://www.apple.com/macos) TextView with line numbers and much more. (NSTextView replacement)
