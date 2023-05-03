@@ -120,7 +120,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7544423227B9332E00901C0E /* Build configuration list for PBXProject "STTextViewDemo" */;
+			buildConfigurationList = 7544423227B9332E00901C0E /* Build configuration list for PBXProject "TextEdit" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -295,6 +295,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "$(TARGET_NAME).entitlements";
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
@@ -325,6 +326,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "$(TARGET_NAME).entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -352,7 +354,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7544423227B9332E00901C0E /* Build configuration list for PBXProject "STTextViewDemo" */ = {
+		7544423227B9332E00901C0E /* Build configuration list for PBXProject "TextEdit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7544424427B9332F00901C0E /* Debug */,
