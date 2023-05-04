@@ -7,10 +7,7 @@ import Cocoa
 extension STTextView {
 
     @objc func startSpeaking(_ sender: Any?) {
-        guard !NSSpeechSynthesizer.isAnyApplicationSpeaking else {
-            return
-        }
-
+        stopSpeaking(sender)
         speechSynthesizer.startSpeaking(textLayoutManager.textSelectionsString() ?? string)
     }
 
