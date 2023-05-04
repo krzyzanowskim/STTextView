@@ -252,7 +252,7 @@ open class STTextView: NSView, NSTextInput {
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
     internal var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
-    internal let speechSynthesizer = NSSpeechSynthesizer()
+    internal lazy var speechSynthesizer: NSSpeechSynthesizer = NSSpeechSynthesizer()
 
     internal lazy var completionWindowController: CompletionWindowController = {
         let viewController = delegate?.textViewCompletionViewController(self) ?? STCompletionViewController()
