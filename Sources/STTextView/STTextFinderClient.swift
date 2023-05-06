@@ -31,7 +31,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
             return
         }
 
-        textView.replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
+        textView.replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
     }
 
     public var firstSelectedRange: NSRange {

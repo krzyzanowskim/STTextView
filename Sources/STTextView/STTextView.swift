@@ -848,6 +848,14 @@ open class STTextView: NSView, NSTextInput {
         needsDisplay = true
     }
 
+    public func replaceCharacters(in range: NSRange, with string: String) {
+        textFinderClient.replaceCharacters(in: range, with: string)
+    }
+
+    public func replaceCharacters(in range: NSTextRange, with string: String) {
+        replaceCharacters(in: range, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
+    }
+
     internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
         self.replaceCharacters(
             in: textRanges,
