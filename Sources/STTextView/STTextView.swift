@@ -595,13 +595,13 @@ open class STTextView: NSView, NSTextInput {
             case let attributedString as NSAttributedString:
                 replaceCharacters(in: textContentManager.documentRange, with: attributedString, allowsTypingCoalescing: false)
             case let string as String:
-                replaceCharacters(in: textContentManager.documentRange, with: string, allowsTypingCoalescing: false)
+                replaceCharacters(in: textContentManager.documentRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
             default:
                 assertionFailure()
                 return
             }
         } else if case .none = string {
-            replaceCharacters(in: textContentManager.documentRange, with: "", allowsTypingCoalescing: false)
+            replaceCharacters(in: textContentManager.documentRange, with: "", useTypingAttributes: true, allowsTypingCoalescing: false)
         }
     }
 
@@ -848,11 +848,27 @@ open class STTextView: NSView, NSTextInput {
         needsDisplay = true
     }
 
+    internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
+        self.replaceCharacters(
+            in: textRanges,
+            with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]),
+            allowsTypingCoalescing: allowsTypingCoalescing
+        )
+    }
+
     internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
         // Replace from the end to beginning of the document
         for textRange in textRanges.sorted(by: { $0.location > $1.location }) {
             replaceCharacters(in: textRange, with: replacementString, allowsTypingCoalescing: true)
         }
+    }
+
+    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
+        self.replaceCharacters(
+            in: textRange,
+            with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]),
+            allowsTypingCoalescing: allowsTypingCoalescing
+        )
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
@@ -938,22 +954,6 @@ open class STTextView: NSView, NSTextInput {
 
         delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
         textDidChange(self)
-    }
-
-    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool = true, allowsTypingCoalescing: Bool = true) {
-        self.replaceCharacters(
-            in: textRange,
-            with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]),
-            allowsTypingCoalescing: allowsTypingCoalescing
-        )
-    }
-
-    internal func replaceCharacters(in textRange: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
-        self.replaceCharacters(
-            in: textRange,
-            with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]),
-            allowsTypingCoalescing: allowsTypingCoalescing
-        )
     }
 
     /// Whenever text is to be changed due to some user-induced action,
