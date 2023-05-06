@@ -259,6 +259,7 @@ open class STTextView: NSView, NSTextInput {
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
     internal var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
+    private var didChangeBackingPropertiesNotificationObserver: NSObjectProtocol?
     internal lazy var speechSynthesizer: NSSpeechSynthesizer = NSSpeechSynthesizer()
 
     internal lazy var completionWindowController: CompletionWindowController = {
@@ -427,19 +428,30 @@ open class STTextView: NSView, NSTextInput {
     open override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
 
-        func updateContentScale(for layer: CALayer, scale: CGFloat) {
-            layer.contentsScale = backingScaleFactor
-            layer.setNeedsDisplay()
-            for sublayer in layer.sublayers ?? [] {
-                updateContentScale(for: sublayer, scale: scale)
+        if let window = self.window {
+            textFinder.client = textFinderClient
+            textFinder.findBarContainer = scrollView
+
+            func updateContentScale(for layer: CALayer, scale: CGFloat) {
+                layer.contentsScale = backingScaleFactor
+                layer.setNeedsDisplay()
+                for sublayer in layer.sublayers ?? [] {
+                    updateContentScale(for: sublayer, scale: scale)
+                }
             }
+
+            updateContentScale(for: self.contentLayer, scale: self.backingScaleFactor)
+            updateContentScale(for: self.selectionLayer, scale: self.backingScaleFactor)
+
+            didChangeBackingPropertiesNotificationObserver = NotificationCenter.default.addObserver(forName: NSWindow.didChangeBackingPropertiesNotification, object: window, queue: .main) { [weak self] notification in
+                guard let self = self else { return }
+                updateContentScale(for: self.contentLayer, scale: self.backingScaleFactor)
+                updateContentScale(for: self.selectionLayer, scale: self.backingScaleFactor)
+            }
+        } else if let didChangeBackingPropertiesNotificationObserver {
+            NotificationCenter.default.removeObserver(didChangeBackingPropertiesNotificationObserver)
+            self.didChangeBackingPropertiesNotificationObserver = nil
         }
-
-        updateContentScale(for: contentLayer, scale: backingScaleFactor)
-        updateContentScale(for: selectionLayer, scale: backingScaleFactor)
-
-        textFinder.client = textFinderClient
-        textFinder.findBarContainer = scrollView
     }
 
     open override func hitTest(_ point: NSPoint) -> NSView? {
