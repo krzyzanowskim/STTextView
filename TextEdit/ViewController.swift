@@ -24,7 +24,6 @@ final class ViewController: NSViewController {
 
         textView.defaultParagraphStyle = paragraph
         textView.font = NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
-        textView.textColor = .textColor
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 
         // highlight occurence of STTextView

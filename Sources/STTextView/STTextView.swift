@@ -28,19 +28,16 @@ open class STTextView: NSView, NSTextInput {
     open var insertionPointLayerClass = STInsertionPointLayer.self
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
-    @objc dynamic open var isEditable: Bool {
+    @Invalidating(.insertionPoint)
+    @objc dynamic open var isEditable: Bool = true {
         didSet {
             isSelectable = isEditable
         }
     }
 
     /// A Boolean value that controls whether the text views allows the user to select text.
-    @objc dynamic open var isSelectable: Bool {
-        didSet {
-            updateInsertionPointStateAndRestartTimer()
-            window?.invalidateCursorRects(for: self)
-        }
-    }
+    @Invalidating(.insertionPoint, .cursorRects)
+    @objc dynamic open var isSelectable: Bool = true
 
     @objc public let isRichText: Bool = true
     @objc public let isFieldEditor: Bool = false
@@ -48,15 +45,27 @@ open class STTextView: NSView, NSTextInput {
 
     /// A Boolean value that determines whether the text view should draw its insertion point.
     open var shouldDrawInsertionPoint: Bool {
-        isFirstResponder && isEditable
+        if !isFirstResponder {
+            return false
+        }
+
+        if !isEditable {
+            return false
+        }
+
+        if let window = window, window.isKeyWindow, window.firstResponder == self {
+            return true
+        }
+
+        return false
     }
 
     /// The color of the insertion point.
-    @Invalidating(.display)
+    @Invalidating(.display, .insertionPoint)
     @objc dynamic open var insertionPointColor: NSColor = .textColor
 
     /// The width of the insertion point.
-    @Invalidating(.display)
+    @Invalidating(.display, .insertionPoint)
     @objc dynamic open var insertionPointWidth: CGFloat = 1.0
 
     /// The font of the text view.
@@ -67,7 +76,6 @@ open class STTextView: NSView, NSTextInput {
 
         set {
             typingAttributes[.font] = newValue
-            // TODO: update storage
         }
     }
 
@@ -83,7 +91,6 @@ open class STTextView: NSView, NSTextInput {
 
         set {
             typingAttributes[.foregroundColor] = newValue
-            // TODO: update storage
         }
     }
 
@@ -303,7 +310,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     /// Generates and returns a scroll view with a STTextView set as its document view.
-    public static func scrollableTextView() -> NSScrollView {
+    open class func scrollableTextView() -> NSScrollView {
         let scrollView = NSScrollView()
         let textView = STTextView()
 
@@ -362,12 +369,9 @@ open class STTextView: NSView, NSTextInput {
         selectionLayer = STCATiledLayer()
         selectionLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
 
-        isEditable = true
-        isSelectable = isEditable
         typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
-        isFirstResponder = false
 
         textFinder = NSTextFinder()
         textFinderClient = STTextFinderClient()
@@ -408,12 +412,16 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-
     open override func resetCursorRects() {
         super.resetCursorRects()
         if isSelectable {
             addCursorRect(visibleRect, cursor: .iBeam)
         }
+    }
+
+    open override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        self.updateSelectionHighlights()
     }
 
     open override func viewDidMoveToWindow() {
@@ -453,7 +461,7 @@ open class STTextView: NSView, NSTextInput {
     }
 
     open override var canBecomeKeyView: Bool {
-        acceptsFirstResponder
+        super.canBecomeKeyView && acceptsFirstResponder && !isHiddenOrHasHiddenAncestor
     }
 
     open override var needsPanelToBecomeKey: Bool {
@@ -464,26 +472,44 @@ open class STTextView: NSView, NSTextInput {
         isSelectable
     }
 
-    internal var isFirstResponder: Bool {
-        didSet {
-            updateInsertionPointStateAndRestartTimer()
-        }
-    }
+    @Invalidating(.insertionPoint)
+    internal var isFirstResponder: Bool = false
 
     open override func becomeFirstResponder() -> Bool {
         if isEditable {
             NotificationCenter.default.post(name: NSText.didBeginEditingNotification, object: self, userInfo: nil)
         }
-        isFirstResponder = true
-        return true
+
+        defer {
+            isFirstResponder = true
+        }
+
+        return super.becomeFirstResponder()
     }
 
     open override func resignFirstResponder() -> Bool {
         if isEditable {
             NotificationCenter.default.post(name: NSText.didEndEditingNotification, object: self, userInfo: nil)
         }
-        isFirstResponder = false
-        return true
+
+        defer {
+            isFirstResponder = false
+        }
+        return super.resignFirstResponder()
+    }
+
+    /// Resigns the window’s key window status.
+    ///
+    /// Swift documentation to NSWindow.resignKey() is wrong about selector sent to the first responder.
+    /// It uses resignKeyWindow(), not resignKey() selector.
+    ///
+    /// Never invoke this method directly.
+    @objc private func resignKeyWindow() {
+        updateInsertionPointStateAndRestartTimer()
+    }
+
+    @objc private func becomeKeyWindow() {
+        updateInsertionPointStateAndRestartTimer()
     }
 
     open override class var isCompatibleWithResponsiveScrolling: Bool {
@@ -661,6 +687,8 @@ open class STTextView: NSView, NSTextInput {
                     highlightLayer.backgroundColor = selectionBackgroundColor.cgColor
                     selectionLayer.addSublayer(highlightLayer)
                 } else {
+                    // NOTE: this is to hide/show insertion point on selection.
+                    //       there's probably better place to handle that.
                     updateInsertionPointStateAndRestartTimer()
                 }
 
@@ -901,11 +929,19 @@ open class STTextView: NSView, NSTextInput {
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool = true, allowsTypingCoalescing: Bool = true) {
-        self.replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]), allowsTypingCoalescing: allowsTypingCoalescing)
+        self.replaceCharacters(
+            in: textRange,
+            with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]),
+            allowsTypingCoalescing: allowsTypingCoalescing
+        )
     }
 
     internal func replaceCharacters(in textRange: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
-        self.replaceCharacters(in: textRange, with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]), allowsTypingCoalescing: allowsTypingCoalescing)
+        self.replaceCharacters(
+            in: textRange,
+            with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]),
+            allowsTypingCoalescing: allowsTypingCoalescing
+        )
     }
 
     /// Whenever text is to be changed due to some user-induced action,
@@ -931,6 +967,8 @@ open class STTextView: NSView, NSTextInput {
     }
 }
 
+// MARK: - CALayer
+
 private extension CALayer {
 
     func isDescendant(of layer: CALayer) -> Bool {
@@ -944,4 +982,39 @@ private extension CALayer {
 
         return false
     }
+}
+
+// MARK: - NSViewInvalidating
+
+private extension NSViewInvalidating where Self == NSView.Invalidations.InsertionPoint {
+
+    static var insertionPoint: NSView.Invalidations.InsertionPoint {
+        NSView.Invalidations.InsertionPoint()
+    }
+
+    static var cursorRects: NSView.Invalidations.CursorRects {
+        NSView.Invalidations.CursorRects()
+    }
+}
+
+private extension NSView.Invalidations {
+
+    struct InsertionPoint: NSViewInvalidating {
+
+        func invalidate(view: NSView) {
+            guard let textView = view as? STTextView else {
+                return
+            }
+
+            textView.updateInsertionPointStateAndRestartTimer()
+        }
+    }
+
+    struct CursorRects: NSViewInvalidating {
+
+        func invalidate(view: NSView) {
+            view.window?.invalidateCursorRects(for: view)
+        }
+    }
+
 }

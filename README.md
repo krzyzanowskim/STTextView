@@ -97,7 +97,7 @@ textView.defaultParagraphStyle = paragraph
 textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
 
 // Set default text color
-textView.textColor = NSColor.textColor
+textView.textColor = .textColor
 
 // Set text value
 textView.string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ornare lobortis sem a vulputate."

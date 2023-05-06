@@ -23,6 +23,7 @@ public final class STAnnotationLabelView: NSView {
     }
 
     private struct AnnotationLabelStyle: LabelStyle {
+        @Environment(\.colorScheme) private var colorScheme
 
         func makeBody(configuration: Configuration) -> some View {
             HStack(alignment: .center, spacing: 0) {
