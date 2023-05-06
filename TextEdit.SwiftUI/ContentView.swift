@@ -5,12 +5,12 @@ import SwiftUI
 import TextView
 
 struct ContentView: View {
-    @Binding var document: TextEditUIDocument
+    @State private var text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 
     var body: some View {
         TextView(
-            text: $document.text,
-            font: .preferredFont(forTextStyle: .body),
+            text: $text,
+            font: NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular),
             wrapLines: true
         )
     }
@@ -18,6 +18,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(document: .constant(TextEditUIDocument()))
+        ContentView()
     }
 }

@@ -8,23 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		752F2BDB2A028FC4009E35E4 /* TextEditUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752F2BDA2A028FC4009E35E4 /* TextEditUIApp.swift */; };
-		752F2BDD2A028FC4009E35E4 /* TextEditUIDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752F2BDC2A028FC4009E35E4 /* TextEditUIDocument.swift */; };
 		752F2BDF2A028FC4009E35E4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752F2BDE2A028FC4009E35E4 /* ContentView.swift */; };
 		752F2BE12A028FC5009E35E4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 752F2BE02A028FC5009E35E4 /* Assets.xcassets */; };
 		752F2BE42A028FC5009E35E4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 752F2BE32A028FC5009E35E4 /* Preview Assets.xcassets */; };
-		752F2BEB2A029117009E35E4 /* STTextView in Frameworks */ = {isa = PBXBuildFile; productRef = 752F2BEA2A029117009E35E4 /* STTextView */; };
+		7582A1FC2A07096F00F8AB20 /* STTextView in Frameworks */ = {isa = PBXBuildFile; productRef = 7582A1FB2A07096F00F8AB20 /* STTextView */; };
+		758A710E2A070A7E00F7E836 /* content.txt in Resources */ = {isa = PBXBuildFile; fileRef = 758A710D2A070A7E00F7E836 /* content.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		752F2BD82A028FC4009E35E4 /* TextEdit.SwiftUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TextEdit.SwiftUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		752F2BDA2A028FC4009E35E4 /* TextEditUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditUIApp.swift; sourceTree = "<group>"; };
-		752F2BDC2A028FC4009E35E4 /* TextEditUIDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditUIDocument.swift; sourceTree = "<group>"; };
 		752F2BDE2A028FC4009E35E4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		752F2BE02A028FC5009E35E4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		752F2BE32A028FC5009E35E4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		752F2BE52A028FC5009E35E4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		752F2BE62A028FC5009E35E4 /* TextEditUI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TextEditUI.entitlements; sourceTree = "<group>"; };
-		75F8128227BD644E0029BDC0 /* STTextView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = STTextView; path = ..; sourceTree = "<group>"; };
+		758A710D2A070A7E00F7E836 /* content.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = content.txt; path = ../TextEdit/content.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,7 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				752F2BEB2A029117009E35E4 /* STTextView in Frameworks */,
+				7582A1FC2A07096F00F8AB20 /* STTextView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,7 +49,6 @@
 		7544422E27B9332E00901C0E = {
 			isa = PBXGroup;
 			children = (
-				75F8128227BD644E0029BDC0 /* STTextView */,
 				759BE6512A06FEBA0095FCF1 /* TextEdit */,
 				7544423827B9332E00901C0E /* Products */,
 				7547090C27BD54B8001CA5B1 /* Frameworks */,
@@ -79,8 +77,8 @@
 				752F2BE52A028FC5009E35E4 /* Info.plist */,
 				752F2BE62A028FC5009E35E4 /* TextEditUI.entitlements */,
 				752F2BDA2A028FC4009E35E4 /* TextEditUIApp.swift */,
-				752F2BDC2A028FC4009E35E4 /* TextEditUIDocument.swift */,
 				752F2BDE2A028FC4009E35E4 /* ContentView.swift */,
+				758A710D2A070A7E00F7E836 /* content.txt */,
 				752F2BE22A028FC5009E35E4 /* Preview Content */,
 			);
 			name = TextEdit;
@@ -103,7 +101,7 @@
 			);
 			name = TextEdit.SwiftUI;
 			packageProductDependencies = (
-				752F2BEA2A029117009E35E4 /* STTextView */,
+				7582A1FB2A07096F00F8AB20 /* STTextView */,
 			);
 			productName = TextEditUI;
 			productReference = 752F2BD82A028FC4009E35E4 /* TextEdit.SwiftUI.app */;
@@ -147,6 +145,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				758A710E2A070A7E00F7E836 /* content.txt in Resources */,
 				752F2BE42A028FC5009E35E4 /* Preview Assets.xcassets in Resources */,
 				752F2BE12A028FC5009E35E4 /* Assets.xcassets in Resources */,
 			);
@@ -160,7 +159,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				752F2BDB2A028FC4009E35E4 /* TextEditUIApp.swift in Sources */,
-				752F2BDD2A028FC4009E35E4 /* TextEditUIDocument.swift in Sources */,
 				752F2BDF2A028FC4009E35E4 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -184,7 +182,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Marcin Krzyżanowski";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -213,7 +211,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Marcin Krzyżanowski";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -363,7 +361,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		752F2BEA2A029117009E35E4 /* STTextView */ = {
+		7582A1FB2A07096F00F8AB20 /* STTextView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = STTextView;
 		};
