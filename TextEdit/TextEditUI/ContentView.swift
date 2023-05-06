@@ -8,7 +8,9 @@ struct ContentView: View {
     @Binding var document: TextEditUIDocument
 
     var body: some View {
-        TextView(text: $document.text)
+        TextView(
+            text: $document.text
+        )
     }
 }
 
