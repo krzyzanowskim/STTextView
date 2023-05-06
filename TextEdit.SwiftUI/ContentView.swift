@@ -11,7 +11,8 @@ struct ContentView: View {
         TextView(
             text: $text,
             font: NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular),
-            wrapLines: true
+            wrapLines: true,
+            highlightSelectedLine: true
         )
     }
 }

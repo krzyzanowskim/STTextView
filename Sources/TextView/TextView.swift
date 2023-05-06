@@ -11,21 +11,25 @@ public struct TextView: SwiftUI.View {
     @Binding private var text: AttributedString
     private var font: NSFont
     private var wrapLines: Bool
+    private var highlightSelectedLine: Bool
 
     public init(
         text: Binding<AttributedString>,
         font: NSFont = .preferredFont(forTextStyle: .body),
-        wrapLines: Bool = true
+        wrapLines: Bool = true,
+        highlightSelectedLine: Bool = false
     ) {
         _text = text
         self.font = font
         self.wrapLines = wrapLines
+        self.highlightSelectedLine = highlightSelectedLine
     }
 
     public init(
         text: Binding<String>,
         font: NSFont = .preferredFont(forTextStyle: .body),
-        wrapLines: Bool = true
+        wrapLines: Bool = true,
+        highlightSelectedLine: Bool = false
     ) {
         self = TextView(
             text: Binding(
@@ -39,7 +43,8 @@ public struct TextView: SwiftUI.View {
                 }
             ),
             font: font,
-            wrapLines: wrapLines
+            wrapLines: wrapLines,
+            highlightSelectedLine: highlightSelectedLine
         )
     }
 
@@ -47,7 +52,8 @@ public struct TextView: SwiftUI.View {
         TextViewRepresentable(
             text: $text,
             font: font,
-            wrapLines: wrapLines
+            wrapLines: wrapLines,
+            highlightSelectedLine: highlightSelectedLine
         )
         .background(.background)
     }
@@ -59,6 +65,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
     @Binding var text: AttributedString
     var font: NSFont
     var wrapLines: Bool
+    var highlightSelectedLine: Bool
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = STTextView.scrollableTextView()
@@ -66,6 +73,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.font = font
         textView.attributedString = NSAttributedString(text)
         textView.delegate = context.coordinator
+        textView.highlightSelectedLine = highlightSelectedLine
         textView.widthTracksTextView = wrapLines
         textView.selectedRange = .init()
         return scrollView
