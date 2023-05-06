@@ -7,12 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		752F2BDB2A028FC4009E35E4 /* TextEditUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752F2BDA2A028FC4009E35E4 /* TextEditUIApp.swift */; };
-		752F2BDD2A028FC4009E35E4 /* TextEditUIDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752F2BDC2A028FC4009E35E4 /* TextEditUIDocument.swift */; };
-		752F2BDF2A028FC4009E35E4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752F2BDE2A028FC4009E35E4 /* ContentView.swift */; };
-		752F2BE12A028FC5009E35E4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 752F2BE02A028FC5009E35E4 /* Assets.xcassets */; };
-		752F2BE42A028FC5009E35E4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 752F2BE32A028FC5009E35E4 /* Preview Assets.xcassets */; };
-		752F2BEB2A029117009E35E4 /* STTextView in Frameworks */ = {isa = PBXBuildFile; productRef = 752F2BEA2A029117009E35E4 /* STTextView */; };
 		7544423B27B9332E00901C0E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7544423A27B9332E00901C0E /* AppDelegate.swift */; };
 		7544423D27B9332E00901C0E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7544423C27B9332E00901C0E /* ViewController.swift */; };
 		7544423F27B9332F00901C0E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7544423E27B9332F00901C0E /* Assets.xcassets */; };
@@ -24,14 +18,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		752F2BD82A028FC4009E35E4 /* TextEditUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TextEditUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		752F2BDA2A028FC4009E35E4 /* TextEditUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditUIApp.swift; sourceTree = "<group>"; };
-		752F2BDC2A028FC4009E35E4 /* TextEditUIDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditUIDocument.swift; sourceTree = "<group>"; };
-		752F2BDE2A028FC4009E35E4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		752F2BE02A028FC5009E35E4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		752F2BE32A028FC5009E35E4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		752F2BE52A028FC5009E35E4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		752F2BE62A028FC5009E35E4 /* TextEditUI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TextEditUI.entitlements; sourceTree = "<group>"; };
 		7544423727B9332E00901C0E /* Text Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Text Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7544423A27B9332E00901C0E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7544423C27B9332E00901C0E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -45,14 +31,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		752F2BD52A028FC4009E35E4 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				752F2BEB2A029117009E35E4 /* STTextView in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		7544423427B9332E00901C0E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -64,34 +42,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		752F2BD92A028FC4009E35E4 /* TextEditUI */ = {
-			isa = PBXGroup;
-			children = (
-				752F2BDA2A028FC4009E35E4 /* TextEditUIApp.swift */,
-				752F2BDC2A028FC4009E35E4 /* TextEditUIDocument.swift */,
-				752F2BDE2A028FC4009E35E4 /* ContentView.swift */,
-				752F2BE02A028FC5009E35E4 /* Assets.xcassets */,
-				752F2BE52A028FC5009E35E4 /* Info.plist */,
-				752F2BE62A028FC5009E35E4 /* TextEditUI.entitlements */,
-				752F2BE22A028FC5009E35E4 /* Preview Content */,
-			);
-			path = TextEditUI;
-			sourceTree = "<group>";
-		};
-		752F2BE22A028FC5009E35E4 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				752F2BE32A028FC5009E35E4 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
-			sourceTree = "<group>";
-		};
 		7544422E27B9332E00901C0E = {
 			isa = PBXGroup;
 			children = (
 				75F8128227BD644E0029BDC0 /* STTextView */,
 				7544423927B9332E00901C0E /* TextEdit */,
-				752F2BD92A028FC4009E35E4 /* TextEditUI */,
 				7544423827B9332E00901C0E /* Products */,
 				7547090C27BD54B8001CA5B1 /* Frameworks */,
 			);
@@ -101,7 +56,6 @@
 			isa = PBXGroup;
 			children = (
 				7544423727B9332E00901C0E /* Text Editor.app */,
-				752F2BD82A028FC4009E35E4 /* TextEditUI.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -131,26 +85,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		752F2BD72A028FC4009E35E4 /* TextEditUI */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 752F2BE92A028FC5009E35E4 /* Build configuration list for PBXNativeTarget "TextEditUI" */;
-			buildPhases = (
-				752F2BD42A028FC4009E35E4 /* Sources */,
-				752F2BD52A028FC4009E35E4 /* Frameworks */,
-				752F2BD62A028FC4009E35E4 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = TextEditUI;
-			packageProductDependencies = (
-				752F2BEA2A029117009E35E4 /* STTextView */,
-			);
-			productName = TextEditUI;
-			productReference = 752F2BD82A028FC4009E35E4 /* TextEditUI.app */;
-			productType = "com.apple.product-type.application";
-		};
 		7544423627B9332E00901C0E /* TextEdit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7544424627B9332F00901C0E /* Build configuration list for PBXNativeTarget "TextEdit" */;
@@ -181,9 +115,6 @@
 				LastSwiftUpdateCheck = 1430;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
-					752F2BD72A028FC4009E35E4 = {
-						CreatedOnToolsVersion = 14.3;
-					};
 					7544423627B9332E00901C0E = {
 						CreatedOnToolsVersion = 13.3;
 					};
@@ -203,21 +134,11 @@
 			projectRoot = "";
 			targets = (
 				7544423627B9332E00901C0E /* TextEdit */,
-				752F2BD72A028FC4009E35E4 /* TextEditUI */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		752F2BD62A028FC4009E35E4 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				752F2BE42A028FC5009E35E4 /* Preview Assets.xcassets in Resources */,
-				752F2BE12A028FC5009E35E4 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		7544423527B9332E00901C0E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -231,16 +152,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		752F2BD42A028FC4009E35E4 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				752F2BDB2A028FC4009E35E4 /* TextEditUIApp.swift in Sources */,
-				752F2BDD2A028FC4009E35E4 /* TextEditUIDocument.swift in Sources */,
-				752F2BDF2A028FC4009E35E4 /* ContentView.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		7544423327B9332E00901C0E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -266,66 +177,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		752F2BE72A028FC5009E35E4 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = TextEditUI/TextEditUI.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"TextEditUI/Preview Content\"";
-				DEVELOPMENT_TEAM = 67RAULRX93;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TextEditUI/Info.plist;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = best.swift.TextEditUI;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		752F2BE82A028FC5009E35E4 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = TextEditUI/TextEditUI.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"TextEditUI/Preview Content\"";
-				DEVELOPMENT_TEAM = 67RAULRX93;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TextEditUI/Info.plist;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = best.swift.TextEditUI;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
 		7544424427B9332F00901C0E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -503,15 +354,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		752F2BE92A028FC5009E35E4 /* Build configuration list for PBXNativeTarget "TextEditUI" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				752F2BE72A028FC5009E35E4 /* Debug */,
-				752F2BE82A028FC5009E35E4 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		7544423227B9332E00901C0E /* Build configuration list for PBXProject "TextEdit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -533,10 +375,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		752F2BEA2A029117009E35E4 /* STTextView */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = STTextView;
-		};
 		75F8128327BD64590029BDC0 /* STTextView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = STTextView;

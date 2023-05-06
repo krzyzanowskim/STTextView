@@ -9,27 +9,26 @@ public struct TextView: SwiftUI.View {
     @Environment(\.colorScheme) private var colorScheme
 
     @Binding private var text: String
-    @Binding private var font: NSFont
+    private var font: NSFont
 
     public init(
         text: Binding<String>,
-        font: Binding<NSFont> = .constant(.preferredFont(forTextStyle: .body))
+        font: NSFont = .preferredFont(forTextStyle: .body)
     ) {
         _text = text
-        _font = font
+        self.font = font
     }
 
     public var body: some View {
         TextViewRepresentable(
             text: $text,
-            font: $font
+            font: .constant(font)
         )
         .background(.background)
     }
 }
 
 private struct TextViewRepresentable: NSViewRepresentable {
-    @Environment(\.lineSpacing) private var lineSpacing
     @Environment(\.isEnabled) private var isEnabled
 
     @Binding var text: String
@@ -58,7 +57,6 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
     class TextCoordinator: STTextViewDelegate {
         var parent: TextViewRepresentable
-        var isUpdating: Bool = false
 
         init(parent: TextViewRepresentable) {
             self.parent = parent

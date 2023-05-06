@@ -9,7 +9,8 @@ struct ContentView: View {
 
     var body: some View {
         TextView(
-            text: $document.text
+            text: $document.text,
+            font: .preferredFont(forTextStyle: .body)
         )
     }
 }
