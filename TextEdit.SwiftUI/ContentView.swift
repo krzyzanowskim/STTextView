@@ -10,7 +10,8 @@ struct ContentView: View {
     var body: some View {
         TextView(
             text: $document.text,
-            font: .preferredFont(forTextStyle: .body)
+            font: .preferredFont(forTextStyle: .body),
+            wrapLines: true
         )
     }
 }
