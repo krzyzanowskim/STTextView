@@ -71,11 +71,11 @@ private struct TextViewRepresentable: NSViewRepresentable {
         let scrollView = STTextView.scrollableTextView()
         let textView = scrollView.documentView as! STTextView
         textView.font = font
-        textView.attributedString = NSAttributedString(text)
+        textView.setAttributedString(NSAttributedString(text))
         textView.delegate = context.coordinator
         textView.highlightSelectedLine = highlightSelectedLine
         textView.widthTracksTextView = wrapLines
-        textView.selectedRange = .init()
+        textView.setSelectedRange(NSRange())
         return scrollView
     }
 
@@ -104,7 +104,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
                 return
             }
 
-            parent.text = AttributedString(textView.attributedString)
+            parent.text = AttributedString(textView.attributedString())
         }
 
     }

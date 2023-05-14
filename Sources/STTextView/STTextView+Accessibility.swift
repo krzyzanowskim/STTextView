@@ -58,12 +58,12 @@ extension STTextView  {
     }
 
     open override func accessibilitySelectedTextRange() -> NSRange {
-        selectedRange
+        selectedRange()
     }
 
     open override func setAccessibilitySelectedTextRange(_ accessibilitySelectedTextRange: NSRange) {
         if let textRange = NSTextRange(accessibilitySelectedTextRange, in: textContentManager) {
-            setSelectedRange(textRange)
+            setSelectedTextRange(textRange)
         } else {
             assertionFailure()
         }
