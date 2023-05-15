@@ -982,8 +982,14 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    /// Informs the receiver that it should begin coalescing successive typing operations in a new undo grouping
     public func breakUndoCoalescing() {
         (undoManager as? CoalescingUndoManager)?.breakCoalescing()
+    }
+
+    /// A Boolean value that indicates whether undo coalescing is in progress.
+    public var isCoalescingUndo: Bool {
+        (undoManager as? CoalescingUndoManager)?.isCoalescing ?? false
     }
 }
 
