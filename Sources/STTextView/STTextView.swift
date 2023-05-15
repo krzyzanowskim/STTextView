@@ -100,6 +100,7 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    /// Sets the text color of characters within the specified range to the specified color.
     open func setTextColor(_ color: NSColor?, range: NSRange) {
         if let color {
             addAttributes([.foregroundColor: color], range: range)
