@@ -832,7 +832,16 @@ open class STTextView: NSView, NSTextInput {
         delegate?.textViewWillChangeText(notification)
     }
 
+    /// Sends out necessary notifications when a text change completes.
     open func textDidChange(_ sender: Any?) {
+        didChangeText()
+    }
+
+    /// Sends out necessary notifications when a text change completes.
+    ///
+    /// Invoked automatically at the end of a series of changes, this method posts an `textDidChangeNotification` to the default notification center, which also results in the delegate receiving `textViewDidChangeText(_:)` message.
+    /// Subclasses implementing methods that change their text should invoke this method at the end of those methods.
+    open func didChangeText() {
         needsScrollToSelection = true
 
         let notification = Notification(name: STTextView.textDidChangeNotification, object: self, userInfo: nil)
