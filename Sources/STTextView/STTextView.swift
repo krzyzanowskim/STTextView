@@ -423,9 +423,7 @@ open class STTextView: NSView, NSTextInput {
             guard let self = self else { return }
 
             // TODO: doesn't work work correctly (at all) for multiple insertion points where each has different typing attribute
-            let startLocation = textLayoutManager.insertionPointLocations.first
-
-            if let startLocation {
+            if let startLocation = textLayoutManager.insertionPointLocations.first {
                 var attr: [NSAttributedString.Key: Any] = [:]
                 let options: NSTextContentManager.EnumerationOptions = startLocation == textContentManager.documentRange.location ? [] : [.reverse]
                 textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
