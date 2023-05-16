@@ -121,11 +121,27 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    private static var defaultTypingAttributes: [NSAttributedString.Key: Any] = [.paragraphStyle: NSParagraphStyle.default, .font: NSFont.userFont(ofSize: 0)!, .foregroundColor: NSColor.textColor]
+    private static let defaultTypingAttributes: [NSAttributedString.Key: Any] = [
+        .paragraphStyle: NSParagraphStyle.default,
+        .font: NSFont.userFont(ofSize: 0) ?? .preferredFont(forTextStyle: .body),
+        .foregroundColor: NSColor.textColor
+    ]
 
     /// The text view's typing attributes
     @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
+
+            // make sure to keep the main attributes set.
+            if typingAttributes.isEmpty {
+                typingAttributes = Self.defaultTypingAttributes
+            } else {
+                for key in Self.defaultTypingAttributes.keys {
+                    if typingAttributes[key] == nil {
+                        typingAttributes[key] = Self.defaultTypingAttributes[key]
+                    }
+                }
+            }
+
             needsLayout = true
             needsDisplay = true
         }
