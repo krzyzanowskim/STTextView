@@ -128,6 +128,8 @@ open class STTextView: NSView, NSTextInput {
     ]
 
     /// The text view's typing attributes
+    ///
+    /// Typing attributes are reset automatically whenever the selection changes. However, if you add any user actions that change text attributes, the action should use this method to apply those attributes afterwards. User actions that change attributes should always set the typing attributes because there might not be a subsequent change in selection before the next typing.
     @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
 
@@ -419,6 +421,28 @@ open class STTextView: NSView, NSTextInput {
         // Forward didChangeSelectionNotification from STTextLayoutManager
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
+
+            // TODO: doesn't work work correctly (at all) for multiple insertion points where each has different typing attribute
+            if textLayoutManager.insertionPointLocations.count == 1,
+                let endLocation = textLayoutManager.insertionPointLocations.first {
+                let startLocation: NSTextLocation
+                if endLocation == textContentManager.documentRange.location {
+                    startLocation = textContentManager.documentRange.location
+                } else {
+                    startLocation = textContentManager.location(endLocation, offsetBy: -1)!
+                }
+
+                var attr: [NSAttributedString.Key: Any] = [:]
+                textContentManager.enumerateTextElements(from: startLocation) { textElement in
+                    if let textParagraph = textElement as? NSTextParagraph, let elementRange = textElement.elementRange, let textContentManager = textElement.textContentManager {
+                        let charLocation = textContentManager.offset(from: elementRange.location, to: startLocation)
+                        attr = textParagraph.attributedString.attributes(at: charLocation, effectiveRange: nil)
+                    }
+
+                    return false
+                }
+                self.typingAttributes = attr
+            }
 
             Yanking.shared.selectionChanged()
 
