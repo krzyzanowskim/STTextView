@@ -120,6 +120,8 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
+    private static var defaultTypingAttributes: [NSAttributedString.Key: Any] = [.paragraphStyle: NSParagraphStyle.default, .font: NSFont.userFont(ofSize: 0)!, .foregroundColor: NSColor.textColor]
+
     /// The text view's typing attributes
     @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
@@ -130,8 +132,8 @@ open class STTextView: NSView, NSTextInput {
 
     // line height based on current typing font and current typing paragraph
     internal var typingLineHeight: CGFloat {
-        let font = typingAttributes[.font] as? NSFont ?? .preferredFont(forTextStyle: .body)
-        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
+        let font = typingAttributes[.font] as? NSFont ?? Self.defaultTypingAttributes[.font] as! NSFont
+        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? Self.defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
         let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
         return NSLayoutManager().defaultLineHeight(for: font) * lineHeightMultiple
     }
@@ -371,7 +373,7 @@ open class STTextView: NSView, NSTextInput {
         selectionLayer = STCATiledLayer()
         selectionLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
 
-        typingAttributes = [.paragraphStyle: NSParagraphStyle.default, .foregroundColor: NSColor.textColor]
+        typingAttributes = Self.defaultTypingAttributes
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
 
