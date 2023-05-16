@@ -19,10 +19,10 @@ final class ViewController: NSViewController {
         scrollView.drawsBackground = true
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        paragraph.lineHeightMultiple = 1.1
+        paragraph.lineHeightMultiple = 1.2
         paragraph.defaultTabInterval = 28 // default
 
-        textView.defaultParagraphStyle = paragraph
+        textView.typingAttributes[.paragraphStyle] = paragraph
         textView.font = NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
 

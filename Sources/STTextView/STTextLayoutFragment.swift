@@ -4,15 +4,15 @@
 import Cocoa
 
 final class STTextLayoutFragment: NSTextLayoutFragment {
-    private let defaultParagraphStyle: NSParagraphStyle
+    private let paragraphStyle: NSParagraphStyle
 
-    init(textElement: NSTextElement, range rangeInElement: NSTextRange?, defaultParagraphStyle: NSParagraphStyle) {
-        self.defaultParagraphStyle = defaultParagraphStyle
+    init(textElement: NSTextElement, range rangeInElement: NSTextRange?, paragraphStyle: NSParagraphStyle) {
+        self.paragraphStyle = paragraphStyle
         super.init(textElement: textElement, range: rangeInElement)
     }
 
     required init?(coder: NSCoder) {
-        self.defaultParagraphStyle = .default
+        self.paragraphStyle = NSParagraphStyle.default
         super.init(coder: coder)
     }
 
@@ -32,7 +32,7 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
             {
                 paragraphStyle = lineParagraphStyle
             } else {
-                paragraphStyle = defaultParagraphStyle
+                paragraphStyle = self.paragraphStyle
             }
 
             if !paragraphStyle.lineHeightMultiple.isAlmostZero() {

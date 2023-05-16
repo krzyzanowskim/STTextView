@@ -109,7 +109,8 @@ open class STTextView: NSView, NSTextInput {
         }
     }
 
-    /// The text view’s default paragraph style.
+    /// Deprecated. The text view’s default paragraph style.
+    @available(*, deprecated, message: "Use typingAttributes[.paragraphStyle] instead")
     @objc dynamic public var defaultParagraphStyle: NSParagraphStyle? {
         get {
             typingAttributes[.paragraphStyle] as? NSParagraphStyle

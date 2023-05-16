@@ -90,8 +90,8 @@ let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphSty
 paragraph.lineHeightMultiple = 1.1
 paragraph.defaultTabInterval = 28
 
-// Default Paragraph
-textView.defaultParagraphStyle = paragraph
+// Default Paragraph style
+textView.typingAttributes[.paragraphStyle] = paragraph
 
 // Set default font
 textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
