@@ -20,27 +20,70 @@ extension NSTextContentManager {
     }
 
 
+    /// Attributed string for the range
+    /// - Parameter range: Text range, or nil for the whole document.
+    /// - Returns: Attributed string, or nil.
     func attributedString(in range: NSTextRange?) -> NSAttributedString? {
-        let result = NSMutableAttributedString()
-        if let range = range {
-            // TODO: not performant for large documents
-            //       instead process only affected elements and extract only the range
-            //       Use enumerateTextElements and calculate attributed string range
-            if let attributedString = attributedString(in: nil) {
-                result.append(
-                    attributedString.attributedSubstring(from: NSRange(range, in: self))
-                )
-            }
-        } else {
-            enumerateTextElements(from: nil) { textElement in
-                if let textParagraph = textElement as? NSTextParagraph {
-                    result.append(textParagraph.attributedString)
-                }
-
-                return true
-            }
+        if range != nil, range?.isEmpty == true {
+            return nil
         }
 
+        let result = NSMutableAttributedString()
+        result.beginEditing()
+        enumerateTextElements(from: range?.location) { textElement in
+            if let range = range,
+               let textParagraph = textElement as? NSTextParagraph,
+               let elementRange = textElement.elementRange,
+               let textContentManager = textElement.textContentManager
+            {
+                var shouldStop = false
+                var needAdjustment = false
+                var constrainedElementRange = elementRange
+                if elementRange.contains(range.location) {
+                    // start location
+                    constrainedElementRange = NSTextRange(location: range.location, end: constrainedElementRange.endLocation)!
+                    needAdjustment = true
+                }
+
+                if elementRange.contains(range.endLocation) {
+                    // end location
+                    constrainedElementRange = NSTextRange(location: constrainedElementRange.location, end: range.endLocation)!
+                    needAdjustment = true
+                    shouldStop = true
+                }
+
+                if needAdjustment {
+                    let constrainedRangeInDocument = NSTextRange(location: constrainedElementRange.location, end: constrainedElementRange.endLocation)!
+                    let leadingOffset = textContentManager.offset(from: elementRange.location, to: constrainedElementRange.location)
+
+                    // translate contentRangeInDocument from document namespace to textElement.attributedString namespace
+                    let nsRangeInDocumentDocument = NSRange(
+                        location: leadingOffset,
+                        length: constrainedRangeInDocument.length(in: textContentManager)
+                    )
+
+                    result.append(
+                        textParagraph.attributedString.attributedSubstring(from: nsRangeInDocumentDocument)
+                    )
+                } else {
+                    result.append(
+                        textParagraph.attributedString
+                    )
+                }
+
+                if shouldStop {
+                    return false
+                }
+            } else if range == nil, let textParagraph = textElement as? NSTextParagraph {
+                result.append(
+                    textParagraph.attributedString
+                )
+            }
+
+            return true
+        }
+
+        result.endEditing()
         if result.length == 0 {
             return nil
         }
