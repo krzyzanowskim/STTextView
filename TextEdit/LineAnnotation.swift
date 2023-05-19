@@ -6,9 +6,9 @@ import STTextView
 import Cocoa
 
 final class LineAnnotation: STLineAnnotation {
-    let message: String
+    let message: AttributedString
 
-    init(message: String, location: NSTextLocation) {
+    init(message: AttributedString, location: NSTextLocation) {
         self.message = message
         super.init(location: location)
     }

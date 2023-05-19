@@ -6,7 +6,7 @@ import Foundation
 import STTextView
 
 struct AnnotationLabelView: View {
-    let message: String
+    let message: AttributedString
     let action: (STLineAnnotation) -> Void
     let lineAnnotation: STLineAnnotation
 

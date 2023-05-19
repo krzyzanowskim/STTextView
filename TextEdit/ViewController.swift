@@ -33,8 +33,8 @@ final class ViewController: NSViewController {
                 textView.addAttributes([.foregroundColor: NSColor.controlAccentColor], range: NSRange(ocurrenceRange, in: textView.string))
 
                 let characterLocationOffset = textView.string.distance(from: textView.string.startIndex, to: ocurrenceRange.upperBound)
-                let annotation = LineAnnotation(
-                    message: "ready!",
+                let annotation = try! LineAnnotation(
+                    message: AttributedString(markdown: "**TODO**: todo _or_ not todo"),
                     location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: characterLocationOffset)!
                 )
                 annotations.append(annotation)
@@ -123,7 +123,7 @@ extension ViewController: STTextViewDataSource {
             return nil
         }
 
-        let messageFont = NSFont.preferredFont(forTextStyle: .body).withSize(textView.font!.pointSize)
+        let messageFont = NSFont.preferredFont(forTextStyle: .body)
 
         let decorationView = STAnnotationLabelView(
             annotation: myLineAnnotation,
