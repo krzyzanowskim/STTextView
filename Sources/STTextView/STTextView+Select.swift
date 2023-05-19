@@ -15,6 +15,8 @@ extension STTextView {
             NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
         ]
 
+        updateTypingAttributes()
+
         if updateLayout {
             needsLayout = true
         }
@@ -37,6 +39,7 @@ extension STTextView {
             NSTextSelection(range: textLayoutManager.documentRange, affinity: .downstream, granularity: .line)
         ]
 
+        updateTypingAttributes()
         updateSelectionHighlights()
     }
 
@@ -52,6 +55,7 @@ extension STTextView {
                 )
         ]
 
+        updateTypingAttributes()
         needsScrollToSelection = true
         needsDisplay = true
     }
@@ -68,6 +72,7 @@ extension STTextView {
             )
         ]
 
+        updateTypingAttributes()
         needsScrollToSelection = true
         needsDisplay = true
     }
@@ -84,6 +89,7 @@ extension STTextView {
             )
         ]
 
+        updateTypingAttributes()
         needsScrollToSelection = true
         needsDisplay = true
 
@@ -406,6 +412,7 @@ extension STTextView {
             )
         }
 
+        updateTypingAttributes()
         needsScrollToSelection = true
         needsDisplay = true
     }
@@ -458,6 +465,7 @@ extension STTextView {
             textLayoutManager.textSelections = selections
         }
 
+        updateTypingAttributes()
         updateSelectionHighlights()
         needsDisplay = true
     }

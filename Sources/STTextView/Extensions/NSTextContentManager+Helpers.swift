@@ -24,6 +24,10 @@ extension NSTextContentManager {
     /// - Parameter range: Text range, or nil for the whole document.
     /// - Returns: Attributed string, or nil.
     func attributedString(in range: NSTextRange?) -> NSAttributedString? {
+        if let range {
+            precondition(range.isEmpty == false)
+        }
+        
         if range != nil, range?.isEmpty == true {
             return nil
         }
@@ -53,18 +57,20 @@ extension NSTextContentManager {
                 }
 
                 if needAdjustment {
-                    let constrainedRangeInDocument = NSTextRange(location: constrainedElementRange.location, end: constrainedElementRange.endLocation)!
-                    let leadingOffset = textContentManager.offset(from: elementRange.location, to: constrainedElementRange.location)
+                    if let constrainedRangeInDocument = NSTextRange(location: constrainedElementRange.location, end: constrainedElementRange.endLocation) {
+                        let constrainedRangeInDocumentLength = constrainedRangeInDocument.length(in: textContentManager)
+                        let leadingOffset = textContentManager.offset(from: elementRange.location, to: constrainedElementRange.location)
 
-                    // translate contentRangeInDocument from document namespace to textElement.attributedString namespace
-                    let nsRangeInDocumentDocument = NSRange(
-                        location: leadingOffset,
-                        length: constrainedRangeInDocument.length(in: textContentManager)
-                    )
+                        // translate contentRangeInDocument from document namespace to textElement.attributedString namespace
+                        let nsRangeInDocumentDocument = NSRange(
+                            location: leadingOffset,
+                            length: constrainedRangeInDocumentLength
+                        )
 
-                    result.append(
-                        textParagraph.attributedString.attributedSubstring(from: nsRangeInDocumentDocument)
-                    )
+                        result.append(
+                            textParagraph.attributedString.attributedSubstring(from: nsRangeInDocumentDocument)
+                        )
+                    }
                 } else {
                     result.append(
                         textParagraph.attributedString

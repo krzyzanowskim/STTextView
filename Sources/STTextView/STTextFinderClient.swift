@@ -57,6 +57,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
             textLayoutManager.textSelections = [NSTextSelection(textRanges, affinity: .downstream, granularity: .character)]
             textView?.updateSelectionHighlights()
+            textView?.updateTypingAttributes()
         }
 
         get {

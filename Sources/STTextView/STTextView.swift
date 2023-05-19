@@ -74,13 +74,32 @@ open class STTextView: NSView, NSTextInput {
     @Invalidating(.display, .insertionPoint)
     @objc dynamic open var insertionPointWidth: CGFloat = 1.0
 
-    /// The font of the text view.
+    /// The font of the text.
+    ///
+    /// This property applies to the entire text string.
+    /// Assigning a new value to this property causes the new font to be applied to the entire contents of the text view.
     @objc dynamic open var font: NSFont? {
         get {
-            typingAttributes[.font] as? NSFont
+            // if not empty, return a font at location 0
+            if !textContentManager.documentRange.isEmpty {
+                let location = textContentManager.documentRange.location
+                let endLocation = textContentManager.location(location, offsetBy: 1)
+                return textContentManager.attributedString(in: NSTextRange(location: location, end: endLocation))?.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
+            }
+
+            // otherwise return current typing attribute
+            return typingAttributes[.font] as? NSFont
         }
 
         set {
+            guard let newValue else {
+                return
+            }
+
+            if !textContentManager.documentRange.isEmpty {
+                addAttributes([.font: newValue], range: textContentManager.documentRange)
+            }
+
             typingAttributes[.font] = newValue
         }
     }
@@ -132,7 +151,6 @@ open class STTextView: NSView, NSTextInput {
     /// Typing attributes are reset automatically whenever the selection changes. However, if you add any user actions that change text attributes, the action should use this method to apply those attributes afterwards. User actions that change attributes should always set the typing attributes because there might not be a subsequent change in selection before the next typing.
     @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
-
             // make sure to keep the main attributes set.
             if typingAttributes.isEmpty {
                 typingAttributes = Self.defaultTypingAttributes
@@ -146,6 +164,23 @@ open class STTextView: NSView, NSTextInput {
 
             needsLayout = true
             needsDisplay = true
+        }
+    }
+
+    internal func updateTypingAttributes() {
+        // TODO: doesn't work work correctly (at all) for multiple insertion points where each has different typing attribute
+        if let startLocation = textLayoutManager.insertionPointLocations.first {
+            var attr: [NSAttributedString.Key: Any] = [:]
+            let options: NSTextContentManager.EnumerationOptions = startLocation == textContentManager.documentRange.location ? [] : [.reverse]
+            textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
+                if let textParagraph = textElement as? NSTextParagraph, let elementRange = textElement.elementRange, let textContentManager = textElement.textContentManager {
+                    let charLocation = textContentManager.offset(from: elementRange.location, to: startLocation)
+                    attr = textParagraph.attributedString.attributes(at: charLocation, effectiveRange: nil)
+                }
+
+                return false
+            }
+            self.typingAttributes = attr
         }
     }
 
@@ -421,21 +456,6 @@ open class STTextView: NSView, NSTextInput {
         // Forward didChangeSelectionNotification from STTextLayoutManager
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
-
-            // TODO: doesn't work work correctly (at all) for multiple insertion points where each has different typing attribute
-            if let startLocation = textLayoutManager.insertionPointLocations.first {
-                var attr: [NSAttributedString.Key: Any] = [:]
-                let options: NSTextContentManager.EnumerationOptions = startLocation == textContentManager.documentRange.location ? [] : [.reverse]
-                textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
-                    if let textParagraph = textElement as? NSTextParagraph, let elementRange = textElement.elementRange, let textContentManager = textElement.textContentManager {
-                        let charLocation = textContentManager.offset(from: elementRange.location, to: startLocation)
-                        attr = textParagraph.attributedString.attributes(at: max(0, charLocation - 1), effectiveRange: nil)
-                    }
-
-                    return false
-                }
-                self.typingAttributes = attr
-            }
 
             Yanking.shared.selectionChanged()
 
