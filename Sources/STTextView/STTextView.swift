@@ -93,6 +93,7 @@ open class STTextView: NSView, NSTextInput {
 
         set {
             guard let newValue else {
+                NSException(name: .invalidArgumentException, reason: "nil NSFont given").raise()
                 return
             }
 
@@ -169,18 +170,35 @@ open class STTextView: NSView, NSTextInput {
 
     internal func updateTypingAttributes() {
         // TODO: doesn't work work correctly (at all) for multiple insertion points where each has different typing attribute
-        if let startLocation = textLayoutManager.insertionPointLocations.first {
-            var attr: [NSAttributedString.Key: Any] = [:]
+        if let insertionPointSelection = textLayoutManager.insertionPointSelections.first,
+           let startLocation = insertionPointSelection.textRanges.first?.location
+        {
+            var attrs: [NSAttributedString.Key: Any] = [:]
+            // The attribute is derived from the previous (upstream) location,
+            // except for the beginning of the document where it from whatever is at location 0
             let options: NSTextContentManager.EnumerationOptions = startLocation == textContentManager.documentRange.location ? [] : [.reverse]
+            let offsetDiff = startLocation == textContentManager.documentRange.location ? 0 : -1
             textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
-                if let textParagraph = textElement as? NSTextParagraph, let elementRange = textElement.elementRange, let textContentManager = textElement.textContentManager {
-                    let charLocation = textContentManager.offset(from: elementRange.location, to: startLocation)
-                    attr = textParagraph.attributedString.attributes(at: charLocation, effectiveRange: nil)
+                if let textParagraph = textElement as? NSTextParagraph,
+                   let elementRange = textElement.elementRange,
+                   let textContentManager = textElement.textContentManager
+                {
+                    let offset = textContentManager.offset(from: elementRange.location, to: startLocation)
+                    assert(offset != NSNotFound, "Unexpected location")
+                    attrs = textParagraph.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
                 }
 
                 return false
             }
-            self.typingAttributes = attr
+
+            // fill in with missing typing attributes if needed
+            for key in Self.defaultTypingAttributes.keys {
+                if attrs[key] == nil {
+                    attrs[key] = Self.defaultTypingAttributes[key]
+                }
+            }
+
+            self.typingAttributes = attrs
         }
     }
 
@@ -682,7 +700,9 @@ open class STTextView: NSView, NSTextInput {
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
 
+
         if updateLayout {
+            updateTypingAttributes()
             needsLayout = true
         }
     }
@@ -706,7 +726,9 @@ open class STTextView: NSView, NSTextInput {
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
 
+
         if updateLayout {
+            updateTypingAttributes()
             needsLayout = true
         }
     }
@@ -729,6 +751,8 @@ open class STTextView: NSView, NSTextInput {
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
         }
+
+        updateTypingAttributes()
 
         if updateLayout {
             needsLayout = true

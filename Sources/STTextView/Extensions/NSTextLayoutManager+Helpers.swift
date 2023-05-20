@@ -57,6 +57,11 @@ extension NSTextLayoutManager {
 
     public func textSelectionSegmentFrame(in textRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> CGRect? {
         var result: CGRect? = nil
+        // .upstreamAffinity: When specified, the segment is placed based on the upstream affinity for an empty range.
+        //
+        // In the context of text editing, upstream affinity means that the selection is biased towards the preceding or earlier portion of the text,
+        // while downstream affinity means that the selection is biased towards the following or later portion of the text. The affinity helps determine
+        // the behavior of the text selection when the text is modified or manipulated.
         enumerateTextSegments(in: textRange, type: type, options: [.rangeNotRequired, .upstreamAffinity]) { _, textSegmentFrame, _, _ -> Bool in
             result = textSegmentFrame
             return true

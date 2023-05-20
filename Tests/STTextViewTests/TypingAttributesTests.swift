@@ -34,10 +34,6 @@ class TypingAttributesTests : XCTestCase {
         XCTAssertNotNil(textView.font)
         XCTAssertEqual(textView.font, NSFont.boldSystemFont(ofSize: 99))
         XCTAssertEqual(textView.font, textView.typingAttributes[.font] as? NSFont)
-
-        textView.font = nil
-        XCTAssertEqual(textView.font, NSFont.boldSystemFont(ofSize: 99))
-        XCTAssertEqual(textView.font, textView.typingAttributes[.font] as? NSFont)
     }
 
     func testSetFontContent() {
@@ -47,10 +43,6 @@ class TypingAttributesTests : XCTestCase {
 
         textView.font = NSFont.boldSystemFont(ofSize: 99)
         XCTAssertNotNil(textView.font)
-        XCTAssertEqual(textView.font, NSFont.boldSystemFont(ofSize: 99))
-        XCTAssertEqual(textView.font, textView.typingAttributes[.font] as? NSFont)
-
-        textView.font = nil
         XCTAssertEqual(textView.font, NSFont.boldSystemFont(ofSize: 99))
         XCTAssertEqual(textView.font, textView.typingAttributes[.font] as? NSFont)
     }
@@ -64,24 +56,23 @@ class TypingAttributesTests : XCTestCase {
         // "89" is size of 66
         textView.addAttributes([.font: NSFont.systemFont(ofSize: 66)], range: NSRange(location: 8, length: 2))
 
-        print(textView.attributedString())
         // Move insertion point
 
         // No change at index 0
         textView.setSelectedRange(NSRange(location: 0, length: 0))
         XCTAssertEqual(textView.typingAttributes[.font] as? NSFont, beforeChange[.font] as? NSFont)
 
-        // Change at index 1
+        // No change at index 1
         textView.setSelectedRange(NSRange(location: 1, length: 0))
-        XCTAssertNotEqual(textView.typingAttributes[.font] as? NSFont, beforeChange[.font] as? NSFont)
+        XCTAssertEqual(textView.typingAttributes[.font] as? NSFont, beforeChange[.font] as? NSFont)
 
         // Change at index 2
         textView.setSelectedRange(NSRange(location: 2, length: 0))
         XCTAssertNotEqual(textView.typingAttributes[.font] as? NSFont, beforeChange[.font] as? NSFont)
 
-        // No change at index 3
+        // Change at index 3
         textView.setSelectedRange(NSRange(location: 3, length: 0))
-        XCTAssertEqual(textView.typingAttributes[.font] as? NSFont, beforeChange[.font] as? NSFont)
+        XCTAssertNotEqual(textView.typingAttributes[.font] as? NSFont, beforeChange[.font] as? NSFont)
 
         // Change at index 9
         textView.setSelectedRange(NSRange(location: 9, length: 0))
