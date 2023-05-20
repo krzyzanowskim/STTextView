@@ -26,6 +26,29 @@ class TypingAttributesTests : XCTestCase {
         XCTAssertEqual(beforeChange[.foregroundColor] as? NSColor, afterChange[.foregroundColor] as? NSColor)
     }
 
+    func testSetTypingAttributesCompareWithNSTextView() {
+        let nstv = NSTextView()
+        print(nstv.font!) // Helvetica
+
+        let sttv = STTextView()
+
+        nstv.setSelectedRange(NSRange(location: 0, length: 0))
+        sttv.setSelectedRange(NSRange(location: 0, length: 0))
+
+        // NSTextView.insertText behave different than nstv.textStorage.insert()
+        // I don't understand what it does to the font attribute but it's wrong.
+        // nstv.insertText(attributedString, replacementRange: NSRange(location: 0, length: 0))
+        let attributedString = NSAttributedString(string: "0123456789", attributes: [.font: NSFont.systemFont(ofSize: 44)])
+
+        nstv.textStorage?.insert(attributedString, at: 0)
+        XCTAssertTrue(nstv.string.utf16.count == 10)
+
+        sttv.insertText(attributedString, replacementRange: NSRange(location: 0, length: 0))
+        XCTAssertEqual(nstv.string.utf16.count, sttv.string.utf16.count)
+
+        XCTAssertEqual(nstv.font, sttv.font)
+    }
+
     func testSetFontEmptyContent() {
         let textView = STTextView()
         XCTAssertNotNil(textView.font)
