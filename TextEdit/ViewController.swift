@@ -23,8 +23,35 @@ final class ViewController: NSViewController {
         paragraph.defaultTabInterval = 28 // default
 
         textView.typingAttributes[.paragraphStyle] = paragraph
-        textView.font = NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        textView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
+
+        textView.widthTracksTextView = false // wrap
+        textView.highlightSelectedLine = true
+        textView.textFinder.isIncrementalSearchingEnabled = true
+        textView.textFinder.incrementalSearchingShouldDimContentView = true
+        textView.delegate = self
+        textView.dataSource = self
+
+        scrollView.documentView = textView
+
+        // Line numbers
+        let rulerView = STLineNumberRulerView(textView: textView)
+        rulerView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
+        rulerView.allowsMarkers = true
+        rulerView.highlightSelectedLine = true
+        scrollView.verticalRulerView = rulerView
+        scrollView.rulersVisible = true
+
+        view.addSubview(scrollView)
+        NSLayoutConstraint.activate([
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        // Add attributes
 
         // highlight occurence of STTextView
         do {
@@ -51,30 +78,6 @@ final class ViewController: NSViewController {
             ],
             range: NSRange(textView.string.linesRanges().first!, in: textView.string)
         )
-
-        textView.widthTracksTextView = false // wrap
-        textView.highlightSelectedLine = true
-        textView.textFinder.isIncrementalSearchingEnabled = true
-        textView.textFinder.incrementalSearchingShouldDimContentView = true
-        textView.delegate = self
-        textView.dataSource = self
-
-        scrollView.documentView = textView
-
-        // Line numbers
-        let rulerView = STLineNumberRulerView(textView: textView)
-        rulerView.allowsMarkers = true
-        rulerView.highlightSelectedLine = true
-        scrollView.verticalRulerView = rulerView
-        scrollView.rulersVisible = true
-
-        view.addSubview(scrollView)
-        NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
     }
 
     @IBAction func toggleTextWrapMode(_ sender: Any?) {

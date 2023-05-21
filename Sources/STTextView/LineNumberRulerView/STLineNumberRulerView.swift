@@ -15,7 +15,7 @@ open class STLineNumberRulerView: NSRulerView {
     /// Initialized with a textView font value and does not update automatically when
     /// text view font changes.
     @Invalidating(.display)
-    open var font: NSFont = NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: NSFont.systemFontSize) ?? NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+    open var font: NSFont = NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: 0) ?? NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
 
     /// The insets of the ruler view.
     @Invalidating(.display)
