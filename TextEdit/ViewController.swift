@@ -58,15 +58,21 @@ final class ViewController: NSViewController {
             var currentRange = textView.string.startIndex..<textView.string.endIndex
             while let ocurrenceRange = textView.string.range(of: "STTextView", range: currentRange) {
                 textView.addAttributes([.foregroundColor: NSColor.controlAccentColor], range: NSRange(ocurrenceRange, in: textView.string))
+                currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
+            }
+        }
 
+        // add annotation
+        do {
+            let stringRange = textView.string.startIndex..<textView.string.endIndex
+            if let ocurrenceRange = textView.string.range(of: "infamous", range: stringRange) {
                 let characterLocationOffset = textView.string.distance(from: textView.string.startIndex, to: ocurrenceRange.upperBound)
                 let annotation = try! LineAnnotation(
-                    message: AttributedString(markdown: "**TODO**: todo _or_ not todo"),
+                    message: AttributedString(markdown: "**TODO**: to cry _or_ not to cry"),
                     location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: characterLocationOffset)!
                 )
                 annotations.append(annotation)
 
-                currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
             }
         }
 

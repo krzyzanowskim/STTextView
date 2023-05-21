@@ -28,7 +28,6 @@ class TypingAttributesTests : XCTestCase {
 
     func testSetTypingAttributesCompareWithNSTextView() {
         let nstv = NSTextView()
-        print(nstv.font!) // Helvetica
 
         let sttv = STTextView()
 
@@ -47,6 +46,7 @@ class TypingAttributesTests : XCTestCase {
         XCTAssertEqual(nstv.string.utf16.count, sttv.string.utf16.count)
 
         XCTAssertEqual(nstv.font, sttv.font)
+        XCTAssertEqual(nstv.selectedRange(), sttv.selectedRange())
     }
 
     func testSetFontEmptyContent() {
