@@ -10,11 +10,9 @@ The goal of this project is to build [NSTextView](https://developer.apple.com/do
 
 The component is developed to serve [Swift Studio](https://swiftstudio.app) needs as a **source code editor**.
 
-
 <img width="100%" alt="Screenshot 2023-04-24 at 02 03 51" src="https://user-images.githubusercontent.com/758033/233873957-3f94a73a-a401-4f54-9631-3002600ba6f8.png">
 
 https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-9812-b3c7e324a1ca.mp4
-
 
 [TextKit 2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit 1 replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit 2 and provide support along TextKit 1 bits. As I started to learn more about `NSTextView` + TextKit2, I realized as of today (Feb 2022), neither `NSTextView` is fully functional, nor TextKit 2 classes are fully functional. Along the way, I reported several bug reports to Apple requested DTS (support tickets). Eventually, I've got blocked by specific bugs that pushed me to start this project.
 
@@ -35,7 +33,6 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - Anchored annotations
 - Undo/Redo
 
-
 ## 🗓️ Roadmap
 
 STTextView is already well suited as a text editor component, however it still need improvements before release v1.0
@@ -44,7 +41,8 @@ STTextView is already well suited as a text editor component, however it still n
 
 #### Known issues
 
-* Improve Undo/Redo. Current fail in some scenario to redo text at the correct location. Updates are incremental and uses custom implementation.
+- Improve Undo/Redo. Currently fail in some scenarios to redo text at the correct location. Updates are incremental and uses custom implementation.
+- Missing text drag'n'drop
 
 ## 🚀 Getting Started
 
@@ -60,11 +58,35 @@ let package = Package(
 
 ## Usage
 
+### SwiftUI
+
+The `TextView` is a [SwiftUI](https://developer.apple.com/xcode/swiftui/) view that wraps the STTextView.
+
+```swift
+import TextView
+
+struct ContentView: View {
+
+    @State private var text = "Hello World!"
+
+    var body: some View {
+        TextView(
+            text: $text,
+            font: NSFont.monospacedSystemFont(ofSize: 0, weight: .regular),
+            wrapLines: true,
+            highlightSelectedLine: true
+        )
+    }
+}
+```
+
 ### Create a TextView
 
 The `STTextView` is a subclass of `NSView` and as such can be initialized like any other view. It has an API that is similar to the one of NSTextView.
 
 ```swift
+import STTextView
+
 let textView = STTextView()
 view.addSubView(textView)
 ```
@@ -82,7 +104,7 @@ let textView = scrollView.documentView as! STTextView
 
 ### Customize
 
-The text view can be customized in a variety of ways. 
+The text view can be customized in a variety of ways.
 
 ```swift
 let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
@@ -160,12 +182,11 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 
 (**ST** prefix stands for "**S**wift s**T**udio" because **[SS](https://en.wikipedia.org/wiki/Schutzstaffel)** is not good prefix since 1939)
 
-
 ## Suggestions or Feedback
 
 Start a new [discussion topic](https://github.com/krzyzanowskim/STTextView/discussions) or a pull request.
 
-I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twitter.com/krzyzanowskim), mastodon [@krzyzanowskim@mastodon.social](https://mastodon.social/@krzyzanowskim). 
+I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twitter.com/krzyzanowskim), mastodon [@krzyzanowskim@mastodon.social](https://mastodon.social/@krzyzanowskim).
 
 ## License
 
