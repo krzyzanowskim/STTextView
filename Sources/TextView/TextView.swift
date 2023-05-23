@@ -6,30 +6,39 @@ import SwiftUI
 import STTextView
 
 public struct TextView: SwiftUI.View {
+
+    @frozen
+    public struct Options: OptionSet {
+        public let rawValue: Int
+
+        public init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
+
+        public static let wrapLines = Options(rawValue: 1 << 0)
+        public static let highlightSelectedLine = Options(rawValue: 1 << 1)
+    }
+
     @Environment(\.colorScheme) private var colorScheme
 
     @Binding private var text: AttributedString
     private var font: NSFont
-    private var wrapLines: Bool
-    private var highlightSelectedLine: Bool
+    private let options: Options
 
     public init(
         text: Binding<AttributedString>,
         font: NSFont = .preferredFont(forTextStyle: .body),
-        wrapLines: Bool = true,
-        highlightSelectedLine: Bool = false
+        options: Options = []
     ) {
         _text = text
         self.font = font
-        self.wrapLines = wrapLines
-        self.highlightSelectedLine = highlightSelectedLine
+        self.options = options
     }
 
     public init(
         text: Binding<String>,
         font: NSFont = .preferredFont(forTextStyle: .body),
-        wrapLines: Bool = true,
-        highlightSelectedLine: Bool = false
+        options: Options = []
     ) {
         self = TextView(
             text: Binding(
@@ -43,8 +52,7 @@ public struct TextView: SwiftUI.View {
                 }
             ),
             font: font,
-            wrapLines: wrapLines,
-            highlightSelectedLine: highlightSelectedLine
+            options: options
         )
     }
 
@@ -52,8 +60,7 @@ public struct TextView: SwiftUI.View {
         TextViewRepresentable(
             text: $text,
             font: font,
-            wrapLines: wrapLines,
-            highlightSelectedLine: highlightSelectedLine
+            options: options
         )
         .background(.background)
     }
@@ -64,8 +71,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
     @Binding var text: AttributedString
     var font: NSFont
-    var wrapLines: Bool
-    var highlightSelectedLine: Bool
+    var options: TextView.Options
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = STTextView.scrollableTextView()
@@ -73,8 +79,8 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.font = font
         textView.setAttributedString(NSAttributedString(text))
         textView.delegate = context.coordinator
-        textView.highlightSelectedLine = highlightSelectedLine
-        textView.widthTracksTextView = wrapLines
+        textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
+        textView.widthTracksTextView = options.contains(.wrapLines)
         textView.setSelectedRange(NSRange())
         return scrollView
     }
@@ -85,7 +91,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
         let textView = scrollView.documentView as! STTextView
         textView.isEditable = isEnabled
         textView.isSelectable = isEnabled
-        textView.widthTracksTextView = wrapLines
+        textView.widthTracksTextView = options.contains(.wrapLines)
     }
 
     func makeCoordinator() -> TextCoordinator {
