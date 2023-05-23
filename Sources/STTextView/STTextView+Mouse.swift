@@ -43,14 +43,23 @@ extension STTextView {
         }
     }
 
+    open override func mouseUp(with event: NSEvent) {
+        super.mouseUp(with: event)
+        mouseDraggingSelectionAnchors = nil
+    }
+
     open override func mouseDragged(with event: NSEvent) {
         if isSelectable, event.type == .leftMouseDragged, (!event.deltaY.isZero || !event.deltaX.isZero) {
             let point = convert(event.locationInWindow, from: nil)
 
+            if mouseDraggingSelectionAnchors == nil {
+                mouseDraggingSelectionAnchors = textLayoutManager.textSelections
+            }
+
             updateTextSelection(
                 interactingAt: point,
-                inContainerAt: textLayoutManager.documentRange.location,
-                anchors: textLayoutManager.textSelections,
+                inContainerAt: mouseDraggingSelectionAnchors?.first?.textRanges.first?.location ?? textLayoutManager.documentRange.location,
+                anchors: mouseDraggingSelectionAnchors!,
                 extending: true,
                 isDragging: true,
                 visual: event.modifierFlags.contains(.option)

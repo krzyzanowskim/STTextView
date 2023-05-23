@@ -435,23 +435,6 @@ extension STTextView {
             modifiers.insert(.visual)
         }
 
-        // FB11898356
-        // Something if wrong with textSelectionsInteractingAtPoint
-        //
-        // When drag mouse down it move text range to the previous line
-        // that is unexpected. This happens only when the anchor location
-        // is at the beginning of the line/paragraph
-        //
-        // Mouse position: (8.140625, 82.99609375)
-        // [NSTextSelection:<0x60000153fb10> granularity=character, affinity=upstream, transient, anchor position offset=5.000000, anchor location 512, textRanges=(
-        // "512...1106"
-        // )]
-        //
-        // Mouse position: (8.484375, 83.20703125)
-        // [NSTextSelection:<0x60000152f570> granularity=character, affinity=upstream, transient, anchor position offset=5.000000, anchor location 512, textRanges=(
-        // "511...1106"
-        // )]
-        //
         let selections = textLayoutManager.textSelectionNavigation.textSelections(
             interactingAt: point,
             inContainerAt: location,

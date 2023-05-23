@@ -20,7 +20,6 @@ import Cocoa
 
 /// A TextKit2 text view without NSTextView baggage
 open class STTextView: NSView, NSTextInput {
-
     /// Posted before an object performs any operation that changes characters or formatting attributes.
     public static let textWillChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
 
@@ -409,6 +408,15 @@ open class STTextView: NSView, NSTextInput {
             return nil
         }
     }
+
+    /// A dragging selection anchor
+    ///
+    /// FB11898356 - Something if wrong with textSelectionsInteractingAtPoint
+    /// it expects that the dragging operation does not change anchor selections
+    /// significantly. Specifically it does not play well if anchor and current
+    /// location is too close to each other, therefore `mouseDraggingSelectionAnchors`
+    /// keep the anchors unchanged while dragging.
+    internal var mouseDraggingSelectionAnchors: [NSTextSelection]? = nil
 
     open override class var defaultMenu: NSMenu? {
         let menu = super.defaultMenu ?? NSMenu()
