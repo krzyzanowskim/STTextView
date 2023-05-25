@@ -301,7 +301,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     @objc dynamic open var allowsUndo: Bool
     internal var _undoManager: UndoManager?
 
-    struct MarkedText {
+    internal struct MarkedText {
         var string: Any
         var selectedRange: NSRange
         var replacementRange: NSRange

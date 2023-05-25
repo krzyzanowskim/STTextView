@@ -6,6 +6,10 @@ import Cocoa
 extension STTextView {
 
     open override func mouseDown(with event: NSEvent) {
+        guard (inputContext?.handleEvent(event) ?? false) == false else {
+            return
+        }
+
         guard isSelectable, event.type == .leftMouseDown else {
             super.mouseDown(with: event)
             return
@@ -44,11 +48,19 @@ extension STTextView {
     }
 
     open override func mouseUp(with event: NSEvent) {
-        super.mouseUp(with: event)
+        guard (inputContext?.handleEvent(event) ?? false) == false else {
+            return
+        }
+
         mouseDraggingSelectionAnchors = nil
+        super.mouseUp(with: event)
     }
 
     open override func mouseDragged(with event: NSEvent) {
+        guard (inputContext?.handleEvent(event) ?? false) == false else {
+            return
+        }
+
         if isSelectable, event.type == .leftMouseDragged, (!event.deltaY.isZero || !event.deltaX.isZero) {
             let point = convert(event.locationInWindow, from: nil)
 
@@ -71,6 +83,14 @@ extension STTextView {
         } else {
             super.mouseDragged(with: event)
         }
+    }
+
+    open override func mouseMoved(with event: NSEvent) {
+        guard (inputContext?.handleEvent(event) ?? false) == false else {
+            return
+        }
+
+        super.mouseMoved(with: event)
     }
 
     open override func menu(for event: NSEvent) -> NSMenu? {
