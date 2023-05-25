@@ -19,7 +19,7 @@
 import Cocoa
 
 /// A TextKit2 text view without NSTextView baggage
-open class STTextView: NSView, NSTextInput {
+open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Posted before an object performs any operation that changes characters or formatting attributes.
     public static let textWillChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
 
@@ -292,6 +292,8 @@ open class STTextView: NSView, NSTextInput {
 
         backgroundColor = color
     }
+
+    open var contentType: NSTextContentType?
 
     /// A Boolean value that indicates whether the receiver allows undo.
     ///
