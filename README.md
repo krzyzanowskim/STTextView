@@ -31,6 +31,7 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - Customizable Completion support
 - Smooth scrolling of long content
 - Anchored annotations
+- LTR (Left To Right) / RTL (Right To Left) layout
 - Undo/Redo
 
 ## 🗓️ Roadmap
@@ -41,8 +42,8 @@ STTextView is already well suited as a text editor component, however it still n
 
 #### Known issues
 
-- Improve Undo/Redo. Currently fail in some scenarios to redo text at the correct location. Updates are incremental and uses custom implementation.
-- Missing text drag'n'drop
+- undo/redo while typing need fixes
+- no text dragging
 
 ## 🚀 Getting Started
 
