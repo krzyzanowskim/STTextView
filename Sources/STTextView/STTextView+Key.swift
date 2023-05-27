@@ -5,6 +5,12 @@ import Cocoa
 
 extension STTextView {
     open override func keyDown(with event: NSEvent) {
+        
+        guard isEditable else {
+            super.keyDown(with: event)
+            return
+        }
+
         processingKeyEvent = true
         defer {
             processingKeyEvent = false
