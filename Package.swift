@@ -8,7 +8,7 @@ let package = Package(
     products: [
         .library(
             name: "STTextView",
-            targets: ["STTextView", "TextView"]
+            targets: ["STTextView", "STTextViewUI"]
         )
     ],
     targets: [
@@ -16,7 +16,7 @@ let package = Package(
             name: "STTextView"
         ),
         .target(
-            name: "TextView",
+            name: "STTextViewUI",
             dependencies: ["STTextView"]
         ),
         .testTarget(

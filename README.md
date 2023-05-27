@@ -63,7 +63,7 @@ let package = Package(
 The `TextView` is a [SwiftUI](https://developer.apple.com/xcode/swiftui/) view that wraps the STTextView.
 
 ```swift
-import TextView
+import STTextViewUI
 
 struct ContentView: View {
 

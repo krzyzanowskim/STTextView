@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import SwiftUI
-import TextView
+import STTextViewUI
 
 struct ContentView: View {
     @State private var text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
