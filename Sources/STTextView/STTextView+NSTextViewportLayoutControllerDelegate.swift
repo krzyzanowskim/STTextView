@@ -6,14 +6,6 @@ import Cocoa
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        let horizontalInset: CGFloat
-        if let scrollView {
-            // ruler.ruleThickness affects NSClipView bounds and insets
-            horizontalInset = scrollView.contentView.contentInsets.left + scrollView.contentView.contentInsets.right
-        } else {
-            horizontalInset = 0
-        }
-
         let overdrawRect = preparedContentRect
         var minY: CGFloat = 0
         var maxY: CGFloat = 0
@@ -29,7 +21,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             minY = visibleRect.minY
             maxY = visibleRect.maxY
         }
-        return CGRect(x: bounds.minX, y: minY, width: bounds.width - horizontalInset, height: maxY - minY)
+        return CGRect(x: bounds.minX, y: minY, width: bounds.width, height: maxY - minY)
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {

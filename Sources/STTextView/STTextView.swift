@@ -841,7 +841,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             proposedSize.height = bounds.height
         }
 
-        if textContainer.size != proposedSize {
+        if !textContainer.size.isAlmostEqual(to: proposedSize)  {
             textContainer.size = proposedSize
         }
     }
