@@ -100,8 +100,7 @@ open class STLineNumberRulerView: NSRulerView {
         clientView = textView
 
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textView.textLayoutManager, queue: .main) { [weak self] _ in
-            self?.invalidateLineNumbers()
-            self?.needsDisplay = true
+            self?.invalidateHashMarks()
         }
     }
 
@@ -111,6 +110,7 @@ open class STLineNumberRulerView: NSRulerView {
 
     open override func invalidateHashMarks() {
         invalidateLineNumbers()
+        needsDisplay = true
     }
 
     open override func addMarker(_ marker: NSRulerMarker) {
@@ -241,7 +241,7 @@ open class STLineNumberRulerView: NSRulerView {
             self.ruleThickness = calculatedThickness
             if let scrollView = scrollView {
                 let clipView = scrollView.contentView
-                scrollView.contentView.bounds.origin.x = -clipView.contentInsets.left
+                scrollView.contentView.bounds.origin.x = -(clipView.contentInsets.left + clipView.contentInsets.right)
                 scrollView.reflectScrolledClipView(clipView)
 
                 invalidateMarkersRect()
