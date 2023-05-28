@@ -6,13 +6,13 @@ import Cocoa
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        // viewportBounds affects layout. layoutFragments from outside of the viewport bounds are broken.
-        // It's visible in line number ruler. Until I figure correct calculation of bounds
-        // the viewport is effectively whole textview = no viewport.
-        // Maybe overdraw is too small, maybe something else.
-        //
-        // Return bounds until resolve bounds problem
-        // return bounds
+        let horizontalInset: CGFloat
+        if let scrollView {
+            // ruler.ruleThickness affects NSClipView bounds and insets
+            horizontalInset = scrollView.contentView.contentInsets.left + scrollView.contentView.contentInsets.right
+        } else {
+            horizontalInset = 0
+        }
 
         let overdrawRect = preparedContentRect
         var minY: CGFloat = 0
@@ -29,7 +29,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             minY = visibleRect.minY
             maxY = visibleRect.maxY
         }
-        return CGRect(x: bounds.minX, y: minY, width: bounds.width, height: maxY - minY)
+        return CGRect(x: bounds.minX, y: minY, width: bounds.width - horizontalInset, height: maxY - minY)
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
