@@ -627,7 +627,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open func drawBackground(in rect: NSRect) {
         if highlightSelectedLine,
            // don't highlight when there's selection
-           textLayoutManager.insertionPointSelections.flatMap(\.textRanges).allSatisfy({ $0.isEmpty })
+           textLayoutManager.insertionPointSelections.flatMap(\.textRanges).allSatisfy(\.isEmpty)
         {
             drawHighlightedLine(in: rect)
         }
@@ -639,32 +639,24 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         for insertionRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) {
-            textLayoutManager.enumerateTextSegments(in: insertionRange, type: .highlight) { segmentRange, textSegmentFrame, baselinePosition, textContainer -> Bool in
-                // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
-                // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
-                // therefore for empty override height with value manually calculated from font + paragraph style
-                var selectionFrame: NSRect = textSegmentFrame
-                if segmentRange == textContentManager.documentRange {
-                    selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
-                }
-
+            textLayoutManager.enumerateTextLayoutFragments(from: insertionRange.location) { layoutFragment in
                 context.saveGState()
                 context.setFillColor(selectedLineHighlightColor.cgColor)
 
                 let fillRect = CGRect(
                     origin: CGPoint(
                         x: bounds.minX,
-                        y: selectionFrame.origin.y
+                        y: layoutFragment.layoutFragmentFrame.origin.y
                     ),
                     size: CGSize(
                         width: textContainer.size.width,
-                        height: selectionFrame.height
+                        height: layoutFragment.layoutFragmentFrame.height
                     )
                 )
 
                 context.fill(fillRect)
                 context.restoreGState()
-                return true
+                return false
             }
         }
     }

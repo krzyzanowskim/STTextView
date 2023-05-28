@@ -335,7 +335,7 @@ open class STLineNumberRulerView: NSRulerView {
             // Draw a background rectangle to highlight the selected ruler line
             if highlightSelectedLine,
                // don't highlight when there's selection
-               textView.textLayoutManager.insertionPointSelections.flatMap(\.textRanges).allSatisfy({ $0.isEmpty }),
+               textView.textLayoutManager.insertionPointSelections.flatMap(\.textRanges).allSatisfy(\.isEmpty),
                textView.textLayoutManager.insertionPointSelections.flatMap(\.textRanges).contains(where: { line.textRange.intersects($0) || line.textRange.contains($0) })
             {
                 drawHighlightedRuler(line: line, at: relativePoint, in: dirtyRect)
