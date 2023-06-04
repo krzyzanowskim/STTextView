@@ -22,13 +22,22 @@ extension STTextView {
         // Assumption: self.attributedString map 1:1 with the storage range. May or may not be true all the time (I can imagine it won't)
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) where !textRange.isEmpty {
             let selectionNSRange = NSRange(textRange, in: textContentManager)
-            attributedString().enumerateAttribute(.font, in: selectionNSRange, options: []) { value, runRange, stop in
-                if let currentFont = value as? NSFont {
-                    if let runTextRange = NSTextRange(runRange, in: textContentManager) {
-                        let newFont = fontManager.convert(currentFont)
-                        addAttributes([.font: newFont], range: runTextRange)
-                    }
+            guard let attributedStringInRange = textContentManager.attributedString(in: textRange) else {
+                return
+            }
+
+            attributedStringInRange.enumerateAttribute(.font, in: NSRange(location: 0, length: attributedStringInRange.length), options: [.longestEffectiveRangeNotRequired]) { value, runRange, stop in
+                guard let currentFont = value as? NSFont else {
+                    return
                 }
+
+                let documentScopeRange = NSRange(location: selectionNSRange.location + runRange.location, length: runRange.length)
+                guard let runTextRange = NSTextRange(documentScopeRange, in: textContentManager) else {
+                    return
+                }
+
+                let newFont = fontManager.convert(currentFont)
+                addAttributes([.font: newFont], range: runTextRange)
             }
         }
     }
