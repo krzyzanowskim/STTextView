@@ -44,6 +44,9 @@ public struct TextView: SwiftUI.View {
             text: Binding(
                 get: {
                     var container = AttributeContainer()
+                    // Swift 5.9 bogus warning: Conformance of 'NSFont' to 'Sendable' is unavailable
+                    // AttributeScopes.AppKitAttributes.FontAttribute requires NSFont and Sendable
+                    // that is impossible compbination.
                     container[AttributeScopes.AppKitAttributes.FontAttribute.self] = font
                     return AttributedString(text.wrappedValue, attributes: container)
                 },
