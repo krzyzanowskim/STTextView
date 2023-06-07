@@ -12,7 +12,7 @@ open class STInsertionPointLayer: STCALayer {
         }
     }
 
-    open internal(set) var insertionPointColor: NSColor = .textColor {
+    open internal(set) var insertionPointColor: NSColor = .defaultTextInsertionPoint {
         didSet {
             backgroundColor = insertionPointColor.cgColor
         }
