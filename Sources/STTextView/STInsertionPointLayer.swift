@@ -4,8 +4,9 @@
 import Foundation
 import Cocoa
 
-open class STInsertionPointLayer: STCALayer {
+open class STInsertionPointView: NSView {
     private var timer: Timer?
+
     open internal(set) var insertionPointWidth: CGFloat = 1 {
         didSet {
             frame.size.width = insertionPointWidth
@@ -14,12 +15,13 @@ open class STInsertionPointLayer: STCALayer {
 
     open internal(set) var insertionPointColor: NSColor = .defaultTextInsertionPoint {
         didSet {
-            backgroundColor = insertionPointColor.cgColor
+            layer?.backgroundColor = insertionPointColor.cgColor
         }
     }
 
-    public override init(layer: Any) {
-        super.init(layer: layer)
+    public required override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        commonInit()
     }
 
     public required init?(coder: NSCoder) {
@@ -27,20 +29,24 @@ open class STInsertionPointLayer: STCALayer {
         commonInit()
     }
 
-    public override required init(frame frameRect: CGRect) {
-        super.init(frame: frameRect)
-        frame = frameRect
-        commonInit()
+    private func commonInit() {
+        wantsLayer = true
+        updateGeometry()
     }
 
-    private func commonInit() {
-        updateGeometry()
+
+    public override var isFlipped: Bool {
+        #if os(macOS)
+        true
+        #else
+        false
+        #endif
     }
 
     public func updateGeometry() {
         frame = frame.insetBy(dx: 0, dy: 1).pixelAligned
         frame.size.width = insertionPointWidth
-        backgroundColor = insertionPointColor.cgColor
+        layer?.backgroundColor = insertionPointColor.cgColor
     }
 
     open func blinkStart() {

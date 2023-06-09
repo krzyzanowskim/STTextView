@@ -26,7 +26,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         // TODO: update difference, not all layers
-        contentLayer.sublayers = nil
+        contentView.subviews.removeAll()
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
@@ -37,19 +37,18 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
-        let fragmentLayer = fragmentLayerMap.object(forKey: textLayoutFragment) as? STTextLayoutFragmentLayer ?? STTextLayoutFragmentLayer(layoutFragment: textLayoutFragment)
-        fragmentLayer.contentsScale = backingScaleFactor
+        let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) ?? STTextLayoutFragmentView(layoutFragment: textLayoutFragment)
 
         // Adjust position
-        let oldFrame = fragmentLayer.frame
-        fragmentLayer.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
-        if oldFrame != fragmentLayer.frame {
-            fragmentLayer.needsLayout()
-            fragmentLayer.needsDisplay()
+        let oldFrame = fragmentView.frame
+        fragmentView.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
+        if oldFrame != fragmentView.frame {
+            fragmentView.needsLayout = true
+            fragmentView.needsDisplay = true
         }
 
-        contentLayer.addSublayer(fragmentLayer)
-        fragmentLayerMap.setObject(fragmentLayer, forKey: textLayoutFragment)
+        contentView.addSubview(fragmentView)
+        fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
     }
 
     internal func adjustViewportOffsetIfNeeded() {

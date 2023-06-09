@@ -3,10 +3,10 @@
 //
 //
 //  STTextView
-//      |---selectionLayer (STCATiledLayer)
-//      |---contentLayer (STCATiledLayer)
-//              |---(STInsertionPointLayer (STCALayer) | STTextLayoutFragmentLayer (STCALayer))
-//      |---lineAnnotationLayer (STCATiledLayer)
+//      |---selectionView
+//      |---contentView
+//              |---(STInsertionPointView | STTextLayoutFragmentView)
+//      |---lineAnnotationView
 //
 //
 // The default implementation of the NSView method inputContext manages
@@ -30,7 +30,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
     /// Returns the type of layer used by the receiver.
-    open var insertionPointLayerClass = STInsertionPointLayer.self
+    open var insertionPointViewClass = STInsertionPointView.self
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
     @Invalidating(.insertionPoint)
@@ -330,10 +330,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// The text view's text container
     public let textContainer: NSTextContainer
 
-    internal let contentLayer: STCATiledLayer
-    internal let selectionLayer: STCATiledLayer
+    internal let contentView: ContentView
+    internal let selectionView: SelectionView
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
-    internal var fragmentLayerMap: NSMapTable<NSTextLayoutFragment, STCALayer>
+    internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
     private var didChangeBackingPropertiesNotificationObserver: NSObjectProtocol?
     internal lazy var speechSynthesizer: NSSpeechSynthesizer = NSSpeechSynthesizer()
@@ -440,7 +440,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Initializes a text view.
     /// - Parameter frameRect: The frame rectangle of the text view.
     override public init(frame frameRect: NSRect) {
-        fragmentLayerMap = .weakToWeakObjects()
+        fragmentViewMap = .weakToWeakObjects()
         annotationViewMap = .strongToWeakObjects()
 
         textContentManager = STTextContentStorage()
@@ -450,10 +450,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         textContentManager.addTextLayoutManager(textLayoutManager)
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
-        contentLayer = STCATiledLayer()
-        contentLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
-        selectionLayer = STCATiledLayer()
-        selectionLayer.autoresizingMask = [.layerHeightSizable, .layerWidthSizable]
+        contentView = ContentView()
+        contentView.wantsLayer = true
+        contentView.autoresizingMask = [.height, .width]
+        selectionView = SelectionView()
+        selectionView.wantsLayer = true
+        selectionView.autoresizingMask = [.height, .width]
 
         typingAttributes = Self.defaultTypingAttributes
         allowsUndo = true
@@ -478,8 +480,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         textLayoutManager.textViewportLayoutController.delegate = self
 
-        layer?.addSublayer(selectionLayer)
-        layer?.addSublayer(contentLayer)
+        addSubview(selectionView)
+        addSubview(contentView)
 
         // Forward didChangeSelectionNotification from STTextLayoutManager
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
@@ -513,26 +515,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
 
-        if let window = self.window {
+        if self.window != nil {
             textFinder.client = textFinderClient
             textFinder.findBarContainer = scrollView
-
-            func updateContentScale(for layer: CALayer, scale: CGFloat) {
-                layer.contentsScale = backingScaleFactor
-                layer.setNeedsDisplay()
-                for sublayer in layer.sublayers ?? [] {
-                    updateContentScale(for: sublayer, scale: scale)
-                }
-            }
-
-            updateContentScale(for: self.contentLayer, scale: self.backingScaleFactor)
-            updateContentScale(for: self.selectionLayer, scale: self.backingScaleFactor)
-
-            didChangeBackingPropertiesNotificationObserver = NotificationCenter.default.addObserver(forName: NSWindow.didChangeBackingPropertiesNotification, object: window, queue: .main) { [weak self] notification in
-                guard let self = self else { return }
-                updateContentScale(for: self.contentLayer, scale: self.backingScaleFactor)
-                updateContentScale(for: self.selectionLayer, scale: self.backingScaleFactor)
-            }
         } else if let didChangeBackingPropertiesNotificationObserver {
             NotificationCenter.default.removeObserver(didChangeBackingPropertiesNotificationObserver)
             self.didChangeBackingPropertiesNotificationObserver = nil
@@ -542,12 +527,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open override func hitTest(_ point: NSPoint) -> NSView? {
         let result = super.hitTest(point)
 
-        // click-through `contentLayer`, `selectionLayer` and `lineAnnotationLayer` sublayers
+        // click-through `contentView`, `selectionView` and `lineAnnotationView` subviews
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent
         // for interaction.
-        if let view = result, view != self, let viewLayer = view.layer,
-           (viewLayer.isDescendant(of: contentLayer) || viewLayer.isDescendant(of: selectionLayer)) {
+        if let view = result, view != self,
+            (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView)) {
             return self
         }
         return result
@@ -763,11 +748,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     internal func updateSelectionHighlights() {
         guard !textLayoutManager.textSelections.isEmpty else {
-            selectionLayer.sublayers = nil
+            selectionView.subviews.removeAll()
             return
         }
 
-        selectionLayer.sublayers = nil
+        selectionView.subviews.removeAll()
 
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
@@ -777,10 +762,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                 }
 
                 if !highlightFrame.size.width.isZero {
-                    let highlightLayer = STCALayer(frame: highlightFrame)
-                    highlightLayer.contentsScale = backingScaleFactor
-                    highlightLayer.backgroundColor = selectionBackgroundColor.cgColor
-                    selectionLayer.addSublayer(highlightLayer)
+                    let highlightView = HighlightView(frame: highlightFrame)
+                    highlightView.wantsLayer = true
+                    highlightView.layer?.backgroundColor = selectionBackgroundColor.cgColor
+                    selectionView.addSubview(highlightView)
                 } else {
                     // NOTE: this is to hide/show insertion point on selection.
                     //       there's probably better place to handle that.
@@ -1082,23 +1067,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// A Boolean value that indicates whether undo coalescing is in progress.
     public var isCoalescingUndo: Bool {
         (undoManager as? CoalescingUndoManager)?.isCoalescing ?? false
-    }
-}
-
-// MARK: - CALayer
-
-private extension CALayer {
-
-    func isDescendant(of layer: CALayer) -> Bool {
-        var layer = layer
-        while let parent = layer.superlayer {
-            if parent == layer {
-                return true
-            }
-            layer = parent
-        }
-
-        return false
     }
 }
 

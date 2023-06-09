@@ -4,29 +4,30 @@
 import Cocoa
 import CoreGraphics
 
-final class STTextLayoutFragmentLayer: STCALayer {
+final class STTextLayoutFragmentView: NSView {
     private let layoutFragment: NSTextLayoutFragment
+
+    override var isFlipped: Bool {
+        #if os(macOS)
+        true
+        #else
+        false
+        #endif
+    }
 
     init(layoutFragment: NSTextLayoutFragment) {
         self.layoutFragment = layoutFragment
         super.init(frame: .zero)
-        setNeedsDisplay()
+        wantsLayer = true
+        needsDisplay = true
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override init(layer: Any) {
-        if let myself = layer as? Self {
-            layoutFragment = myself.layoutFragment
-        } else {
-            fatalError("Unexpected use")
-        }
-        super.init(layer: layer)
-    }
-
-    override func draw(in ctx: CGContext) {
+    override func draw(_ dirtyRect: NSRect) {
+        guard let ctx = NSGraphicsContext.current?.cgContext else { return }
         layoutFragment.draw(at: .zero, in: ctx)
     }
 }

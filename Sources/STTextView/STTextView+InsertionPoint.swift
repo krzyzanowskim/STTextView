@@ -9,8 +9,8 @@ extension STTextView {
     /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
     public func updateInsertionPointStateAndRestartTimer() {
         // Remove insertion point layers
-        selectionLayer.sublayers?.removeAll(where: { layer in
-            type(of: layer) == insertionPointLayerClass
+        selectionView.subviews.removeAll(where: { view in
+            type(of: view) == insertionPointViewClass
         })
 
         if shouldDrawInsertionPoint {
@@ -28,18 +28,18 @@ extension STTextView {
                         selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
                     }
 
-                    let insertionLayer = insertionPointLayerClass.init(frame: selectionFrame)
-                    insertionLayer.insertionPointColor = insertionPointColor
-                    insertionLayer.insertionPointWidth = insertionPointWidth
-                    insertionLayer.updateGeometry()
+                    let insertionView = insertionPointViewClass.init(frame: selectionFrame)
+                    insertionView.insertionPointColor = insertionPointColor
+                    insertionView.insertionPointWidth = insertionPointWidth
+                    insertionView.updateGeometry()
 
                     if isFirstResponder {
-                        insertionLayer.blinkStart()
+                        insertionView.blinkStart()
                     } else {
-                        insertionLayer.blinkStop()
+                        insertionView.blinkStop()
                     }
 
-                    selectionLayer.addSublayer(insertionLayer)
+                    selectionView.addSubview(insertionView)
 
                     return true
                 }
