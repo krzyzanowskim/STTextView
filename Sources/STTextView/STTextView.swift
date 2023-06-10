@@ -335,7 +335,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
-    private var didChangeBackingPropertiesNotificationObserver: NSObjectProtocol?
     internal lazy var speechSynthesizer: NSSpeechSynthesizer = NSSpeechSynthesizer()
 
     internal lazy var completionWindowController: CompletionWindowController = {
@@ -518,9 +517,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         if self.window != nil {
             textFinder.client = textFinderClient
             textFinder.findBarContainer = scrollView
-        } else if let didChangeBackingPropertiesNotificationObserver {
-            NotificationCenter.default.removeObserver(didChangeBackingPropertiesNotificationObserver)
-            self.didChangeBackingPropertiesNotificationObserver = nil
         }
     }
 

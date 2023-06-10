@@ -278,14 +278,14 @@ open class STLineNumberRulerView: NSRulerView {
     }
     
 
-    open func drawBackground(in rect: NSRect) {
+    open func drawBackground(in dirtyRect: NSRect) {
         guard drawsBackground, let context = NSGraphicsContext.current?.cgContext else {
             return
         }
 
         context.saveGState()
         context.setFillColor(backgroundColor.cgColor)
-        context.fill(rect)
+        context.fill(bounds)
         context.restoreGState()
     }
 

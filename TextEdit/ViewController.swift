@@ -33,8 +33,6 @@ final class ViewController: NSViewController {
         textView.delegate = self
         textView.dataSource = self
 
-        scrollView.documentView = textView
-
         // Line numbers
         let rulerView = STLineNumberRulerView(textView: textView)
         rulerView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
