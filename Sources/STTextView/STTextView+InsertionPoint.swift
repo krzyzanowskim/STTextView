@@ -10,7 +10,7 @@ extension STTextView {
     public func updateInsertionPointStateAndRestartTimer() {
         // Remove insertion point layers
         selectionView.subviews.removeAll(where: { view in
-            type(of: view) == insertionPointViewClass
+            type(of: view) == STTextInsertionIndicator.self
         })
 
         if shouldDrawInsertionPoint {
@@ -28,17 +28,14 @@ extension STTextView {
                         selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
                     }
 
-                    let insertionView = insertionPointViewClass.init(frame: selectionFrame)
-                    insertionView.insertionPointColor = insertionPointColor
-                    insertionView.insertionPointWidth = insertionPointWidth
-                    insertionView.updateGeometry()
-
-                    if isFirstResponder {
-                        insertionView.blinkStart()
-                    } else {
-                        insertionView.blinkStop()
+                    let insertionView = STTextInsertionIndicator(frame: selectionFrame)
+                    if let insertionPointColor {
+                        insertionView.color = insertionPointColor
                     }
-
+                    insertionView.effectsViewInserter = { [weak self] view in
+                        // FIXME: Never called
+                        self?.selectionView.addSubview(view)
+                    }
                     selectionView.addSubview(insertionView)
 
                     return true

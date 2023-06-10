@@ -29,9 +29,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Posted when the selected range of characters changes.
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
-    /// Returns the type of layer used by the receiver.
-    open var insertionPointViewClass = STInsertionPointView.self
-
     /// A Boolean value that controls whether the text view allows the user to edit text.
     @Invalidating(.insertionPoint)
     @objc dynamic open var isEditable: Bool = true {
@@ -65,13 +62,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         return false
     }
 
-    /// The color of the insertion point.
+    /// Custom color of the insertion point.
     @Invalidating(.display, .insertionPoint)
-    @objc dynamic open var insertionPointColor: NSColor = .defaultTextInsertionPoint
-
-    /// The width of the insertion point.
-    @Invalidating(.display, .insertionPoint)
-    @objc dynamic open var insertionPointWidth: CGFloat = 1.0
+    @objc dynamic open var insertionPointColor: NSColor? = .defaultTextInsertionPoint
 
     /// The font of the text.
     ///
