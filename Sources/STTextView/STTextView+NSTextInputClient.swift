@@ -46,7 +46,7 @@ extension STTextView: NSTextInputClient {
         case is NSAttributedString:
             replaceCharacters(in: replacementTextRange, with: string as! NSAttributedString, allowsTypingCoalescing: false)
         case is String:
-            replaceCharacters(in: replacementTextRange, with: NSAttributedString(string: string as! String, attributes: typingAttributes), allowsTypingCoalescing: false)
+            replaceCharacters(in: replacementTextRange, with: NSAttributedString(string: string as! String, attributes: markedTextAttributes ?? typingAttributes), allowsTypingCoalescing: false)
         default:
             assertionFailure()
             return

@@ -309,6 +309,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     internal var markedText: MarkedText? = nil
 
+    /// The attributes used to draw marked text.
+    ///
+    /// Text color, background color, and underline are the only supported attributes for marked text.
+    public var markedTextAttributes: [NSAttributedString.Key : Any]?
+
     /// A flag
     internal var processingKeyEvent: Bool = false
 
