@@ -1,4 +1,6 @@
-//  Created by Elias Wahl on 14.01.23.
+//  Created by Marcin Krzyzanowski
+//  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
+
 import Foundation
 
 public struct STRulerInsets: Equatable {

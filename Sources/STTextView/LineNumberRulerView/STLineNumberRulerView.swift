@@ -298,7 +298,7 @@ open class STLineNumberRulerView: NSRulerView {
         context.setFillColor(selectedLineHighlightColor.cgColor)
 
         let fillRect = CGRect(
-            origin: line.layoutFragmentFrame.moved(dx: 0, dy: relativePoint.y).origin,
+            origin: line.layoutFragmentFrame.moved(dx: -rulerInsets.leading, dy: relativePoint.y).origin,
             size: CGSize(
                 width: bounds.width,
                 height: line.layoutFragmentFrame.height
@@ -324,7 +324,7 @@ open class STLineNumberRulerView: NSRulerView {
         if drawSeparator {
             context.setLineWidth(1)
             context.setStrokeColor(separatorColor.cgColor)
-            context.addLines(between: [CGPoint(x: requiredThickness, y: 0), CGPoint(x: requiredThickness, y: bounds.maxY) ])
+            context.addLines(between: [CGPoint(x: requiredThickness - 0.5, y: 0), CGPoint(x: requiredThickness - 0.5, y: bounds.maxY) ])
             context.strokePath()
         }
         
