@@ -5,10 +5,14 @@ import AppKit
 
 extension NSColor {
     static var defaultTextInsertionPoint: NSColor {
-//        if #available(macOS 14, *) {
-//            return NSColor.textInsertionPoint
-//        } else {
+        #if compiler(>=5.9)
+            if #available(macOS 14, *) {
+                return NSColor.textInsertionPoint
+            } else {
+                return NSColor.textColor
+            }
+        #else
             return NSColor.textColor
-//        }
+        #endif
     }
 }
