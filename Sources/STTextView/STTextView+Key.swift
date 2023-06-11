@@ -24,6 +24,13 @@ extension STTextView {
             return
         }
 
-        interpretKeyEvents([event])
+        if inputContext?.handleEvent(event) == false {
+            interpretKeyEvents([event])
+        }
+    }
+
+    open override func doCommand(by selector: Selector) {
+        logger.debug("doCommand \(selector)")
+        super.doCommand(by: selector)
     }
 }

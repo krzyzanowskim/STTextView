@@ -53,7 +53,7 @@ extension STTextView: NSTextInputClient {
         }
     }
 
-    /// The receiver unmarks the markaed text. If no marked text, the invocation of this method has no effect.
+    /// The receiver unmarks the marked text. If no marked text, the invocation of this method has no effect.
     @objc public func unmarkText() {
         if !hasMarkedText() {
             return
