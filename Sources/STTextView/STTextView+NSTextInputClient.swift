@@ -6,7 +6,7 @@ import Cocoa
 extension STTextView: NSTextInputClient {
 
     @objc public func selectedRange() -> NSRange {
-        if let selectionTextRange = textLayoutManager.textSelections.first?.textRanges.first {
+        if let selectionTextRange = textLayoutManager.textSelections.last?.textRanges.last {
             return NSRange(selectionTextRange, in: textContentManager)
         }
 
@@ -24,17 +24,35 @@ extension STTextView: NSTextInputClient {
     /// string can be either an NSString or NSAttributedString instance.
     /// selectedRange specifies the selection inside the string being inserted; hence, the location is relative to the beginning of string.
     /// When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
-    @objc public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
 
-        if replacementRange != .notFound {
+    /// Replaces a specified range in the receiver’s text storage with the given string and sets the selection.
+    ///
+    /// If there is no marked text, the current selection is replaced. If there is no selection, the string is inserted at the insertion point.
+    /// - Parameters:
+    ///   - string: The string to insert. Can be either an NSString or NSAttributedString instance.
+    ///   - selectedRange: The range to set as the selection, computed from the beginning of the inserted string.
+    ///   - replacementRange: The range to replace, computed from the beginning of the marked text.
+    @objc public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
+        let attributedString: NSAttributedString
+        switch string {
+        case is NSAttributedString:
+            attributedString = string as! NSAttributedString
+        case is String:
+            attributedString = NSAttributedString(string: string as! String, attributes: markedTextAttributes ?? typingAttributes)
+        default:
+            assertionFailure()
+            return
+        }
+
+        if let markedText {
+            markedText.string = string
+            markedText.selectedRange = selectedRange
+        } else if attributedString.length > 0 {
             markedText = MarkedText(
                 string: string,
                 selectedRange: selectedRange,
                 replacementRange: replacementRange
             )
-        } else {
-            markedText?.string = string
-            markedText?.selectedRange = selectedRange
         }
 
         guard let markedText = markedText,
@@ -42,21 +60,17 @@ extension STTextView: NSTextInputClient {
             return
         }
 
-        switch string {
-        case is NSAttributedString:
-            replaceCharacters(in: replacementTextRange, with: string as! NSAttributedString, allowsTypingCoalescing: false)
-        case is String:
-            replaceCharacters(in: replacementTextRange, with: NSAttributedString(string: string as! String, attributes: markedTextAttributes ?? typingAttributes), allowsTypingCoalescing: false)
-        default:
-            assertionFailure()
-            return
-        }
+        replaceCharacters(in: replacementTextRange, with: attributedString, allowsTypingCoalescing: false)
     }
 
     /// The receiver unmarks the marked text. If no marked text, the invocation of this method has no effect.
+    ///
+    /// The receiver removes any marking from pending input text and disposes of the marked text as it wishes.
+    /// The text view should accept the marked text as if it had been inserted normally.
+    /// If there is no marked text, the invocation of this method has no effect.
     @objc public func unmarkText() {
-        if !hasMarkedText() {
-            return
+        if hasMarkedText() {
+            // TODO: The text view should accept the marked text as if it had been inserted normally.
         }
 
         markedText = nil
@@ -69,7 +83,7 @@ extension STTextView: NSTextInputClient {
 
     /// Returns whether or not the receiver has marked text.
     @objc public func hasMarkedText() -> Bool {
-        markedText != nil && markedText!.replacementRange.location != NSNotFound
+        markedText != nil
     }
 
     @objc public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {

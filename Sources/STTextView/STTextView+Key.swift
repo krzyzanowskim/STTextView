@@ -28,9 +28,4 @@ extension STTextView {
             interpretKeyEvents([event])
         }
     }
-
-    open override func doCommand(by selector: Selector) {
-        logger.debug("doCommand \(selector)")
-        super.doCommand(by: selector)
-    }
 }
