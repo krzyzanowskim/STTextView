@@ -302,14 +302,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal var _undoManager: UndoManager?
 
     internal class MarkedText {
-        var string: Any
-        var selectedRange: NSRange
-        var replacementRange: NSRange
+        var markedText: String
+        var markedRange: NSRange
 
-        init(string: Any, selectedRange: NSRange, replacementRange: NSRange) {
-            self.string = string
-            self.selectedRange = selectedRange
-            self.replacementRange = replacementRange
+        init(markedText: String, markedRange: NSRange) {
+            self.markedText = markedText
+            self.markedRange = markedRange
         }
     }
 
@@ -964,7 +962,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
-        if allowsUndo, let undoManager = undoManager {
+        if allowsUndo, let undoManager = undoManager, undoManager.isUndoRegistrationEnabled {
             // typing coalescing
             if processingKeyEvent, allowsTypingCoalescing,
                let undoManager = undoManager as? CoalescingUndoManager
@@ -1008,7 +1006,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                         )
                     }
                 }
-            } else if !undoManager.isUndoing, !undoManager.isRedoing {
+            } else if !undoManager.isUndoing, !undoManager.isRedoing, undoManager.isUndoRegistrationEnabled {
                 breakUndoCoalescing()
 
                 // Reach to NSTextStorage because NSTextContentStorage range extraction is cumbersome.

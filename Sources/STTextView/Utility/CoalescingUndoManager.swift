@@ -15,6 +15,10 @@ final class CoalescingUndoManager: UndoManager {
     }
 
     func breakCoalescing() {
+        guard isUndoRegistrationEnabled else {
+            return
+        }
+        
         // register undo and break coalescing
         if !isUndoing, !isRedoing, let undoAction = coalescing?.undoAction, let value = coalescing?.value {
             // Disable implicit grouping to avoid group coalescing and non-coalescing undo

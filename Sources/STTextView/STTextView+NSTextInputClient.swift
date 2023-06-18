@@ -10,24 +10,28 @@ extension STTextView: NSTextInputClient {
             return NSRange(selectionTextRange, in: textContentManager)
         }
 
-        return NSRange.notFound
+        return .notFound
     }
 
-    /// Called by the input manager to set text which might be combined with further input to form the final text (e.g. composition of ^ and a to â).
-    /// The receiver inserts string replacing the content specified by replacementRange.
-    /// string can be either an NSString or NSAttributedString instance.
-    /// selectedRange specifies the selection inside the string being inserted;
-    /// hence, the location is relative to the beginning of string.
-    /// When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
-    ///
-    /// The receiver inserts string replacing the content specified by replacementRange.
-    /// string can be either an NSString or NSAttributedString instance.
-    /// selectedRange specifies the selection inside the string being inserted; hence, the location is relative to the beginning of string.
-    /// When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
+
+    // Managing Marked Text
+    //
+    // As the input context interprets keyboard input, it can mark incomplete input in a special way.
+    // The text view displays this marked text differently from the selection, using temporary attributes
+    // that affect only display, not layout or storage.
+    //
+    // One of the primary things that a text view must do to cooperate with an input context is to maintain
+    // a (possibly empty) range of marked text within its text storage. The text view should highlight text
+    // in this range in a distinctive way, and it should allow selection within the marked text.
+    // A text view must also maintain an insertion point, which is usually at the end of the marked text,
+    // but the user can place it within the marked text. The text view also maintains a (possibly empty)
+    // selection range within its text storage, and if there is any marked text, the selection must be entirely
+    // within the marked text
 
     /// Replaces a specified range in the receiver’s text storage with the given string and sets the selection.
     ///
     /// If there is no marked text, the current selection is replaced. If there is no selection, the string is inserted at the insertion point.
+    /// When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
     /// - Parameters:
     ///   - string: The string to insert. Can be either an NSString or NSAttributedString instance.
     ///   - selectedRange: The range to set as the selection, computed from the beginning of the inserted string.
@@ -44,23 +48,66 @@ extension STTextView: NSTextInputClient {
             return
         }
 
-        if let markedText {
-            markedText.string = string
-            markedText.selectedRange = selectedRange
-        } else if attributedString.length > 0 {
-            markedText = MarkedText(
-                string: string,
-                selectedRange: selectedRange,
-                replacementRange: replacementRange
-            )
-        }
+        #if DEBUG
+        logger.debug("\(#function) \(attributedString.string), selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
+        #endif
 
-        guard let markedText = markedText,
-              let replacementTextRange = NSTextRange(markedText.replacementRange, in: textContentManager) else {
-            return
-        }
+        let temporaryDisableUndoRegistration = undoManager?.isUndoRegistrationEnabled == true
 
-        replaceCharacters(in: replacementTextRange, with: attributedString, allowsTypingCoalescing: false)
+        if replacementRange.location != NSNotFound {
+            if markedText == nil {
+                markedText = MarkedText(
+                    markedText: attributedString.string,
+                    markedRange: NSRange(location: replacementRange.location, length: attributedString.string.utf16.count)
+                )
+
+            } else if let markedText {
+                markedText.markedText = attributedString.string
+                markedText.markedRange = NSRange(location: replacementRange.location, length: attributedString.string.utf16.count)
+            }
+        } else if replacementRange.location == NSNotFound {
+            // NSNotFound indicates that the marked text should be placed at the current insertion point
+            // continue updates.dictation begins with this case
+
+            if markedText == nil {
+                markedText = MarkedText(
+                    markedText: attributedString.string,
+                    markedRange: NSRange(location: self.selectedRange().location, length: attributedString.string.utf16.count)
+                )
+            } else if let markedText {
+                // Delete current marked range
+                if let markedTextInsertRange = NSTextRange(markedText.markedRange, in: textContentManager) {
+                    if temporaryDisableUndoRegistration {
+                        undoManager?.disableUndoRegistration()
+                    }
+
+                    replaceCharacters(in: markedTextInsertRange, with: "")
+
+                    if temporaryDisableUndoRegistration {
+                        undoManager?.enableUndoRegistration()
+                    }
+                }
+
+                markedText.markedText = attributedString.string
+                markedText.markedRange = NSRange(location: markedText.markedRange.location, length: attributedString.string.utf16.count)
+            }
+
+            // Insert new marked text in place selected text - that is currently marked text range
+            guard let markedTextInsertRange = NSTextRange(NSRange(location: markedText!.markedRange.location, length: 0), in: textContentManager) else {
+                assertionFailure()
+                return
+            }
+
+            if temporaryDisableUndoRegistration {
+                undoManager?.disableUndoRegistration()
+            }
+
+            replaceCharacters(in: markedTextInsertRange, with: markedText!.markedText)
+
+            if temporaryDisableUndoRegistration {
+                undoManager?.enableUndoRegistration()
+            }
+        }
     }
 
     /// The receiver unmarks the marked text. If no marked text, the invocation of this method has no effect.
@@ -70,15 +117,36 @@ extension STTextView: NSTextInputClient {
     /// If there is no marked text, the invocation of this method has no effect.
     @objc public func unmarkText() {
         if hasMarkedText() {
-            // TODO: The text view should accept the marked text as if it had been inserted normally.
+            if let markedTextRange = NSTextRange(markedText!.markedRange, in: textContentManager) {
+                let temporaryDisableUndoRegistration = undoManager?.isUndoRegistrationEnabled == true
+
+                if temporaryDisableUndoRegistration {
+                    undoManager?.disableUndoRegistration()
+                }
+
+                replaceCharacters(in: markedTextRange, with: "")
+
+                if temporaryDisableUndoRegistration {
+                    undoManager?.enableUndoRegistration()
+                }
+            } else {
+                assertionFailure()
+            }
         }
 
         markedText = nil
     }
 
     /// Returns the marked range. Returns {NSNotFound, 0} if no marked range.
+    ///
+    /// The returned range measures from the start of the receiver’s text storage.
+    /// The return value’s location is NSNotFound and its length is 0 if and only if hasMarkedText() returns false.
     @objc public func markedRange() -> NSRange {
-        markedText?.replacementRange ?? .notFound
+        if !hasMarkedText() {
+            return .notFound
+        }
+
+        return markedText!.markedRange
     }
 
     /// Returns whether or not the receiver has marked text.
@@ -123,24 +191,17 @@ extension STTextView: NSTextInputClient {
     }
 
     @objc open func insertText(_ string: Any, replacementRange: NSRange) {
-        var textRanges: [NSTextRange]
+        unmarkText()
 
-        if hasMarkedText() {
-            textRanges = [NSTextRange(markedText!.replacementRange, in: textContentManager)!]
-        } else if replacementRange == .notFound {
+        var textRanges: [NSTextRange] = []
+
+        if replacementRange == .notFound {
             textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
-        } else {
-            textRanges = []
         }
 
         let replacementTextRange = NSTextRange(replacementRange, in: textContentManager)
         if let replacementTextRange, !textRanges.contains(where: { $0 == replacementTextRange }) {
             textRanges.append(replacementTextRange)
-        }
-
-        let temporaryDisableUndoRegistration = hasMarkedText() && undoManager?.isUndoRegistrationEnabled == true
-        if temporaryDisableUndoRegistration {
-            undoManager?.disableUndoRegistration()
         }
 
         switch string {
@@ -154,13 +215,6 @@ extension STTextView: NSTextInputClient {
             }
         default:
             assertionFailure()
-        }
-
-        if hasMarkedText() {
-            if temporaryDisableUndoRegistration {
-                undoManager?.enableUndoRegistration()
-            }
-            unmarkText()
         }
     }
 
