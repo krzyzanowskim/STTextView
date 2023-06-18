@@ -42,18 +42,16 @@ extension STTextView: NSTextInputClient {
         case is NSAttributedString:
             let attributedString = NSMutableAttributedString(attributedString: string as! NSAttributedString)
 
-            let validAttributesForMarkedText = self.validAttributesForMarkedText()
-            let attrs = typingAttributes.merging(markedTextAttributes ?? [:]) { (_, new) in new }.filter { attr in
-                validAttributesForMarkedText.contains(attr.key)
-            }
+            // it comes with unexpected NSUnderlineColorAttributeName with a clear color that makes it not visible
+            // probably it should be more sophisticated to care about the clear underline and do something about
+            // but I don't really know how to test this scenario, hence remove clear underline
+            attributedString.removeAttribute(.underlineColor, range:  NSRange(location: 0, length: attributedString.length))
 
+            let attrs = typingAttributes.merging(markedTextAttributes ?? [:]) { (_, new) in new }
             attributedString.addAttributes(attrs, range: NSRange(location: 0, length: attributedString.length))
             attributedMarkedString = attributedString
         case is String:
-            let validAttributesForMarkedText = self.validAttributesForMarkedText()
-            let attrs = typingAttributes.merging(markedTextAttributes ?? [:]) { (_, new) in new }.filter { attr in
-                validAttributesForMarkedText.contains(attr.key)
-            }
+            let attrs = typingAttributes.merging(markedTextAttributes ?? [:]) { (_, new) in new }
             attributedMarkedString = NSAttributedString(string: string as! String, attributes: attrs)
         default:
             assertionFailure()
@@ -150,8 +148,14 @@ extension STTextView: NSTextInputClient {
         textContentManager.attributedString(in: nil) ?? NSAttributedString()
     }
 
+    /// Returns an array of attribute names recognized by the receiver.
+    ///
+    /// Returns an empty array if no attributes are supported.
     @objc public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
-        [.backgroundColor, .accessibilityBackgroundColor, .foregroundColor, .accessibilityForegroundColor, .font, .accessibilityFont, .underlineStyle, .accessibilityUnderline, .underlineColor, .accessibilityUnderlineColor, .paragraphStyle]
+        // Properly implementing this would allow things like bolded underline
+        // for certain texts in the marked range. I only half-understand how it works
+        // hence leave it like this.
+        return []
     }
 
     @objc public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
