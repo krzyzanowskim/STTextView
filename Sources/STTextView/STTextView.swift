@@ -301,13 +301,19 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     @objc dynamic open var allowsUndo: Bool
     internal var _undoManager: UndoManager?
 
-    internal class MarkedText {
+    internal class MarkedText: CustomDebugStringConvertible {
         var markedText: NSAttributedString
         var markedRange: NSRange
+        var selectedRange: NSRange
 
-        init(markedText: NSAttributedString, markedRange: NSRange) {
+        init(markedText: NSAttributedString, markedRange: NSRange, selectedRange: NSRange) {
             self.markedText = markedText
             self.markedRange = markedRange
+            self.selectedRange = selectedRange
+        }
+
+        var debugDescription: String {
+            "markedText: \"\(markedText.string)\", markedRange: \(markedRange), selectedRange: \(selectedRange)"
         }
     }
 

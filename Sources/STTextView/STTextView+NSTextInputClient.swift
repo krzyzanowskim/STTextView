@@ -64,61 +64,47 @@ extension STTextView: NSTextInputClient {
         logger.debug("\(#function) \(attributedMarkedString.string), selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
         #endif
 
-        let temporaryDisableUndoRegistration = undoManager?.isUndoRegistrationEnabled == true
-
         if replacementRange.location != NSNotFound {
             if markedText == nil {
-                markedText = MarkedText(
+                self.markedText = MarkedText(
                     markedText: attributedMarkedString,
-                    markedRange: NSRange(location: replacementRange.location, length: attributedMarkedString.string.utf16.count)
+                    markedRange: NSRange(location: replacementRange.location, length: attributedMarkedString.length),
+                    selectedRange: NSRange(location: replacementRange.location + selectedRange.location, length: selectedRange.length)
                 )
 
             } else if let markedText {
                 markedText.markedText = attributedMarkedString
-                markedText.markedRange = NSRange(location: replacementRange.location, length: attributedMarkedString.string.utf16.count)
+                markedText.markedRange = NSRange(location: replacementRange.location, length: attributedMarkedString.length)
+                markedText.selectedRange = NSRange(location: replacementRange.location + selectedRange.location, length: selectedRange.length)
             }
         } else if replacementRange.location == NSNotFound {
             // NSNotFound indicates that the marked text should be placed at the current insertion point
             // continue updates.dictation begins with this case
 
             if markedText == nil {
-                markedText = MarkedText(
+                self.markedText = MarkedText(
                     markedText: attributedMarkedString,
-                    markedRange: NSRange(location: self.selectedRange().location, length: attributedMarkedString.string.utf16.count)
+                    markedRange: NSRange(location: self.selectedRange().location, length: attributedMarkedString.length),
+                    selectedRange: NSRange(location: self.selectedRange().location + selectedRange.location, length: selectedRange.length)
                 )
             } else if let markedText {
                 // Delete current marked range
-                if let markedTextInsertRange = NSTextRange(markedText.markedRange, in: textContentManager) {
-                    if temporaryDisableUndoRegistration {
-                        undoManager?.disableUndoRegistration()
-                    }
-
-                    replaceCharacters(in: markedTextInsertRange, with: "")
-
-                    if temporaryDisableUndoRegistration {
-                        undoManager?.enableUndoRegistration()
-                    }
+                undoManager.withoutUndoRegistration {
+                    replaceCharacters(in: NSTextRange(markedText.markedRange, in: textContentManager)!, with: "")
                 }
 
+                // update
                 markedText.markedText = attributedMarkedString
-                markedText.markedRange = NSRange(location: markedText.markedRange.location, length: attributedMarkedString.string.utf16.count)
+                markedText.markedRange = NSRange(location: markedText.markedRange.location, length: attributedMarkedString.length)
+                markedText.selectedRange = NSRange(location: markedText.markedRange.location + selectedRange.location, length: selectedRange.length)
             }
+        }
 
-            // Insert new marked text in place selected text - that is currently marked text range
-            guard let markedTextInsertRange = NSTextRange(NSRange(location: markedText!.markedRange.location, length: 0), in: textContentManager) else {
-                assertionFailure()
-                return
-            }
-
-            if temporaryDisableUndoRegistration {
-                undoManager?.disableUndoRegistration()
-            }
-
-            replaceCharacters(in: markedTextInsertRange, with: markedText!.markedText, allowsTypingCoalescing: false)
-
-            if temporaryDisableUndoRegistration {
-                undoManager?.enableUndoRegistration()
-            }
+        // Insert new marked text (or replace replacementRange)
+        let insertionRangeLenght = replacementRange.location == NSNotFound ? 0 : replacementRange.length
+        let insertionRange = NSRange(location: markedText!.markedRange.location, length: insertionRangeLenght)
+        undoManager.withoutUndoRegistration {
+            replaceCharacters(in: NSTextRange(insertionRange, in: textContentManager)!, with: markedText!.markedText, allowsTypingCoalescing: false)
         }
     }
 
@@ -129,20 +115,10 @@ extension STTextView: NSTextInputClient {
     /// If there is no marked text, the invocation of this method has no effect.
     @objc public func unmarkText() {
         if hasMarkedText() {
-            if let markedTextRange = NSTextRange(markedText!.markedRange, in: textContentManager) {
-                let temporaryDisableUndoRegistration = undoManager?.isUndoRegistrationEnabled == true
-
-                if temporaryDisableUndoRegistration {
-                    undoManager?.disableUndoRegistration()
-                }
-
+            // Delete temporary marked text. It's been replaced with final text in insertText
+            undoManager.withoutUndoRegistration {
+                let markedTextRange = NSTextRange(markedText!.markedRange, in: textContentManager)!
                 replaceCharacters(in: markedTextRange, with: "")
-
-                if temporaryDisableUndoRegistration {
-                    undoManager?.enableUndoRegistration()
-                }
-            } else {
-                assertionFailure()
             }
         }
 
@@ -230,4 +206,25 @@ extension STTextView: NSTextInputClient {
         }
     }
 
+}
+
+
+private extension Optional<UndoManager> {
+    func withoutUndoRegistration(_ action: () -> Void) {
+        let temporaryDisableUndoRegistration = self?.isUndoRegistrationEnabled == true
+
+        if let self {
+            if temporaryDisableUndoRegistration {
+                self.disableUndoRegistration()
+            }
+
+            action()
+
+            if temporaryDisableUndoRegistration {
+                self.enableUndoRegistration()
+            }
+        } else {
+            action()
+        }
+    }
 }
