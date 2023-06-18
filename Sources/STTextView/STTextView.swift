@@ -302,10 +302,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal var _undoManager: UndoManager?
 
     internal class MarkedText {
-        var markedText: String
+        var markedText: NSAttributedString
         var markedRange: NSRange
 
-        init(markedText: String, markedRange: NSRange) {
+        init(markedText: NSAttributedString, markedRange: NSRange) {
             self.markedText = markedText
             self.markedRange = markedRange
         }

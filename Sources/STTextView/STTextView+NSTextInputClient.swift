@@ -37,19 +37,31 @@ extension STTextView: NSTextInputClient {
     ///   - selectedRange: The range to set as the selection, computed from the beginning of the inserted string.
     ///   - replacementRange: The range to replace, computed from the beginning of the marked text.
     @objc public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
-        let attributedString: NSAttributedString
+        let attributedMarkedString: NSAttributedString
         switch string {
         case is NSAttributedString:
-            attributedString = string as! NSAttributedString
+            let attributedString = NSMutableAttributedString(attributedString: string as! NSAttributedString)
+
+            let validAttributesForMarkedText = self.validAttributesForMarkedText()
+            let attrs = typingAttributes.merging(markedTextAttributes ?? [:]) { (_, new) in new }.filter { attr in
+                validAttributesForMarkedText.contains(attr.key)
+            }
+
+            attributedString.addAttributes(attrs, range: NSRange(location: 0, length: attributedString.length))
+            attributedMarkedString = attributedString
         case is String:
-            attributedString = NSAttributedString(string: string as! String, attributes: markedTextAttributes ?? typingAttributes)
+            let validAttributesForMarkedText = self.validAttributesForMarkedText()
+            let attrs = typingAttributes.merging(markedTextAttributes ?? [:]) { (_, new) in new }.filter { attr in
+                validAttributesForMarkedText.contains(attr.key)
+            }
+            attributedMarkedString = NSAttributedString(string: string as! String, attributes: attrs)
         default:
             assertionFailure()
             return
         }
 
         #if DEBUG
-        logger.debug("\(#function) \(attributedString.string), selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
+        logger.debug("\(#function) \(attributedMarkedString.string), selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
         #endif
 
         let temporaryDisableUndoRegistration = undoManager?.isUndoRegistrationEnabled == true
@@ -57,13 +69,13 @@ extension STTextView: NSTextInputClient {
         if replacementRange.location != NSNotFound {
             if markedText == nil {
                 markedText = MarkedText(
-                    markedText: attributedString.string,
-                    markedRange: NSRange(location: replacementRange.location, length: attributedString.string.utf16.count)
+                    markedText: attributedMarkedString,
+                    markedRange: NSRange(location: replacementRange.location, length: attributedMarkedString.string.utf16.count)
                 )
 
             } else if let markedText {
-                markedText.markedText = attributedString.string
-                markedText.markedRange = NSRange(location: replacementRange.location, length: attributedString.string.utf16.count)
+                markedText.markedText = attributedMarkedString
+                markedText.markedRange = NSRange(location: replacementRange.location, length: attributedMarkedString.string.utf16.count)
             }
         } else if replacementRange.location == NSNotFound {
             // NSNotFound indicates that the marked text should be placed at the current insertion point
@@ -71,8 +83,8 @@ extension STTextView: NSTextInputClient {
 
             if markedText == nil {
                 markedText = MarkedText(
-                    markedText: attributedString.string,
-                    markedRange: NSRange(location: self.selectedRange().location, length: attributedString.string.utf16.count)
+                    markedText: attributedMarkedString,
+                    markedRange: NSRange(location: self.selectedRange().location, length: attributedMarkedString.string.utf16.count)
                 )
             } else if let markedText {
                 // Delete current marked range
@@ -88,8 +100,8 @@ extension STTextView: NSTextInputClient {
                     }
                 }
 
-                markedText.markedText = attributedString.string
-                markedText.markedRange = NSRange(location: markedText.markedRange.location, length: attributedString.string.utf16.count)
+                markedText.markedText = attributedMarkedString
+                markedText.markedRange = NSRange(location: markedText.markedRange.location, length: attributedMarkedString.string.utf16.count)
             }
 
             // Insert new marked text in place selected text - that is currently marked text range
@@ -102,7 +114,7 @@ extension STTextView: NSTextInputClient {
                 undoManager?.disableUndoRegistration()
             }
 
-            replaceCharacters(in: markedTextInsertRange, with: markedText!.markedText)
+            replaceCharacters(in: markedTextInsertRange, with: markedText!.markedText, allowsTypingCoalescing: false)
 
             if temporaryDisableUndoRegistration {
                 undoManager?.enableUndoRegistration()
@@ -163,7 +175,7 @@ extension STTextView: NSTextInputClient {
     }
 
     @objc public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
-        [.backgroundColor, .foregroundColor, .font]
+        [.backgroundColor, .accessibilityBackgroundColor, .foregroundColor, .accessibilityForegroundColor, .font, .accessibilityFont, .underlineStyle, .accessibilityUnderline, .underlineColor, .accessibilityUnderlineColor, .paragraphStyle]
     }
 
     @objc public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
