@@ -8,7 +8,7 @@ import Cocoa
 /// needed for the annotation view
 open class STLineAnnotation: NSObject {
     /// Location in content storage
-    public let location: NSTextLocation
+    public var location: NSTextLocation
 
     public init(location: NSTextLocation) {
         self.location = location

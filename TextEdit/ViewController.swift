@@ -101,8 +101,18 @@ final class ViewController: NSViewController {
 
 extension ViewController: STTextViewDelegate {
 
-    func textDidChange(_ notification: Notification) {
-        //
+    func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
+        // Adjust annotation location based on the edit
+        // The annotation location have to update its absolut position
+        // to accomodate insert/delete change in the document, to visually
+        // stay in the same place
+        let affectedCount = textView.textContentManager.offset(from: affectedCharRange.location, to: affectedCharRange.endLocation)
+        let replacementCount = replacementString.utf16.count
+        let deltaCount = replacementCount - affectedCount
+
+        for annotation in self.annotations where textView.textContentManager.offset(from: affectedCharRange.endLocation, to: annotation.location) >= 0 {
+            annotation.location = textView.textContentManager.location(annotation.location, offsetBy: deltaCount) ?? annotation.location
+        }
     }
 
     // Completion
