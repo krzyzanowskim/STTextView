@@ -9,7 +9,7 @@ extension STTextView {
     /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
     public func updateInsertionPointStateAndRestartTimer() {
         // Remove insertion point layers
-        selectionView.subviews.removeAll(where: { view in
+        contentView.subviews.removeAll(where: { view in
             type(of: view) == insertionPointViewClass
         })
 
@@ -39,7 +39,7 @@ extension STTextView {
                         insertionView.blinkStop()
                     }
 
-                    selectionView.addSubview(insertionView)
+                    contentView.addSubview(insertionView)
 
                     return true
                 }

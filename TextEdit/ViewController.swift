@@ -62,6 +62,16 @@ final class ViewController: NSViewController {
             }
         }
 
+        // Insert attachment image
+        // do {
+        //     let attachment = NSTextAttachment()
+        //     let img = NSImage(systemSymbolName: "figure.walk", accessibilityDescription: nil)
+        //     let cell = NSTextAttachmentCell(imageCell: img)
+        //     attachment.attachmentCell = cell
+        //     let attachmentString = NSAttributedString(attachment: attachment)
+        //     textView.insertText(attachmentString, replacementRange: NSRange(location: 20, length: 0))
+        // }
+
         // add annotation
         do {
             let stringRange = textView.string.startIndex..<textView.string.endIndex
