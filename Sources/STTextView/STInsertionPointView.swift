@@ -51,6 +51,7 @@ open class STInsertionPointView: NSView {
         }
         frame = frame.insetBy(dx: 0, dy: 1).pixelAligned
         layer?.backgroundColor = insertionPointColor.cgColor
+        layer?.cornerRadius = 1
     }
 
     open func blinkStart() {
