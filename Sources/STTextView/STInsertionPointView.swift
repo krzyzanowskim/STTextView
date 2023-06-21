@@ -7,9 +7,11 @@ import Cocoa
 open class STInsertionPointView: NSView {
     private var timer: Timer?
 
-    open internal(set) var insertionPointWidth: CGFloat = 1 {
+    open internal(set) var insertionPointWidth: CGFloat? {
         didSet {
-            frame.size.width = insertionPointWidth
+            if let insertionPointWidth {
+                frame.size.width = insertionPointWidth
+            }
         }
     }
 
@@ -44,8 +46,10 @@ open class STInsertionPointView: NSView {
     }
 
     public func updateGeometry() {
+        if let insertionPointWidth {
+            frame.size.width = insertionPointWidth
+        }
         frame = frame.insetBy(dx: 0, dy: 1).pixelAligned
-        frame.size.width = insertionPointWidth
         layer?.backgroundColor = insertionPointColor.cgColor
     }
 

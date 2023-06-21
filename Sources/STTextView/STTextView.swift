@@ -71,7 +71,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     /// The width of the insertion point.
     @Invalidating(.display, .insertionPoint)
-    @objc dynamic open var insertionPointWidth: CGFloat = 1.0
+    @objc dynamic open var insertionPointWidth: CGFloat = 2.0
 
     /// The font of the text.
     ///
