@@ -93,25 +93,6 @@ extension STTextView {
         super.mouseMoved(with: event)
     }
 
-    open override func menu(for event: NSEvent) -> NSMenu? {
-        let proposedMenu = super.menu(for: event)
-
-        // Disable context menu when adding an insertion point in mouseDown
-        if proposedMenu != nil, event.type == .leftMouseDown && event.modifierFlags.isSuperset(of: [.shift, .control]) {
-            return nil
-        }
-
-        let point = convert(event.locationInWindow, from: nil)
-        if let delegate = delegate,
-           let proposedMenu = proposedMenu,
-           let eventLocation = textLayoutManager.lineFragmentRange(for: point, inContainerAt: textLayoutManager.documentRange.location)?.location,
-           let location = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point, inContainerAt: eventLocation, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.first?.location {
-            return delegate.textView(self, menu: proposedMenu, for: event, at: location)
-        }
-
-        return proposedMenu
-    }
-
     open override func rightMouseDown(with event: NSEvent) {
 
         if menu(for: event) != nil {
@@ -131,4 +112,25 @@ extension STTextView {
 
         super.rightMouseDown(with: event)
     }
+
+    open override func menu(for event: NSEvent) -> NSMenu? {
+        let proposedMenu = super.menu(for: event)
+
+        // Disable context menu when adding an insertion point in mouseDown
+        if proposedMenu != nil, event.type == .leftMouseDown && event.modifierFlags.isSuperset(of: [.shift, .control]) {
+            return nil
+        }
+
+        let point = convert(event.locationInWindow, from: nil)
+        if let delegate = delegate,
+           let proposedMenu = proposedMenu,
+           let eventLocation = textLayoutManager.lineFragmentRange(for: point, inContainerAt: textLayoutManager.documentRange.location)?.location,
+           let location = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point, inContainerAt: eventLocation, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.first?.location {
+            return delegate.textView(self, menu: proposedMenu, for: event, at: location)
+        }
+
+        return proposedMenu
+    }
+
 }
+

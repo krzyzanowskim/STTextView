@@ -15,9 +15,9 @@ final class STTextLayoutFragmentView: NSView {
         #endif
     }
 
-    init(layoutFragment: NSTextLayoutFragment) {
+    init(layoutFragment: NSTextLayoutFragment, frame: NSRect) {
         self.layoutFragment = layoutFragment
-        super.init(frame: .zero)
+        super.init(frame: frame)
         wantsLayer = true
         needsDisplay = true
     }

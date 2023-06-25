@@ -21,24 +21,31 @@ extension NSTextLayoutManager {
         return output
     }
 
-    func textSelectionsString() -> String? {
-        textSelections.flatMap(\.textRanges).reduce(nil) { partialResult, textRange in
-            guard let substring = substring(for: textRange) else {
-                return partialResult
-            }
+    struct TextSelectionRangesOptions: OptionSet {
+        let rawValue: UInt
+        static let withoutInsertionPoints = TextSelectionRangesOptions(rawValue: 1 << 0)
+    }
 
-            var partialResult = partialResult
-            if partialResult == nil {
-                partialResult = ""
-            }
-
-            return partialResult?.appending(substring)
+    func textSelectionsRanges(_ options: TextSelectionRangesOptions = []) -> [NSTextRange] {
+        if options.contains(.withoutInsertionPoints) {
+            return textSelections.flatMap(\.textRanges).filter({ !$0.isEmpty })
+        } else {
+            return textSelections.flatMap(\.textRanges)
         }
+    }
+
+    func textSelectionsString() -> String? {
+        textSelections.flatMap(\.textRanges).compactMap { textRange in
+            substring(for: textRange)
+        }.joined(separator: "\n")
     }
 
     func textSelectionsAttributedString() -> NSAttributedString? {
         let attributedString = textSelections.flatMap(\.textRanges).reduce(NSMutableAttributedString()) { partialResult, range in
             if let attributedString = textContentManager?.attributedString(in: range) {
+                if partialResult.length != 0 {
+                    partialResult.append(NSAttributedString(string: "\n"))
+                }
                 partialResult.append(attributedString)
             }
             return partialResult
@@ -63,7 +70,11 @@ extension NSTextLayoutManager {
         // while downstream affinity means that the selection is biased towards the following or later portion of the text. The affinity helps determine
         // the behavior of the text selection when the text is modified or manipulated.
         enumerateTextSegments(in: textRange, type: type, options: [.rangeNotRequired, .upstreamAffinity]) { _, textSegmentFrame, _, _ -> Bool in
-            result = textSegmentFrame
+            if result == nil {
+                result = textSegmentFrame
+            } else {
+                result = result!.union(textSegmentFrame)
+            }
             return true
         }
         return result

@@ -7,12 +7,13 @@ import UniformTypeIdentifiers
 extension STTextView {
 
     @objc open func copy(_ sender: Any?) {
-        if textLayoutManager.textSelections.isEmpty, let attributedString = textContentManager.attributedString(in: nil) {
-            updatePasteboard(with: attributedString)
-        } else if !textLayoutManager.textSelections.isEmpty {
+        // Copy selected area or the whole document if there's no selection
+        if !textLayoutManager.textSelections.isEmpty {
             if let textSelectionsAttributedString = textLayoutManager.textSelectionsAttributedString() {
                 updatePasteboard(with: textSelectionsAttributedString)
             }
+        } else if let attributedString = textContentManager.attributedString(in: nil) {
+            updatePasteboard(with: attributedString)
         }
     }
 

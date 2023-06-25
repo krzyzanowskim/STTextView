@@ -53,7 +53,7 @@ extension STTextView {
     open override func rulerView(_ ruler: NSRulerView, handleMouseDownWith event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         guard let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point),
-              let textSegmentFrame = textLayoutManager.textSelectionSegmentFrame(in: NSTextRange(location: textLayoutFragment.rangeInElement.location), type: .highlight)?.pixelAligned
+              let textSegmentFrame = textLayoutManager.textSelectionSegmentFrame(at: textLayoutFragment.rangeInElement.location, type: .highlight)?.pixelAligned
         else {
             return
         }

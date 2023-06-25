@@ -14,7 +14,7 @@ extension STTextView {
         })
 
         if shouldDrawInsertionPoint {
-            for textRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) {
+            for textRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) where textRange.isEmpty {
                 textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, _) in
                     var selectionFrame = textSegmentFrame.intersection(frame).pixelAligned
                     guard !selectionFrame.isNull, !selectionFrame.isInfinite else {

@@ -812,8 +812,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             let startLocation = textLayoutManager.textViewportLayoutController.viewportRange?.location ?? textLayoutManager.documentRange.location
             let endLocation = textLayoutManager.textViewportLayoutController.viewportRange?.endLocation ?? textLayoutManager.documentRange.endLocation
             textLayoutManager.enumerateTextLayoutFragments(from: startLocation, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+                let shouldContinue = layoutFragment.rangeInElement.location <= endLocation
+                if !shouldContinue {
+                    return false
+                }
                 proposedWidth = max(proposedWidth, layoutFragment.layoutFragmentFrame.maxX)
-                return layoutFragment.rangeInElement.location < endLocation
+                return shouldContinue
             }
         } else {
             proposedWidth = max(currentSize.width, proposedWidth)
