@@ -35,34 +35,57 @@ final class TextLayoutRangeView: NSView {
     override func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
 
-        let writingDirection = textLayoutManager.baseWritingDirection(at: textRange.location)
-        var offsetY: Double = 0
+        var origin: CGPoint = .zero
         textLayoutManager.enumerateTextLayoutFragments(from: textRange.location) { textLayoutFragment in
             let shouldContinue = textLayoutFragment.rangeInElement.location <= textRange.endLocation
             if !shouldContinue {
                 return false
             }
 
-            // at what location start drawin the line. the first character is at textRange.location
-            let firstLineCharacterOffset = max(0, textLayoutManager.offset(from: textLayoutFragment.rangeInElement.location, to: textRange.location))
-            for (idx, textLineFragment) in textLayoutFragment.textLineFragments.enumerated() {
-                var origin: CGPoint = .zero // adjust to where range start in the line
-
-                if idx == 0 {
-                    let p = textLineFragment.locationForCharacter(at: firstLineCharacterOffset)
-                    if writingDirection == .leftToRight {
-                        origin.x = -p.x
-                    } else if writingDirection == .rightToLeft {
-                        // FIXME: RTL is incorrect
-                        origin.x = p.x
-                    }
+            // at what location start draw the line. the first character is at textRange.location
+            // I want to draw just a part of the line fragment, however I can only draw the whole line
+            // so remove/delete unecessary part of the line
+            for textLineFragment in textLayoutFragment.textLineFragments {
+                // if textLineFragment contains textRange.location, cut off everything before it
+                guard let textLineFragmentRange = textLineFragment.textRange(in: textLayoutFragment) else {
+                    continue
                 }
 
-                textLineFragment.draw(at: CGPoint(x: origin.x, y: origin.y + offsetY), in: ctx)
-                offsetY += textLineFragment.typographicBounds.minY + textLineFragment.glyphOrigin.y
+                textLineFragment.draw(at: origin, in: ctx)
+
+                if textLineFragmentRange.contains(textRange.location) {
+                    let originOffset = textLineFragment.locationForCharacter(at: textLayoutManager.offset(from: textLineFragmentRange.location, to: textRange.location))
+                    ctx.clear(CGRect(x: origin.x, y: origin.y, width: originOffset.x, height: textLineFragment.typographicBounds.height))
+                }
+
+                if textLineFragmentRange.contains(textRange.endLocation) {
+                    let originOffset = textLineFragment.locationForCharacter(at: textLayoutManager.offset(from: textLineFragmentRange.location, to: textRange.endLocation))
+                    ctx.clear(CGRect(x: originOffset.x, y: origin.y, width: textLineFragment.typographicBounds.width - originOffset.x, height: textLineFragment.typographicBounds.height))
+                }
+
+                // TODO: Position does not take RTL, Vertical into account
+                // let writingDirection = textLayoutManager.baseWritingDirection(at: textRange.location)
+                origin.y += textLineFragment.typographicBounds.minY + textLineFragment.glyphOrigin.y
             }
 
             return shouldContinue // Returning false from block breaks out of the enumeration.
         }
+    }
+}
+
+private extension NSTextLineFragment {
+
+    // Range inside textLayoutFragment relative to the document origin
+    func textRange(in textLayoutFragment: NSTextLayoutFragment) -> NSTextRange? {
+
+        guard let textContentManager = textLayoutFragment.textLayoutManager?.textContentManager else {
+            assertionFailure()
+            return nil
+        }
+
+        return NSTextRange(
+            location: textContentManager.location(textLayoutFragment.rangeInElement.location, offsetBy: characterRange.location)!,
+            end: textContentManager.location(textLayoutFragment.rangeInElement.location, offsetBy: characterRange.location + characterRange.length)
+        )
     }
 }
