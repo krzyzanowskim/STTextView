@@ -1083,6 +1083,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     public var isCoalescingUndo: Bool {
         (undoManager as? CoalescingUndoManager)?.isCoalescing ?? false
     }
+
+    /// Releases the drag information still existing after the dragging session has completed.
+    ///
+    /// Subclasses may override this method to clean up any additional data structures used for dragging. In your overridden method, be sure to invoke super’s implementation of this method.
+    open func cleanUpAfterDragOperation() {
+
+    }
 }
 
 // MARK: - NSViewInvalidating
