@@ -41,7 +41,11 @@ extension NSTextLayoutManager {
     }
 
     func textSelectionsAttributedString() -> NSAttributedString? {
-        let attributedString = textSelections.flatMap(\.textRanges).reduce(NSMutableAttributedString()) { partialResult, range in
+        textAttributedString(in: textSelections.flatMap(\.textRanges))
+    }
+
+    func textAttributedString(in textRanges: [NSTextRange]) -> NSAttributedString? {
+        let attributedString = textRanges.reduce(NSMutableAttributedString()) { partialResult, range in
             if let attributedString = textContentManager?.attributedString(in: range) {
                 if partialResult.length != 0 {
                     partialResult.append(NSAttributedString(string: "\n"))
@@ -58,11 +62,11 @@ extension NSTextLayoutManager {
     }
 
     ///  A text segment is both logically and visually contiguous portion of the text content inside a line fragment.
-    public func textSelectionSegmentFrame(at location: NSTextLocation, type: NSTextLayoutManager.SegmentType) -> CGRect? {
-        textSelectionSegmentFrame(in: NSTextRange(location: location), type: type)
+    public func textSegmentFrame(at location: NSTextLocation, type: NSTextLayoutManager.SegmentType) -> CGRect? {
+        textSegmentFrame(in: NSTextRange(location: location), type: type)
     }
 
-    public func textSelectionSegmentFrame(in textRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> CGRect? {
+    public func textSegmentFrame(in textRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> CGRect? {
         var result: CGRect? = nil
         // .upstreamAffinity: When specified, the segment is placed based on the upstream affinity for an empty range.
         //
@@ -80,15 +84,25 @@ extension NSTextLayoutManager {
         return result
     }
 
-    public func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
+    func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
         textLayoutFragment(for: location)?.textLineFragment(at: location)
     }
 
-    public func textLineFragment(at point: CGPoint) -> NSTextLineFragment? {
+    func textLineFragment(at point: CGPoint) -> NSTextLineFragment? {
         textLayoutFragment(for: point)?.textLineFragment(at: point)
     }
 
+    @discardableResult
+    func enumerateTextLayoutFragments(in range: NSTextRange, options: NSTextLayoutFragment.EnumerationOptions = [], using block: (NSTextLayoutFragment) -> Bool) -> NSTextLocation? {
+        enumerateTextLayoutFragments(from: range.location, options: options) { layoutFragment in
+            let shouldContinue = layoutFragment.rangeInElement.location <= range.endLocation
+            if !shouldContinue {
+                return false
+            }
 
+            return shouldContinue && block(layoutFragment)
+        }
+    }
 
 }
 

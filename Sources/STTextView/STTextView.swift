@@ -433,6 +433,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// location is too close to each other, therefore `mouseDraggingSelectionAnchors`
     /// keep the anchors unchanged while dragging.
     internal var mouseDraggingSelectionAnchors: [NSTextSelection]? = nil
+    internal var draggingSession: NSDraggingSession? = nil
 
     open override class var defaultMenu: NSMenu? {
         let menu = super.defaultMenu ?? NSMenu()
@@ -496,6 +497,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         addSubview(selectionView)
         addSubview(contentView)
+
+        addGestureRecognizer(dragSelectedTextGestureRecognizer())
 
         // Forward didChangeSelectionNotification from STTextLayoutManager
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
@@ -876,18 +879,18 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         if selectionTextRange.isEmpty {
-            if let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: selectionTextRange.location, type: .selection) {
+            if let selectionRect = textLayoutManager.textSegmentFrame(at: selectionTextRange.location, type: .selection) {
                 scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
             }
         } else {
             switch selection.affinity {
             case .upstream:
-                if let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: selectionTextRange.location, type: .selection) {
+                if let selectionRect = textLayoutManager.textSegmentFrame(at: selectionTextRange.location, type: .selection) {
                     scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
                 }
             case .downstream:
                 if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
-                   let selectionRect = textLayoutManager.textSelectionSegmentFrame(at: location, type: .selection)
+                   let selectionRect = textLayoutManager.textSegmentFrame(at: location, type: .selection)
                 {
                     scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
                 }

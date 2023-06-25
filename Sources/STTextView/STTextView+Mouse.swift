@@ -15,17 +15,49 @@ extension STTextView {
             return
         }
 
-        var handled = false
-        if event.clickCount == 1 {
-            let point = convert(event.locationInWindow, from: nil)
+        let handled: Bool
+
+        switch event.clickCount {
+        case 1:
+            let eventPoint = convert(event.locationInWindow, from: nil)
+//            let currentSelectionRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
+//
+//            lazy var interactionInSelectedRange: Bool = {
+//                currentSelectionRanges.reduce(true) { partialResult, range in
+//                    guard let interationLocation = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: range.location) else {
+//                        return partialResult
+//                    }
+//                    return partialResult && range.contains(interationLocation)
+//                }
+//            }()
+//
+//            if !currentSelectionRanges.isEmpty,
+//               interactionInSelectedRange,
+//               let selectionsAttributedString = textLayoutManager.textSelectionsAttributedString(),
+//               let textRange = currentSelectionRanges.first // TODO: loop over ranges
+//            {
+//                // has selection, and tap on the selected area
+//                // therefore start dragging session. dragging is interrupted
+//                // by mouseup event, or any other mouse event
+//                let rangeView = TextLayoutRangeView(textLayoutManager: textLayoutManager, textRange: textRange)
+//                let imageRep = bitmapImageRepForCachingDisplay(in: rangeView.bounds)!
+//                rangeView.cacheDisplay(in: rangeView.bounds, to: imageRep)
+//
+//                let draggingImage = NSImage(cgImage: imageRep.cgImage!, size: rangeView.bounds.size)
+//
+//                let draggingItem = NSDraggingItem(pasteboardWriter: selectionsAttributedString)
+//                draggingItem.setDraggingFrame(rangeView.frame, contents: draggingImage)
+//
+//                beginDraggingSession(with: [draggingItem], event: event, source: self)
+//            } else
             if event.modifierFlags.isSuperset(of: [.control, .shift]) {
-                textLayoutManager.appendInsertionPointSelection(interactingAt: point)
+                textLayoutManager.appendInsertionPointSelection(interactingAt: eventPoint)
                 updateTypingAttributes()
                 updateSelectionHighlights()
                 needsDisplay = true
             } else {
                 updateTextSelection(
-                    interactingAt: point,
+                    interactingAt: eventPoint,
                     inContainerAt: textLayoutManager.documentRange.location,
                     anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
                     extending: event.modifierFlags.contains(.shift),
@@ -34,12 +66,14 @@ extension STTextView {
                 )
             }
             handled = true
-        } else if event.clickCount == 2 {
+        case 2:
             selectWord(self)
             handled = true
-        } else if event.clickCount == 3 {
-            selectLine(self)
+        case 3:
+            selectParagraph(self)
             handled = true
+        default:
+            handled = false
         }
 
         if !handled {
@@ -61,27 +95,28 @@ extension STTextView {
             return
         }
 
-        if isSelectable, event.type == .leftMouseDragged, (!event.deltaY.isZero || !event.deltaX.isZero) {
-            let point = convert(event.locationInWindow, from: nil)
-
-            if mouseDraggingSelectionAnchors == nil {
-                mouseDraggingSelectionAnchors = textLayoutManager.textSelections
-            }
-
-            updateTextSelection(
-                interactingAt: point,
-                inContainerAt: mouseDraggingSelectionAnchors?.first?.textRanges.first?.location ?? textLayoutManager.documentRange.location,
-                anchors: mouseDraggingSelectionAnchors!,
-                extending: true,
-                isDragging: true,
-                visual: event.modifierFlags.contains(.option)
-            )
-
-            if autoscroll(with: event) {
-                // TODO: periodic repeat this event, until don't
-            }
-        } else {
+        guard isSelectable, (!event.deltaY.isZero || !event.deltaX.isZero) else {
             super.mouseDragged(with: event)
+            return
+        }
+
+        let eventPoint = convert(event.locationInWindow, from: nil)
+
+        if mouseDraggingSelectionAnchors == nil {
+            mouseDraggingSelectionAnchors = textLayoutManager.textSelections
+        }
+
+        updateTextSelection(
+            interactingAt: eventPoint,
+            inContainerAt: mouseDraggingSelectionAnchors?.first?.textRanges.first?.location ?? textLayoutManager.documentRange.location,
+            anchors: mouseDraggingSelectionAnchors!,
+            extending: true,
+            isDragging: true,
+            visual: event.modifierFlags.contains(.option)
+        )
+
+        if autoscroll(with: event) {
+            // TODO: periodic repeat this event, until don't
         }
     }
 

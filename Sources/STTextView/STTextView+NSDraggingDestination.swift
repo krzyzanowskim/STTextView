@@ -11,13 +11,6 @@ extension STTextView {
     open override func concludeDragOperation(_ sender: NSDraggingInfo?) {
         super.concludeDragOperation(sender)
         cleanUpAfterDragOperation()
-        updateInsertionPointStateAndRestartTimer()
-        displayIfNeeded()
-    }
-
-    open override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        logger.debug("drag operation")
-        return super.performDragOperation(sender)
     }
 
 }

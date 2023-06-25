@@ -168,7 +168,7 @@ extension ViewController: STTextViewDataSource {
 
         // Position
 
-        let segmentFrame = textView.textLayoutManager.textSelectionSegmentFrame(at: lineAnnotation.location, type: .standard)!
+        let segmentFrame = textView.textLayoutManager.textSegmentFrame(at: lineAnnotation.location, type: .standard)!
         let annotationHeight = min(textLineFragment.typographicBounds.height, textView.font?.boundingRectForFont.height ?? 24)
 
         decorationView.frame = CGRect(
