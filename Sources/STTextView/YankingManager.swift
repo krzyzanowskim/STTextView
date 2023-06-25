@@ -5,9 +5,9 @@ import Foundation
 
 /// Yanking means reinserting text previously killed. The usual way to move or copy text is to kill it and then yank it elsewhere.
 /// https://www.gnu.org/software/emacs/manual/html_node/emacs/Yanking.html
-final class Yanking {
+final class YankingManager {
 
-    static let shared = Yanking()
+    static let shared = YankingManager()
 
     enum DeleteAction {
         case delete

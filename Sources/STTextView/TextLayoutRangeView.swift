@@ -6,7 +6,7 @@ import CoreGraphics
 
 /// A view with content of range.
 /// Used to provide image of a text eg. for dragging
-final class STTextLayoutRangeView: NSView {
+final class TextLayoutRangeView: NSView {
     private let textLayoutManager: NSTextLayoutManager
     private let textRange: NSTextRange
 

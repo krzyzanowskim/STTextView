@@ -5,7 +5,7 @@
 //  STTextView
 //      |---selectionView
 //      |---contentView
-//              |---(STInsertionPointView | STTextLayoutFragmentView)
+//              |---(STInsertionPointView | TextLayoutFragmentView)
 //      |---lineAnnotationView
 //
 //
@@ -348,7 +348,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal let contentView: ContentView
     internal let selectionView: SelectionView
     internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
-    internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
+    internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, TextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
     internal lazy var speechSynthesizer: NSSpeechSynthesizer = NSSpeechSynthesizer()
 
@@ -501,7 +501,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
-            Yanking.shared.selectionChanged()
+            YankingManager.shared.selectionChanged()
 
             NotificationCenter.default.post(
                 Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
@@ -930,7 +930,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         let notification = Notification(name: STTextView.textDidChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         delegate?.textViewDidChangeText(notification)
-        Yanking.shared.textChanged()
+        YankingManager.shared.textChanged()
 
         // Because annotation location position changed
         // we need to reposition all views that may be
