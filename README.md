@@ -43,7 +43,7 @@ STTextView is already well suited as a text editor component, however it still n
 #### Known issues
 
 - undo/redo while typing need fixes
-- no text dragging
+- text dragging (partially implemented)
 
 ## 🚀 Getting Started
 
@@ -52,7 +52,7 @@ STTextView is already well suited as a text editor component, however it still n
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.4.0")
+        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.7.0")
     ]
 )
 ```
