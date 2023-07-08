@@ -3,42 +3,21 @@
 
 import Cocoa
 
-extension STTextView {
-
-    func dragSelectedTextGestureRecognizer() -> NSGestureRecognizer {
-        let recognizer = NSPressGestureRecognizer(target: self, action: #selector(_dragSelectedTextGestureRecognizer(gestureRecognizer:)))
-        recognizer.minimumPressDuration = NSEvent.doubleClickInterval / 3
-        recognizer.delaysPrimaryMouseButtonEvents = true
-        recognizer.isEnabled = isSelectable
-        return recognizer
-    }
+extension STTextView: NSGestureRecognizerDelegate {
 
     /// Gesture action for press and drag selected
-    @objc private func _dragSelectedTextGestureRecognizer(gestureRecognizer: NSGestureRecognizer) {
-        guard gestureRecognizer.state == .began else {
-            return
-        }
-
+    @objc func _dragSelectedTextGestureRecognizer(gestureRecognizer: NSGestureRecognizer) {
         let eventPoint = gestureRecognizer.location(in: self)
         let currentSelectionRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
 
         guard !currentSelectionRanges.isEmpty else {
-            gestureRecognizer.state = .cancelled
             return
         }
 
-        lazy var interactionInSelectedRange: Bool = {
-            currentSelectionRanges.reduce(true) { partialResult, range in
-                guard let interationLocation = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: range.location) else {
-                    return partialResult
-                }
-                return partialResult && range.contains(interationLocation)
-            }
-        }()
-
         // TODO: loop over all selected ranges
-        guard interactionInSelectedRange, let selectionsAttributedString = textLayoutManager.textSelectionsAttributedString(), let textRange = currentSelectionRanges.first else {
-            gestureRecognizer.state = .cancelled
+        guard interactionInSelectedRange(at: eventPoint),
+              let selectionsAttributedString = textLayoutManager.textSelectionsAttributedString(),
+              let textRange = currentSelectionRanges.first else {
             return
         }
 
@@ -53,4 +32,33 @@ extension STTextView {
 
         draggingSession = beginDraggingSession(with: [draggingItem], event: NSApp.currentEvent!, source: self)
     }
+
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: NSGestureRecognizer) -> Bool {
+
+        if gestureRecognizer == self.dragSelectedTextGestureRecognizer {
+            return shouldRecognizeDragGesture(gestureRecognizer)
+        }
+
+        return true
+    }
+
+    private func shouldRecognizeDragGesture(_ gestureRecognizer: NSGestureRecognizer) -> Bool {
+        let eventPoint = gestureRecognizer.location(in: self)
+        return interactionInSelectedRange(at: eventPoint)
+    }
+
+    private func interactionInSelectedRange(at location: CGPoint) -> Bool {
+        let currentSelectionRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
+        if currentSelectionRanges.isEmpty {
+            return false
+        }
+
+        return currentSelectionRanges.reduce(true) { partialResult, range in
+            guard let interationLocation = textLayoutManager.location(interactingAt: location, inContainerAt: range.location) else {
+                return partialResult
+            }
+            return partialResult && range.contains(interationLocation)
+        }
+    }
+
 }

@@ -435,6 +435,14 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal var mouseDraggingSelectionAnchors: [NSTextSelection]? = nil
     internal var draggingSession: NSDraggingSession? = nil
 
+    lazy var dragSelectedTextGestureRecognizer: NSGestureRecognizer = {
+        let recognizer = NSPressGestureRecognizer(target: self, action: #selector(_dragSelectedTextGestureRecognizer(gestureRecognizer:)))
+        recognizer.minimumPressDuration = NSEvent.doubleClickInterval / 3
+        recognizer.isEnabled = isSelectable
+        recognizer.delegate = self
+        return recognizer
+    }()
+
     open override class var defaultMenu: NSMenu? {
         let menu = super.defaultMenu ?? NSMenu()
 
@@ -498,7 +506,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         addSubview(selectionView)
         addSubview(contentView)
 
-        addGestureRecognizer(dragSelectedTextGestureRecognizer())
+        addGestureRecognizer(dragSelectedTextGestureRecognizer)
 
         // Forward didChangeSelectionNotification from STTextLayoutManager
         NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
