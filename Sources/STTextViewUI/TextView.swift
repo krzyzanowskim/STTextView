@@ -73,18 +73,23 @@ private struct TextViewRepresentable: NSViewRepresentable {
     @Environment(\.isEnabled) private var isEnabled
 
     @Binding var text: AttributedString
-    var font: NSFont
-    var options: TextView.Options
+    let font: NSFont
+    let options: TextView.Options
+
+    init(text: Binding<AttributedString>, font: NSFont, options: TextView.Options) {
+        self._text = text
+        self.font = font
+        self.options = options
+    }
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = STTextView.scrollableTextView()
         let textView = scrollView.documentView as! STTextView
-        textView.font = font
-        textView.setAttributedString(NSAttributedString(text))
         textView.delegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.widthTracksTextView = options.contains(.wrapLines)
         textView.setSelectedRange(NSRange())
+        textView.setAttributedString(NSAttributedString(text))
         return scrollView
     }
 
@@ -92,9 +97,32 @@ private struct TextViewRepresentable: NSViewRepresentable {
         context.coordinator.parent = self
 
         let textView = scrollView.documentView as! STTextView
-        textView.isEditable = isEnabled
-        textView.isSelectable = isEnabled
-        textView.widthTracksTextView = options.contains(.wrapLines)
+
+        do {
+            context.coordinator.isUpdating = true
+            if context.coordinator.isDidChangeText  == false {
+                textView.setAttributedString(NSAttributedString(text))
+            }
+            context.coordinator.isUpdating = false
+            context.coordinator.isDidChangeText  = false
+        }
+
+        if textView.isEditable != isEnabled {
+            textView.isEditable = isEnabled
+        }
+
+        if textView.isSelectable != isEnabled {
+            textView.isSelectable = isEnabled
+        }
+
+        let wrapLines = options.contains(.wrapLines)
+        if wrapLines != textView.widthTracksTextView {
+            textView.widthTracksTextView = options.contains(.wrapLines)
+        }
+
+        if textView.font != font {
+            textView.font = font
+        }
     }
 
     func makeCoordinator() -> TextCoordinator {
@@ -103,6 +131,9 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
     class TextCoordinator: STTextViewDelegate {
         var parent: TextViewRepresentable
+        var isUpdating: Bool = false
+        var isDidChangeText: Bool = false
+        var enqueuedValue: AttributedString?
 
         init(parent: TextViewRepresentable) {
             self.parent = parent
@@ -113,7 +144,13 @@ private struct TextViewRepresentable: NSViewRepresentable {
                 return
             }
 
-            parent.text = AttributedString(textView.attributedString())
+            if !isUpdating {
+                let newTextValue = AttributedString(textView.attributedString())
+                DispatchQueue.main.async {
+                    self.isDidChangeText = true
+                    self.parent.text = newTextValue
+                }
+            }
         }
 
     }
