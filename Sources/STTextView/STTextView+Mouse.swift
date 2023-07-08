@@ -20,36 +20,6 @@ extension STTextView {
         switch event.clickCount {
         case 1:
             let eventPoint = convert(event.locationInWindow, from: nil)
-//            let currentSelectionRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
-//
-//            lazy var interactionInSelectedRange: Bool = {
-//                currentSelectionRanges.reduce(true) { partialResult, range in
-//                    guard let interationLocation = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: range.location) else {
-//                        return partialResult
-//                    }
-//                    return partialResult && range.contains(interationLocation)
-//                }
-//            }()
-//
-//            if !currentSelectionRanges.isEmpty,
-//               interactionInSelectedRange,
-//               let selectionsAttributedString = textLayoutManager.textSelectionsAttributedString(),
-//               let textRange = currentSelectionRanges.first // TODO: loop over ranges
-//            {
-//                // has selection, and tap on the selected area
-//                // therefore start dragging session. dragging is interrupted
-//                // by mouseup event, or any other mouse event
-//                let rangeView = TextLayoutRangeView(textLayoutManager: textLayoutManager, textRange: textRange)
-//                let imageRep = bitmapImageRepForCachingDisplay(in: rangeView.bounds)!
-//                rangeView.cacheDisplay(in: rangeView.bounds, to: imageRep)
-//
-//                let draggingImage = NSImage(cgImage: imageRep.cgImage!, size: rangeView.bounds.size)
-//
-//                let draggingItem = NSDraggingItem(pasteboardWriter: selectionsAttributedString)
-//                draggingItem.setDraggingFrame(rangeView.frame, contents: draggingImage)
-//
-//                beginDraggingSession(with: [draggingItem], event: event, source: self)
-//            } else
             if event.modifierFlags.isSuperset(of: [.control, .shift]) {
                 textLayoutManager.appendInsertionPointSelection(interactingAt: eventPoint)
                 updateTypingAttributes()
