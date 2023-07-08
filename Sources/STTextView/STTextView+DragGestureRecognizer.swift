@@ -23,6 +23,7 @@ extension STTextView {
         let currentSelectionRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
 
         guard !currentSelectionRanges.isEmpty else {
+            gestureRecognizer.state = .cancelled
             return
         }
 
@@ -37,6 +38,7 @@ extension STTextView {
 
         // TODO: loop over all selected ranges
         guard interactionInSelectedRange, let selectionsAttributedString = textLayoutManager.textSelectionsAttributedString(), let textRange = currentSelectionRanges.first else {
+            gestureRecognizer.state = .cancelled
             return
         }
 
