@@ -5,7 +5,7 @@ import SwiftUI
 import STTextViewUI
 
 struct ContentView: View {
-    @State private var text = AttributedString(try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!))
+    @State private var text: AttributedString = ""
     @State private var counter = 0
 
     var body: some View {
@@ -14,9 +14,9 @@ struct ContentView: View {
             // this is fast
             STTextViewUI.TextView(
                 text: $text,
-                font: .preferredFont(forTextStyle: .body),
                 options: [.wrapLines, .highlightSelectedLine]
             )
+            .textViewFont(.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular))
 
             /*
             Button("Modify") {
@@ -27,9 +27,17 @@ struct ContentView: View {
             // SwiftUI is slow, I wouldn't use it
             SwiftUI.TextEditor(text: Binding(get: { String(text.characters) }, set: { text = AttributedString($0) }))
                 .font(.body)
-             
             */
         }
+        .onAppear {
+            loadContent()
+        }
+    }
+
+    private func loadContent() {
+        let string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
+        var attributedString = AttributedString(string)
+        self.text = attributedString
     }
 }
 
