@@ -5,6 +5,7 @@ import Foundation
 import SwiftUI
 import STTextView
 
+/// This SwiftUI view can be used to view and edit rich text.
 public struct TextView: SwiftUI.View {
 
     @frozen
@@ -15,15 +16,21 @@ public struct TextView: SwiftUI.View {
             self.rawValue = rawValue
         }
 
+        /// Breaks the text as needed to fit within the bounding box.
         public static let wrapLines = Options(rawValue: 1 << 0)
+
+        /// Highlighted selected line
         public static let highlightSelectedLine = Options(rawValue: 1 << 1)
     }
 
     @Environment(\.colorScheme) private var colorScheme
-
     @Binding private var text: AttributedString
     private let options: Options
 
+    /// Create a text edit view with a certain text that uses a certain options.
+    /// - Parameters:
+    ///   - text: The attributed string content
+    ///   - options: Editor options
     public init(
         text: Binding<AttributedString>,
         options: Options = []

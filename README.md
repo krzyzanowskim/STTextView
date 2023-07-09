@@ -57,6 +57,10 @@ let package = Package(
 )
 ```
 
+## Demo Application
+
+The demo app lets you explore the library. To try it out, just open and run the `STTextView.xcworkspace` in Xcode.
+
 ## Usage
 
 ### SwiftUI

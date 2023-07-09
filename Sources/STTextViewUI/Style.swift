@@ -22,6 +22,8 @@ extension STTextViewUI.TextView: TextViewModifier {
 }
 
 extension TextViewModifier {
+
+    /// Sets the default font for text in this view.
     public func textViewFont(_ font: NSFont) -> TextView.EnvironmentModifier<Self, NSFont> {
         TextView.EnvironmentModifier(content: self, keyPath: \.font, value: font)
     }
