@@ -36,8 +36,7 @@ struct ContentView: View {
 
     private func loadContent() {
         let string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        var attributedString = AttributedString(string)
-        self.text = attributedString
+        self.text = AttributedString(string)
     }
 }
 
