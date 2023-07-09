@@ -149,6 +149,8 @@ extension STTextView: NSTextInputClient {
             return nil
         }
 
+        actualRange?.pointee = NSRange(textRange, in: textContentManager)
+
         return textContentManager.attributedString(in: textRange)
     }
 
