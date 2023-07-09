@@ -9,15 +9,9 @@ public protocol TextViewModifier: SwiftUI.View { }
 extension STTextViewUI.TextView: TextViewModifier {
 
     public struct EnvironmentModifier<Content: View, V>: View, TextViewModifier {
-        private let content: Content
-        private let keyPath: WritableKeyPath<EnvironmentValues, V>
-        private let value: V
-
-        init(content: Content, keyPath: WritableKeyPath<EnvironmentValues, V>, value: V) {
-            self.content = content
-            self.keyPath = keyPath
-            self.value = value
-        }
+        let content: Content
+        let keyPath: WritableKeyPath<EnvironmentValues, V>
+        let value: V
 
         public var body: some View {
             content
