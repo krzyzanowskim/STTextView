@@ -141,7 +141,11 @@ extension STTextView: NSTextInputClient {
     }
 
     @objc public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
-        textContentManager.attributedString(in: NSTextRange(range, in: textContentManager))
+        guard let validTextRange = NSTextRange(range, in: textContentManager) else {
+            return nil
+        }
+
+        return textContentManager.attributedString(in: validTextRange)
     }
 
     @objc public func attributedString() -> NSAttributedString {
@@ -173,13 +177,12 @@ extension STTextView: NSTextInputClient {
     }
 
     @objc public func characterIndex(for point: NSPoint) -> Int {
-        guard let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point) else {
+        let eventPoint = convert(window!.convertPoint(fromScreen: point), from: nil)
+        guard let location = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location) else {
             return NSNotFound
         }
 
-        return textLayoutManager.offset(
-            from: textLayoutManager.documentRange.location, to: textLayoutFragment.rangeInElement.location
-        )
+        return textLayoutManager.offset(from: textLayoutManager.documentRange.location, to: location)
     }
 
     @objc open func insertText(_ string: Any, replacementRange: NSRange) {
