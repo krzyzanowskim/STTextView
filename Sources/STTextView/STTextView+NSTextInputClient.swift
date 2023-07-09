@@ -141,11 +141,15 @@ extension STTextView: NSTextInputClient {
     }
 
     @objc public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
-        guard let validTextRange = NSTextRange(range, in: textContentManager) else {
+        // An implementation of this method should be prepared for range to be out of bounds.
+        let location = textContentManager.location(textContentManager.documentRange.location, offsetBy: range.location) ?? textContentManager.documentRange.location
+        let endLocation = textContentManager.location(textContentManager.documentRange.location, offsetBy: range.location + range.length) ?? textContentManager.documentRange.endLocation
+
+        guard let textRange = NSTextRange(location: location, end: endLocation) else {
             return nil
         }
 
-        return textContentManager.attributedString(in: validTextRange)
+        return textContentManager.attributedString(in: textRange)
     }
 
     @objc public func attributedString() -> NSAttributedString {
