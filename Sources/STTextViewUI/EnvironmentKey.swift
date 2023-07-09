@@ -9,7 +9,7 @@ private struct FontEnvironmentKey: EnvironmentKey {
     static var defaultValue: NSFont = .preferredFont(forTextStyle: .body)
 }
 
-public extension EnvironmentValues {
+internal extension EnvironmentValues {
     var font: NSFont {
         get { self[FontEnvironmentKey.self] }
         set { self[FontEnvironmentKey.self] = newValue }
