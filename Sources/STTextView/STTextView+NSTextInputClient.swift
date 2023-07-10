@@ -145,7 +145,7 @@ extension STTextView: NSTextInputClient {
         let location = textContentManager.location(textContentManager.documentRange.location, offsetBy: range.location) ?? textContentManager.documentRange.location
         let endLocation = textContentManager.location(textContentManager.documentRange.location, offsetBy: range.location + range.length) ?? textContentManager.documentRange.endLocation
 
-        guard let textRange = NSTextRange(location: location, end: endLocation) else {
+        guard let textRange = NSTextRange(location: location, end: endLocation), !textRange.isEmpty else {
             return nil
         }
 

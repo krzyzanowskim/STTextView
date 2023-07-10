@@ -54,7 +54,6 @@ internal final class CompletionWindowController: NSWindowController {
         guard let window = window else { return }
 
         if !isVisible {
-            super.showWindow(nil)
             parentWindow.addChildWindow(window, ordered: .above)
         }
 
