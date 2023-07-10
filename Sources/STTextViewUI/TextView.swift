@@ -5,6 +5,7 @@ import Foundation
 import SwiftUI
 import STTextView
 
+/// This SwiftUI view can be used to view and edit rich text.
 public struct TextView: SwiftUI.View {
 
     @frozen
@@ -15,54 +16,32 @@ public struct TextView: SwiftUI.View {
             self.rawValue = rawValue
         }
 
+        /// Breaks the text as needed to fit within the bounding box.
         public static let wrapLines = Options(rawValue: 1 << 0)
+
+        /// Highlighted selected line
         public static let highlightSelectedLine = Options(rawValue: 1 << 1)
     }
 
     @Environment(\.colorScheme) private var colorScheme
-
     @Binding private var text: AttributedString
-    private var font: NSFont
     private let options: Options
 
+    /// Create a text edit view with a certain text that uses a certain options.
+    /// - Parameters:
+    ///   - text: The attributed string content
+    ///   - options: Editor options
     public init(
         text: Binding<AttributedString>,
-        font: NSFont = .preferredFont(forTextStyle: .body),
         options: Options = []
     ) {
         _text = text
-        self.font = font
         self.options = options
-    }
-
-    public init(
-        text: Binding<String>,
-        font: NSFont = .preferredFont(forTextStyle: .body),
-        options: Options = []
-    ) {
-        self = TextView(
-            text: Binding(
-                get: {
-                    var container = AttributeContainer()
-                    // Swift 5.9 bogus warning: Conformance of 'NSFont' to 'Sendable' is unavailable
-                    // AttributeScopes.AppKitAttributes.FontAttribute requires NSFont and Sendable
-                    // that is impossible compbination.
-                    container[AttributeScopes.AppKitAttributes.FontAttribute.self] = font
-                    return AttributedString(text.wrappedValue, attributes: container)
-                },
-                set: { attributedString in
-                    text.wrappedValue = String(attributedString.characters[...])
-                }
-            ),
-            font: font,
-            options: options
-        )
     }
 
     public var body: some View {
         TextViewRepresentable(
             text: $text,
-            font: font,
             options: options
         )
         .background(.background)
@@ -71,14 +50,14 @@ public struct TextView: SwiftUI.View {
 
 private struct TextViewRepresentable: NSViewRepresentable {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.font) private var font
+    @Environment(\.lineSpacing) private var lineSpacing
 
-    @Binding var text: AttributedString
-    let font: NSFont
-    let options: TextView.Options
+    @Binding private var text: AttributedString
+    private let options: TextView.Options
 
-    init(text: Binding<AttributedString>, font: NSFont, options: TextView.Options) {
+    init(text: Binding<AttributedString>, options: TextView.Options) {
         self._text = text
-        self.font = font
         self.options = options
     }
 
@@ -89,7 +68,9 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.widthTracksTextView = options.contains(.wrapLines)
         textView.setSelectedRange(NSRange())
-        textView.setAttributedString(NSAttributedString(text))
+
+        textView.setAttributedString(NSAttributedString(styledAttributedString(textView.typingAttributes)))
+
         return scrollView
     }
 
@@ -101,7 +82,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
         do {
             context.coordinator.isUpdating = true
             if context.coordinator.isDidChangeText  == false {
-                textView.setAttributedString(NSAttributedString(text))
+                textView.setAttributedString(NSAttributedString(styledAttributedString(textView.typingAttributes)))
             }
             context.coordinator.isUpdating = false
             context.coordinator.isDidChangeText  = false
@@ -127,6 +108,22 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
     func makeCoordinator() -> TextCoordinator {
         TextCoordinator(parent: self)
+    }
+
+    private func styledAttributedString(_ typingAttributes: [NSAttributedString.Key: Any]) -> AttributedString {
+        let paragraph = (typingAttributes[.paragraphStyle] as! NSParagraphStyle).mutableCopy() as! NSMutableParagraphStyle
+        if !paragraph.lineSpacing.isAlmostEqual(to: lineSpacing) {
+            paragraph.lineSpacing = lineSpacing
+            var typingAttributes = typingAttributes
+            typingAttributes[.paragraphStyle] = paragraph
+
+            let attributeContainer = AttributeContainer(typingAttributes)
+            var styledText = text
+            styledText.mergeAttributes(attributeContainer, mergePolicy: .keepNew)
+            return styledText
+        }
+
+        return text
     }
 
     class TextCoordinator: STTextViewDelegate {
@@ -155,3 +152,4 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
     }
 }
+

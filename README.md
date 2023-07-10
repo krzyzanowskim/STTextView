@@ -57,25 +57,32 @@ let package = Package(
 )
 ```
 
+## Demo Application
+
+The demo app lets you explore the library. To try it out, just open and run the `STTextView.xcworkspace` in Xcode.
+
 ## Usage
 
 ### SwiftUI
 
 The `TextView` is a [SwiftUI](https://developer.apple.com/xcode/swiftui/) view that wraps the STTextView.
 
+* Support for rich text (attributed string)
+* Faster than SwiftUI.TextEdit (https://twitter.com/krzyzanowskim/status/1677628085217243137)
+
 ```swift
 import STTextViewUI
 
 struct ContentView: View {
 
-    @State private var text = "Hello World!"
+    @State private var text = AttributedString("Hello World!")
 
     var body: some View {
-        TextView(
+        STTextViewUI.TextView(
             text: $text,
-            font: NSFont.monospacedSystemFont(ofSize: 0, weight: .regular),
             options: [.wrapLines, .highlightSelectedLine]
         )
+        .textViewFont(.preferredFont(forTextStyle: .body))
     }
 }
 ```

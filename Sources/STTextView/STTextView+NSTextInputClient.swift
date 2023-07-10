@@ -141,7 +141,17 @@ extension STTextView: NSTextInputClient {
     }
 
     @objc public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
-        textContentManager.attributedString(in: NSTextRange(range, in: textContentManager))
+        // An implementation of this method should be prepared for range to be out of bounds.
+        let location = textContentManager.location(textContentManager.documentRange.location, offsetBy: range.location) ?? textContentManager.documentRange.location
+        let endLocation = textContentManager.location(textContentManager.documentRange.location, offsetBy: range.location + range.length) ?? textContentManager.documentRange.endLocation
+
+        guard let textRange = NSTextRange(location: location, end: endLocation), !textRange.isEmpty else {
+            return nil
+        }
+
+        actualRange?.pointee = NSRange(textRange, in: textContentManager)
+
+        return textContentManager.attributedString(in: textRange)
     }
 
     @objc public func attributedString() -> NSAttributedString {
@@ -173,13 +183,12 @@ extension STTextView: NSTextInputClient {
     }
 
     @objc public func characterIndex(for point: NSPoint) -> Int {
-        guard let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point) else {
+        let eventPoint = convert(window!.convertPoint(fromScreen: point), from: nil)
+        guard let location = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location) else {
             return NSNotFound
         }
 
-        return textLayoutManager.offset(
-            from: textLayoutManager.documentRange.location, to: textLayoutFragment.rangeInElement.location
-        )
+        return textLayoutManager.offset(from: textLayoutManager.documentRange.location, to: location)
     }
 
     @objc open func insertText(_ string: Any, replacementRange: NSRange) {

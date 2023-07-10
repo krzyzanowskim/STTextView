@@ -20,9 +20,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
     open override var items: [Any] {
         didSet {
             tableView.reloadData()
-
-            // preselect first row
-            tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+            view.needsUpdateConstraints = true
         }
     }
 
@@ -32,18 +30,31 @@ open class STCompletionViewController: STAnyCompletionViewController {
     private var eventMonitor: Any?
 
     open override func loadView() {
-        view = NSView(frame: CGRect(x: 0, y: 0, width: 320, height: 120))
-        view.autoresizingMask = [.width, .height]
+        view = NSView()
+        view.translatesAutoresizingMaskIntoConstraints = false
         view.wantsLayer = true
         view.layer?.cornerRadius = 5
         view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
 
+        NSLayoutConstraint.activate(
+            [
+                view.widthAnchor.constraint(greaterThanOrEqualToConstant: 320),
+            ]
+        )
+
         tableView.style = .plain
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.headerView = nil
-        tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
+        tableView.usesAlternatingRowBackgroundColors = false
+        tableView.columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
         tableView.allowsColumnResizing = false
         tableView.rowHeight = 22
-        tableView.backgroundColor = .windowBackgroundColor
+        tableView.usesAutomaticRowHeights = false
+        tableView.rowSizeStyle = .custom
+        tableView.intercellSpacing = CGSize(width: 4, height: 2)
+        tableView.backgroundColor = .clear
+        tableView.selectionHighlightStyle = .regular
+        tableView.allowsEmptySelection = false
         tableView.action = #selector(tableViewAction(_:))
         tableView.doubleAction = #selector(tableViewDoubleAction(_:))
         tableView.target = self
@@ -57,14 +68,27 @@ open class STCompletionViewController: STAnyCompletionViewController {
         tableView.dataSource = self
         tableView.delegate = self
 
-        let scrollView = NSScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
+        let scrollView = NSScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.automaticallyAdjustsContentInsets = false
-        scrollView.contentInsets = .init(top: 5, left: 5, bottom: 5, right: 5)
+        scrollView.contentInsets = NSEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
         scrollView.drawsBackground = false
+        scrollView.backgroundColor = .clear
+        scrollView.borderType = .noBorder
         scrollView.autoresizingMask = [.width, .height]
         scrollView.hasVerticalScroller = true
         scrollView.documentView = tableView
+
         view.addSubview(scrollView)
+        NSLayoutConstraint.activate(
+            [
+                scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+                scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            ]
+        )
+
         contentScrollView = scrollView
     }
 
@@ -114,6 +138,23 @@ open class STCompletionViewController: STAnyCompletionViewController {
             NSEvent.removeMonitor(eventMonitor)
         }
         eventMonitor = nil
+    }
+
+    private var heightConstraint: NSLayoutConstraint!
+
+    open override func updateViewConstraints() {
+        if heightConstraint == nil {
+            heightConstraint = view.heightAnchor.constraint(greaterThanOrEqualToConstant: 0)
+            heightConstraint.isActive = true
+        }
+
+        let maxVisibleItemsCount = min(8.5, CGFloat(items.count))
+        heightConstraint.constant = max(
+            tableView.rowHeight,
+            (maxVisibleItemsCount * tableView.rowHeight) + (tableView.intercellSpacing.height * maxVisibleItemsCount) + (tableView.enclosingScrollView!.contentInsets.top + tableView.enclosingScrollView!.contentInsets.bottom)
+        )
+
+        super.updateViewConstraints()
     }
 
     open override func insertTab(_ sender: Any?) {
@@ -188,7 +229,7 @@ private class STTableRowView: NSTableRowView {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         context.saveGState()
         let path = NSBezierPath(roundedRect: dirtyRect, xRadius: 4, yRadius: 4)
-        context.setFillColor(NSColor.selectedContentBackgroundColor.cgColor)
+        context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(0.7).cgColor)
         path.fill()
         context.restoreGState()
     }
@@ -229,7 +270,7 @@ private final class CompletionLabelCellView: TableCellView {
 
     func setup(with item: STCompletion.Item) {
         guard let textField = textField else { return }
-        textField.font = .userFixedPitchFont(ofSize: NSFont.systemFontSize)
+        textField.font = .preferredFont(forTextStyle: .body)
         textField.textColor = .labelColor
         textField.stringValue = item.label
         textField.allowsExpansionToolTips = true
