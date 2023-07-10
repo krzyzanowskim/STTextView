@@ -20,6 +20,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
     open override var items: [Any] {
         didSet {
             tableView.reloadData()
+            view.needsUpdateConstraints = true
         }
     }
 
@@ -38,7 +39,6 @@ open class STCompletionViewController: STAnyCompletionViewController {
         NSLayoutConstraint.activate(
             [
                 view.widthAnchor.constraint(greaterThanOrEqualToConstant: 320),
-                view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120),
             ]
         )
 
@@ -138,6 +138,23 @@ open class STCompletionViewController: STAnyCompletionViewController {
             NSEvent.removeMonitor(eventMonitor)
         }
         eventMonitor = nil
+    }
+
+    private var heightConstraint: NSLayoutConstraint!
+
+    open override func updateViewConstraints() {
+        if heightConstraint == nil {
+            heightConstraint = view.heightAnchor.constraint(greaterThanOrEqualToConstant: 0)
+            heightConstraint.isActive = true
+        }
+
+        let maxVisibleItemsCount = min(8.5, CGFloat(items.count))
+        heightConstraint.constant = max(
+            tableView.rowHeight,
+            (maxVisibleItemsCount * tableView.rowHeight) + (tableView.intercellSpacing.height * maxVisibleItemsCount) + (tableView.enclosingScrollView!.contentInsets.top + tableView.enclosingScrollView!.contentInsets.bottom)
+        )
+
+        super.updateViewConstraints()
     }
 
     open override func insertTab(_ sender: Any?) {
