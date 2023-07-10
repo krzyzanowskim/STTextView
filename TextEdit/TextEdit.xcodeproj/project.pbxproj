@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		75055B6C2A5C9F3A00595DC2 /* CompletionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75055B6B2A5C9F3A00595DC2 /* CompletionItem.swift */; };
 		7544423B27B9332E00901C0E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7544423A27B9332E00901C0E /* AppDelegate.swift */; };
 		7544423D27B9332E00901C0E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7544423C27B9332E00901C0E /* ViewController.swift */; };
 		7544423F27B9332F00901C0E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7544423E27B9332F00901C0E /* Assets.xcassets */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		75055B6B2A5C9F3A00595DC2 /* CompletionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionItem.swift; sourceTree = "<group>"; };
 		7544423727B9332E00901C0E /* Text Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Text Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7544423A27B9332E00901C0E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7544423C27B9332E00901C0E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 			children = (
 				7544423A27B9332E00901C0E /* AppDelegate.swift */,
 				7544423C27B9332E00901C0E /* ViewController.swift */,
+				75055B6B2A5C9F3A00595DC2 /* CompletionItem.swift */,
 				755B613F29F5B78800EDD45F /* LineAnnotation.swift */,
 				755B614129F5B7B800EDD45F /* AnnotationLabelView.swift */,
 				7544424927B9387300901C0E /* content.txt */,
@@ -157,6 +160,7 @@
 				755B614029F5B78800EDD45F /* LineAnnotation.swift in Sources */,
 				7544423D27B9332E00901C0E /* ViewController.swift in Sources */,
 				755B614229F5B7B800EDD45F /* AnnotationLabelView.swift in Sources */,
+				75055B6C2A5C9F3A00595DC2 /* CompletionItem.swift in Sources */,
 				7544423B27B9332E00901C0E /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

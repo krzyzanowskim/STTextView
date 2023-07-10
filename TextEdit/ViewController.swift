@@ -129,16 +129,16 @@ extension ViewController: STTextViewDelegate {
 
     func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]? {
         [
-            Completion.Item(id: UUID().uuidString, label: "One", insertText: "one"),
-            Completion.Item(id: UUID().uuidString, label: "Two", insertText: "two"),
-            Completion.Item(id: UUID().uuidString, label: "Three", insertText: "three"),
-            Completion.Item(id: UUID().uuidString, label: "Four", insertText: "four"),
-            Completion.Item(id: UUID().uuidString, label: "Five", insertText: "five"),
-            Completion.Item(id: UUID().uuidString, label: "Six", insertText: "six"),
-            Completion.Item(id: UUID().uuidString, label: "Seven", insertText: "seven"),
-            Completion.Item(id: UUID().uuidString, label: "Eight", insertText: "eight"),
-            Completion.Item(id: UUID().uuidString, label: "Nine", insertText: "nine"),
-            Completion.Item(id: UUID().uuidString, label: "Ten", insertText: "ten")
+            Completion.Item(id: UUID().uuidString, label: "One", symbolName: "1.circle", insertText: "one"),
+            Completion.Item(id: UUID().uuidString, label: "Two", symbolName: "2.circle", insertText: "two"),
+            Completion.Item(id: UUID().uuidString, label: "Three", symbolName: "3.circle", insertText: "three"),
+            Completion.Item(id: UUID().uuidString, label: "Four", symbolName: "4.circle", insertText: "four"),
+            Completion.Item(id: UUID().uuidString, label: "Five", symbolName: "5.circle", insertText: "five"),
+            Completion.Item(id: UUID().uuidString, label: "Six", symbolName: "6.circle", insertText: "six"),
+            Completion.Item(id: UUID().uuidString, label: "Seven", symbolName: "7.circle", insertText: "seven"),
+            Completion.Item(id: UUID().uuidString, label: "Eight", symbolName: "8.circle", insertText: "eight"),
+            Completion.Item(id: UUID().uuidString, label: "Nine", symbolName: "9.circle", insertText: "nine"),
+            Completion.Item(id: UUID().uuidString, label: "Ten", symbolName: "10.circle", insertText: "ten")
         ]
     }
 
@@ -210,19 +210,3 @@ private extension StringProtocol {
 }
 
 
-private enum Completion {
-
-    class Item: STCompletionItem {
-
-        public let id: String
-        public let label: String
-        public let insertText: String
-
-        public init(id: String, label: String, insertText: String) {
-            self.id = id
-            self.label = label
-            self.insertText = insertText
-        }
-    }
-
-}

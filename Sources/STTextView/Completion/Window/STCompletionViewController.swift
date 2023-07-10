@@ -193,9 +193,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
 extension STCompletionViewController: NSTableViewDelegate {
 
     open func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        let item = items[row]
-
-        return NSHostingView(rootView: RowView(item: item))
+        NSHostingView(rootView: ItemView(items[row]))
     }
 
     open func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
@@ -222,24 +220,17 @@ private class STTableRowView: NSTableRowView {
     }
 }
 
-private struct RowView: View {
-    @Environment(\.colorScheme) var colorScheme
-    let item: any STCompletionItem
+private struct ItemView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    private let item: any STCompletionItem
+
+    init(_ item: any STCompletionItem) {
+        self.item = item
+    }
 
     var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                HStack {
-                    Image(systemName: "ellipsis.curlybraces")
-                }
-                .frame(width: 24)
-
-                Text(item.label)
-
-                Spacer()
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        AnyView(item.body)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

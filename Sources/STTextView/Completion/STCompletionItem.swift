@@ -1,5 +1,7 @@
 import Foundation
+import SwiftUI
 
 public protocol STCompletionItem: Identifiable {
-    var label: String { get }
+    associatedtype Body: View
+    @ViewBuilder var body: Body { get }
 }
