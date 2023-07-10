@@ -131,7 +131,10 @@ extension ViewController: STTextViewDelegate {
         [
             STCompletion.Item(id: UUID().uuidString, label: "One", insertText: "one"),
             STCompletion.Item(id: UUID().uuidString, label: "Two", insertText: "two"),
-            STCompletion.Item(id: UUID().uuidString, label: "Three", insertText: "three")
+            STCompletion.Item(id: UUID().uuidString, label: "Three", insertText: "three"),
+            STCompletion.Item(id: UUID().uuidString, label: "Four", insertText: "four"),
+            STCompletion.Item(id: UUID().uuidString, label: "Five", insertText: "five"),
+            STCompletion.Item(id: UUID().uuidString, label: "Six", insertText: "six")
         ]
     }
 

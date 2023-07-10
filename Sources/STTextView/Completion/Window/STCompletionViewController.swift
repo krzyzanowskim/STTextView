@@ -20,9 +20,6 @@ open class STCompletionViewController: STAnyCompletionViewController {
     open override var items: [Any] {
         didSet {
             tableView.reloadData()
-
-            // preselect first row
-            tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         }
     }
 
@@ -40,10 +37,16 @@ open class STCompletionViewController: STAnyCompletionViewController {
 
         tableView.style = .plain
         tableView.headerView = nil
-        tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
+        tableView.usesAlternatingRowBackgroundColors = false
+        tableView.columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
         tableView.allowsColumnResizing = false
         tableView.rowHeight = 22
-        tableView.backgroundColor = .windowBackgroundColor
+        tableView.usesAutomaticRowHeights = false
+        tableView.rowSizeStyle = .custom
+        tableView.intercellSpacing = CGSize(width: 5, height: 5)
+        tableView.backgroundColor = .clear
+        tableView.selectionHighlightStyle = .regular
+        tableView.allowsEmptySelection = false
         tableView.action = #selector(tableViewAction(_:))
         tableView.doubleAction = #selector(tableViewDoubleAction(_:))
         tableView.target = self
@@ -59,8 +62,10 @@ open class STCompletionViewController: STAnyCompletionViewController {
 
         let scrollView = NSScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
         scrollView.automaticallyAdjustsContentInsets = false
-        scrollView.contentInsets = .init(top: 5, left: 5, bottom: 5, right: 5)
+        scrollView.contentInsets = NSEdgeInsets(top: tableView.intercellSpacing.height, left: tableView.intercellSpacing.width, bottom: tableView.intercellSpacing.height, right: tableView.intercellSpacing.width)
         scrollView.drawsBackground = false
+        scrollView.backgroundColor = .clear
+        scrollView.borderType = .noBorder
         scrollView.autoresizingMask = [.width, .height]
         scrollView.hasVerticalScroller = true
         scrollView.documentView = tableView
