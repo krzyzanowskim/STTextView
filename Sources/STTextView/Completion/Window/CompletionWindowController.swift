@@ -30,7 +30,6 @@ internal final class CompletionWindowController: NSWindowController {
         window.standardWindowButton(.zoomButton)?.isHidden = true
         window.setAnchorAttribute(.top, for: .vertical)
         window.setAnchorAttribute(.leading, for: .horizontal)
-        window.contentMinSize = CGSize(width: 420, height: 220)
 
         super.init(window: window)
 

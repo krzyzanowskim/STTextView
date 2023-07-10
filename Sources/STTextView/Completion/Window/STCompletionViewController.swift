@@ -29,13 +29,21 @@ open class STCompletionViewController: STAnyCompletionViewController {
     private var eventMonitor: Any?
 
     open override func loadView() {
-        view = NSView(frame: CGRect(x: 0, y: 0, width: 320, height: 120))
-        view.autoresizingMask = [.width, .height]
+        view = NSView()
+        view.translatesAutoresizingMaskIntoConstraints = false
         view.wantsLayer = true
         view.layer?.cornerRadius = 5
         view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
 
+        NSLayoutConstraint.activate(
+            [
+                view.widthAnchor.constraint(greaterThanOrEqualToConstant: 320),
+                view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120),
+            ]
+        )
+
         tableView.style = .plain
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.headerView = nil
         tableView.usesAlternatingRowBackgroundColors = false
         tableView.columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
@@ -43,7 +51,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
         tableView.rowHeight = 22
         tableView.usesAutomaticRowHeights = false
         tableView.rowSizeStyle = .custom
-        tableView.intercellSpacing = CGSize(width: 5, height: 5)
+        tableView.intercellSpacing = CGSize(width: 4, height: 2)
         tableView.backgroundColor = .clear
         tableView.selectionHighlightStyle = .regular
         tableView.allowsEmptySelection = false
@@ -60,16 +68,27 @@ open class STCompletionViewController: STAnyCompletionViewController {
         tableView.dataSource = self
         tableView.delegate = self
 
-        let scrollView = NSScrollView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
+        let scrollView = NSScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.automaticallyAdjustsContentInsets = false
-        scrollView.contentInsets = NSEdgeInsets(top: tableView.intercellSpacing.height, left: tableView.intercellSpacing.width, bottom: tableView.intercellSpacing.height, right: tableView.intercellSpacing.width)
+        scrollView.contentInsets = NSEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
         scrollView.drawsBackground = false
         scrollView.backgroundColor = .clear
         scrollView.borderType = .noBorder
         scrollView.autoresizingMask = [.width, .height]
         scrollView.hasVerticalScroller = true
         scrollView.documentView = tableView
+
         view.addSubview(scrollView)
+        NSLayoutConstraint.activate(
+            [
+                scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+                scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            ]
+        )
+
         contentScrollView = scrollView
     }
 
@@ -193,7 +212,7 @@ private class STTableRowView: NSTableRowView {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         context.saveGState()
         let path = NSBezierPath(roundedRect: dirtyRect, xRadius: 4, yRadius: 4)
-        context.setFillColor(NSColor.selectedContentBackgroundColor.cgColor)
+        context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(0.7).cgColor)
         path.fill()
         context.restoreGState()
     }
@@ -234,7 +253,7 @@ private final class CompletionLabelCellView: TableCellView {
 
     func setup(with item: STCompletion.Item) {
         guard let textField = textField else { return }
-        textField.font = .userFixedPitchFont(ofSize: NSFont.systemFontSize)
+        textField.font = .preferredFont(forTextStyle: .body)
         textField.textColor = .labelColor
         textField.stringValue = item.label
         textField.allowsExpansionToolTips = true
