@@ -83,7 +83,7 @@ extension STTextView {
             }
         }
 
-        if textRanges.isEmpty {
+        if textRanges.isEmpty || !shouldChangeText(in: textRanges, replacementString: "") {
             return nil
         }
 
