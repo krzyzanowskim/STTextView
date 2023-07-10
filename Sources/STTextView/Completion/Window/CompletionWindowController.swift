@@ -49,7 +49,7 @@ internal final class CompletionWindowController: NSWindowController {
         super.showWindow(nil)
     }
 
-    func showWindow(at origin: NSPoint, items: [Any], parent parentWindow: NSWindow) {
+    func showWindow(at origin: NSPoint, items: [any STCompletionItem], parent parentWindow: NSWindow) {
         guard let window = window else { return }
 
         if !isVisible {
@@ -79,11 +79,11 @@ internal final class CompletionWindowController: NSWindowController {
 }
 
 protocol CompletionWindowDelegate: AnyObject {
-    func completionWindowController(_ windowController: CompletionWindowController, complete item: Any, movement: NSTextMovement)
+    func completionWindowController(_ windowController: CompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement)
 }
 
 extension CompletionWindowController: STCompletionViewControllerDelegate {
-    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: Any, movement: NSTextMovement) {
+    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement) {
         delegate?.completionWindowController(self, complete: item, movement: movement)
     }
 }

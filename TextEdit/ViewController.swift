@@ -127,19 +127,27 @@ extension ViewController: STTextViewDelegate {
 
     // Completion
 
-    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [Any]? {
+    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]? {
         [
-            STCompletion.Item(id: UUID().uuidString, label: "One", insertText: "one"),
-            STCompletion.Item(id: UUID().uuidString, label: "Two", insertText: "two"),
-            STCompletion.Item(id: UUID().uuidString, label: "Three", insertText: "three"),
-            STCompletion.Item(id: UUID().uuidString, label: "Four", insertText: "four"),
-            STCompletion.Item(id: UUID().uuidString, label: "Five", insertText: "five"),
-            STCompletion.Item(id: UUID().uuidString, label: "Six", insertText: "six")
+            Completion.Item(id: UUID().uuidString, label: "One", insertText: "one"),
+            Completion.Item(id: UUID().uuidString, label: "Two", insertText: "two"),
+            Completion.Item(id: UUID().uuidString, label: "Three", insertText: "three"),
+            Completion.Item(id: UUID().uuidString, label: "Four", insertText: "four"),
+            Completion.Item(id: UUID().uuidString, label: "Five", insertText: "five"),
+            Completion.Item(id: UUID().uuidString, label: "Six", insertText: "six"),
+            Completion.Item(id: UUID().uuidString, label: "Seven", insertText: "seven"),
+            Completion.Item(id: UUID().uuidString, label: "Eight", insertText: "eight"),
+            Completion.Item(id: UUID().uuidString, label: "Nine", insertText: "nine"),
+            Completion.Item(id: UUID().uuidString, label: "Ten", insertText: "ten")
         ]
     }
 
-    func textView(_ textView: STTextView, insertCompletionItem item: Any) {
-        textView.insertText((item as! STCompletion.Item).insertText)
+    func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem) {
+        guard let completionItem = item as? Completion.Item else {
+            fatalError()
+        }
+
+        textView.insertText(completionItem.insertText)
     }
 }
 
@@ -201,3 +209,20 @@ private extension StringProtocol {
     }
 }
 
+
+private enum Completion {
+
+    class Item: STCompletionItem {
+
+        public let id: String
+        public let label: String
+        public let insertText: String
+
+        public init(id: String, label: String, insertText: String) {
+            self.id = id
+            self.label = label
+            self.insertText = insertText
+        }
+    }
+
+}

@@ -36,9 +36,9 @@ public protocol STTextViewDelegate: AnyObject {
     func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu?
 
     /// Completion items
-    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [Any]?
+    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]?
 
-    func textView(_ textView: STTextView, insertCompletionItem item: Any)
+    func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem)
 
     // Due to Swift 5.6 generics limitation it can't return STCompletionViewControllerProtocol
     func textViewCompletionViewController(_ textView: STTextView) -> STAnyCompletionViewController?
@@ -78,11 +78,11 @@ public extension STTextViewDelegate {
         menu
     }
 
-    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [Any]? {
+    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]? {
         nil
     }
 
-    func textView(_ textView: STTextView, insertCompletionItem item: Any) {
+    func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem) {
         
     }
 

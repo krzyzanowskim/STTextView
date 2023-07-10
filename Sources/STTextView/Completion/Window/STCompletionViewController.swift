@@ -2,22 +2,22 @@ import Cocoa
 import SwiftUI
 
 public protocol STCompletionViewControllerDelegate: AnyObject {
-    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: Any, movement: NSTextMovement)
+    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement)
 }
 
 public protocol STCompletionViewControllerProtocol: NSViewController {
-    var items: [Any] { get set }
+    var items: [any STCompletionItem] { get set }
     var delegate: STCompletionViewControllerDelegate? { get set }
 }
 
 open class STAnyCompletionViewController: NSViewController, STCompletionViewControllerProtocol {
-    open var items: [Any] = []
+    open var items: [any STCompletionItem] = []
     open weak var delegate: STCompletionViewControllerDelegate?
 }
 
 open class STCompletionViewController: STAnyCompletionViewController {
 
-    open override var items: [Any] {
+    open override var items: [any STCompletionItem] {
         didSet {
             tableView.reloadData()
             view.needsUpdateConstraints = true
@@ -25,7 +25,6 @@ open class STCompletionViewController: STAnyCompletionViewController {
     }
 
     public let tableView = NSTableView()
-    private var contentScrollView: NSScrollView!
 
     private var eventMonitor: Any?
 
@@ -38,7 +37,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
 
         NSLayoutConstraint.activate(
             [
-                view.widthAnchor.constraint(greaterThanOrEqualToConstant: 320),
+                view.widthAnchor.constraint(greaterThanOrEqualToConstant: 320)
             ]
         )
 
@@ -88,8 +87,6 @@ open class STCompletionViewController: STAnyCompletionViewController {
                 scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ]
         )
-
-        contentScrollView = scrollView
     }
 
     @objc open func tableViewAction(_ sender: Any?) {
@@ -196,19 +193,9 @@ open class STCompletionViewController: STAnyCompletionViewController {
 extension STCompletionViewController: NSTableViewDelegate {
 
     open func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        guard let tableColumn = tableColumn else { return nil }
+        let item = items[row]
 
-        let item = items[row] as! STCompletion.Item
-
-        switch tableColumn.identifier {
-            case .labelColumn:
-                let cellView = tableView.reuseOrCreateTableView(withIdentifier: .labelColumn) as CompletionLabelCellView
-                cellView.setup(with: item)
-                return cellView
-            default:
-                assertionFailure("Unknown column")
-                return nil
-        }
+        return NSHostingView(rootView: RowView(item: item))
     }
 
     open func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
@@ -235,57 +222,24 @@ private class STTableRowView: NSTableRowView {
     }
 }
 
-private class TableCellView: NSTableCellView {
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
+private struct RowView: View {
+    @Environment(\.colorScheme) var colorScheme
+    let item: any STCompletionItem
 
-        let textField = NSTextField()
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.isEditable = false
-        textField.isSelectable = false
-        textField.drawsBackground = false
-        textField.maximumNumberOfLines = 1
-        textField.lineBreakMode = .byTruncatingTail
-        textField.bezelStyle = .roundedBezel
-        textField.isBordered = false
-        textField.autoresizingMask = [.width, .height]
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                HStack {
+                    Image(systemName: "ellipsis.curlybraces")
+                }
+                .frame(width: 24)
 
-        addSubview(textField)
+                Text(item.label)
 
-        NSLayoutConstraint.activate([
-            textField.leadingAnchor.constraint(equalTo: leadingAnchor),
-            textField.centerYAnchor.constraint(equalTo: centerYAnchor),
-            textField.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ])
-
-        self.textField = textField
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-private final class CompletionLabelCellView: TableCellView {
-
-    func setup(with item: STCompletion.Item) {
-        guard let textField = textField else { return }
-        textField.font = .preferredFont(forTextStyle: .body)
-        textField.textColor = .labelColor
-        textField.stringValue = item.label
-        textField.allowsExpansionToolTips = true
-    }
-
-}
-
-private extension NSTableView {
-    func reuseOrCreateTableView<V: NSView>(withIdentifier identifier: NSUserInterfaceItemIdentifier) -> V {
-        guard let view = makeView(withIdentifier: identifier, owner: self) else {
-            let view = V()
-            view.identifier = identifier
-            return view
+                Spacer()
+            }
         }
-        return view as! V
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
