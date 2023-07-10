@@ -84,11 +84,11 @@ extension NSTextLayoutManager {
         return result
     }
 
-    func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
+    public func textLineFragment(at location: NSTextLocation) -> NSTextLineFragment? {
         textLayoutFragment(for: location)?.textLineFragment(at: location)
     }
 
-    func textLineFragment(at point: CGPoint) -> NSTextLineFragment? {
+    public func textLineFragment(at point: CGPoint) -> NSTextLineFragment? {
         textLayoutFragment(for: point)?.textLineFragment(at: point)
     }
 
