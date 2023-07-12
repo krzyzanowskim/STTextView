@@ -33,7 +33,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open var insertionPointViewClass = STInsertionPointView.self
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
-    @Invalidating(.insertionPoint)
+    @Invalidating(.insertionPoint, .cursorRects)
     @objc dynamic open var isEditable: Bool = true {
         didSet {
             isSelectable = isEditable
@@ -576,11 +576,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         isSelectable
     }
 
-    @Invalidating(.insertionPoint)
+    @Invalidating(.insertionPoint, .cursorRects)
     internal var isFirstResponder: Bool = false
 
     open override func becomeFirstResponder() -> Bool {
         if isEditable {
+            dispatchPrecondition(condition: .onQueue(.main))
             NotificationCenter.default.post(name: NSText.didBeginEditingNotification, object: self, userInfo: nil)
         }
 
