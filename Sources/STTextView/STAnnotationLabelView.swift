@@ -5,7 +5,7 @@ import Cocoa
 import SwiftUI
 
 /// Covenience annotation view implementation provided by the framework.
-public final class STAnnotationLabelView: NSView {
+open class STAnnotationLabelView: NSView {
 
     private struct ContentView<Label: View>: View {
         @Environment(\.isEnabled) private var isEnabled
@@ -61,7 +61,7 @@ public final class STAnnotationLabelView: NSView {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
