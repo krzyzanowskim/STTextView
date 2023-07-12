@@ -7,8 +7,8 @@ internal final class CompletionWindowController: NSWindowController {
 
     weak var delegate: CompletionWindowDelegate?
 
-    private var completionViewController: STCompletionViewControllerProtocol {
-        window!.contentViewController as! STCompletionViewControllerProtocol
+    private var completionViewController: any STCompletionViewControllerProtocol {
+        window!.contentViewController as! any STCompletionViewControllerProtocol
     }
 
     var isVisible: Bool {

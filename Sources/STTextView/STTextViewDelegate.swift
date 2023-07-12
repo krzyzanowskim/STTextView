@@ -14,16 +14,22 @@ public protocol STTextViewDelegate: AnyObject {
     /// applications may need a custom undo manager to handle interactions between changes
     /// to text and changes to other items in the application.
     func undoManager(for textView: STTextView) -> UndoManager?
+
     /// Any keyDown or paste which changes the contents causes this
     func textViewWillChangeText(_ notification: Notification)
+
     /// Any keyDown or paste which changes the contents causes this
     func textViewDidChangeText(_ notification: Notification)
+
     /// Sent when the selection changes in the text view.
     func textViewDidChangeSelection(_ notification: Notification)
+
     /// Sent when a text view needs to determine if text in a specified range should be changed.
     func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool
+
     /// Sent when a text view will change text.
     func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
+
     /// Sent when a text view did change text.
     func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
 
@@ -35,13 +41,21 @@ public protocol STTextViewDelegate: AnyObject {
     /// - Returns: A menu to use as the contextual menu. You can return `menu` unaltered, or you can return a customized menu.
     func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu?
 
+    // MARK: Completion
+
     /// Completion items
     func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]?
 
+    /// Insert completion item
     func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem)
 
+    /// Asks the delegate for a view to display content of completion window.
+    ///
+    /// Uses `textView(_:completionItemsAtLocation:)` to populate `STCompletionViewControllerProtocol.items`
     func textViewCompletionViewController(_ textView: STTextView) -> (any STCompletionViewControllerProtocol)?
 }
+
+// MARK: - Default implementation
 
 public extension STTextViewDelegate {
 
