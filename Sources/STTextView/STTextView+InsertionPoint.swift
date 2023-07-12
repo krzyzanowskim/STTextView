@@ -16,7 +16,7 @@ extension STTextView {
         if shouldDrawInsertionPoint {
             for textRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) where textRange.isEmpty {
                 textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, _) in
-                    var selectionFrame = textSegmentFrame.intersection(frame).pixelAligned
+                    var selectionFrame = textSegmentFrame.intersection(frame)
                     guard !selectionFrame.isNull, !selectionFrame.isInfinite else {
                         return true
                     }
@@ -25,7 +25,7 @@ extension STTextView {
                     // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
                     // therefore for empty override height with value manually calculated from font + paragraph style
                     if textRange == textContentManager.documentRange {
-                        selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
+                        selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: selectionFrame.height)).pixelAligned
                     }
 
                     let insertionView = insertionPointViewClass.init(frame: selectionFrame)

@@ -9,9 +9,7 @@ open class STInsertionPointView: NSView {
 
     open internal(set) var insertionPointWidth: CGFloat? {
         didSet {
-            if let insertionPointWidth {
-                frame.size.width = insertionPointWidth
-            }
+            updateGeometry()
         }
     }
 
@@ -49,8 +47,7 @@ open class STInsertionPointView: NSView {
         if let insertionPointWidth {
             frame.size.width = insertionPointWidth
         }
-        frame = frame.insetBy(dx: 0, dy: 1).pixelAligned
-        layer?.backgroundColor = insertionPointColor.cgColor
+        layer?.backgroundColor = insertionPointColor.withAlphaComponent(0.9).cgColor
         layer?.cornerRadius = 1
     }
 
