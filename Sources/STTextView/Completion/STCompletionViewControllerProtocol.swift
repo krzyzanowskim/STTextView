@@ -4,6 +4,7 @@
 import Cocoa
 
 public protocol STCompletionViewControllerProtocol: NSViewController {
-    var items: [any STCompletionItem] { get set }
+    typealias Item = any STCompletionItem
+    var items: [Item] { get set }
     var delegate: STCompletionViewControllerDelegate? { get set }
 }

@@ -352,9 +352,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
     internal lazy var speechSynthesizer: NSSpeechSynthesizer = NSSpeechSynthesizer()
 
-    internal lazy var completionWindowController: CompletionWindowController = {
-        let viewController = delegate?.textViewCompletionViewController(self) ?? STCompletionViewController()
-        return CompletionWindowController(viewController)
+    internal lazy var completionWindowController: CompletionWindowController? = {
+        if let viewController = delegate?.textViewCompletionViewController(self) {
+            return CompletionWindowController(viewController)
+        }
+
+        return nil
     }()
 
     internal var annotationViewMap: NSMapTable<STLineAnnotation, NSView>

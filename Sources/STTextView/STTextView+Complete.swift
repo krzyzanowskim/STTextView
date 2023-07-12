@@ -10,7 +10,7 @@ extension STTextView {
     ///
     /// see NSStandardKeyBindingResponding
     open override func complete(_ sender: Any?) {
-        if completionWindowController.isVisible {
+        if let completionWindowController, completionWindowController.isVisible {
             completionWindowController.close()
         } else {
             performCompletion()
@@ -26,7 +26,7 @@ extension STTextView {
         guard let insertionPointLocation = textLayoutManager.insertionPointLocations.first,
               let textCharacterSegmentRect = textLayoutManager.textSegmentFrame(at: insertionPointLocation, type: .standard)
         else {
-            self.completionWindowController.close()
+            self.completionWindowController?.close()
             return
         }
 
@@ -38,11 +38,11 @@ extension STTextView {
         dispatchPrecondition(condition: .onQueue(.main))
 
         if completionItems.isEmpty {
-            self.completionWindowController.close()
+            self.completionWindowController?.close()
         } else if let window = self.window {
             let completionWindowOrigin = window.convertPoint(toScreen: convert(characterSegmentFrame.origin, to: nil))
-            completionWindowController.showWindow(at: completionWindowOrigin, items: completionItems, parent: window)
-            completionWindowController.delegate = self
+            completionWindowController?.showWindow(at: completionWindowOrigin, items: completionItems, parent: window)
+            completionWindowController?.delegate = self
         }
     }
 }

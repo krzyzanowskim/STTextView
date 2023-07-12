@@ -52,7 +52,7 @@ public protocol STTextViewDelegate: AnyObject {
     /// Asks the delegate for a view to display content of completion window.
     ///
     /// Uses `textView(_:completionItemsAtLocation:)` to populate `STCompletionViewControllerProtocol.items`
-    func textViewCompletionViewController(_ textView: STTextView) -> (any STCompletionViewControllerProtocol)?
+    func textViewCompletionViewController(_ textView: STTextView) -> any STCompletionViewControllerProtocol
 }
 
 // MARK: - Default implementation
@@ -99,7 +99,7 @@ public extension STTextViewDelegate {
         
     }
 
-    func textViewCompletionViewController(_ textView: STTextView) -> (any STCompletionViewControllerProtocol)? {
-        nil
+    func textViewCompletionViewController(_ textView: STTextView) -> any STCompletionViewControllerProtocol {
+        STCompletionViewController()
     }
 }
