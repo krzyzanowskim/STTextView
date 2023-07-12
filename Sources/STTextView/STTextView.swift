@@ -774,7 +774,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             return
         }
 
-        selectionView.subviews.removeAll()
+        if !selectionView.subviews.isEmpty {
+            selectionView.subviews.removeAll()
+        }
 
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }) {
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
