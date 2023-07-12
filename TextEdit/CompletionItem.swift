@@ -10,8 +10,8 @@ enum Completion {
         let symbolName: String
         let insertText: String
 
-        var body: some View {
-            VStack(alignment: .leading) {
+        var view: NSView {
+            NSHostingView(rootView: VStack(alignment: .leading) {
                 HStack {
                     Image(systemName: symbolName)
                         .frame(width: 24)
@@ -20,7 +20,7 @@ enum Completion {
 
                     Spacer()
                 }
-            }
+            })
         }
     }
 

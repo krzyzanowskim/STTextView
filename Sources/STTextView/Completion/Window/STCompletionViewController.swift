@@ -193,7 +193,7 @@ open class STCompletionViewController: STAnyCompletionViewController {
 extension STCompletionViewController: NSTableViewDelegate {
 
     open func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        NSHostingView(rootView: ItemView(items[row]))
+        items[row].view
     }
 
     open func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
@@ -217,20 +217,6 @@ private class STTableRowView: NSTableRowView {
         context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(0.7).cgColor)
         path.fill()
         context.restoreGState()
-    }
-}
-
-private struct ItemView: View {
-    @Environment(\.colorScheme) private var colorScheme
-    private let item: any STCompletionItem
-
-    init(_ item: any STCompletionItem) {
-        self.item = item
-    }
-
-    var body: some View {
-        AnyView(item.body)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
