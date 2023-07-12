@@ -788,6 +788,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                     highlightView.wantsLayer = true
                     highlightView.layer?.backgroundColor = selectionBackgroundColor.cgColor
                     selectionView.addSubview(highlightView)
+
+                    // Remove insertion point when selection
+                    removeInsertionPointView()
                 } else {
                     // NOTE: this is to hide/show insertion point on selection.
                     //       there's probably better place to handle that.

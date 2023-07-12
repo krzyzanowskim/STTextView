@@ -42,10 +42,14 @@ extension STTextView {
                     return true
                 }
             }
-        } else {
-            contentView.subviews.removeAll { view in
-                type(of: view) == insertionPointViewClass
-            }
+        } else if !shouldDrawInsertionPoint {
+            removeInsertionPointView()
+        }
+    }
+
+    func removeInsertionPointView() {
+        contentView.subviews.removeAll { view in
+            type(of: view) == insertionPointViewClass
         }
     }
 
