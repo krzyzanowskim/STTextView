@@ -57,13 +57,13 @@ open class STInsertionPointView: NSView {
         }
 
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
-            guard let self = self else { return }
-            self.isHidden.toggle()
+            self?.isHidden.toggle()
         }
     }
 
     open func blinkStop() {
         isHidden = false
+        timer?.invalidate()
         timer = nil
     }
 }
