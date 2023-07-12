@@ -78,4 +78,12 @@ final class STTextContentStorage: NSTextContentStorage {
             textLayoutManager.textSelections = finalSelections
         }
     }
+
+    override func enumerateTextElements(from textLocation: NSTextLocation?, options: NSTextContentManager.EnumerationOptions = [], using block: (NSTextElement) -> Bool) -> NSTextLocation? {
+        super.enumerateTextElements(from: textLocation, options: options, using: block)
+    }
+
+    override func recordEditAction(in originalTextRange: NSTextRange, newTextRange: NSTextRange) {
+        super.recordEditAction(in: originalTextRange, newTextRange: newTextRange)
+    }
 }

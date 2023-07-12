@@ -1,23 +1,14 @@
+//  Created by Marcin Krzyzanowski
+//  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
+
 import Cocoa
 import SwiftUI
 
-public protocol STCompletionViewControllerDelegate: AnyObject {
-    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement)
-}
+open class STCompletionViewController: NSViewController, STCompletionViewControllerProtocol {
 
-public protocol STCompletionViewControllerProtocol: NSViewController {
-    var items: [any STCompletionItem] { get set }
-    var delegate: STCompletionViewControllerDelegate? { get set }
-}
+    public weak var delegate: STCompletionViewControllerDelegate?
 
-open class STAnyCompletionViewController: NSViewController, STCompletionViewControllerProtocol {
-    open var items: [any STCompletionItem] = []
-    open weak var delegate: STCompletionViewControllerDelegate?
-}
-
-open class STCompletionViewController: STAnyCompletionViewController {
-
-    open override var items: [any STCompletionItem] {
+    open var items: [any STCompletionItem] = [] {
         didSet {
             tableView.reloadData()
             view.needsUpdateConstraints = true
