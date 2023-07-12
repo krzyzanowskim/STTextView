@@ -20,14 +20,10 @@ final class ViewController: NSViewController {
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.2
-        paragraph.defaultTabInterval = 28 // default
-
         textView.typingAttributes[.paragraphStyle] = paragraph
+
         textView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        textView.markedTextAttributes = [
-            .underlineStyle: NSUnderlineStyle.single.rawValue
-        ]
         textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true
         textView.textFinder.isIncrementalSearchingEnabled = true

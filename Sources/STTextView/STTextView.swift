@@ -322,7 +322,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// The attributes used to draw marked text.
     ///
     /// Text color, background color, and underline are the only supported attributes for marked text.
-    public var markedTextAttributes: [NSAttributedString.Key : Any]?
+    public var markedTextAttributes: [NSAttributedString.Key : Any] = [.underlineStyle: NSUnderlineStyle.single.rawValue]
 
     /// A flag
     internal var processingKeyEvent: Bool = false

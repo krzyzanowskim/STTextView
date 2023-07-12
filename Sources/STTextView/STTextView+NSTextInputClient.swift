@@ -47,11 +47,11 @@ extension STTextView: NSTextInputClient {
             // but I don't really know how to test this scenario, hence remove clear underline
             attributedString.removeAttribute(.underlineColor, range:  NSRange(location: 0, length: attributedString.length))
 
-            let attrs = typingAttributes.merging(markedTextAttributes ?? [:]) { (_, new) in new }
+            let attrs = typingAttributes.merging(markedTextAttributes) { (_, new) in new }
             attributedString.addAttributes(attrs, range: NSRange(location: 0, length: attributedString.length))
             attributedMarkedString = attributedString
         case is String:
-            let attrs = typingAttributes.merging(markedTextAttributes ?? [:]) { (_, new) in new }
+            let attrs = typingAttributes.merging(markedTextAttributes) { (_, new) in new }
             attributedMarkedString = NSAttributedString(string: string as! String, attributes: attrs)
         default:
             assertionFailure()
