@@ -8,11 +8,7 @@ extension STTextView {
 
     /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
     public func updateInsertionPointStateAndRestartTimer() {
-        // Remove insertion point layers
-        contentView.subviews.removeAll(where: { view in
-            type(of: view) == insertionPointViewClass
-        })
-
+        // Hide insertion point layers
         if shouldDrawInsertionPoint {
             for textRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) where textRange.isEmpty {
                 textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, _) in
@@ -39,10 +35,16 @@ extension STTextView {
                         insertionView.blinkStop()
                     }
 
-                    contentView.addSubview(insertionView)
+                    if !contentView.subviews.contains(where: { type(of: $0) == insertionPointViewClass }) {
+                        contentView.addSubview(insertionView)
+                    }
 
                     return true
                 }
+            }
+        } else {
+            contentView.subviews.removeAll { view in
+                type(of: view) == insertionPointViewClass
             }
         }
     }
