@@ -7,14 +7,7 @@ import UniformTypeIdentifiers
 extension STTextView {
 
     @objc open func copy(_ sender: Any?) {
-        // Copy selected area or the whole document if there's no selection
-        if !textLayoutManager.textSelections.isEmpty {
-            if let textSelectionsAttributedString = textLayoutManager.textSelectionsAttributedString() {
-                updatePasteboard(with: textSelectionsAttributedString)
-            }
-        } else if let attributedString = textContentManager.attributedString(in: nil) {
-            updatePasteboard(with: attributedString)
-        }
+        _ = writeSelection(to: NSPasteboard.general, types: [.rtf, .string])
     }
 
     @objc open func paste(_ sender: Any?) {
@@ -28,28 +21,12 @@ extension STTextView {
     }
 
     @objc open func pasteAsPlainText(_ sender: Any?) {
-        guard let string = NSPasteboard.general.string(forType: .string) else {
-            return
-        }
-
-        replaceCharacters(
-            in: textLayoutManager.textSelections.flatMap(\.textRanges),
-            with: string,
-            useTypingAttributes: true,
-            allowsTypingCoalescing: false
-        )
+        _ = readSelection(from: NSPasteboard.general, type: .string)
     }
 
     /// This action method inserts the contents of the pasteboard into the receiver’s text as rich text, maintaining its attributes.
     @objc open func pasteAsRichText(_ sender: Any?) {
-        let pasteboard = NSPasteboard.general
-        if pasteboard.canReadItem(withDataConformingToTypes: [UTType.rtf.identifier]), let attributedString = pasteboard.readObjects(forClasses: [NSAttributedString.self])?.first as? NSAttributedString {
-            replaceCharacters(
-                in: textLayoutManager.textSelections.flatMap(\.textRanges),
-                with: attributedString,
-                allowsTypingCoalescing: false
-            )
-        }
+        _ = readSelection(from: NSPasteboard.general, type: .rtf)
     }
 
     @objc open func cut(_ sender: Any?) {
