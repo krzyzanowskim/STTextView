@@ -569,6 +569,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         return result
     }
 
+    @available(*, unavailable)
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
