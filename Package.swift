@@ -9,19 +9,33 @@ let package = Package(
         .library(
             name: "STTextView",
             targets: ["STTextView", "STTextViewUI"]
+        ),
+        .library(
+            name: "STTextKitPlus",
+            targets: ["STTextKitPlus"]
         )
     ],
     targets: [
         .target(
-            name: "STTextView"
+            name: "STTextView",
+            dependencies: [
+                .target(name: "STTextKitPlus")
+            ]
+        ),
+        .target(
+            name: "STTextKitPlus"
         ),
         .target(
             name: "STTextViewUI",
-            dependencies: ["STTextView"]
+            dependencies: [
+                .target(name: "STTextView")
+            ]
         ),
         .testTarget(
             name: "STTextViewTests",
-            dependencies: ["STTextView"]
+            dependencies: [
+                .target(name: "STTextView")
+            ]
         )
     ]
 )

@@ -17,6 +17,7 @@
 // whether view conforms to NSTextInput, hence it's here along the NSTextInputClient
 
 import Cocoa
+import STTextKitPlus
 
 /// A TextKit2 text view without NSTextView baggage
 open class STTextView: NSView, NSTextInput, NSTextContent {
