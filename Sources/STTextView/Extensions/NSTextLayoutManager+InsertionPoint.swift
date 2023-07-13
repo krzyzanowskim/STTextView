@@ -16,26 +16,6 @@ import Cocoa
 
 extension NSTextLayoutManager {
 
-    @available(*, deprecated, message: "Use insertionPointLocations")
-    public var insertionPointLocation: NSTextLocation? {
-        guard let textSelection = insertionPointSelections.first else {
-            return nil
-        }
-
-        return textSelection.textRanges.first?.location
-
-        // FB11961508 NSTextSelectionNavigation.resolvedInsertionLocation sometimes crashes instead return nil
-        // return textSelectionNavigation.resolvedInsertionLocation(for: textSelection, writingDirection: .leftToRight)
-    }
-
-    public var insertionPointLocations: [NSTextLocation] {
-        insertionPointSelections.flatMap(\.textRanges).map(\.location)
-    }
-
-    public var insertionPointSelections: [NSTextSelection] {
-        textSelections.filter(_textSelectionInsertionPointFilter)
-    }
-
     /// Append insertion point.
     /// - Parameter point: A CGPoint that represents the location of the tap or click.
     internal func appendInsertionPointSelection(interactingAt point: CGPoint) {
@@ -52,12 +32,4 @@ extension NSTextLayoutManager {
         )
     }
     
-}
-
-private let _textSelectionInsertionPointFilter: (NSTextSelection) -> Bool = { textSelection in
-       !textSelection.isLogical
-    && !textSelection.isTransient
-    && textSelection.textRanges.contains { textRange in
-        textRange.isEmpty
-    }
 }
