@@ -42,16 +42,4 @@ extension STTextView {
             insertText("", replacementRange: nsrange)
         }
     }
-
-    private func updatePasteboard(with text: String) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.writeObjects([text as NSPasteboardWriting])
-    }
-
-    private func updatePasteboard(with text: NSAttributedString) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.writeObjects([text as NSPasteboardWriting])
-    }
 }
