@@ -58,7 +58,7 @@ extension FloatingPoint {
   /// - Returns: `true` if `self` is almost equal to `other`; otherwise
   ///   `false`.
   @inlinable
-  public func isAlmostEqual(
+  internal func isAlmostEqual(
     to other: Self,
     tolerance: Self = Self.ulpOfOne.squareRoot()
   ) -> Bool {
@@ -110,7 +110,7 @@ extension FloatingPoint {
   /// - Returns: `true` if `abs(self)` is less than `absoluteTolerance`.
   ///            `false` otherwise.
   @inlinable
-  public func isAlmostZero(
+  internal func isAlmostZero(
     absoluteTolerance tolerance: Self = Self.ulpOfOne.squareRoot()
   ) -> Bool {
     assert(tolerance > 0)

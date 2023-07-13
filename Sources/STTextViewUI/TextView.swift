@@ -112,7 +112,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
     private func styledAttributedString(_ typingAttributes: [NSAttributedString.Key: Any]) -> AttributedString {
         let paragraph = (typingAttributes[.paragraphStyle] as! NSParagraphStyle).mutableCopy() as! NSMutableParagraphStyle
-        if !paragraph.lineSpacing.isAlmostEqual(to: lineSpacing) {
+        if paragraph.lineSpacing != lineSpacing {
             paragraph.lineSpacing = lineSpacing
             var typingAttributes = typingAttributes
             typingAttributes[.paragraphStyle] = paragraph
