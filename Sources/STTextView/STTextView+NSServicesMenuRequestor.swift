@@ -12,6 +12,17 @@ import UniformTypeIdentifiers
 
 extension STTextView: NSServicesMenuRequestor {
 
+    /// The types this text view can read immediately from the pasteboard.
+    @objc open var readablePasteboardTypes: [NSPasteboard.PasteboardType] {
+        [.string, .init(rawValue: "NSStringPboardType"), .rtf, .init(rawValue: "NSRTFPboardType")]
+    }
+
+    /// The pasteboard types that can be provided from the current selection.
+    @objc open var writablePasteboardTypes: [NSPasteboard.PasteboardType] {
+        [.string, .init(rawValue: "NSStringPboardType"), .rtf, .init(rawValue: "NSRTFPboardType")]
+    }
+
+    /// Reads data of the given type from the specified pasteboard.
     @objc open func readSelection(from pboard: NSPasteboard, type: NSPasteboard.PasteboardType) -> Bool {
 
         switch type.rawValue {
@@ -45,6 +56,7 @@ extension STTextView: NSServicesMenuRequestor {
         return false
     }
 
+    /// Writes the current selection to the specified pasteboard under each given type.
     @objc open func writeSelection(to pboard: NSPasteboard, types: [NSPasteboard.PasteboardType]) -> Bool {
         if types.isEmpty || textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty {
             return false
@@ -65,11 +77,6 @@ extension STTextView: NSServicesMenuRequestor {
                     let rtf = attributedString.rtf(from: NSRange(location: 0, length: attributedString.length))
                     return pboard.setData(rtf, forType: .rtf)
                 }
-            case NSPasteboard.PasteboardType.rtfd.rawValue, "NSRTFDPboardType":
-                return {
-                    let rtfd = attributedString.rtfd(from: NSRange(location: 0, length: attributedString.length))
-                    return pboard.setData(rtfd, forType: .rtfd)
-                }
             default:
                 return { false }
             }
@@ -85,6 +92,7 @@ extension STTextView: NSServicesMenuRequestor {
         }
     }
 
+    /// Returns `self` if the text view can provide and accept the specified data types, or nil if it can't
     @objc open override func validRequestor(forSendType sendType: NSPasteboard.PasteboardType?, returnType: NSPasteboard.PasteboardType?) -> Any? {
         var sendOK = false
         var returnOK = false
