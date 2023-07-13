@@ -37,13 +37,21 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     @Invalidating(.insertionPoint, .cursorRects)
     @objc dynamic open var isEditable: Bool = true {
         didSet {
-            isSelectable = isEditable
+            if isEditable == true {
+                isSelectable = true
+            }
         }
     }
 
     /// A Boolean value that controls whether the text views allows the user to select text.
     @Invalidating(.insertionPoint, .cursorRects)
-    @objc dynamic open var isSelectable: Bool = true
+    @objc dynamic open var isSelectable: Bool = true {
+        didSet {
+            if isSelectable == false {
+                isEditable = false
+            }
+        }
+    }
 
     @objc public let isRichText: Bool = true
     @objc public let isFieldEditor: Bool = false
