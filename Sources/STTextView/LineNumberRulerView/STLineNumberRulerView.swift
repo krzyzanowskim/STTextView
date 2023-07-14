@@ -187,9 +187,8 @@ open class STLineNumberRulerView: NSRulerView {
         } else {
             let textElements = textContentManager.textElements(for: NSTextRange(location: textLayoutManager.documentRange.location, end: viewportRange.location)!)
             let startLineIndex = textElements.count
-            let firstFragmentLayout = textLayoutManager.textLayoutFragment(for: viewportRange.location)!
 
-            textLayoutManager.enumerateTextLayoutFragments(from: firstFragmentLayout.rangeInElement.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+            textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 let shouldContinue = layoutFragment.rangeInElement.location <= viewportRange.endLocation
                 if !shouldContinue {
                     return false
