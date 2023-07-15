@@ -7,7 +7,13 @@ import SwiftUI
 
 final class ViewController: NSViewController {
     private var textView: STTextView!
-    private var annotations: [LineAnnotation] = []
+    private var annotations: [LineAnnotation] = [] {
+        didSet {
+            textView.reloadData()
+        }
+    }
+
+    private var completions: [Completion.Item] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,6 +96,8 @@ final class ViewController: NSViewController {
             ],
             range: NSRange(textView.string.linesRanges().first!, in: textView.string)
         )
+
+        updateCompletionsInBackground()
     }
 
     @IBAction func toggleTextWrapMode(_ sender: Any?) {
@@ -98,9 +106,36 @@ final class ViewController: NSViewController {
 
     @objc func removeAnnotation(_ annotation: STLineAnnotation) {
         annotations.removeAll(where: { $0 == annotation })
-        textView.reloadData()
     }
 
+    /// Update completion list with words
+    private func updateCompletionsInBackground() {
+        Task {
+            var arr: Set<String> = []
+            for await word in SimpleParser.words(textView.string) {
+                arr.insert(word.string)
+            }
+
+            self.completions = arr
+                .filter {
+                    $0.count > 2
+                }
+                .sorted { lhs, rhs in
+                    lhs.localizedCaseInsensitiveCompare(rhs) == .orderedAscending
+                }
+                .map { word in
+
+                    let symbol: String
+                    if let firstCharacter = word.first, firstCharacter.isASCII, firstCharacter.isLetter {
+                        symbol = "\(word.first!).square"
+                    } else {
+                        symbol = "note.text"
+                    }
+
+                    return Completion.Item(id: UUID().uuidString, label: word.localizedCapitalized, symbolName: symbol, insertText: word)
+                }
+        }
+    }
 }
 
 // MARK: STTextViewDelegate
@@ -119,23 +154,14 @@ extension ViewController: STTextViewDelegate {
         for annotation in self.annotations where textView.textContentManager.offset(from: affectedCharRange.endLocation, to: annotation.location) >= 0 {
             annotation.location = textView.textContentManager.location(annotation.location, offsetBy: deltaCount) ?? annotation.location
         }
+
+        updateCompletionsInBackground()
     }
 
     // Completion
 
     func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]? {
-        [
-            Completion.Item(id: UUID().uuidString, label: "One", symbolName: "1.circle", insertText: "one"),
-            Completion.Item(id: UUID().uuidString, label: "Two", symbolName: "2.circle", insertText: "two"),
-            Completion.Item(id: UUID().uuidString, label: "Three", symbolName: "3.circle", insertText: "three"),
-            Completion.Item(id: UUID().uuidString, label: "Four", symbolName: "4.circle", insertText: "four"),
-            Completion.Item(id: UUID().uuidString, label: "Five", symbolName: "5.circle", insertText: "five"),
-            Completion.Item(id: UUID().uuidString, label: "Six", symbolName: "6.circle", insertText: "six"),
-            Completion.Item(id: UUID().uuidString, label: "Seven", symbolName: "7.circle", insertText: "seven"),
-            Completion.Item(id: UUID().uuidString, label: "Eight", symbolName: "8.circle", insertText: "eight"),
-            Completion.Item(id: UUID().uuidString, label: "Nine", symbolName: "9.circle", insertText: "nine"),
-            Completion.Item(id: UUID().uuidString, label: "Ten", symbolName: "10.circle", insertText: "ten")
-        ]
+        completions
     }
 
     func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem) {
