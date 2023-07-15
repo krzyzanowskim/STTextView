@@ -108,12 +108,20 @@ final class ViewController: NSViewController {
         annotations.removeAll(where: { $0 == annotation })
     }
 
+    private var completionTask: Task<(), Never>?
+
     /// Update completion list with words
     private func updateCompletionsInBackground() {
-        Task {
+        completionTask?.cancel()
+        completionTask = Task(priority: .background) {
             var arr: Set<String> = []
-            for await word in SimpleParser.words(textView.string) {
+
+            for await word in SimpleParser.words(textView.string) where !Task.isCancelled {
                 arr.insert(word.string)
+            }
+
+            if Task.isCancelled {
+                return
             }
 
             self.completions = arr
@@ -124,7 +132,6 @@ final class ViewController: NSViewController {
                     lhs.localizedCaseInsensitiveCompare(rhs) == .orderedAscending
                 }
                 .map { word in
-
                     let symbol: String
                     if let firstCharacter = word.first, firstCharacter.isASCII, firstCharacter.isLetter {
                         symbol = "\(word.first!).square"
