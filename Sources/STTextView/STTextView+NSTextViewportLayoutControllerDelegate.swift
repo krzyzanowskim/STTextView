@@ -7,10 +7,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
         let overdrawRect = preparedContentRect
-        var minY: CGFloat = 0
-        var maxY: CGFloat = 0
+        let minY: CGFloat
+        let maxY: CGFloat
 
-        if overdrawRect.intersects(visibleRect) {
+        if !overdrawRect.isEmpty, overdrawRect.intersects(visibleRect) {
             // Use preparedContentRect for vertical overdraw and ensure visibleRect is included at the minimum,
             // the width is always bounds width for proper line wrapping.
             minY = min(overdrawRect.minY, max(visibleRect.minY, bounds.minY))
@@ -59,7 +59,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             var layoutYPoint: CGFloat = 0
             textLayoutManager.enumerateTextLayoutFragments(from: viewportLayoutController.viewportRange!.location, options: [.reverse, .ensuresLayout]) { layoutFragment in
                 layoutYPoint = layoutFragment.layoutFragmentFrame.origin.y
-                return true //return false?
+                return true // NOTE: should break early (return false)?
             }
 
             if !layoutYPoint.isZero {
