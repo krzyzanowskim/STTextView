@@ -108,6 +108,11 @@ final class ViewController: NSViewController {
         annotations.removeAll(where: { $0 == annotation })
     }
 
+    override func viewDidDisappear() {
+        super.viewDidDisappear()
+        completionTask?.cancel()
+    }
+
     private var completionTask: Task<(), Never>?
 
     /// Update completion list with words
@@ -134,7 +139,7 @@ final class ViewController: NSViewController {
                 .map { word in
                     let symbol: String
                     if let firstCharacter = word.first, firstCharacter.isASCII, firstCharacter.isLetter {
-                        symbol = "\(word.first!).square"
+                        symbol = "\(word.first!.lowercased()).square"
                     } else {
                         symbol = "note.text"
                     }
