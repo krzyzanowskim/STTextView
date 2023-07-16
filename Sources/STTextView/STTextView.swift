@@ -417,6 +417,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         textContainer.widthTracksTextView = true
         textContainer.heightTracksTextView = false
 
+        scrollView.wantsLayer = true
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = true
         scrollView.drawsBackground = false
@@ -474,10 +475,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
         contentView = ContentView()
-        contentView.wantsLayer = true
         contentView.autoresizingMask = [.height, .width]
         selectionView = SelectionView()
-        selectionView.wantsLayer = true
         selectionView.autoresizingMask = [.height, .width]
 
         typingAttributes = Self.defaultTypingAttributes
@@ -499,6 +498,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         postsFrameChangedNotifications = true
 
         wantsLayer = true
+        canDrawSubviewsIntoLayer = true
         autoresizingMask = [.width, .height]
 
         textLayoutManager.textViewportLayoutController.delegate = self
