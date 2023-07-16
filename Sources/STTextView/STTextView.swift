@@ -877,8 +877,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     open override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
-        adjustViewportOffsetIfNeeded()
-        updateFrameSizeIfNeeded()
+        textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
     open override func layout() {
