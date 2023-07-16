@@ -251,11 +251,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
 
-                if textContainer.widthTracksTextView == true {
-                    textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: textContainer.size.height)
-                } else {
-                    textContainer.size = CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude))
-                }
+                updateTextContainerSizeIfNeeded()
 
                 if let scrollView = scrollView {
                     setFrameSize(scrollView.contentSize)
@@ -861,7 +857,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         var proposedSize = textContainer.size
 
         if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: bounds.width) {
-            proposedSize.width = bounds.width
+            proposedSize.width = visibleRect.width
         }
 
         if textContainer.heightTracksTextView, !textContainer.size.height.isAlmostEqual(to: bounds.height)  {
