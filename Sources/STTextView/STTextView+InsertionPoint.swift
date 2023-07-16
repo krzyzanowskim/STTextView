@@ -10,7 +10,15 @@ extension STTextView {
     public func updateInsertionPointStateAndRestartTimer() {
         // Hide insertion point layers
         if shouldDrawInsertionPoint {
-            for textRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) where textRange.isEmpty {
+            let insertionPointsRanges = textLayoutManager.insertionPointSelections.flatMap(\.textRanges).filter(\.isEmpty)
+
+            if !insertionPointsRanges.isEmpty {
+                contentView.subviews.removeAll {
+                    type(of: $0) == insertionPointViewClass
+                }
+            }
+
+            for textRange in insertionPointsRanges {
                 textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, _) in
                     var selectionFrame = textSegmentFrame.intersection(frame)
                     guard !selectionFrame.isNull, !selectionFrame.isInfinite else {
@@ -35,9 +43,7 @@ extension STTextView {
                         insertionView.blinkStop()
                     }
 
-                    if !contentView.subviews.contains(where: { type(of: $0) == insertionPointViewClass }) {
-                        contentView.addSubview(insertionView)
-                    }
+                    contentView.addSubview(insertionView)
 
                     return true
                 }
