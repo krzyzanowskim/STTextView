@@ -856,7 +856,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal func updateTextContainerSizeIfNeeded() {
         var proposedSize = textContainer.size
 
-        if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: bounds.width) {
+        if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: visibleRect.width) {
             proposedSize.width = visibleRect.width
         }
 
