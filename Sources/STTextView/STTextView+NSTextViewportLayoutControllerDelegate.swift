@@ -21,7 +21,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             minY = visibleRect.minY
             maxY = visibleRect.maxY
         }
-        return CGRect(x: bounds.minX, y: minY, width: bounds.width, height: maxY - minY)
+        return CGRect(x: bounds.minX, y: minY, width: visibleRect.width, height: maxY - minY)
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
