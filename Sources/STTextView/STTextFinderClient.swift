@@ -3,6 +3,7 @@
 
 import Cocoa
 
+@objcMembers
 final class STTextFinderClient: NSObject, NSTextFinderClient {
 
     weak var textView: STTextView?
@@ -19,7 +20,11 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         textView?.isSelectable ?? false
     }
 
-    public var allowsMultipleSelection: Bool {
+    var isEditable: Bool {
+        textView?.isEditable ?? false
+    }
+
+    var allowsMultipleSelection: Bool {
         false
     }
 
@@ -34,7 +39,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         textView.replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
     }
 
-    public var firstSelectedRange: NSRange {
+    var firstSelectedRange: NSRange {
         guard let firstTextSelectionRange = textView?.textLayoutManager.textSelections.first?.textRanges.first,
               let textContentManager = textContentManager else {
             return NSRange()
@@ -43,7 +48,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         return NSRange(firstTextSelectionRange, in: textContentManager)
     }
 
-    public var selectedRanges: [NSValue] {
+    var selectedRanges: [NSValue] {
         set {
             guard let textContentManager = textContentManager,
                   let textLayoutManager = textView?.textLayoutManager else {
@@ -79,18 +84,15 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         }
     }
 
-    var isEditable: Bool {
-        textView?.isEditable ?? false
-    }
-
     func scrollRangeToVisible(_ range: NSRange) {
         guard let textContentManager = textContentManager,
+              let textView = textView,
               let textRange = NSTextRange(range, in: textContentManager)
         else {
             return
         }
 
-        textView?.scrollToSelection(NSTextSelection(range: textRange, affinity: .downstream, granularity: .character))
+        textView.scrollToSelection(NSTextSelection(range: textRange, affinity: .downstream, granularity: .character))
     }
 
     var visibleCharacterRanges: [NSValue] {
