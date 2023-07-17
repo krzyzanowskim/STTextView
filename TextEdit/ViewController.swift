@@ -56,6 +56,7 @@ final class ViewController: NSViewController {
         // Add attributes
 
         // highlight occurence of STTextView
+        /* Disabled because it has bad performance effect on large documents
         do {
             var currentRange = textView.string.startIndex..<textView.string.endIndex
             while let ocurrenceRange = textView.string.range(of: "STTextView", range: currentRange) {
@@ -63,6 +64,7 @@ final class ViewController: NSViewController {
                 currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
             }
         }
+        */
 
         // Insert attachment image
         // do {
@@ -167,7 +169,8 @@ extension ViewController: STTextViewDelegate {
             annotation.location = textView.textContentManager.location(annotation.location, offsetBy: deltaCount) ?? annotation.location
         }
 
-        updateCompletionsInBackground()
+        // Continous completion update disabled due to bad performance for large strings
+        // updateCompletionsInBackground()
     }
 
     // Completion

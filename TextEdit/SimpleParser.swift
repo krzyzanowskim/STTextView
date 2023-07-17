@@ -13,16 +13,24 @@ class SimpleParser {
         }
     }
 
-    static func words(_ string: String) -> AsyncStream<Word> {
+    static func words(_ string: String, maxCount: Int = 512) -> AsyncStream<Word> {
         let tokenizer = NLTokenizer(unit: .word)
         tokenizer.string = string
 
         return AsyncStream { continuation in
+            var count = 0
             tokenizer.enumerateTokens(in: string.startIndex..<string.endIndex) { tokenRange, attributes in
                 if !attributes.contains(.numeric) {
                     let token = String(string[tokenRange])
                     continuation.yield(Word(string: token))
+                    count += 1
                 }
+
+                if count > maxCount {
+                    continuation.finish()
+                    return false
+                }
+
                 return !Task.isCancelled
             }
 
