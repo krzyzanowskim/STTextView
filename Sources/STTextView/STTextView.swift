@@ -181,33 +181,37 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         if let insertionPointSelection = textLayoutManager.insertionPointSelections.first,
            let startLocation = insertionPointSelection.textRanges.first?.location
         {
-            var attrs: [NSAttributedString.Key: Any] = [:]
-            // The attribute is derived from the previous (upstream) location,
-            // except for the beginning of the document where it from whatever is at location 0
-            let options: NSTextContentManager.EnumerationOptions = startLocation == textContentManager.documentRange.location ? [] : [.reverse]
-            let offsetDiff = startLocation == textContentManager.documentRange.location ? 0 : -1
-            textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
-                if let textParagraph = textElement as? NSTextParagraph,
-                   let elementRange = textElement.elementRange,
-                   let textContentManager = textElement.textContentManager
-                {
-                    let offset = textContentManager.offset(from: elementRange.location, to: startLocation)
-                    assert(offset != NSNotFound, "Unexpected location")
-                    attrs = textParagraph.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
-                }
-
-                return false
-            }
-
-            // fill in with missing typing attributes if needed
-            for key in Self.defaultTypingAttributes.keys {
-                if attrs[key] == nil {
-                    attrs[key] = Self.defaultTypingAttributes[key]
-                }
-            }
-
-            self.typingAttributes = attrs
+            self.typingAttributes = typingAttributes(at: startLocation)
         }
+    }
+
+    internal func typingAttributes(at startLocation: NSTextLocation) -> [NSAttributedString.Key : Any] {
+        var attrs: [NSAttributedString.Key: Any] = [:]
+        // The attribute is derived from the previous (upstream) location,
+        // except for the beginning of the document where it from whatever is at location 0
+        let options: NSTextContentManager.EnumerationOptions = startLocation == textContentManager.documentRange.location ? [] : [.reverse]
+        let offsetDiff = startLocation == textContentManager.documentRange.location ? 0 : -1
+        textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
+            if let textParagraph = textElement as? NSTextParagraph,
+               let elementRange = textElement.elementRange,
+               let textContentManager = textElement.textContentManager
+            {
+                let offset = textContentManager.offset(from: elementRange.location, to: startLocation)
+                assert(offset != NSNotFound, "Unexpected location")
+                attrs = textParagraph.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
+            }
+
+            return false
+        }
+
+        // fill in with missing typing attributes if needed
+        for key in Self.defaultTypingAttributes.keys {
+            if attrs[key] == nil {
+                attrs[key] = Self.defaultTypingAttributes[key]
+            }
+        }
+
+        return attrs
     }
 
     // line height based on current typing font and current typing paragraph

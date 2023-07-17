@@ -32,6 +32,23 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         false
     }
 
+    func shouldReplaceCharacters(inRanges ranges: [NSValue], with strings: [String]) -> Bool {
+        guard let textView = textView,
+              let textContentManager = textContentManager
+        else {
+            return false
+        }
+
+        var result = true
+        for (range, string) in zip(ranges.map(\.rangeValue), strings) {
+            if let textRange = NSTextRange(range, in: textContentManager) {
+                result = result && textView.shouldChangeText(in: textRange, replacementString: string)
+            }
+        }
+
+        return result
+    }
+
     func replaceCharacters(in range: NSRange, with string: String) {
         guard let textContentManager = textContentManager,
               let textRange = NSTextRange(range, in: textContentManager),
@@ -40,7 +57,11 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
             return
         }
 
-        textView.replaceCharacters(in: textRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
+        if textView.shouldChangeText(in: textRange, replacementString: string) {
+            let typingAttributes = textView.typingAttributes(at: textRange.location)
+            let attributedString = NSAttributedString(string: string, attributes: typingAttributes)
+            textView.replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: false)
+        }
     }
 
     var firstSelectedRange: NSRange {
@@ -117,7 +138,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
         var rangeRects: [CGRect] = []
         textView?.textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: .rangeNotRequired, using: { _, rect, _, _ in
-            rangeRects.append(rect.pixelAligned)
+            rangeRects.append(rect)
             return true
         })
 
@@ -126,18 +147,18 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
     func contentView(at index: Int, effectiveCharacterRange outRange: NSRangePointer) -> NSView {
         guard let textView = textView,
-              let viewportRange = textView.textLayoutManager.textViewportLayoutController.viewportRange
+              let textContentManager = textContentManager
         else {
             assertionFailure()
             return textView!
         }
 
-        outRange.pointee = NSRange(viewportRange, in: textView.textContentManager)
+        outRange.pointee = NSRange(textContentManager.documentRange, in: textView.textContentManager)
         return textView
     }
 
     func drawCharacters(in range: NSRange, forContentView view: NSView) {
-        guard let textView = view as? STTextView,
+        guard let textView = view as? STTextView, textView == self.textView,
               let textRange = NSTextRange(range, in: textView.textContentManager),
               let context = NSGraphicsContext.current?.cgContext
         else {
