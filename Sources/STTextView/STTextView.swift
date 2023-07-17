@@ -780,7 +780,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     internal func updateSelectionHighlights() {
-        guard !textLayoutManager.textSelections.isEmpty else {
+        guard !textLayoutManager.textSelections.isEmpty,
+            let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange
+        else {
             selectionView.subviews.removeAll()
             return
         }
@@ -788,8 +790,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         if !selectionView.subviews.isEmpty {
             selectionView.subviews.removeAll()
         }
-
-        let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange!
 
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }).compactMap({ $0.clamped(viewportRange) }) {
             // NOTE: enumerateTextSegments is very slow https://github.com/krzyzanowskim/STTextView/discussions/25#discussioncomment-6464398

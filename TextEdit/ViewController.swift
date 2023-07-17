@@ -56,15 +56,14 @@ final class ViewController: NSViewController {
         // Add attributes
 
         // highlight occurence of STTextView
-        /* Disabled because it has bad performance effect on large documents
         do {
-            var currentRange = textView.string.startIndex..<textView.string.endIndex
-            while let ocurrenceRange = textView.string.range(of: "STTextView", range: currentRange) {
-                textView.addAttributes([.foregroundColor: NSColor.controlAccentColor], range: NSRange(ocurrenceRange, in: textView.string))
+            let str = textView.string
+            var currentRange = str.startIndex..<str.endIndex
+            while let ocurrenceRange = str.range(of: "STTextView", range: currentRange) {
+                textView.addAttributes([.foregroundColor: NSColor.controlAccentColor], range: NSRange(ocurrenceRange, in: str))
                 currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
             }
         }
-        */
 
         // Insert attachment image
         // do {
