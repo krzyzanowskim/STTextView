@@ -27,7 +27,7 @@ extension NSTextRange {
                 return textRange.endLocation
             }
 
-            return location
+            return self.location
         }()
 
         let endLocation = {
@@ -39,7 +39,7 @@ extension NSTextRange {
                 return textRange.endLocation
             }
 
-            return location
+            return self.endLocation
         }()
 
         return Self(location: beginLocation, end: endLocation)
