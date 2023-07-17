@@ -174,7 +174,7 @@ extension STTextView: NSTextInputClient {
         }
 
         var rect: NSRect = .zero
-        textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { _, textSegmentFrame, baselinePosition, textContainer in
+        textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: .rangeNotRequired) { _, textSegmentFrame, baselinePosition, textContainer in
             rect = window!.convertToScreen(convert(textSegmentFrame, to: nil))
             return false
         }

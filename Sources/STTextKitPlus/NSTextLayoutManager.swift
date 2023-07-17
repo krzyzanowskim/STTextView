@@ -52,7 +52,7 @@ extension NSTextLayoutManager {
         // In the context of text editing, upstream affinity means that the selection is biased towards the preceding or earlier portion of the text,
         // while downstream affinity means that the selection is biased towards the following or later portion of the text. The affinity helps determine
         // the behavior of the text selection when the text is modified or manipulated.
-        enumerateTextSegments(in: textRange, type: type, options: [.rangeNotRequired, .upstreamAffinity]) { _, textSegmentFrame, _, _ -> Bool in
+        enumerateTextSegments(in: textRange, type: type, options: [.upstreamAffinity]) { _, textSegmentFrame, _, _ -> Bool in
             if result == nil {
                 result = textSegmentFrame
             } else {

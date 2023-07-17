@@ -547,7 +547,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         if self.window != nil {
             textFinder.client = textFinderClient
-            textFinder.findBarContainer = scrollView
+            textFinder.findBarContainer = enclosingScrollView
         }
     }
 
@@ -887,8 +887,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open override func layout() {
         super.layout()
 
-        if needsScrollToSelection, let textSelection = textLayoutManager.textSelections.last {
-            scrollToSelection(textSelection)
+        if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
+            scrollToVisible(textRange, type: .standard)
         }
 
         textLayoutManager.textViewportLayoutController.layoutViewport()
@@ -896,31 +896,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         layoutAnnotationViewsIfNeeded()
     }
 
-    internal func scrollToSelection(_ selection: NSTextSelection) {
-        guard let selectionTextRange = selection.textRanges.last else {
-            return
+    @discardableResult
+    internal func scrollToVisible(_ selectionTextRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
+        guard let rect = textLayoutManager.textSegmentFrame(in: selectionTextRange, type: type) else {
+            return false
         }
 
-        if selectionTextRange.isEmpty {
-            if let selectionRect = textLayoutManager.textSegmentFrame(at: selectionTextRange.location, type: .selection) {
-                scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
-            }
-        } else {
-            switch selection.affinity {
-            case .upstream:
-                if let selectionRect = textLayoutManager.textSegmentFrame(at: selectionTextRange.location, type: .selection) {
-                    scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
-                }
-            case .downstream:
-                if let location = textLayoutManager.location(selectionTextRange.endLocation, offsetBy: -1),
-                   let selectionRect = textLayoutManager.textSegmentFrame(at: location, type: .selection)
-                {
-                    scrollToVisible(selectionRect.margin(.init(width: visibleRect.width * 0.1, height: 0)))
-                }
-            @unknown default:
-                break
-            }
-        }
+        return scrollToVisible(rect)
     }
 
     open func scrollRangeToVisible(_ range: NSRange) {

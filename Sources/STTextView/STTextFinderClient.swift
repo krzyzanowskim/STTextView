@@ -16,6 +16,10 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         textView?.string ?? ""
     }
 
+    func stringLength() -> Int {
+        string.utf16.count
+    }
+
     var isSelectable: Bool {
         textView?.isSelectable ?? false
     }
@@ -92,7 +96,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
             return
         }
 
-        textView.scrollToSelection(NSTextSelection(range: textRange, affinity: .downstream, granularity: .character))
+        textView.scrollToVisible(textRange, type: .standard)
     }
 
     var visibleCharacterRanges: [NSValue] {
@@ -112,7 +116,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         }
 
         var rangeRects: [CGRect] = []
-        textView?.textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired, using: { _, rect, _, _ in
+        textView?.textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: .rangeNotRequired, using: { _, rect, _, _ in
             rangeRects.append(rect.pixelAligned)
             return true
         })
