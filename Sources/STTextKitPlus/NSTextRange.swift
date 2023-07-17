@@ -16,4 +16,32 @@ extension NSTextRange {
     public func length(in textContentManager: NSTextContentManager) -> Int {
         textContentManager.offset(from: location, to: endLocation)
     }
+
+    public func clamped(_ textRange: NSTextRange) -> Self? {
+        let beginLocation = {
+            if self.location <= textRange.location {
+                return textRange.location
+            }
+
+            if self.location >= textRange.endLocation {
+                return textRange.endLocation
+            }
+
+            return location
+        }()
+
+        let endLocation = {
+            if self.endLocation <= textRange.location {
+                return textRange.location
+            }
+
+            if self.endLocation >= textRange.endLocation {
+                return textRange.endLocation
+            }
+
+            return location
+        }()
+
+        return Self(location: beginLocation, end: endLocation)
+    }
 }
