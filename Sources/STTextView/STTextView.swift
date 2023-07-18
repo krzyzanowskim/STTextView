@@ -378,6 +378,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal let textFinderClient: STTextFinderClient
 
     /// A Boolean value that indicates whether incremental searching is enabled.
+    ///
+    /// See `NSTextFinder` for information about the find bar.
+    ///
+    /// The default value is false.
     public var isIncrementalSearchingEnabled: Bool {
         get {
             textFinder.isIncrementalSearchingEnabled

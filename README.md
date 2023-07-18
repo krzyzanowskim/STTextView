@@ -163,7 +163,7 @@ scrollView.rulersVisible = true
 Enable an optional search-and-replace find interface inside a view, usually a scroll view.
 
 ```swift
-textView.textFinder.isIncrementalSearchingEnabled = true
+textView.isIncrementalSearchingEnabled = true
 textView.textFinder.incrementalSearchingShouldDimContentView = true
 ```
 

@@ -32,8 +32,7 @@ final class ViewController: NSViewController {
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true
-        textView.textFinder.isIncrementalSearchingEnabled = true
-        textView.textFinder.incrementalSearchingShouldDimContentView = true
+        textView.isIncrementalSearchingEnabled = true
         textView.delegate = self
         textView.dataSource = self
 
