@@ -842,13 +842,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             // not necessarly need to layout whole thing, is's enough to enumerate over visible area
             let startLocation = textLayoutManager.textViewportLayoutController.viewportRange?.location ?? textLayoutManager.documentRange.location
             let endLocation = textLayoutManager.textViewportLayoutController.viewportRange?.endLocation ?? textLayoutManager.documentRange.endLocation
-            textLayoutManager.enumerateTextLayoutFragments(from: startLocation, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-                let shouldContinue = layoutFragment.rangeInElement.location <= endLocation
-                if !shouldContinue {
-                    return false
-                }
+            textLayoutManager.enumerateTextLayoutFragments(in: NSTextRange(location: startLocation, end: endLocation)!, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 proposedWidth = max(proposedWidth, layoutFragment.layoutFragmentFrame.maxX)
-                return shouldContinue
+                return true
             }
         } else {
             proposedWidth = max(currentSize.width, proposedWidth)
