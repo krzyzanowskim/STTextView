@@ -21,7 +21,7 @@ class SimpleParser {
             var count = 0
             tokenizer.enumerateTokens(in: string.startIndex..<string.endIndex) { tokenRange, attributes in
                 if !attributes.contains(.numeric) {
-                    let token = String(string[tokenRange])
+                    let token = String(string[tokenRange]).lowercased()
                     continuation.yield(Word(string: token))
                     count += 1
                 }

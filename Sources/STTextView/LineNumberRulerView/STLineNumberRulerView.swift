@@ -245,7 +245,6 @@ open class STLineNumberRulerView: NSRulerView {
             if let scrollView = scrollView {
                 let clipView = scrollView.contentView
                 scrollView.contentView.bounds.origin.x = -(clipView.contentInsets.left + clipView.contentInsets.right)
-                scrollView.reflectScrolledClipView(clipView)
 
                 invalidateMarkersRect()
             }

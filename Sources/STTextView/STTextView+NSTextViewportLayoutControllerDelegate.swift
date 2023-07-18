@@ -32,7 +32,9 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         // TODO: update difference, not all layers
-        contentView.subviews.removeAll()
+        contentView.subviews.removeAll {
+            type(of: $0) != insertionPointViewClass
+        }
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
@@ -72,7 +74,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 let adjustmentDelta = bounds.minY - layoutYPoint
                 viewportLayoutController.adjustViewport(byVerticalOffset: adjustmentDelta)
                 scroll(CGPoint(x: clipView.bounds.minX, y: clipView.bounds.minY + adjustmentDelta))
-                scrollView.reflectScrolledClipView(scrollView.contentView)
+                scrollView.reflectScrolledClipView(clipView)
             }
         }
 
