@@ -855,7 +855,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         let proposedSize = CGSize(width: proposedWidth, height: proposedHeight)
-        if !currentSize.isAlmostEqual(to: proposedSize) {
+        if proposedSize.height > currentSize.height || proposedSize.width != currentSize.width {
             setFrameSize(proposedSize)
         }
     }

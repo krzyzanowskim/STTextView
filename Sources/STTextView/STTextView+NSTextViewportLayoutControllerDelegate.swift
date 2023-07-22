@@ -37,13 +37,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         }
     }
 
-    public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        updateFrameSizeIfNeeded()
-        updateSelectionHighlights()
-        adjustViewportOffsetIfNeeded()
-        scrollView?.verticalRulerView?.invalidateHashMarks()
-    }
-
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
         let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) ?? TextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: .zero)
         // Adjust position
@@ -56,6 +49,13 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
         contentView.addSubview(fragmentView)
         fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
+    }
+
+    public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
+        updateFrameSizeIfNeeded()
+        updateSelectionHighlights()
+        adjustViewportOffsetIfNeeded()
+        scrollView?.verticalRulerView?.invalidateHashMarks()
     }
 
     internal func adjustViewportOffsetIfNeeded() {
