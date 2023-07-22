@@ -835,6 +835,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             let endLocation = textLayoutManager.documentRange.endLocation
             textLayoutManager.ensureLayout(for: NSTextRange(location: endLocation))
             textLayoutManager.enumerateTextLayoutFragments(from: endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+                // at times, reported height is way above the final value for the document
+                // it result in "jumping" the scroller, as frame height grow and shrink
                 proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
                 return false // stop
             }
@@ -855,7 +857,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         let proposedSize = CGSize(width: proposedWidth, height: proposedHeight)
-        if proposedSize.height > currentSize.height || proposedSize.width != currentSize.width {
+        if !currentSize.isAlmostEqual(to: proposedSize) {
             setFrameSize(proposedSize)
         }
     }

@@ -58,9 +58,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         scrollView?.verticalRulerView?.invalidateHashMarks()
     }
 
-    internal func adjustViewportOffsetIfNeeded() {
-        guard let scrollView = scrollView else { return }
-        let clipView = scrollView.contentView
+    private func adjustViewportOffsetIfNeeded() {
+        guard let clipView = scrollView?.contentView else {
+            return
+        }
 
         func adjustViewportOffset() {
             let viewportLayoutController = textLayoutManager.textViewportLayoutController
@@ -74,7 +75,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 let adjustmentDelta = bounds.minY - layoutYPoint
                 viewportLayoutController.adjustViewport(byVerticalOffset: adjustmentDelta)
                 scroll(CGPoint(x: clipView.bounds.minX, y: clipView.bounds.minY + adjustmentDelta))
-                scrollView.reflectScrolledClipView(clipView)
+                reflectScrolledClipView(clipView)
             }
         }
 
