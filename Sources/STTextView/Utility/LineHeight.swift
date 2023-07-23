@@ -44,7 +44,7 @@ private func shouldUseAdjustment(_ font: NSFont) -> Bool {
     }
 
     return familyName.caseInsensitiveCompare("Times") == .orderedSame
-    || familyName.caseInsensitiveCompare("Helvetica") == .orderedSame
-    || familyName.caseInsensitiveCompare("Courier") == .orderedSame // macOS only
-    || familyName.caseInsensitiveCompare(".Helvetica NeueUI") == .orderedSame
+        || familyName.caseInsensitiveCompare("Helvetica") == .orderedSame
+        || familyName.caseInsensitiveCompare("Courier") == .orderedSame // macOS only
+        || familyName.caseInsensitiveCompare(".Helvetica NeueUI") == .orderedSame
 }

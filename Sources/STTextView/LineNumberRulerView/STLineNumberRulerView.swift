@@ -162,14 +162,11 @@ open class STLineNumberRulerView: NSRulerView {
                     }
 
                     let lineNumber = lines.count + 1
+
                     let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes)
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
-                    var ascent: CGFloat = 0
-                    var descent: CGFloat = 0
-                    var leading: CGFloat = 0
-                    CTLineGetTypographicBounds(ctLine, &ascent, &descent, &leading)
-                    let locationForFirstCharacter = CGPoint(x: 0, y: ascent + descent + leading)
+                    let locationForFirstCharacter = CGPoint(x: 0, y: calculateDefaultLineHeight(for: lineTextAttributes[.font] as! NSFont))
 
                     lines.append(
                         Line(
