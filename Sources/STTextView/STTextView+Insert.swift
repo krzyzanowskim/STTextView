@@ -43,7 +43,8 @@ extension STTextView {
     }
 
     open override func insertNewline(_ sender: Any?) {
-        insertText(NSAttributedString(string: "\n", attributes: typingAttributes))
+        // insert newline with current typing attributes
+        insertText("\n")
     }
 
     open override func insertNewlineIgnoringFieldEditor(_ sender: Any?) {

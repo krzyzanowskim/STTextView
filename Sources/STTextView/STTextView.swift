@@ -1010,7 +1010,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                 if !undoManager.isCoalescing {
                     let undoRange = NSTextRange(
                         location: textRange.location,
-                        end: textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count)
+                        end: textContentManager.location(textRange.location, offsetBy: replacementString.length)
                     ) ?? textRange
 
                     let previousStringInRange = (textContentManager as? NSTextContentStorage)!.attributedString!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
