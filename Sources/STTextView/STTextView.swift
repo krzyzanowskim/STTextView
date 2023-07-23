@@ -186,11 +186,16 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     internal func typingAttributes(at startLocation: NSTextLocation) -> [NSAttributedString.Key : Any] {
+        guard !textContentManager.documentRange.isEmpty else {
+            return typingAttributes
+        }
+
         var attrs: [NSAttributedString.Key: Any] = [:]
         // The attribute is derived from the previous (upstream) location,
         // except for the beginning of the document where it from whatever is at location 0
         let options: NSTextContentManager.EnumerationOptions = startLocation == textContentManager.documentRange.location ? [] : [.reverse]
         let offsetDiff = startLocation == textContentManager.documentRange.location ? 0 : -1
+
         textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
             if let textParagraph = textElement as? NSTextParagraph,
                let elementRange = textElement.elementRange,
