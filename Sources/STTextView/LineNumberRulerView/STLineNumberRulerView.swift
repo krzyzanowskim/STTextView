@@ -133,9 +133,9 @@ open class STLineNumberRulerView: NSRulerView {
     }
 
     private func invalidateLineNumbers() {
-        guard let textLayoutManager = textView?.textLayoutManager,
-              let textContentManager = textLayoutManager.textContentManager,
-              let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange
+        guard let textView,
+              let textContentManager = textView.textLayoutManager.textContentManager,
+              let viewportRange = textView.textLayoutManager.textViewportLayoutController.viewportRange
         else {
             return
         }
@@ -151,15 +151,15 @@ open class STLineNumberRulerView: NSRulerView {
 
         lines.removeAll(keepingCapacity: true)
 
-        if textLayoutManager.documentRange.isEmpty {
+        if textView.textLayoutManager.documentRange.isEmpty {
             // For empty document, layout the extra line as if it has text in it
             // the ExtraLineFragment doesn't have information about typing attributes hence layout manager uses a default values - not from text view
-            textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+            textView.textLayoutManager.enumerateTextLayoutFragments(from: textView.textLayoutManager.documentRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
 
                     var baselineOffset: CGFloat = 0
-                    if let paragraphStyle = textView?.typingAttributes[.paragraphStyle] as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                        baselineOffset = -(textView!.typingLineHeight * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                    if let paragraphStyle = textView.typingAttributes[.paragraphStyle] as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                        baselineOffset = -(textView.typingLineHeight * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
                     }
 
                     let lineNumber = lines.count + 1
@@ -174,7 +174,7 @@ open class STLineNumberRulerView: NSRulerView {
                             number: lineNumber,
                             textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
                             textRange: layoutFragment.rangeInElement,
-                            layoutFragmentFrame: layoutFragment.layoutFragmentFrame,
+                            layoutFragmentFrame: CGRect(x: layoutFragment.layoutFragmentFrame.origin.x, y: layoutFragment.layoutFragmentFrame.origin.x, width: layoutFragment.layoutFragmentFrame.width, height:  textView.typingLineHeight),
                             ctLine: ctLine,
                             isSelected: true
                         )
@@ -184,10 +184,10 @@ open class STLineNumberRulerView: NSRulerView {
                 return false
             }
         } else {
-            let textElements = textContentManager.textElements(for: NSTextRange(location: textLayoutManager.documentRange.location, end: viewportRange.location)!)
+            let textElements = textContentManager.textElements(for: NSTextRange(location: textView.textLayoutManager.documentRange.location, end: viewportRange.location)!)
             let startLineIndex = textElements.count
 
-            textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+            textView.textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
                 let shouldContinue = layoutFragment.rangeInElement.location <= viewportRange.endLocation
                 if !shouldContinue {
                     return false
@@ -204,8 +204,16 @@ open class STLineNumberRulerView: NSRulerView {
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
 
                     var effectiveAttributes = lineTextAttributes
-                    let isSelectedLine = !selectedLineTextAttributes.isEmpty && textLayoutManager.textSelections.flatMap(\.textRanges).contains(where: { layoutFragment.rangeInElement.intersects($0) || layoutFragment.rangeInElement.contains($0) })
-                    if isSelectedLine && highlightSelectedLine {
+
+                    let isLineSelected: Bool = {
+                        var result = true
+                        result = result && textView.textLayoutManager.textSelections.flatMap(\.textRanges).contains { selectionTextRange in
+                            layoutFragment.rangeInElement.intersects(selectionTextRange) || layoutFragment.rangeInElement.contains(selectionTextRange)
+                        }
+                        return result
+                    }()
+
+                    if isLineSelected, highlightSelectedLine, !selectedLineTextAttributes.isEmpty {
                         effectiveAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                     }
 
@@ -219,7 +227,7 @@ open class STLineNumberRulerView: NSRulerView {
                             textRange: layoutFragment.rangeInElement,
                             layoutFragmentFrame: layoutFragment.layoutFragmentFrame,
                             ctLine: ctLine,
-                            isSelected: isSelectedLine
+                            isSelected: isLineSelected
                         )
                     )
                 }
@@ -340,7 +348,7 @@ open class STLineNumberRulerView: NSRulerView {
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
         for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dx: 0, dy: relativePoint.y)) {
-            
+
             // Draw a background rectangle to highlight the selected ruler line
             if highlightSelectedLine, line.isSelected {
                 drawHighlightedRuler(line: line, at: relativePoint, in: dirtyRect)
