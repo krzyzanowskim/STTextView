@@ -82,6 +82,7 @@ open class STLineNumberRulerView: NSRulerView {
         let textRange: NSTextRange
         let layoutFragmentFrame: CGRect
         let ctLine: CTLine
+        let isSelected: Bool
     }
     
     private var lines: [Line] = []
@@ -174,7 +175,8 @@ open class STLineNumberRulerView: NSRulerView {
                             textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
                             textRange: layoutFragment.rangeInElement,
                             layoutFragmentFrame: layoutFragment.layoutFragmentFrame,
-                            ctLine: ctLine
+                            ctLine: ctLine,
+                            isSelected: true
                         )
                     )
                 }
@@ -202,10 +204,9 @@ open class STLineNumberRulerView: NSRulerView {
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
 
                     var effectiveAttributes = lineTextAttributes
-                    if highlightSelectedLine, !selectedLineTextAttributes.isEmpty {
-                        if textLayoutManager.textSelections.flatMap(\.textRanges).contains(where: { layoutFragment.rangeInElement.intersects($0) || layoutFragment.rangeInElement.contains($0) }) {
-                            effectiveAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
-                        }
+                    let isSelectedLine = !selectedLineTextAttributes.isEmpty && textLayoutManager.textSelections.flatMap(\.textRanges).contains(where: { layoutFragment.rangeInElement.intersects($0) || layoutFragment.rangeInElement.contains($0) })
+                    if isSelectedLine && highlightSelectedLine {
+                        effectiveAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                     }
 
                     let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: effectiveAttributes)
@@ -217,7 +218,8 @@ open class STLineNumberRulerView: NSRulerView {
                             textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
                             textRange: layoutFragment.rangeInElement,
                             layoutFragmentFrame: layoutFragment.layoutFragmentFrame,
-                            ctLine: ctLine
+                            ctLine: ctLine,
+                            isSelected: isSelectedLine
                         )
                     )
                 }
@@ -256,7 +258,8 @@ open class STLineNumberRulerView: NSRulerView {
                 textPosition: $0.textPosition.moved(dx: requiredThickness - (ctLineWidth + rulerInsets.trailing), dy: -baselineOffset),
                 textRange: $0.textRange,
                 layoutFragmentFrame: $0.layoutFragmentFrame,
-                ctLine: $0.ctLine
+                ctLine: $0.ctLine,
+                isSelected: $0.isSelected
             )
         }
 
@@ -337,13 +340,9 @@ open class STLineNumberRulerView: NSRulerView {
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
         for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dx: 0, dy: relativePoint.y)) {
-
+            
             // Draw a background rectangle to highlight the selected ruler line
-            if highlightSelectedLine,
-               // don't highlight when there's selection
-               textView.textLayoutManager.insertionPointSelections.flatMap(\.textRanges).allSatisfy(\.isEmpty),
-               textView.textLayoutManager.insertionPointSelections.flatMap(\.textRanges).contains(where: { line.textRange.intersects($0) || line.textRange.contains($0) })
-            {
+            if highlightSelectedLine, line.isSelected {
                 drawHighlightedRuler(line: line, at: relativePoint, in: dirtyRect)
             }
 
