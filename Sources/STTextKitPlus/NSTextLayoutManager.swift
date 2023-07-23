@@ -64,7 +64,7 @@ extension NSTextLayoutManager {
     }
 
     public var insertionPointLocations: [NSTextLocation] {
-        insertionPointSelections.flatMap(\.textRanges).map(\.location)
+        insertionPointSelections.flatMap(\.textRanges).map(\.location).sorted(by: { $0 < $1 })
     }
 
     public var insertionPointSelections: [NSTextSelection] {

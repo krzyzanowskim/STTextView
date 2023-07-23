@@ -28,9 +28,9 @@ extension NSTextLayoutManager {
 
     func textSelectionsRanges(_ options: TextSelectionRangesOptions = []) -> [NSTextRange] {
         if options.contains(.withoutInsertionPoints) {
-            return textSelections.flatMap(\.textRanges).filter({ !$0.isEmpty })
+            return textSelections.flatMap(\.textRanges).filter({ !$0.isEmpty }).sorted(by: { $0.location < $1.location })
         } else {
-            return textSelections.flatMap(\.textRanges)
+            return textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location })
         }
     }
 
