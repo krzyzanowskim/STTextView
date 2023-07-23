@@ -350,7 +350,7 @@ open class STLineNumberRulerView: NSRulerView {
         for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dx: 0, dy: relativePoint.y)) {
 
             // Draw a background rectangle to highlight the selected ruler line
-            if highlightSelectedLine, line.isSelected {
+            if highlightSelectedLine, line.isSelected, textView.textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty {
                 drawHighlightedRuler(line: line, at: relativePoint, in: dirtyRect)
             }
 
