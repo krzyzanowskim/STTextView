@@ -79,7 +79,6 @@ open class STLineNumberRulerView: NSRulerView {
     struct Line {
         let number: Int
         let textPosition: CGPoint
-        let textRange: NSTextRange
         let layoutFragmentFrame: CGRect
         let ctLine: CTLine
         let isSelected: Bool
@@ -164,7 +163,13 @@ open class STLineNumberRulerView: NSRulerView {
 
                     let lineNumber = lines.count + 1
 
-                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes)
+                    var effectiveAttributes = lineTextAttributes
+
+                    if highlightSelectedLine, !selectedLineTextAttributes.isEmpty {
+                        effectiveAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
+                    }
+
+                    let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: effectiveAttributes)
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     let locationForFirstCharacter = CGPoint(x: 0, y: calculateDefaultLineHeight(for: lineTextAttributes[.font] as! NSFont))
@@ -173,8 +178,7 @@ open class STLineNumberRulerView: NSRulerView {
                         Line(
                             number: lineNumber,
                             textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
-                            textRange: layoutFragment.rangeInElement,
-                            layoutFragmentFrame: CGRect(x: layoutFragment.layoutFragmentFrame.origin.x, y: layoutFragment.layoutFragmentFrame.origin.x, width: layoutFragment.layoutFragmentFrame.width, height:  textView.typingLineHeight),
+                            layoutFragmentFrame: CGRect(x: layoutFragment.layoutFragmentFrame.origin.x, y: layoutFragment.layoutFragmentFrame.origin.y, width: layoutFragment.layoutFragmentFrame.width, height: textView.typingLineHeight),
                             ctLine: ctLine,
                             isSelected: true
                         )
@@ -204,28 +208,47 @@ open class STLineNumberRulerView: NSRulerView {
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
 
                     var effectiveAttributes = lineTextAttributes
+                    let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                     let isLineSelected: Bool = {
-                        var result = true
-                        result = result && textView.textLayoutManager.textSelections.flatMap(\.textRanges).contains { selectionTextRange in
-                            layoutFragment.rangeInElement.intersects(selectionTextRange) || layoutFragment.rangeInElement.contains(selectionTextRange)
+                        textView.textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
+                            var result = true
+                            if lineFragment.isExtraLineFragment {
+                                let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
+                                result = result && c1
+                            } else {
+                                let c1 = contentRangeInElement.contains(selectionTextRange)
+                                let c2 = contentRangeInElement.intersects(selectionTextRange)
+                                let c3 = selectionTextRange.contains(contentRangeInElement)
+                                let c4 = selectionTextRange.intersects(contentRangeInElement)
+                                let c5 = contentRangeInElement.endLocation == selectionTextRange.location
+                                result = result && (c1 || c2 || c3 || c4 || c5)
+                            }
+                            return partialResult && result
                         }
-                        return result
                     }()
 
-                    if isLineSelected, highlightSelectedLine, !selectedLineTextAttributes.isEmpty {
+
+                    if highlightSelectedLine, !selectedLineTextAttributes.isEmpty, isLineSelected {
                         effectiveAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                     }
 
                     let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: effectiveAttributes)
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
+                    var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                    if lineFragment.isExtraLineFragment {
+                        lineFragmentFrame.size.height = lineFragment.typographicBounds.height
+                        lineFragmentFrame = lineFragmentFrame.moved(dy: lineFragment.typographicBounds.height)
+                    } else {
+                        lineFragmentFrame.size.height = lineFragment.typographicBounds.height
+                    }
+
                     lines.append(
                         Line(
                             number: lineNumber,
                             textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
-                            textRange: layoutFragment.rangeInElement,
-                            layoutFragmentFrame: layoutFragment.layoutFragmentFrame,
+                            layoutFragmentFrame: lineFragmentFrame,
                             ctLine: ctLine,
                             isSelected: isLineSelected
                         )
@@ -264,7 +287,6 @@ open class STLineNumberRulerView: NSRulerView {
             return Line(
                 number: $0.number,
                 textPosition: $0.textPosition.moved(dx: requiredThickness - (ctLineWidth + rulerInsets.trailing), dy: -baselineOffset),
-                textRange: $0.textRange,
                 layoutFragmentFrame: $0.layoutFragmentFrame,
                 ctLine: $0.ctLine,
                 isSelected: $0.isSelected
