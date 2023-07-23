@@ -219,9 +219,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         let font = typingAttributes[.font] as? NSFont ?? Self.defaultTypingAttributes[.font] as! NSFont
         let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? Self.defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
         let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
-        return NSLayoutManager().defaultLineHeight(for: font) * lineHeightMultiple
+        return defaultLineHeight(for: font) * lineHeightMultiple
     }
-
 
     /// The characters of the receiver’s text.
     ///
