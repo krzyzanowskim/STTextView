@@ -655,29 +655,52 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     private func drawHighlightedLine(in rect: NSRect) {
-        guard let context = NSGraphicsContext.current?.cgContext else {
-            return
+
+        func drawHighlight(in fillRect: CGRect) {
+            guard let context = NSGraphicsContext.current?.cgContext else {
+                return
+            }
+
+            context.saveGState()
+            context.setFillColor(selectedLineHighlightColor.cgColor)
+            context.fill(fillRect)
+            context.restoreGState()
         }
 
-        for insertionRange in textLayoutManager.insertionPointSelections.flatMap(\.textRanges) {
-            textLayoutManager.enumerateTextLayoutFragments(from: insertionRange.location) { layoutFragment in
-                context.saveGState()
-                context.setFillColor(selectedLineHighlightColor.cgColor)
-
-                let fillRect = CGRect(
-                    origin: CGPoint(
-                        x: bounds.minX,
-                        y: layoutFragment.layoutFragmentFrame.origin.y
-                    ),
-                    size: CGSize(
-                        width: textContainer.size.width,
-                        height: layoutFragment.layoutFragmentFrame.height
+        for insertionLocation in textLayoutManager.insertionPointSelections.flatMap(\.textRanges).map(\.location) {
+            if insertionLocation == textContentManager.documentRange.endLocation {
+                // - empty document has no layout fragments, nothing, it's empt and has to be handled explicitly.
+                // - there's no layout fragment at the document endLocation (technically it's out of bounds), has to be handled explicitly.
+                if let selectionFrame = textLayoutManager.textSegmentFrame(at: insertionLocation, type: .standard) {
+                    drawHighlight(
+                        in: CGRect(
+                            origin: CGPoint(
+                                x: bounds.minX,
+                                y: selectionFrame.origin.y
+                            ),
+                            size: CGSize(
+                                width: textContainer.size.width,
+                                height: typingLineHeight
+                            )
+                        )
                     )
-                )
-
-                context.fill(fillRect)
-                context.restoreGState()
-                return false
+                }
+            } else {
+                textLayoutManager.enumerateTextLayoutFragments(from: insertionLocation) { layoutFragment in
+                    drawHighlight(
+                        in: CGRect(
+                            origin: CGPoint(
+                                x: bounds.minX,
+                                y: layoutFragment.layoutFragmentFrame.origin.y
+                            ),
+                            size: CGSize(
+                                width: textContainer.size.width,
+                                height: layoutFragment.layoutFragmentFrame.height
+                            )
+                        )
+                    )
+                    return false
+                }
             }
         }
     }
