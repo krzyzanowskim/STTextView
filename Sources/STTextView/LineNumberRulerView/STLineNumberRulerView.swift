@@ -158,7 +158,7 @@ open class STLineNumberRulerView: NSRulerView {
 
                     var baselineOffset: CGFloat = 0
                     if let paragraphStyle = textView?.typingAttributes[.paragraphStyle] as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                        baselineOffset = -(textView!.typingLineHeight * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                        baselineOffset = -(textView!.defaultLineHeight * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
                     }
 
                     let lineNumber = lines.count + 1

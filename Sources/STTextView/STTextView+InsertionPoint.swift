@@ -11,42 +11,40 @@ extension STTextView {
         // Hide insertion point layers
         if shouldDrawInsertionPoint {
             let insertionPointsRanges = textLayoutManager.insertionPointSelections.flatMap(\.textRanges).filter(\.isEmpty)
-
-            if !insertionPointsRanges.isEmpty {
-                contentView.subviews.removeAll {
-                    type(of: $0) == insertionPointViewClass
-                }
+            guard !insertionPointsRanges.isEmpty else {
+                return
             }
 
-            for textRange in insertionPointsRanges {
-                textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) { ( _, textSegmentFrame, baselinePosition, _) in
-                    var selectionFrame = textSegmentFrame.intersection(frame)
-                    guard !selectionFrame.isNull, !selectionFrame.isInfinite else {
-                        return true
-                    }
-
-                    // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
-                    // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
-                    // therefore for empty override height with value manually calculated from font + paragraph style
-                    if textRange == textContentManager.documentRange {
-                        selectionFrame = NSRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: selectionFrame.height)).pixelAligned
-                    }
-
-                    let insertionView = insertionPointViewClass.init(frame: selectionFrame)
-                    insertionView.insertionPointColor = insertionPointColor
-                    insertionView.insertionPointWidth = insertionPointWidth
-                    insertionView.updateGeometry()
-
-                    if isFirstResponder {
-                        insertionView.blinkStart()
-                    } else {
-                        insertionView.blinkStop()
-                    }
-
-                    contentView.addSubview(insertionView)
-
-                    return true
+            let textSelectionFrames = insertionPointsRanges.compactMap { textRange -> CGRect? in
+                guard let selectionFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .selection)?.intersection(self.frame) else {
+                    return nil
                 }
+
+                // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
+                // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
+                // therefore for empty override height with value manually calculated from font + paragraph style
+                if textRange.isEmpty, textContentManager.documentRange.isEmpty {
+                    return CGRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: defaultLineHeight)).pixelAligned
+                }
+
+                return selectionFrame
+            }
+
+            removeInsertionPointView()
+
+            for selectionFrame in textSelectionFrames where !selectionFrame.isNull && !selectionFrame.isInfinite {
+                let insertionView = insertionPointViewClass.init(frame: selectionFrame)
+                insertionView.insertionPointColor = insertionPointColor
+                insertionView.insertionPointWidth = insertionPointWidth
+                insertionView.updateGeometry()
+
+                if isFirstResponder {
+                    insertionView.blinkStart()
+                } else {
+                    insertionView.blinkStop()
+                }
+
+                contentView.addSubview(insertionView)
             }
         } else if !shouldDrawInsertionPoint {
             removeInsertionPointView()

@@ -40,7 +40,7 @@ extension STTextView {
         if let textLayoutFragment = textLayoutManager.textLayoutFragment(for: point) {
             var baselineOffset: CGFloat = 0
             if let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                baselineOffset = -(typingLineHeight * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                baselineOffset = -(defaultLineHeight * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
             }
 
             let effectiveFrame = textLayoutFragment.layoutFragmentFrame.moved(dy: baselineOffset)

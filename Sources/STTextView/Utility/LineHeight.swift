@@ -4,7 +4,7 @@
 import Cocoa
 
 
-internal func defaultLineHeight(for font: NSFont) -> CGFloat {
+internal func calculateDefaultLineHeight(for font: NSFont) -> CGFloat {
     /// Heavily inspired by WebKit
 
     let kLineHeightAdjustment: CGFloat = 0.15

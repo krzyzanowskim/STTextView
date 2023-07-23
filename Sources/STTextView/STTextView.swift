@@ -215,11 +215,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     // line height based on current typing font and current typing paragraph
-    internal var typingLineHeight: CGFloat {
+    internal var defaultLineHeight: CGFloat {
         let font = typingAttributes[.font] as? NSFont ?? Self.defaultTypingAttributes[.font] as! NSFont
         let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? Self.defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
         let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
-        return defaultLineHeight(for: font) * lineHeightMultiple
+        return calculateDefaultLineHeight(for: font) * lineHeightMultiple
     }
 
     /// The characters of the receiver’s text.
@@ -829,7 +829,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         var proposedHeight: CGFloat = viewportBounds.height
         if textLayoutManager.documentRange.isEmpty {
-            proposedHeight = typingLineHeight
+            proposedHeight = defaultLineHeight
         } else {
             let endLocation = textLayoutManager.documentRange.endLocation
             textLayoutManager.ensureLayout(for: NSTextRange(location: endLocation))
