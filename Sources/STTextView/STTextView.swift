@@ -994,7 +994,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                     // Extend existing coalesce range
                     if let coalescingValue = undoManager.coalescing?.value,
                        textRange.location == coalescingValue.textRange.endLocation,
-                       let undoEndLocation = textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count),
+                       let undoEndLocation = textContentManager.location(textRange.location, offsetBy: replacementString.length),
                        let undoTextRange = NSTextRange(location: coalescingValue.textRange.location, end: undoEndLocation)
                     {
                         undoManager.coalesce(TypingTextUndo(
@@ -1036,7 +1036,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                 // A range that is as long as replacement string, so when undo it undo
                 let undoRange = NSTextRange(
                     location: textRange.location,
-                    end: textContentManager.location(textRange.location, offsetBy: replacementString.string.utf16.count)
+                    end: textContentManager.location(textRange.location, offsetBy: replacementString.length)
                 ) ?? textRange
 
                 let previousStringInRange = (textContentManager as! NSTextContentStorage).attributedString!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
