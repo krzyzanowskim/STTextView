@@ -16,6 +16,12 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
         super.init(coder: coder)
     }
 
+    // Provide default line height based on the typingattributed. By default return (0, 0, 10, 14)
+    //
+    // override var layoutFragmentFrame: CGRect {
+    //    super.layoutFragmentFrame
+    // }
+
     override func draw(at point: CGPoint, in context: CGContext) {
         // Layout fragment draw text at the bottom (after apply baselineOffset) but ignore the paragraph line height
         // This is a workaround/patch to position text nicely in the line
