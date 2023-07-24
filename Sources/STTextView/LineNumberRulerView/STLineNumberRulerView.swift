@@ -191,11 +191,8 @@ open class STLineNumberRulerView: NSRulerView {
             let textElements = textContentManager.textElements(for: NSTextRange(location: textView.textLayoutManager.documentRange.location, end: viewportRange.location)!)
             let startLineIndex = textElements.count
 
-            textView.textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-                let shouldContinue = layoutFragment.rangeInElement.location <= viewportRange.endLocation
-                if !shouldContinue {
-                    return false
-                }
+            textView.textLayoutManager.enumerateTextLayoutFragments(in: viewportRange, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+                let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                 for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
                     var baselineOffset: CGFloat = 0
@@ -208,7 +205,6 @@ open class STLineNumberRulerView: NSRulerView {
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
 
                     var effectiveAttributes = lineTextAttributes
-                    let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                     let isLineSelected: Bool = {
                         textView.textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
@@ -237,11 +233,12 @@ open class STLineNumberRulerView: NSRulerView {
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+
+                    lineFragmentFrame.origin.y += lineFragment.typographicBounds.origin.y
                     if lineFragment.isExtraLineFragment {
                         lineFragmentFrame.size.height = lineFragment.typographicBounds.height
-                        lineFragmentFrame = lineFragmentFrame.moved(dy: lineFragment.typographicBounds.height)
-                    } else {
-                        lineFragmentFrame.size.height = lineFragment.typographicBounds.height
+                    } else if !lineFragment.isExtraLineFragment, let extraLineFragment = layoutFragment.textLineFragments.first(where: { $0.isExtraLineFragment }) {
+                        lineFragmentFrame.size.height -= extraLineFragment.typographicBounds.height
                     }
 
                     lines.append(
@@ -255,7 +252,7 @@ open class STLineNumberRulerView: NSRulerView {
                     )
                 }
 
-                return shouldContinue
+                return true
             }
         }
 
