@@ -531,10 +531,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
             YankingManager.shared.selectionChanged()
 
-            NotificationCenter.default.post(
-                Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
-            )
-            self.delegate?.textViewDidChangeSelection(notification)
+            let textViewNotification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
+
+            NotificationCenter.default.post(textViewNotification)
+            self.delegate?.textViewDidChangeSelection(textViewNotification)
         }
 
         usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.new]) { [weak self] textLayoutManager, change in

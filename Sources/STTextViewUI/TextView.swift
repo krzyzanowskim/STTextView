@@ -25,6 +25,7 @@ public struct TextView: SwiftUI.View {
 
     @Environment(\.colorScheme) private var colorScheme
     @Binding private var text: AttributedString
+    @Binding private var selection: NSTextRange?
     private let options: Options
 
     /// Create a text edit view with a certain text that uses a certain options.
@@ -33,15 +34,18 @@ public struct TextView: SwiftUI.View {
     ///   - options: Editor options
     public init(
         text: Binding<AttributedString>,
+        selection: Binding<NSTextRange?> = .constant(nil),
         options: Options = []
     ) {
         _text = text
+        _selection = selection
         self.options = options
     }
 
     public var body: some View {
         TextViewRepresentable(
             text: $text,
+            selection: $selection,
             options: options
         )
         .background(.background)
@@ -54,10 +58,12 @@ private struct TextViewRepresentable: NSViewRepresentable {
     @Environment(\.lineSpacing) private var lineSpacing
 
     @Binding private var text: AttributedString
+    @Binding private var selection: NSTextRange?
     private let options: TextView.Options
 
-    init(text: Binding<AttributedString>, options: TextView.Options) {
+    init(text: Binding<AttributedString>, selection: Binding<NSTextRange?>, options: TextView.Options) {
         self._text = text
+        self._selection = selection
         self.options = options
     }
 
