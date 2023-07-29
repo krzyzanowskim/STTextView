@@ -18,7 +18,7 @@ public protocol STTextViewDelegate: AnyObject {
     /// Any keyDown or paste which changes the contents causes this
     func textViewWillChangeText(_ notification: Notification)
 
-    /// Any keyDown or paste which changes the contents causes this
+    /// Informs the delegate that the text object has changed its characters or formatting attributes.
     func textViewDidChangeText(_ notification: Notification)
 
     /// Sent when the selection changes in the text view.

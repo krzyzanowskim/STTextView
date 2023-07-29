@@ -69,7 +69,9 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.widthTracksTextView = options.contains(.wrapLines)
         textView.setSelectedRange(NSRange())
 
+        context.coordinator.isUpdating = true
         textView.setAttributedString(NSAttributedString(styledAttributedString(textView.typingAttributes)))
+        context.coordinator.isUpdating = false
 
         return scrollView
     }
@@ -81,11 +83,11 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
         do {
             context.coordinator.isUpdating = true
-            if context.coordinator.isDidChangeText  == false {
+            if context.coordinator.isDidChangeText == false {
                 textView.setAttributedString(NSAttributedString(styledAttributedString(textView.typingAttributes)))
             }
             context.coordinator.isUpdating = false
-            context.coordinator.isDidChangeText  = false
+            context.coordinator.isDidChangeText = false
         }
 
         if textView.isEditable != isEnabled {
