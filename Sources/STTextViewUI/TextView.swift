@@ -96,6 +96,10 @@ private struct TextViewRepresentable: NSViewRepresentable {
             context.coordinator.isDidChangeText = false
         }
 
+        if textView.selectedRange() != selection, let selection {
+            textView.setSelectedRange(selection)
+        }
+
         if textView.isEditable != isEnabled {
             textView.isEditable = isEnabled
         }

@@ -19,16 +19,16 @@ struct ContentView: View {
             )
             .textViewFont(.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular))
 
-            /*
-            Button("Modify") {
-                text.insert(AttributedString("\(counter)\n"), at: text.startIndex)
-                counter += 1
-            }
+            // Button("Modify") {
+            //     text.insert(AttributedString("\(counter)\n"), at: text.startIndex)
+            //     counter += 1
+            //      selection = NSRange(location: 0, length: 3)
+            // }
 
             // SwiftUI is slow, I wouldn't use it
-            SwiftUI.TextEditor(text: Binding(get: { String(text.characters) }, set: { text = AttributedString($0) }))
-                .font(.body)
-            */
+            //
+            // SwiftUI.TextEditor(text: Binding(get: { String(text.characters) }, set: { text = AttributedString($0) }))
+            //    .font(.body)
 
             HStack {
                 if let selection {
