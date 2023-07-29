@@ -6,14 +6,15 @@ import STTextViewUI
 
 struct ContentView: View {
     @State private var text: AttributedString = ""
+    @State private var selection: NSRange?
     @State private var counter = 0
 
     var body: some View {
-        VStack {
-
+        VStack(spacing: 0) {
             // this is fast
             STTextViewUI.TextView(
                 text: $text,
+                selection: $selection,
                 options: [.wrapLines, .highlightSelectedLine]
             )
             .textViewFont(.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular))
@@ -28,6 +29,18 @@ struct ContentView: View {
             SwiftUI.TextEditor(text: Binding(get: { String(text.characters) }, set: { text = AttributedString($0) }))
                 .font(.body)
             */
+
+            HStack {
+                if let selection {
+                    Text("Location: \(selection.location)")
+                } else {
+                    Text("No selection")
+                }
+
+                Spacer()
+            }
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
         }
         .onAppear {
             loadContent()
