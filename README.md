@@ -76,10 +76,12 @@ import STTextViewUI
 struct ContentView: View {
 
     @State private var text = AttributedString("Hello World!")
+    @State private var selection: NSRange?
 
     var body: some View {
         STTextViewUI.TextView(
             text: $text,
+            selection: $selection,
             options: [.wrapLines, .highlightSelectedLine]
         )
         .textViewFont(.preferredFont(forTextStyle: .body))
