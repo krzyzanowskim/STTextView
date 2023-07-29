@@ -22,6 +22,8 @@ public protocol STTextViewDelegate: AnyObject {
     func textViewDidChangeText(_ notification: Notification)
 
     /// Sent when the selection changes in the text view.
+    ///
+    /// You can use the selectedRange property of the text view to get the new selection.
     func textViewDidChangeSelection(_ notification: Notification)
 
     /// Sent when a text view needs to determine if text in a specified range should be changed.
