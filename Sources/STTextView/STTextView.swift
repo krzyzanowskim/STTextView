@@ -24,10 +24,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Posted before an object performs any operation that changes characters or formatting attributes.
     public static let textWillChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
 
-    /// Posted after an object performs any operation that changes characters or formatting attributes.
+    /// Sent when the text in the receiving control changes.
     public static let textDidChangeNotification = NSText.didChangeNotification
 
-    /// Posted when the selected range of characters changes.
+    /// Sent when the selection range of characters changes.
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
     /// Returns the type of layer used by the receiver.
@@ -984,6 +984,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     /// Sends out necessary notifications when a text change completes.
+    @available(*, deprecated, message: "Use didChangeText() instead")
     open func textDidChange(_ sender: Any?) {
         didChangeText()
     }
@@ -1121,7 +1122,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
-        textDidChange(self)
+        didChangeText()
     }
 
     /// Whenever text is to be changed due to some user-induced action,
