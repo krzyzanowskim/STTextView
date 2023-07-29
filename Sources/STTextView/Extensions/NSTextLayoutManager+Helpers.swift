@@ -2,6 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import Cocoa
+import STTextKitPlus
 
 extension NSTextLayoutManager {
 

@@ -3,8 +3,8 @@
 
 import Cocoa
 
-@_spi(STTextKitPlus)
-internal extension NSTextLocation {
+public extension NSTextLocation {
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.compare(rhs) == .orderedSame
     }
@@ -27,5 +27,9 @@ internal extension NSTextLocation {
 
     static func >= (lhs: Self, rhs: Self) -> Bool {
         lhs == rhs || lhs > rhs
+    }
+
+    static func ~= (a: Self, b: Self) -> Bool {
+        a == b
     }
 }

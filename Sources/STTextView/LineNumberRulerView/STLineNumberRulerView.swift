@@ -2,6 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import Cocoa
+import STTextKitPlus
 
 /// A ruler view to display line numbers to the side of the text view.
 open class STLineNumberRulerView: NSRulerView {

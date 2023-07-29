@@ -3,6 +3,7 @@
 
 
 import Cocoa
+import STTextKitPlus
 
 extension STTextView {
 
