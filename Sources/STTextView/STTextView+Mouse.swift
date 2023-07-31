@@ -102,7 +102,7 @@ extension STTextView {
 
         if menu(for: event) != nil {
 
-            if textLayoutManager.textSelections.isEmpty {
+            if textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty {
                 let point = convert(event.locationInWindow, from: nil)
                 updateTextSelection(
                     interactingAt: point,
@@ -119,7 +119,7 @@ extension STTextView {
     }
 
     open override func menu(for event: NSEvent) -> NSMenu? {
-        let proposedMenu = super.menu(for: event)
+        let proposedMenu = super.menu(for: event)?.copy() as? NSMenu
 
         // Disable context menu when adding an insertion point in mouseDown
         if proposedMenu != nil, event.type == .leftMouseDown && event.modifierFlags.isSuperset(of: [.shift, .control]) {
@@ -131,6 +131,19 @@ extension STTextView {
            let proposedMenu = proposedMenu,
            let eventLocation = textLayoutManager.lineFragmentRange(for: point, inContainerAt: textLayoutManager.documentRange.location)?.location,
            let location = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point, inContainerAt: eventLocation, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.first?.location {
+
+            // Insert spell checker menu
+            do {
+                var effectiveRange = NSRange()
+                if let textCheckingMenu = textCheckingController.menu(at: NSRange(NSTextRange(location: location), in: textContentManager).location, clickedOnSelection: true, effectiveRange: &effectiveRange) {
+                    let items = textCheckingMenu.items
+                    for (idx, menuItem) in items.enumerated() {
+                        proposedMenu.insertItem(menuItem.copy() as! NSMenuItem, at: idx)
+                    }
+                    proposedMenu.insertItem(.separator(), at: items.count)
+                }
+            }
+
             return delegate.textView(self, menu: proposedMenu, for: event, at: location)
         }
 

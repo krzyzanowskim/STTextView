@@ -165,7 +165,7 @@ extension STTextView: NSTextInputClient {
         // Properly implementing this would allow things like bolded underline
         // for certain texts in the marked range. I only half-understand how it works
         // hence leave it like this.
-        return []
+        return textCheckingController.validAnnotations()
     }
 
     @objc public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {

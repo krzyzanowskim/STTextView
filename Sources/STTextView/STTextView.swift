@@ -381,6 +381,27 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// NSTextFinderClient
     internal let textFinderClient: STTextFinderClient
 
+    internal var textCheckingController: NSTextCheckingController!
+
+    /// A Boolean value that indicates whether the receiver has continuous spell checking enabled.
+    ///
+    /// true if the object has continuous spell-checking enabled; otherwise, false.
+    @objc public var isContinuousSpellCheckingEnabled: Bool = false
+
+    /// Enables and disables grammar checking.
+    ///
+    /// If true, grammar checking is enabled; if false, it is disabled.
+    @objc public var isGrammarCheckingEnabled: Bool = false
+
+    /// A Boolean value that indicates whether the text view supplies autocompletion suggestions as the user types.
+    @objc public var isAutomaticTextCompletionEnabled: Bool = false
+
+    /// A Boolean value that indicates whether automatic spelling correction is enabled.
+    @objc public var isAutomaticSpellingCorrectionEnabled: Bool = false
+
+    /// A Boolean value that indicates whether automatic text replacement is enabled.
+    @objc public var isAutomaticTextReplacementEnabled: Bool = false
+
     /// A Boolean value that indicates whether incremental searching is enabled.
     ///
     /// See `NSTextFinder` for information about the find bar.
@@ -457,6 +478,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal var draggingSession: NSDraggingSession? = nil
 
     open override class var defaultMenu: NSMenu? {
+        // evaluated once, and cached
         let menu = super.defaultMenu ?? NSMenu()
 
         let pasteAsPlainText = NSMenuItem(title: NSLocalizedString("Paste and Match Style", comment: ""), action: #selector(pasteAsPlainText(_:)), keyEquivalent: "V")
@@ -502,6 +524,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         textLayoutManager.delegate = self
         textFinderClient.textView = self
+        textCheckingController = NSTextCheckingController(client: self)
 
         // Set insert point at the very beginning
         setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
@@ -777,7 +800,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
-
 
         if updateLayout {
             updateTypingAttributes()
