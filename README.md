@@ -28,6 +28,7 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - Highlight/Select ranges in the text view
 - Multi-cursor editing
 - Search/Replace the text
+- Spelling and Grammar
 - Customizable Completion support
 - Smooth scrolling of long content
 - Anchored annotations
