@@ -77,6 +77,16 @@ extension STTextView: NSTextCheckingClient {
         return attributedString
     }
 
+    private func addRenderingAnnotations(_ annotations: [NSAttributedString.Key: String], range: NSRange) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            return
+        }
+
+        for annotation in annotations {
+            self.textLayoutManager.addRenderingAttribute(annotation.key, value: annotation.value, for: textRange)
+        }
+    }
+
     // The receiver replaces any existing annotations on the specified range with the provided annotations.
     // The range should be adjusted according to the standard range adjustment policy.
     //
@@ -86,17 +96,19 @@ extension STTextView: NSTextCheckingClient {
             return
         }
 
-        // preferably use rendering attributes for that
-        // it does not necessary has to be saved in the storage permanently
-        self.addAttributes(annotations, range: range)
+        addRenderingAnnotations(annotations, range: range)
     }
 
     public func addAnnotations(_ annotations: [NSAttributedString.Key : String], range: NSRange) {
-        self.addAttributes(annotations, range: range)
+        addRenderingAnnotations(annotations, range: range)
     }
 
     public func removeAnnotation(_ annotationName: NSAttributedString.Key, range: NSRange) {
-        self.removeAttribute(annotationName, range: range)
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            return
+        }
+
+        textLayoutManager.removeRenderingAttribute(annotationName, for: textRange)
     }
 
     public func replaceCharacters(in range: NSRange, withAnnotatedString annotatedString: NSAttributedString) {
