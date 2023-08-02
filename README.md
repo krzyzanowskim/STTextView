@@ -43,7 +43,8 @@ The financial sustainability of the project is possible thanks to the ongoing co
 
   [Judo](https://judo.app) is a design and build tool for SwiftUI apps that writes production-ready code for you while you’re designing. Eliminate back-and-forth with developers and free them from unrewarding grunt work.
 
-  [![judo.app](https://github-production-user-asset-6210df.s3.amazonaws.com/758033/257890674-dd5f68d0-cb8f-496b-863d-3340ca542ca1.png)](https://judo.app)
+  <img src="https://github.com/krzyzanowskim/STTextView/assets/758033/932464f9-d756-4ddb-9946-198901ace96f" width="200">
+
 
 ## 🗓️ Roadmap
 
