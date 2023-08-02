@@ -14,7 +14,7 @@ The component is developed to serve [Swift Studio](https://swiftstudio.app) need
 
 https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-9812-b3c7e324a1ca.mp4
 
-[TextKit 2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit 1 replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit 2 and provide support along TextKit 1 bits. As I started to learn more about `NSTextView` + TextKit2, I realized as of today (Feb 2022), neither `NSTextView` is fully functional, nor TextKit 2 classes are fully functional. Along the way, I reported several bug reports to Apple requested DTS (support tickets). Eventually, I've got blocked by specific bugs that pushed me to start this project.
+[TextKit 2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit 1 replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit 2 and provide support along TextKit 1 bits. As I started to learn more about `NSTextView` + TextKit2, I realized as of today (Feb 2022), neither `NSTextView` is fully functional, nor TextKit 2 classes are fully functional. Along the way, I reported several bug reports to Apple requesting DTS (support tickets). Eventually, I got blocked by specific bugs that pushed me to start this project.
 
 ## ✨ Features
 
@@ -24,7 +24,7 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - Ruler Markers support
 - Customization of colors and fonts
 - Toggle line wrapping on and off
-- Adjust height of lines
+- Adjust the height of lines
 - Highlight/Select ranges in the text view
 - Multi-cursor editing
 - Search/Replace the text
@@ -35,15 +35,26 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - LTR (Left To Right) / RTL (Right To Left) layout
 - Undo/Redo
 
+## 🤝 Support & Sponsors
+
+The financial sustainability of the project is possible thanks to the ongoing contributions from our [GitHub Sponsors](https://github.com/sponsors/krzyzanowskim)
+
+### Premium Sponsors
+
+  [Judo](https://judo.app) is a design and build tool for SwiftUI apps that writes production-ready code for you while you’re designing. Eliminate back-and-forth with developers and free them from unrewarding grunt work.
+
+  <img width="200" alt="Colour Logo@2x" src="https://github.com/krzyzanowskim/STTextView/assets/758033/a33d45c3-418c-423c-b2f6-d966b758485e">
+  
+
 ## 🗓️ Roadmap
 
-STTextView is already well suited as a text editor component, however it still need improvements before release v1.0
+STTextView is already well-suited as a text editor component, however it still needs improvements before the release of v1.0
 
 **Suggest** or **vote** for new features: [Feature Requests](https://github.com/krzyzanowskim/STTextView/discussions/14)
 
 #### Known issues
 
-- undo/redo while typing need fixes
+- undo/redo while typing needs fixes
 - text dragging (partially implemented)
 
 ## 🚀 Getting Started
@@ -92,7 +103,7 @@ struct ContentView: View {
 
 ### Create a TextView
 
-The `STTextView` is a subclass of `NSView` and as such can be initialized like any other view. It has an API that is similar to the one of NSTextView.
+The `STTextView` is an `NSView` subclass and can be initialized like any other view. It has an API that is similar to the one of NSTextView.
 
 ```swift
 import STTextView
@@ -174,11 +185,11 @@ textView.textFinder.incrementalSearchingShouldDimContentView = true
 
 List of **TextKit 2** issues and bugs related to NSTextView and the TextKit framework I reported to Apple so far:
 
-- FB9856587: TextKit2 unexpected additional line fragment for last line
+- FB9856587: TextKit2 unexpected additional line fragment for the last line
 - FB9925766: NSTextSelectionNavigation.deletionRanges only works at the end of the word
 - FB9925647: NSTextLayoutManager.replaceContents(in range: with attributedString:) is documented but is not part of the public API
 - FB9907261: NSTextElementProvider.replaceContents(in:with:) does not replace content as documented
-- FB9692714: Rendering attributes does not draw properly
+- FB9692714: Rendering attributes do not draw properly
 - FB9886911: NSTextView can't properly layout and display long lines (this one is nasty since it causes the view "jump" whenever text attribute updates)
 - FB9713415: NSTextView drawInsertionPoint(in:color:turnedOn) is never called
 - FB9971054: NSLayoutManager.enumerateCaretOffsetsInLineFragment ignores starting location
@@ -203,10 +214,10 @@ I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twi
 
 ### Open Source license
 
-If you are creating an open source application under a license compatible with the [GNU GPL license v3](https://www.gnu.org/licenses/gpl-3.0.html), you may use STTextView under the terms of the GPLv3.
+If you are creating an open-source application under a license compatible with the [GNU GPL license v3](https://www.gnu.org/licenses/gpl-3.0.html), you may use STTextView under the terms of the GPLv3.
 
 ### Commercial license
 
 Get one [starting from €5](https://krzyzanowskim.gumroad.com/l/sttextview).
 
-If you want to use STTextView to develop non open sourced product, and applications, the Commercial license is the appropriate license. With this option, your source code is kept proprietary. Which means, you won't have to change your whole application source code to an open source license. [Purchase a STTextView Commercial License](https://krzyzanowskim.gumroad.com/l/sttextview)
+If you want to use STTextView to develop non open sourced products and applications, the Commercial license is the appropriate license. With this option, your source code is kept proprietary. This means, you won't have to change your whole application source code to an open-source license. [Purchase a STTextView Commercial License](https://krzyzanowskim.gumroad.com/l/sttextview)
