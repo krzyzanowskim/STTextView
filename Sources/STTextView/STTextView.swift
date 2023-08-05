@@ -575,6 +575,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
             NotificationCenter.default.post(textViewNotification)
             self.delegate?.textViewDidChangeSelection(textViewNotification)
+            
+            textCheckingController.didChangeSelectedRange()
         }
 
         usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.new]) { [weak self] textLayoutManager, change in
@@ -653,7 +655,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     open override func resignFirstResponder() -> Bool {
         if isEditable {
-            NotificationCenter.default.post(name: NSText.didEndEditingNotification, object: self, userInfo: nil)
+            NotificationCenter.default.post(name: NSText.didEndEditingNotification, object: self, userInfo: [NSText.didEndEditingNotification: NSTextMovement.other.rawValue])
         }
 
         defer {

@@ -186,18 +186,27 @@ extension STTextView {
 
     @objc public func toggleContinuousSpellChecking(_ sender: Any?) {
         isContinuousSpellCheckingEnabled.toggle()
+        NSSpellChecker.shared.updatePanels()
     }
 
     @objc public func toggleGrammarChecking(_ sender: Any?) {
         isGrammarCheckingEnabled.toggle()
+        NSSpellChecker.shared.updatePanels()
     }
 
     @objc public func toggleAutomaticSpellingCorrection(_ sender: Any?) {
         isAutomaticSpellingCorrectionEnabled.toggle()
+        NSSpellChecker.shared.updatePanels()
     }
 
     @objc public func toggleAutomaticTextCompletion(_ sender: Any?) {
         isAutomaticTextCompletionEnabled.toggle()
+        NSSpellChecker.shared.updatePanels()
+    }
+
+    @objc public func toggleAutomaticQuoteSubstitution(_ sender: Any?) {
+        isAutomaticQuoteSubstitutionEnabled.toggle()
+        NSSpellChecker.shared.updatePanels()
     }
 
     @objc public func showGuessPanel(_ sender: Any?) {
