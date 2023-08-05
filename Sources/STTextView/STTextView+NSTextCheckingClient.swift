@@ -67,11 +67,31 @@ extension STTextView: NSTextCheckingClient {
         }
 
         let attributedString = self.attributedSubstring(forProposedRange: range, actualRange: actualRange)?.mutableCopy() as! NSMutableAttributedString
+        let actualRange = actualRange?.pointee ?? range
+        guard let actualTextRange = NSTextRange(actualRange, in: textContentManager) else {
+            return nil
+        }
 
         // strip out attributes except what's valid (textCheckingController.validAnnotations())
         let invalidAttributes = attributedString.attributes(in: attributedString.range).subtracting(textCheckingController.validAnnotations())
         for attr in invalidAttributes {
             attributedString.removeAttribute(attr, range: attributedString.range)
+        }
+
+        // add (apply) spellcheck attributes from rendering attributes where annotations are saved
+        let offset = textContentManager.offset(from: textContentManager.documentRange.location, to: actualTextRange.location)
+        textLayoutManager.enumerateRenderingAttributes(in: actualTextRange) { textLayoutManager, attrs, attrTextRange in
+            for spellcheckAttributeKey in attrs.keys.filter({ textCheckingController.validAnnotations().contains($0) }) {
+                guard let value = attrs[spellcheckAttributeKey],
+                      let loc = textContentManager.location(attrTextRange.location, offsetBy: -offset),
+                      let endLoc = textContentManager.location(attrTextRange.endLocation, offsetBy: -offset),
+                      let adjustedAttrTextRange = NSTextRange(location: loc, end: endLoc)
+                else {
+                    continue
+                }
+                attributedString.addAttribute(spellcheckAttributeKey, value: value, range: NSRange(adjustedAttrTextRange, in: textContentManager))
+            }
+            return true
         }
 
         return attributedString
@@ -83,7 +103,7 @@ extension STTextView: NSTextCheckingClient {
         }
 
         for annotation in annotations {
-            self.textLayoutManager.addRenderingAttribute(annotation.key, value: annotation.value, for: textRange)
+            textLayoutManager.addRenderingAttribute(annotation.key, value: annotation.value, for: textRange)
         }
     }
 
@@ -176,7 +196,7 @@ extension STTextView {
         isAutomaticSpellingCorrectionEnabled.toggle()
     }
 
-    @objc func toggleAutomaticTextCompletion(_ sender: Any?) {
+    @objc public func toggleAutomaticTextCompletion(_ sender: Any?) {
         isAutomaticTextCompletionEnabled.toggle()
     }
 
@@ -184,7 +204,7 @@ extension STTextView {
         textCheckingController.showGuessPanel(sender)
     }
 
-    @objc func orderFrontSubstitutionsPanel(_ sender: Any?) {
+    @objc public func orderFrontSubstitutionsPanel(_ sender: Any?) {
         textCheckingController.orderFrontSubstitutionsPanel(sender)
     }
 

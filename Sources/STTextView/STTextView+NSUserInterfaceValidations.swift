@@ -48,16 +48,16 @@ extension STTextView: NSUserInterfaceValidations {
         case #selector(toggleRuler(_:)):
             return usesRuler && enclosingScrollView?.hasHorizontalRuler == true || enclosingScrollView?.hasVerticalRuler == true
         case #selector(toggleContinuousSpellChecking(_:)):
-            (item as? NSMenuItem)?.state = isContinuousSpellCheckingEnabled ? .on : .off
+            (item as? NSMenuItem)?.state = spellCheckingType == .yes ? .on : .off
             return isEditable
         case #selector(toggleGrammarChecking(_:)):
-            (item as? NSMenuItem)?.state = isGrammarCheckingEnabled ? .on : .off
+            (item as? NSMenuItem)?.state = grammarCheckingType == .yes ? .on : .off
             return isEditable
         case #selector(toggleAutomaticTextCompletion(_:)):
-            (item as? NSMenuItem)?.state = isAutomaticTextCompletionEnabled ? .on : .off
+            (item as? NSMenuItem)?.state = textCompletionType == .yes ? .on : .off
             return isEditable
         case #selector(toggleAutomaticSpellingCorrection(_:)):
-            (item as? NSMenuItem)?.state = isAutomaticSpellingCorrectionEnabled ? .on : .off
+            (item as? NSMenuItem)?.state = autocorrectionType == .yes ? .on : .off
             return isEditable
         default:
             return true

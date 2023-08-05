@@ -30,10 +30,10 @@ final class TextLayoutFragmentView: NSView {
     override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         layoutFragment.draw(at: .zero, in: context)
-        drawRenderingAttribites(dirtyRect, in: context)
+        drawSpellCheckerAttributes(dirtyRect, in: context)
     }
 
-    private func drawRenderingAttribites(_ dirtyRect: NSRect, in context: CGContext) {
+    private func drawSpellCheckerAttributes(_ dirtyRect: NSRect, in context: CGContext) {
 
         func drawUnderline(under rect: CGRect, lineWidth: CGFloat) {
             let path = NSBezierPath()
@@ -48,12 +48,13 @@ final class TextLayoutFragmentView: NSView {
         context.saveGState()
 
         layoutFragment.textLayoutManager?.enumerateRenderingAttributes(in: layoutFragment.rangeInElement) { textLayoutManager, attrs, textRange in
-            if let spellingState = attrs[.spellingState] as? String, spellingState == "1" {
+            if attrs[.spellingState] != nil {
                 // find frame for textRange inside this layoutFragmentFrame
                 if let segmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard) {
                     context.setStrokeColor(NSColor.systemRed.withAlphaComponent(0.8).cgColor)
                     let pointSize: CGFloat = 2.5
-                    drawUnderline(under: CGRect(origin: CGPoint(x: segmentFrame.origin.x + pointSize, y: 0), size: CGSize(width: segmentFrame.size.width - pointSize, height: segmentFrame.size.height)), lineWidth: pointSize)
+                    let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x + pointSize, y: 0), size: CGSize(width: segmentFrame.size.width - pointSize, height: segmentFrame.size.height))
+                    drawUnderline(under: frameRect, lineWidth: pointSize)
                 }
             }
             return true

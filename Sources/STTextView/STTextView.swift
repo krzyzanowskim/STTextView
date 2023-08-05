@@ -1145,7 +1145,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
-        didChangeText()
+        didChangeText(in: textRange)
     }
 
     /// Whenever text is to be changed due to some user-induced action,
