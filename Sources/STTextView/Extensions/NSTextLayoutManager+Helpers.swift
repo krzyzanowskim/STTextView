@@ -72,6 +72,17 @@ extension NSTextLayoutManager {
 
             return shouldContinue && block(layoutFragment)
         }
+
     }
 
+    func enumerateRenderingAttributes(in range: NSTextRange, using block: (NSTextLayoutManager, [NSAttributedString.Key : Any], NSTextRange) -> Bool) {
+        enumerateRenderingAttributes(from: range.location, reverse: false) { textLayoutManager, attributes, textRange in
+            let shouldContinue = textRange.location <= range.endLocation
+            if !shouldContinue {
+                return false
+            }
+
+            return shouldContinue && block(textLayoutManager, attributes, textRange)
+        }
+    }
 }

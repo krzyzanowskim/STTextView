@@ -519,7 +519,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         contentView.autoresizingMask = [.height, .width]
         selectionView = SelectionView()
         selectionView.autoresizingMask = [.height, .width]
-        decorationView = DecorationView()
+        decorationView = DecorationView(textLayoutManager: textLayoutManager)
         decorationView.autoresizingMask = [.height, .width]
 
         typingAttributes = Self.defaultTypingAttributes
@@ -804,10 +804,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
-        for attr in attrs {
-            textLayoutManager.addRenderingAttribute(attr.key, value: attr.value, for: range)
-        }
-
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
@@ -829,9 +825,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
-
-        // FB9692714 This doesn't work
-        textLayoutManager.setRenderingAttributes(attrs, for: range)
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
@@ -855,9 +848,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
     open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
-
-        // FB9692714 This doesn't work
-        textLayoutManager.removeRenderingAttribute(attribute, for: range)
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))

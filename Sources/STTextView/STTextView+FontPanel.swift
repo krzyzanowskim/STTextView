@@ -18,7 +18,6 @@ extension STTextView {
             }
         }
 
-        // FB9692714: if rendering attribute would work, use this: textLayoutManager.enumerateRenderingAttributes(from: , reverse: , using: )
         // Assumption: self.attributedString map 1:1 with the storage range. May or may not be true all the time (I can imagine it won't)
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges) where !textRange.isEmpty {
             guard let attributedStringInRange = textContentManager.attributedString(in: textRange) else {

@@ -3,6 +3,7 @@
 
 import Cocoa
 import CoreGraphics
+import STTextKitPlus
 
 final class TextLayoutFragmentView: NSView {
     private let layoutFragment: NSTextLayoutFragment
@@ -27,7 +28,37 @@ final class TextLayoutFragmentView: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
-        guard let ctx = NSGraphicsContext.current?.cgContext else { return }
-        layoutFragment.draw(at: .zero, in: ctx)
+        guard let context = NSGraphicsContext.current?.cgContext else { return }
+        layoutFragment.draw(at: .zero, in: context)
+        drawRenderingAttribites(dirtyRect, in: context)
+    }
+
+    private func drawRenderingAttribites(_ dirtyRect: NSRect, in context: CGContext) {
+
+        func drawUnderline(under rect: CGRect, lineWidth: CGFloat) {
+            let path = NSBezierPath()
+            path.lineWidth = lineWidth
+            path.lineCapStyle = .round
+            path.setLineDash([0, 3.75], count: 2, phase: 0)
+            path.move(to: CGPoint(x: rect.minX, y: rect.maxY - (path.lineWidth)))
+            path.line(to: CGPoint(x: rect.maxX, y: rect.maxY - (path.lineWidth)))
+            path.stroke()
+        }
+
+        context.saveGState()
+
+        layoutFragment.textLayoutManager?.enumerateRenderingAttributes(in: layoutFragment.rangeInElement) { textLayoutManager, attrs, textRange in
+            if let spellingState = attrs[.spellingState] as? String, spellingState == "1" {
+                // find frame for textRange inside this layoutFragmentFrame
+                if let segmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard) {
+                    context.setStrokeColor(NSColor.systemRed.withAlphaComponent(0.8).cgColor)
+                    let pointSize: CGFloat = 2.5
+                    drawUnderline(under: CGRect(origin: CGPoint(x: segmentFrame.origin.x + pointSize, y: 0), size: CGSize(width: segmentFrame.size.width - pointSize, height: segmentFrame.size.height)), lineWidth: pointSize)
+                }
+            }
+            return true
+        }
+
+        context.restoreGState()
     }
 }
