@@ -26,7 +26,7 @@ extension STTextView {
             }
 
             let selectionNSRange = NSRange(textRange, in: textContentManager)
-            attributedStringInRange.enumerateAttribute(.font, in: NSRange(location: 0, length: attributedStringInRange.length), options: [.longestEffectiveRangeNotRequired]) { value, runRange, stop in
+            for (runRange, value) in attributedStringInRange.attribute(.font, in: attributedStringInRange.range, options: .longestEffectiveRangeNotRequired) {
                 guard let currentFont = value as? NSFont else {
                     return
                 }
