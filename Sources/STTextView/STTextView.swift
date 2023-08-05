@@ -1019,6 +1019,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         didChangeText()
     }
 
+    internal func didChangeText(in textRange: NSTextRange) {
+        textCheckingController.didChangeText(in: NSRange(textRange, in: textContentManager))
+        didChangeText()
+    }
+
     /// Sends out necessary notifications when a text change completes.
     ///
     /// Invoked automatically at the end of a series of changes, this method posts an `textDidChangeNotification` to the default notification center, which also results in the delegate receiving `textViewDidChangeText(_:)` message.
@@ -1152,6 +1157,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
+
         didChangeText(in: textRange)
     }
 
