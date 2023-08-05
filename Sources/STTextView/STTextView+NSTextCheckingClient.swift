@@ -223,6 +223,35 @@ extension STTextView {
 
 }
 
+extension STTextView {
+
+    /// To be called after text is changed.
+    internal func textCheckingDidChangeText(in range: NSRange) {
+
+        // Doesn't seem to trigger anything
+        textCheckingController.didChangeText(in: range)
+
+        // So do manually
+        // uncheck. remove spelling attributes in the word on both sides
+        if let textRange = NSTextRange(range, in: textContentManager) {
+            textLayoutManager.enumerateRenderingAttributes(from: textRange.location, reverse: true) { textLayoutManager, attributes, attributesTextRange in
+                for attribute in attributes where textCheckingController.validAnnotations().contains(where: { $0 == attribute.key }) {
+                    textLayoutManager.removeRenderingAttribute(attribute.key, for: attributesTextRange)
+                }
+                return false
+            }
+
+            textLayoutManager.enumerateRenderingAttributes(from: textRange.location, reverse: false) { textLayoutManager, attributes, attributesTextRange in
+                for attribute in attributes where textCheckingController.validAnnotations().contains(where: { $0 == attribute.key }) {
+                    textLayoutManager.removeRenderingAttribute(attribute.key, for: attributesTextRange)
+                }
+                return false
+            }
+        }
+    }
+
+}
+
 extension STTextView: NSTextInputTraits {
 
     @objc public var spellCheckingType: NSTextInputTraitType {

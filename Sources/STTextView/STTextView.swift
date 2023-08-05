@@ -575,8 +575,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
             NotificationCenter.default.post(textViewNotification)
             self.delegate?.textViewDidChangeSelection(textViewNotification)
-            
-            textCheckingController.didChangeSelectedRange()
+
+            // textCheckingController.didChangeSelectedRange()
         }
 
         usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.new]) { [weak self] textLayoutManager, change in
@@ -1022,8 +1022,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     internal func didChangeText(in textRange: NSTextRange) {
-        textCheckingController.didChangeText(in: NSRange(textRange, in: textContentManager))
         didChangeText()
+        textCheckingDidChangeText(in: NSRange(textRange, in: textContentManager))
     }
 
     /// Sends out necessary notifications when a text change completes.

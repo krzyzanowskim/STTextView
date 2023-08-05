@@ -48,10 +48,14 @@ final class TextLayoutFragmentView: NSView {
         context.saveGState()
 
         layoutFragment.textLayoutManager?.enumerateRenderingAttributes(in: layoutFragment.rangeInElement) { textLayoutManager, attrs, textRange in
-            if attrs[.spellingState] != nil {
+            if let spellingState = attrs[.spellingState] as? String {
                 // find frame for textRange inside this layoutFragmentFrame
                 if let segmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard) {
-                    context.setStrokeColor(NSColor.systemRed.withAlphaComponent(0.8).cgColor)
+                    if spellingState == "1" {
+                        context.setStrokeColor(NSColor.systemRed.withAlphaComponent(0.8).cgColor)
+                    } else if spellingState == "2" {
+                        context.setStrokeColor(NSColor.controlAccentColor.withAlphaComponent(0.8).cgColor)
+                    }
                     let pointSize: CGFloat = 2.5
                     let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x + pointSize, y: 0), size: CGSize(width: segmentFrame.size.width - pointSize, height: segmentFrame.size.height))
                     drawUnderline(under: frameRect, lineWidth: pointSize)
