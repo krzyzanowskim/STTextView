@@ -20,7 +20,7 @@ extension STTextView {
             NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
         ]
 
-        updateTypingAttributes()
+        updateTypingAttributes(at: textRange.location)
 
         if updateLayout {
             needsLayout = true

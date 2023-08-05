@@ -136,8 +136,8 @@ extension STTextView: NSTextCheckingClient {
     }
 
     public func selectAndShow(_ range: NSRange) {
-        self.setSelectedRange(range)
         self.scrollRangeToVisible(range)
+        self.setSelectedRange(range)
     }
 
     // Returns the view displaying the first logical area for range, and the corresponding rect in view coordinates.
@@ -150,8 +150,8 @@ extension STTextView: NSTextCheckingClient {
     //
     // If the return value is non-nil and actualRange is non-NULL, then actualRange returns the range of text displayed in the returned rect.
     public func view(for range: NSRange, firstRect: NSRectPointer?, actualRange: NSRangePointer?) -> NSView? {
+        let range = adjustedRange(range) ?? range
         actualRange?.pointee = range
-        // firstRect?.pointee = rangeRects(range, constrainedRange: nil, affinity: nil).first!
         return self
     }
 
@@ -212,6 +212,10 @@ extension STTextView {
         textCheckingController.considerTextChecking(for: range)
     }
 
+}
+
+extension STTextView: NSTextInputTraits {
+
     @objc public var spellCheckingType: NSTextInputTraitType {
         get {
             isContinuousSpellCheckingEnabled ? .yes : .no
@@ -257,6 +261,16 @@ extension STTextView {
 
         set {
             isAutomaticTextCompletionEnabled = newValue == .yes
+        }
+    }
+
+    @objc public var smartQuotesType: NSTextInputTraitType {
+        get {
+            isAutomaticQuoteSubstitutionEnabled ? .yes : .no
+        }
+
+        set {
+            isAutomaticQuoteSubstitutionEnabled = newValue == .yes
         }
     }
 

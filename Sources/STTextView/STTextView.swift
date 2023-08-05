@@ -176,12 +176,16 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
     }
 
-    internal func updateTypingAttributes() {
-        // TODO: doesn't work work correctly (at all) for multiple insertion points where each has different typing attribute
-        if let insertionPointSelection = textLayoutManager.insertionPointSelections.first,
-           let startLocation = insertionPointSelection.textRanges.first?.location
-        {
-            self.typingAttributes = typingAttributes(at: startLocation)
+    internal func updateTypingAttributes(at location: NSTextLocation? = nil) {
+        if let location {
+            self.typingAttributes = typingAttributes(at: location)
+        } else {
+            // TODO: doesn't work work correctly (at all) for multiple insertion points where each has different typing attribute
+            if let insertionPointSelection = textLayoutManager.insertionPointSelections.first,
+               let startLocation = insertionPointSelection.textRanges.first?.location
+            {
+                self.typingAttributes = typingAttributes(at: startLocation)
+            }
         }
     }
 
@@ -401,13 +405,16 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     @objc public var isGrammarCheckingEnabled: Bool = false
 
     /// A Boolean value that indicates whether the text view supplies autocompletion suggestions as the user types.
-    @objc public var isAutomaticTextCompletionEnabled: Bool = false
+    @objc public lazy var isAutomaticTextCompletionEnabled: Bool = NSSpellChecker.isAutomaticTextCompletionEnabled
 
     /// A Boolean value that indicates whether automatic spelling correction is enabled.
-    @objc public var isAutomaticSpellingCorrectionEnabled: Bool = false
+    @objc public lazy var isAutomaticSpellingCorrectionEnabled: Bool = NSSpellChecker.isAutomaticSpellingCorrectionEnabled
 
     /// A Boolean value that indicates whether automatic text replacement is enabled.
-    @objc public var isAutomaticTextReplacementEnabled: Bool = false
+    @objc public lazy var isAutomaticTextReplacementEnabled = NSSpellChecker.isAutomaticTextReplacementEnabled
+
+    /// A Boolean value that enables and disables automatic quotation mark substitution.
+    @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
     /// A Boolean value that indicates whether incremental searching is enabled.
     ///
