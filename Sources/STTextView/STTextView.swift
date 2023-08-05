@@ -6,7 +6,7 @@
 //      |---selectionView
 //      |---contentView
 //              |---(STInsertionPointView | TextLayoutFragmentView)
-//      |---lineAnnotationView
+//      |---decorationView
 //
 //
 // The default implementation of the NSView method inputContext manages
@@ -358,11 +358,18 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// The text view's text container
     public let textContainer: NSTextContainer
 
+    /// Content view. Layout fragments content.
     internal let contentView: ContentView
+
+    /// Selection highlight
     internal let selectionView: SelectionView
-    internal var backingScaleFactor: CGFloat { window?.backingScaleFactor ?? 1 }
+
+    /// Layout fragments decoration, custom rendering attributes
+    internal let decorationView: DecorationView
+
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, TextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
+
     internal lazy var speechSynthesizer: NSSpeechSynthesizer = NSSpeechSynthesizer()
 
     internal lazy var completionWindowController: CompletionWindowController? = {
@@ -512,6 +519,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         contentView.autoresizingMask = [.height, .width]
         selectionView = SelectionView()
         selectionView.autoresizingMask = [.height, .width]
+        decorationView = DecorationView()
+        decorationView.autoresizingMask = [.height, .width]
 
         typingAttributes = Self.defaultTypingAttributes
         allowsUndo = true
@@ -540,6 +549,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         addSubview(selectionView)
         addSubview(contentView)
+        addSubview(decorationView)
 
         do {
             let recognizer = DragSelectedTextGestureRecognizer(target: self, action: #selector(_dragSelectedTextGestureRecognizer(gestureRecognizer:)))
@@ -589,12 +599,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open override func hitTest(_ point: NSPoint) -> NSView? {
         let result = super.hitTest(point)
 
-        // click-through `contentView`, `selectionView` and `lineAnnotationView` subviews
+        // click-through `contentView`, `selectionView` and `decorationView` subviews
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent
         // for interaction.
         if let view = result, view != self,
-            (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView)) {
+           (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView) || view.isDescendant(of: decorationView))
+        {
             return self
         }
         return result
