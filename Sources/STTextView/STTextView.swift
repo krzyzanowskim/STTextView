@@ -416,6 +416,18 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// A Boolean value that enables and disables automatic quotation mark substitution.
     @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
+    /// A Boolean value that indicates whether to substitute visible glyphs for whitespace and other typically invisible characters.
+    open var showsInvisibleCharacters: Bool {
+        get {
+            (textLayoutManager as? STTextLayoutManager)?.showsInvisibleCharacters ?? false
+        }
+
+        set {
+            (textLayoutManager as? STTextLayoutManager)?.showsInvisibleCharacters = newValue
+            needsLayout = true
+        }
+    }
+
     /// A Boolean value that indicates whether incremental searching is enabled.
     ///
     /// See `NSTextFinder` for information about the find bar.

@@ -31,7 +31,6 @@ final class TextLayoutFragmentView: NSView {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         layoutFragment.draw(at: .zero, in: context)
         drawSpellCheckerAttributes(dirtyRect, in: context)
-        drawInvisibles(dirtyRect, in: context)
     }
 
     private func drawSpellCheckerAttributes(_ dirtyRect: NSRect, in context: CGContext) {
@@ -73,7 +72,4 @@ final class TextLayoutFragmentView: NSView {
         context.restoreGState()
     }
 
-    private func drawInvisibles(_ dirtyRect: NSRect, in context: CGContext) {
-        
-    }
 }

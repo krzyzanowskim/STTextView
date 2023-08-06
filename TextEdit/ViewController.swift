@@ -33,6 +33,7 @@ final class ViewController: NSViewController {
         textView.widthTracksTextView = false // wrap
         textView.highlightSelectedLine = true
         textView.isIncrementalSearchingEnabled = true
+        textView.showsInvisibleCharacters = false
         textView.delegate = self
         textView.dataSource = self
 

@@ -13,8 +13,8 @@ extension NSTextLayoutManager {
         guard !range.isEmpty else { return "" }
         var output = String()
         output.reserveCapacity(range.length(in: textContentManager!))
-        enumerateSubstrings(from: range.location, options: .byComposedCharacterSequences) { (substring, textRange, _, stop) in
-            let shouldContinue = textRange.location <= range.endLocation
+        enumerateSubstrings(from: range.location, options: .byComposedCharacterSequences) { (substring, substringRange, _, stop) in
+            let shouldContinue = substringRange.location <= range.endLocation
             if !shouldContinue {
                 stop.pointee = true
                 return
@@ -25,6 +25,18 @@ extension NSTextLayoutManager {
             }
         }
         return output
+    }
+
+    func enumerateSubstrings(in range: NSTextRange, options: String.EnumerationOptions = [], using block: (String?, NSTextRange, NSTextRange?, UnsafeMutablePointer<ObjCBool>) -> Void) {
+        enumerateSubstrings(from: range.location, options: options) { substring, substringRange, enclosingRange, stop in
+            let shouldContinue = substringRange.location <= range.endLocation
+            if !shouldContinue {
+                stop.pointee = true
+                return
+            }
+
+            block(substring, substringRange, enclosingRange, stop)
+        }
     }
 
     struct TextSelectionRangesOptions: OptionSet {

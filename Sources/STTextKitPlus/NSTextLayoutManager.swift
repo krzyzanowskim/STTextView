@@ -53,7 +53,7 @@ extension NSTextLayoutManager {
     }
 
     /// A text segment is both logically and visually contiguous portion of the text content inside a line fragment.
-    public func textSegmentFrame(in textRange: NSTextRange, type: NSTextLayoutManager.SegmentType, options: SegmentOptions = [.upstreamAffinity]) -> CGRect? {
+    public func textSegmentFrame(in textRange: NSTextRange, type: NSTextLayoutManager.SegmentType, options: SegmentOptions = [.upstreamAffinity, .rangeNotRequired]) -> CGRect? {
         var result: CGRect? = nil
         // .upstreamAffinity: When specified, the segment is placed based on the upstream affinity for an empty range.
         //
