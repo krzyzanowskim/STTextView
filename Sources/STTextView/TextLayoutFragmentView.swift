@@ -34,6 +34,9 @@ final class TextLayoutFragmentView: NSView {
     }
 
     private func drawSpellCheckerAttributes(_ dirtyRect: NSRect, in context: CGContext) {
+        guard let textLayoutManager = layoutFragment.textLayoutManager else {
+            return
+        }
 
         func drawUnderline(under rect: CGRect, lineWidth: CGFloat) {
             let path = NSBezierPath()
@@ -47,17 +50,17 @@ final class TextLayoutFragmentView: NSView {
 
         context.saveGState()
 
-        layoutFragment.textLayoutManager?.enumerateRenderingAttributes(in: layoutFragment.rangeInElement) { textLayoutManager, attrs, textRange in
+        textLayoutManager.enumerateRenderingAttributes(in: layoutFragment.rangeInElement) { textLayoutManager, attrs, attrTextRange in
             if let spellingState = attrs[.spellingState] as? String {
-                // find frame for textRange inside this layoutFragmentFrame
-                if let segmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard) {
-                    if spellingState == "1" {
-                        context.setStrokeColor(NSColor.systemRed.withAlphaComponent(0.8).cgColor)
-                    } else if spellingState == "2" {
-                        context.setStrokeColor(NSColor.controlAccentColor.withAlphaComponent(0.8).cgColor)
-                    }
+                if spellingState == "1" {
+                    context.setStrokeColor(NSColor.systemRed.withAlphaComponent(0.8).cgColor)
+                } else if spellingState == "2" {
+                    context.setStrokeColor(NSColor.controlAccentColor.withAlphaComponent(0.8).cgColor)
+                }
+
+                if let segmentFrame = textLayoutManager.textSegmentFrame(in: attrTextRange, type: .standard) {
                     let pointSize: CGFloat = 2.5
-                    let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x + pointSize, y: 0), size: CGSize(width: segmentFrame.size.width - pointSize, height: segmentFrame.size.height))
+                    let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x + pointSize, y: segmentFrame.origin.y - layoutFragment.layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width - pointSize, height: segmentFrame.size.height))
                     drawUnderline(under: frameRect, lineWidth: pointSize)
                 }
             }
