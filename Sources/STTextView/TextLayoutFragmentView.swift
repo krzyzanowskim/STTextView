@@ -31,6 +31,7 @@ final class TextLayoutFragmentView: NSView {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         layoutFragment.draw(at: .zero, in: context)
         drawSpellCheckerAttributes(dirtyRect, in: context)
+        drawInvisibles(dirtyRect, in: context)
     }
 
     private func drawSpellCheckerAttributes(_ dirtyRect: NSRect, in context: CGContext) {
@@ -61,12 +62,18 @@ final class TextLayoutFragmentView: NSView {
                 if let segmentFrame = textLayoutManager.textSegmentFrame(in: attrTextRange, type: .standard) {
                     let pointSize: CGFloat = 2.5
                     let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x + pointSize, y: segmentFrame.origin.y - layoutFragment.layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width - pointSize, height: segmentFrame.size.height))
-                    drawUnderline(under: frameRect, lineWidth: pointSize)
+                    if frameRect.intersects(dirtyRect) {
+                        drawUnderline(under: frameRect, lineWidth: pointSize)
+                    }
                 }
             }
             return true
         }
 
         context.restoreGState()
+    }
+
+    private func drawInvisibles(_ dirtyRect: NSRect, in context: CGContext) {
+        
     }
 }

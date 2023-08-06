@@ -12,16 +12,18 @@ extension NSTextLayoutManager {
     func substring(in range: NSTextRange) -> String {
         guard !range.isEmpty else { return "" }
         var output = String()
-        output.reserveCapacity(128)
-        enumerateSubstrings(from: range.location, options: .byComposedCharacterSequences, using:  { (substring, textRange, _, stop) in
+        output.reserveCapacity(range.length(in: textContentManager!))
+        enumerateSubstrings(from: range.location, options: .byComposedCharacterSequences) { (substring, textRange, _, stop) in
+            let shouldContinue = textRange.location <= range.endLocation
+            if !shouldContinue {
+                stop.pointee = true
+                return
+            }
+
             if let substring = substring {
                 output += substring
             }
-
-            if textRange.endLocation >= range.endLocation {
-                stop.pointee = true
-            }
-        })
+        }
         return output
     }
 
