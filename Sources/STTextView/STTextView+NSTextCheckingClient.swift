@@ -80,7 +80,7 @@ extension STTextView: NSTextCheckingClient {
 
         // add (apply) spellcheck attributes from rendering attributes where annotations are saved
         let offset = textContentManager.offset(from: textContentManager.documentRange.location, to: actualTextRange.location)
-        textLayoutManager.enumerateRenderingAttributes(in: actualTextRange) { textLayoutManager, attrs, attrTextRange in
+        textLayoutManager.enumerateRenderingAttributes(in: actualTextRange, reverse: false) { textLayoutManager, attrs, attrTextRange in
             for spellcheckAttributeKey in attrs.keys.filter({ textCheckingController.validAnnotations().contains($0) }) {
                 guard let value = attrs[spellcheckAttributeKey],
                       let loc = textContentManager.location(attrTextRange.location, offsetBy: -offset),

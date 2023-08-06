@@ -82,20 +82,3 @@ final class TextLayoutRangeView: NSView {
         }
     }
 }
-
-private extension NSTextLineFragment {
-
-    // Range inside textLayoutFragment relative to the document origin
-    func textRange(in textLayoutFragment: NSTextLayoutFragment) -> NSTextRange? {
-
-        guard let textContentManager = textLayoutFragment.textLayoutManager?.textContentManager else {
-            assertionFailure()
-            return nil
-        }
-
-        return NSTextRange(
-            location: textContentManager.location(textLayoutFragment.rangeInElement.location, offsetBy: characterRange.location)!,
-            end: textContentManager.location(textLayoutFragment.rangeInElement.location, offsetBy: characterRange.location + characterRange.length)
-        )
-    }
-}

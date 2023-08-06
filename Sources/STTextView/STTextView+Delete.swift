@@ -88,7 +88,7 @@ extension STTextView {
         }
 
         let deletedString = textRanges.reduce(into: "") { partialResult, textRange in
-            partialResult += textLayoutManager.substring(for: textRange) ?? ""
+            partialResult += textLayoutManager.substring(in: textRange)
         }
 
         replaceCharacters(in: textRanges, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)

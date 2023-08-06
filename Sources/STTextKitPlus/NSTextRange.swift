@@ -17,7 +17,8 @@ extension NSTextRange {
         textContentManager.offset(from: location, to: endLocation)
     }
 
-    public func clamped(_ textRange: NSTextRange) -> Self? {
+    /// Returns a copy of this range clamped to the given limiting range.
+    public func clamped(to textRange: NSTextRange) -> Self? {
         let beginLocation = {
             if self.location <= textRange.location {
                 return textRange.location

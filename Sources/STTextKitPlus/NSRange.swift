@@ -5,8 +5,12 @@ import Cocoa
 
 extension NSRange {
 
+    /// A value indicating that a requested item couldn’t be found or doesn’t exist.
     public static let notFound = NSRange(location: NSNotFound, length: 0)
 
+    /// A Boolean value indicating whether the range is empty.
+    ///
+    /// Range is empty when its length is equal 0
     public var isEmpty: Bool {
         length == 0
     }
@@ -22,8 +26,8 @@ extension NSRange {
         self.init(location: offset, length: 0)
     }
 
+    /// Creates a new value object containing the specified Foundation range structure.
     public var nsValue: NSValue {
         NSValue(range: self)
     }
 }
-

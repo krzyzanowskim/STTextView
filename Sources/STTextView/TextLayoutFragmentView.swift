@@ -50,7 +50,7 @@ final class TextLayoutFragmentView: NSView {
 
         context.saveGState()
 
-        textLayoutManager.enumerateRenderingAttributes(in: layoutFragment.rangeInElement) { textLayoutManager, attrs, attrTextRange in
+        textLayoutManager.enumerateRenderingAttributes(in: layoutFragment.rangeInElement, reverse: false) { textLayoutManager, attrs, attrTextRange in
             if let spellingState = attrs[.spellingState] as? String {
                 if spellingState == "1" {
                     context.setStrokeColor(NSColor.systemRed.withAlphaComponent(0.8).cgColor)
