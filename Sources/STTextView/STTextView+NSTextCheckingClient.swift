@@ -73,7 +73,7 @@ extension STTextView: NSTextCheckingClient {
         }
 
         // strip out attributes except what's valid (textCheckingController.validAnnotations())
-        let invalidAttributes = attributedString.attributes(in: attributedString.range).subtracting(textCheckingController.validAnnotations())
+        let invalidAttributes = attributedString.attributes(in: attributedString.range, options: .longestEffectiveRangeNotRequired).subtracting(textCheckingController.validAnnotations())
         for attr in invalidAttributes {
             attributedString.removeAttribute(attr, range: attributedString.range)
         }

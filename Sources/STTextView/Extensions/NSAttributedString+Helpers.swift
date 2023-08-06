@@ -4,7 +4,7 @@
 import Foundation
 
 extension NSAttributedString {
-    func attributes(in range: NSRange, options: NSAttributedString.EnumerationOptions = .longestEffectiveRangeNotRequired) -> Set<NSAttributedString.Key> {
+    func attributes(in range: NSRange, options: NSAttributedString.EnumerationOptions = []) -> Set<NSAttributedString.Key> {
         var usedAttributes: Set<NSAttributedString.Key> = []
 
         enumerateAttributes(in: range, options: .longestEffectiveRangeNotRequired) { attrs, _, _ in
@@ -31,5 +31,9 @@ extension NSAttributedString {
 
     var range: NSRange {
         NSRange(location: 0, length: length)
+    }
+
+    var isEmpty: Bool {
+        length == 0
     }
 }
