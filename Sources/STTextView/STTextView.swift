@@ -424,7 +424,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         set {
             (textLayoutManager as? STTextLayoutManager)?.showsInvisibleCharacters = newValue
-            needsLayout = true
+            textLayoutManager.invalidateLayout(for: textLayoutManager.documentRange)
         }
     }
 

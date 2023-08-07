@@ -105,6 +105,10 @@ final class ViewController: NSViewController {
         textView.widthTracksTextView.toggle()
     }
 
+    @IBAction func toggleInvisibles(_ sender: Any?) {
+        textView.showsInvisibleCharacters.toggle()
+    }
+
     @objc func removeAnnotation(_ annotation: STLineAnnotation) {
         annotations.removeAll(where: { $0 == annotation })
     }

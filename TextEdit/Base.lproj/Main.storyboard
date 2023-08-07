@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21701"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -702,11 +701,19 @@
                                         <action selector="toggleTextWrapMode:" target="Oky-zY-oP4" id="0jK-vv-upN"/>
                                     </connections>
                                 </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="69692D5E-37C8-42F9-B8FE-8F5988211D84" label="Invisibles" paletteLabel="Invisibles" tag="-1" image="eye.slash" catalog="system" bordered="YES" autovalidates="NO" id="1Pv-jL-YKX">
+                                    <size key="minSize" width="33" height="25"/>
+                                    <size key="maxSize" width="33" height="25"/>
+                                    <connections>
+                                        <action selector="toggleInvisibles:" target="Oky-zY-oP4" id="EgE-A0-grP"/>
+                                    </connections>
+                                </toolbarItem>
                                 <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="CJB-Vc-Vlk"/>
                                 <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="yNL-fS-mZG"/>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
                                 <toolbarItem reference="yNL-fS-mZG"/>
+                                <toolbarItem reference="1Pv-jL-YKX"/>
                                 <toolbarItem reference="JV6-de-LTW"/>
                             </defaultToolbarItems>
                         </toolbar>
@@ -737,6 +744,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="eye.slash" catalog="system" width="21" height="14"/>
         <image name="text.justify" catalog="system" width="21" height="17"/>
     </resources>
 </document>
