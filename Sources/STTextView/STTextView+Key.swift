@@ -34,7 +34,7 @@ extension STTextView {
         }
 
         // ^Space -> complete:
-        if event.modifierFlags.contains(.control) && event.charactersIgnoringModifiers == " " {
+        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .control && event.charactersIgnoringModifiers == " " {
             doCommand(by: #selector(NSStandardKeyBindingResponding.complete(_:)))
             return true
         }
