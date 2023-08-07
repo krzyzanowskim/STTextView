@@ -66,7 +66,7 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
 
         for textLineFragment in textLineFragments where !textLineFragment.isExtraLineFragment {
             let string = textLineFragment.attributedString.string
-            if string.contains(where: { $0.isWhitespace }), let textLineTextRange = textLineFragment.textRange(in: self) {
+            if let textLineTextRange = textLineFragment.textRange(in: self) {
                 for (offset, character) in string.enumerated() where character.isWhitespace {
 
                     // FIXME: if fail to draw for right-to-left writing direction
