@@ -29,6 +29,7 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - Multi-cursor editing
 - Search/Replace the text
 - Spelling and Grammar
+- Display Invisible Characters
 - Customizable Completion support
 - Smooth scrolling of long content
 - Anchored annotations
