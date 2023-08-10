@@ -33,6 +33,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Returns the type of layer used by the receiver.
     open var insertionPointViewClass = STInsertionPointView.self
 
+    internal var plugins: [Plugin] = []
+
     /// A Boolean value that controls whether the text view allows the user to edit text.
     @Invalidating(.insertionPoint, .cursorRects)
     @objc dynamic open var isEditable: Bool = true {
@@ -73,6 +75,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         return false
     }
+
+    @Invalidating(.insertionPoint, .cursorRects)
+    internal var isFirstResponder: Bool = false
 
     /// The color of the insertion point.
     @Invalidating(.display, .insertionPoint)
@@ -596,6 +601,17 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
     }
 
+    @available(*, unavailable)
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        plugins.forEach { plugin in
+            plugin.tearDown()
+        }
+    }
+
     open override func resetCursorRects() {
         super.resetCursorRects()
         if isSelectable {
@@ -632,11 +648,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         return result
     }
 
-    @available(*, unavailable)
-    required public init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     open override var canBecomeKeyView: Bool {
         super.canBecomeKeyView && acceptsFirstResponder && !isHiddenOrHasHiddenAncestor
     }
@@ -648,9 +659,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open override var acceptsFirstResponder: Bool {
         isSelectable
     }
-
-    @Invalidating(.insertionPoint, .cursorRects)
-    internal var isFirstResponder: Bool = false
 
     open override func becomeFirstResponder() -> Bool {
         if isEditable {
@@ -1208,6 +1216,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Subclasses may override this method to clean up any additional data structures used for dragging. In your overridden method, be sure to invoke super’s implementation of this method.
     open func cleanUpAfterDragOperation() {
 
+    }
+
+    open func registerPlugin(_ plugin: Plugin) {
+        plugin.setUp(textView: self)
+        plugins.append(plugin)
     }
 }
 
