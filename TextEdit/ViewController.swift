@@ -5,6 +5,8 @@ import Cocoa
 import STTextView
 import SwiftUI
 
+import DummyPlugin
+
 final class ViewController: NSViewController {
     private var textView: STTextView!
     private var annotations: [LineAnnotation] = [] {
@@ -20,6 +22,7 @@ final class ViewController: NSViewController {
 
         let scrollView = STTextView.scrollableTextView()
         textView = scrollView.documentView as? STTextView
+        textView.registerPlugin(DummyPlugin())
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.hasVerticalScroller = true
         scrollView.drawsBackground = true

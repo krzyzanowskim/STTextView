@@ -16,6 +16,7 @@
 		7559DD832A0709D4004441B6 /* STTextView in Frameworks */ = {isa = PBXBuildFile; productRef = 7559DD822A0709D4004441B6 /* STTextView */; };
 		755B614029F5B78800EDD45F /* LineAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 755B613F29F5B78800EDD45F /* LineAnnotation.swift */; };
 		755B614229F5B7B800EDD45F /* AnnotationLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 755B614129F5B7B800EDD45F /* AnnotationLabelView.swift */; };
+		759851B82A85965200C22CBE /* DummyPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 759851B72A85965200C22CBE /* DummyPlugin */; };
 		75BC2F802A62C86C00580249 /* SimpleParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BC2F7F2A62C86C00580249 /* SimpleParser.swift */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				759851B82A85965200C22CBE /* DummyPlugin in Frameworks */,
 				7559DD832A0709D4004441B6 /* STTextView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -104,6 +106,7 @@
 			name = TextEdit;
 			packageProductDependencies = (
 				7559DD822A0709D4004441B6 /* STTextView */,
+				759851B72A85965200C22CBE /* DummyPlugin */,
 			);
 			productName = TextKit2TextEdit;
 			productReference = 7544423727B9332E00901C0E /* Text Editor.app */;
@@ -384,6 +387,10 @@
 		7559DD822A0709D4004441B6 /* STTextView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = STTextView;
+		};
+		759851B72A85965200C22CBE /* DummyPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DummyPlugin;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
