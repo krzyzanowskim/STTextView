@@ -33,7 +33,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Returns the type of layer used by the receiver.
     open var insertionPointViewClass = STInsertionPointView.self
 
-    internal var plugins: [Plugin] = []
+    internal var plugins: [STPluginProtocol] = []
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
     @Invalidating(.insertionPoint, .cursorRects)
@@ -630,6 +630,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         if self.window != nil {
             textFinder.client = textFinderClient
             textFinder.findBarContainer = enclosingScrollView
+
+            // Setup plugins when editor is fully setup
+            for plugin in plugins {
+                plugin.setUp(textView: self)
+            }
         }
     }
 
@@ -1218,8 +1223,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     }
 
-    open func registerPlugin(_ plugin: Plugin) {
-        plugin.setUp(textView: self)
+    open func addPlugin(_ plugin: STPluginProtocol) {
         plugins.append(plugin)
     }
 }

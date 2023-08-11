@@ -144,7 +144,9 @@ extension STTextView {
                 }
             }
 
-            return delegate.textView(self, menu: proposedMenu, for: event, at: location)
+            let effectiveMenu = delegate.textView(self, menu: proposedMenu, for: event, at: location)
+            effectiveMenu?.addItem(.separator())
+            return effectiveMenu
         }
 
         return proposedMenu

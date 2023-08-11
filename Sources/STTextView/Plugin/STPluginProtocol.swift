@@ -3,7 +3,7 @@
 
 import Foundation
 
-public protocol Plugin {
+public protocol STPluginProtocol {
     func setUp(textView: STTextView)
     func tearDown()
 }
