@@ -26,9 +26,6 @@ final class ViewController: NSViewController {
         scrollView.hasVerticalScroller = true
         scrollView.drawsBackground = true
 
-        // Plugins
-        textView.addPlugin(DummyPlugin())
-
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.2
         textView.typingAttributes[.paragraphStyle] = paragraph
@@ -42,6 +39,8 @@ final class ViewController: NSViewController {
         textView.delegate = self
         textView.dataSource = self
 
+        // Plugins
+        textView.addPlugin(DummyPlugin())
 
         // Line numbers
         let rulerView = STLineNumberRulerView(textView: textView)

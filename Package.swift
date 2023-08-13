@@ -14,10 +14,6 @@ let package = Package(
             name: "STTextKitPlus",
             targets: ["STTextKitPlus"]
         ),
-        .library(
-            name: "DummyPlugin",
-            targets: ["DummyPlugin"]
-        )
     ],
     targets: [
         .target(
@@ -31,12 +27,6 @@ let package = Package(
         ),
         .target(
             name: "STTextViewUI",
-            dependencies: [
-                .target(name: "STTextView")
-            ]
-        ),
-        .target(
-            name: "DummyPlugin",
             dependencies: [
                 .target(name: "STTextView")
             ]
