@@ -3,7 +3,8 @@
 
 import Foundation
 
-open class STPlugin: STPluginProtocol {
+/// Base Plugin class. Subclassed by plugins.
+open class STPlugin {
     private var delegateProxy: STTextViewDelegateProxy?
 
     public init() {
@@ -18,6 +19,10 @@ open class STPlugin: STPluginProtocol {
         // unproxy
         delegateProxy?.textView?.delegate = delegateProxy?.sourceDelegate
         delegateProxy = nil
+    }
+
+    deinit {
+        tearDown()
     }
 
     public func register(eventHandler handler: STPluginEventHandler?, of textView: STTextView) {

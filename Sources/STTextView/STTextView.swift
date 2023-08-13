@@ -33,7 +33,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Returns the type of layer used by the receiver.
     open var insertionPointViewClass = STInsertionPointView.self
 
-    internal var plugins: [STPluginProtocol] = []
+    internal var plugins: [STPlugin] = []
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
     @Invalidating(.insertionPoint, .cursorRects)
@@ -1223,7 +1223,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     }
 
-    open func addPlugin(_ plugin: STPluginProtocol) {
+    open func addPlugin(_ plugin: STPlugin) {
         plugins.append(plugin)
     }
 }
