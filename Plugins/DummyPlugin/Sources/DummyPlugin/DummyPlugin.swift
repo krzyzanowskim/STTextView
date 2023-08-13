@@ -10,7 +10,11 @@ public struct DummyPlugin: STPlugin {
     }
 
     public func setUp(context: Context) {
-        
+        context.events.onDidChangeText(didChangeText)
+    }
+
+    private func didChangeText() {
+        print("did change handler!")
     }
     
 }
