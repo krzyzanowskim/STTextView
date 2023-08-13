@@ -8,25 +8,9 @@ public struct STPluginContext<P: STPlugin> {
     public let textView: STTextView
     public var events: STPluginEvents
 
-    init(coordinator: P.Coordinator, textView: STTextView) {
+    init(coordinator: P.Coordinator, textView: STTextView, events: STPluginEvents) {
         self.coordinator = coordinator
         self.textView = textView
-        self.events = STPluginEvents()
+        self.events = events
     }
 }
-
-public class STPluginEvents {
-
-    private var willChangeTextHandler: (() -> Void)?
-    private var didChangeTextHandler: (() -> Void)?
-
-    public func onWillChangeText(_ handler: @escaping () -> Void) {
-        willChangeTextHandler = handler
-    }
-
-    public func onDidChangeText(_ handler: @escaping () -> Void) {
-        didChangeTextHandler = handler
-    }
-
-}
-

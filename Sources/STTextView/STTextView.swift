@@ -33,7 +33,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Returns the type of layer used by the receiver.
     open var insertionPointViewClass = STInsertionPointView.self
 
-    internal var plugins: [any STPlugin] = []
+    /// Installed plugins. events value is available after plugin is setup
+    internal var plugins: [(plugin: any STPlugin, events: STPluginEvents?)] = []
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
     @Invalidating(.insertionPoint, .cursorRects)
@@ -350,7 +351,18 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal var processingKeyEvent: Bool = false
 
     /// The delegate for all text views sharing the same layout manager.
-    public weak var delegate: STTextViewDelegate?
+    public weak var delegate: STTextViewDelegate? {
+        didSet {
+            if let delegate {
+                self.delegateProxy = STTextViewDelegateProxy(source: delegate)
+                self.delegate = delegateProxy
+            } else {
+                self.delegateProxy = nil
+            }
+        }
+    }
+    private var delegateProxy: STTextViewDelegateProxy?
+
     public weak var dataSource: STTextViewDataSource?
 
     /// The manager that lays out text for the text view's text container.
@@ -607,7 +619,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     deinit {
-        plugins.forEach { plugin in
+        plugins.forEach { plugin, _ in
             plugin.tearDown()
         }
     }
@@ -631,15 +643,24 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             textFinder.client = textFinderClient
             textFinder.findBarContainer = enclosingScrollView
 
-            // Setup plugins when editor is fully setup
-
             // unwrap any STPluginProtocol
-            func setUp(plugin: some STPlugin) {
-                plugin.setUp(context: STPluginContext(coordinator: plugin.makeCoordinator(), textView: self))
+            func setUp(plugin: some STPlugin) -> STPluginEvents {
+                let events = STPluginEvents()
+                plugin.setUp(
+                    context: STPluginContext(
+                        coordinator: plugin.makeCoordinator(),
+                        textView: self,
+                        events: events
+                    )
+                )
+                return events
             }
 
-            for plugin in plugins {
-                setUp(plugin: plugin)
+            for (offset, (plugin, _)) in plugins.enumerated() {
+                let events = setUp(plugin: plugin)
+
+                // set events handler
+                plugins[offset] = (plugin, events)
             }
         }
 
@@ -1231,7 +1252,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     open func addPlugin(_ plugin: any STPlugin) {
-        plugins.append(plugin)
+        plugins.append((plugin, nil))
     }
 }
 
