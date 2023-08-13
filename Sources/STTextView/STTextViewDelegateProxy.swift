@@ -41,7 +41,7 @@ class STTextViewDelegateProxy: STTextViewDelegate {
     func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool {
         var result = source?.textView(textView, shouldChangeTextIn: affectedCharRange, replacementString: replacementString) ?? true
         result = result && textView.plugins.events.reduce(result) { partialResult, events in
-            return partialResult && events.shouldChangeText?(affectedCharRange, replacementString) ?? true
+            partialResult && events.shouldChangeTextHandler?(affectedCharRange, replacementString) ?? true
         }
         return result
     }
@@ -54,18 +54,28 @@ class STTextViewDelegateProxy: STTextViewDelegate {
         source?.textView(textView, didChangeTextIn: affectedCharRange, replacementString: replacementString)
     }
 
-    func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu? {
-        var resultMenu: NSMenu? = source?.textView(view, menu: menu, for: event, at: location)
+    func textView(_ textView: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu? {
+        let effectiveMenu = source?.textView(textView, menu: menu, for: event, at: location)
 
-        if let proposedMenu = resultMenu {
-//            for events in textView.plugins.compactMap({ $0.events }) {
-//                events.didChangeTextHandler?()
-//            }
-
-//            resultMenu = eventHandler?.textView(view, menu: proposedMenu, for: event, at: location) ?? proposedMenu
+        // Append plugins menus
+        let pluginMenus = textView.plugins.events.compactMap { events in
+            events.onContextMenuHandler?(location, textView.textContentManager)
         }
 
-        return resultMenu
+        if let effectiveMenu, !pluginMenus.isEmpty {
+            effectiveMenu.addItem(.separator())
+
+            for pluginMenu in pluginMenus {
+                if pluginMenu.items.count == 1, let firstItem = pluginMenu.items.first?.copy() as? NSMenuItem {
+                    effectiveMenu.addItem(firstItem)
+                } else if pluginMenu.items.count > 1 {
+                    let menuItem = effectiveMenu.addItem(withTitle: pluginMenu.title, action: nil, keyEquivalent: "")
+                    menuItem.submenu = pluginMenu
+                }
+            }
+        }
+
+        return effectiveMenu
     }
 
     func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]? {

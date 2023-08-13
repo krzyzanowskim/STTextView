@@ -4,26 +4,36 @@ import OSLog
 import STTextView
 
 public struct DummyPlugin: STPlugin {
-    public init() {
 
-    }
+    public init() { }
 
     public func setUp(context: Context) {
         context.events.onWillChangeText(willChangeText)
         context.events.onDidChangeText(didChangeText)
         context.events.shouldChangeText(shouldChangeText)
+        context.events.onContextMenu(contextMenu)
     }
 
     private func willChangeText() {
-        print("will change handler!")
+        // print("will change handler!")
     }
 
     private func didChangeText() {
-        print("did change handler!")
+        // print("did change handler!")
     }
 
     private func shouldChangeText(in textRange: NSTextRange, replacementString: String?) -> Bool {
-        true
+        // if replacementString == "a" {
+        //    return false
+        // }
+        return true
     }
-    
+
+    private func contextMenu(_ location: NSTextLocation, _ contentManager: NSTextContentManager) -> NSMenu {
+        let menu = NSMenu(title: "Dummy Plugin")
+        menu.autoenablesItems = false
+        menu.addItem(withTitle: "Dummy Action", action: nil, keyEquivalent: "")
+        menu.addItem(withTitle: "Smart Action", action: nil, keyEquivalent: "")
+        return menu
+    }
 }

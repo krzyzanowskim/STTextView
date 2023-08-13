@@ -8,7 +8,8 @@ public class STPluginEvents {
 
     var willChangeTextHandler: (() -> Void)?
     var didChangeTextHandler: (() -> Void)?
-    var shouldChangeText: ((_ affectedCharRange: NSTextRange, _ replacementString: String?) -> Bool)?
+    var shouldChangeTextHandler: ((_ affectedCharRange: NSTextRange, _ replacementString: String?) -> Bool)?
+    var onContextMenuHandler: ((_ location: NSTextLocation, _ contentManager: NSTextContentManager) -> NSMenu)?
 
     public func onWillChangeText(_ handler: @escaping () -> Void) {
         willChangeTextHandler = handler
@@ -19,7 +20,11 @@ public class STPluginEvents {
     }
 
     public func shouldChangeText(_ handler: @escaping (_ affectedCharRange: NSTextRange, _ replacementString: String?) -> Bool) {
-        shouldChangeText = handler
+        shouldChangeTextHandler = handler
+    }
+
+    public func onContextMenu(_ handler: @escaping (_ location: NSTextLocation, _ contentManager: NSTextContentManager) -> NSMenu) {
+        onContextMenuHandler = handler
     }
 
 }
