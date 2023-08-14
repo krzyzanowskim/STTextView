@@ -20,7 +20,7 @@ extension STTextView {
         switch event.clickCount {
         case 1:
             let eventPoint = convert(event.locationInWindow, from: nil)
-            if event.modifierFlags.isSuperset(of: [.control, .shift]) {
+            if event.modifierFlags.intersection(.deviceIndependentFlagsMask).isSuperset(of: [.control, .shift]) {
                 textLayoutManager.appendInsertionPointSelection(interactingAt: eventPoint)
                 updateTypingAttributes()
                 updateSelectionHighlights()
@@ -29,10 +29,10 @@ extension STTextView {
                 updateTextSelection(
                     interactingAt: eventPoint,
                     inContainerAt: textLayoutManager.documentRange.location,
-                    anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                    extending: event.modifierFlags.contains(.shift),
+                    anchors: event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.shift) ? textLayoutManager.textSelections : [],
+                    extending: event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.shift),
                     isDragging: false,
-                    visual: event.modifierFlags.contains(.option)
+                    visual: event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.option)
                 )
             }
             handled = true
@@ -82,7 +82,7 @@ extension STTextView {
             anchors: mouseDraggingSelectionAnchors!,
             extending: true,
             isDragging: true,
-            visual: event.modifierFlags.contains(.option)
+            visual: event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.option)
         )
 
         if autoscroll(with: event) {
@@ -107,8 +107,8 @@ extension STTextView {
                 updateTextSelection(
                     interactingAt: point,
                     inContainerAt: textLayoutManager.documentRange.location,
-                    anchors: event.modifierFlags.contains(.shift) ? textLayoutManager.textSelections : [],
-                    extending: event.modifierFlags.contains(.shift)
+                    anchors: event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.shift) ? textLayoutManager.textSelections : [],
+                    extending: event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.shift)
                 )
 
                 selectWord(self)
@@ -122,7 +122,7 @@ extension STTextView {
         let proposedMenu = super.menu(for: event)?.copy() as? NSMenu
 
         // Disable context menu when adding an insertion point in mouseDown
-        if proposedMenu != nil, event.type == .leftMouseDown && event.modifierFlags.isSuperset(of: [.shift, .control]) {
+        if proposedMenu != nil, event.type == .leftMouseDown && event.modifierFlags.intersection(.deviceIndependentFlagsMask).isSuperset(of: [.shift, .control]) {
             return nil
         }
 
