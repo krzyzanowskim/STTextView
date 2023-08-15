@@ -62,6 +62,10 @@ extension NSTextLayoutManager {
         textAttributedString(in: textSelections.flatMap(\.textRanges))
     }
 
+    func textAttributedString(in textRange: NSTextRange) -> NSAttributedString? {
+        textAttributedString(in: [textRange])
+    }
+
     func textAttributedString(in textRanges: [NSTextRange]) -> NSAttributedString? {
         let attributedString = textRanges.reduce(NSMutableAttributedString()) { partialResult, range in
             if let attributedString = textContentManager?.attributedString(in: range) {
