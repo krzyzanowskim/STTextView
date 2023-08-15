@@ -184,7 +184,20 @@ extension ViewController: STTextViewDelegate {
     // Completion
 
     func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]? {
-        completions
+
+        var word: String?
+        textView.textLayoutManager.enumerateSubstrings(from: location, options: [.byWords, .reverse]) { substring, substringRange, enclosingRange, stop in
+            word = substring
+            stop.pointee = true
+        }
+
+        if let word {
+            return completions.filter { item in
+                item.insertText.hasPrefix(word.localizedLowercase)
+            }
+        }
+
+        return nil
     }
 
     func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem) {
