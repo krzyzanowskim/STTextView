@@ -16,22 +16,11 @@ class STTextViewDelegateProxy: STTextViewDelegate {
     }
 
     func textViewWillChangeText(_ notification: Notification) {
-        guard let textView = notification.object as? STTextView else { return }
         source?.textViewWillChangeText(notification)
-
-        for events in textView.plugins.events {
-            events.willChangeTextHandler?()
-        }
     }
 
     func textViewDidChangeText(_ notification: Notification) {
-        guard let textView = notification.object as? STTextView else { return }
-
         source?.textViewDidChangeText(notification)
-
-        for events in textView.plugins.events {
-            events.didChangeTextHandler?()
-        }
     }
 
     func textViewDidChangeSelection(_ notification: Notification) {
@@ -48,10 +37,19 @@ class STTextViewDelegateProxy: STTextViewDelegate {
 
     func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
         source?.textView(textView, willChangeTextIn: affectedCharRange, replacementString: replacementString)
+
+        for events in textView.plugins.events {
+            events.willChangeTextHandler?(affectedCharRange)
+        }
     }
 
     func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
         source?.textView(textView, didChangeTextIn: affectedCharRange, replacementString: replacementString)
+
+        for events in textView.plugins.events {
+            events.didChangeTextHandler?(affectedCharRange, replacementString)
+        }
+
     }
 
     func textView(_ textView: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu? {

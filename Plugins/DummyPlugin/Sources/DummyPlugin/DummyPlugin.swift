@@ -14,11 +14,11 @@ public struct DummyPlugin: STPlugin {
         context.events.onContextMenu(contextMenu)
     }
 
-    private func willChangeText() {
+    private func willChangeText(in affectedRange: NSTextRange) {
         // print("will change handler!")
     }
 
-    private func didChangeText() {
+    private func didChangeText(in affectedRange: NSTextRange, replacementString: String?) {
         // print("did change handler!")
     }
 

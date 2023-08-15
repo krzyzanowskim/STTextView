@@ -648,7 +648,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                 let events = STPluginEvents()
                 plugin.setUp(
                     context: STPluginContext(
-                        coordinator: plugin.makeCoordinator(),
+                        coordinator: plugin.makeCoordinator(context: .init(textView: self)),
                         textView: self,
                         events: events
                     )

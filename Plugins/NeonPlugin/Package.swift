@@ -13,14 +13,16 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.8.9"),
-        .package(url: "https://github.com/ChimeHQ/Neon.git", from: "0.5.1")
+        .package(url: "https://github.com/ChimeHQ/Neon.git", from: "0.5.1"),
+        .package(url: "https://github.com/alex-pinkus/tree-sitter-swift.git", branch: "with-generated-files")
     ],
     targets: [
         .target(
             name: "NeonPlugin",
             dependencies: [
                 "STTextView",
-                "Neon"
+                "Neon",
+                .product(name: "TreeSitterSwift", package: "tree-sitter-swift")
             ]
         )
     ]
