@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		75055B6C2A5C9F3A00595DC2 /* CompletionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75055B6B2A5C9F3A00595DC2 /* CompletionItem.swift */; };
+		752062132A8C06B00004C1B0 /* NeonPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 752062122A8C06B00004C1B0 /* NeonPlugin */; };
 		7544423B27B9332E00901C0E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7544423A27B9332E00901C0E /* AppDelegate.swift */; };
 		7544423D27B9332E00901C0E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7544423C27B9332E00901C0E /* ViewController.swift */; };
 		7544423F27B9332F00901C0E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7544423E27B9332F00901C0E /* Assets.xcassets */; };
@@ -39,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				752062132A8C06B00004C1B0 /* NeonPlugin in Frameworks */,
 				755C583A2A88F8510057C345 /* DummyPlugin in Frameworks */,
 				7559DD832A0709D4004441B6 /* STTextView in Frameworks */,
 			);
@@ -107,6 +109,7 @@
 			packageProductDependencies = (
 				7559DD822A0709D4004441B6 /* STTextView */,
 				755C58392A88F8510057C345 /* DummyPlugin */,
+				752062122A8C06B00004C1B0 /* NeonPlugin */,
 			);
 			productName = TextKit2TextEdit;
 			productReference = 7544423727B9332E00901C0E /* Text Editor.app */;
@@ -384,6 +387,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		752062122A8C06B00004C1B0 /* NeonPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NeonPlugin;
+		};
 		7559DD822A0709D4004441B6 /* STTextView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = STTextView;

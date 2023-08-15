@@ -1,6 +1,6 @@
 import Foundation
-import AppKit
-import OSLog
+import Cocoa
+
 import STTextView
 
 public struct DummyPlugin: STPlugin {
