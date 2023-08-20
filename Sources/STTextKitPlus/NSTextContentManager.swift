@@ -120,6 +120,7 @@ public extension NSTextContentManager {
             return true
         }
 
+        result.fixAttributes(in: NSRange(location: 0, length: result.length))
         result.endEditing()
         if result.length == 0 {
             return nil
