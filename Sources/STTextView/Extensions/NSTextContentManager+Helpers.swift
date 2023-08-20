@@ -8,7 +8,7 @@ extension NSTextContentManager {
 
     var documentString: String {
         var result: String = ""
-        result.reserveCapacity(1024 * 4)
+        result.reserveCapacity(Int(PAGE_MAX_SIZE))
 
         enumerateTextElements(from: nil) { textElement in
             if let textParagraph = textElement as? NSTextParagraph {

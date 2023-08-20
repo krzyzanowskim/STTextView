@@ -13,7 +13,4 @@
    <FileRef
       location = "group:Plugins/DummyPlugin">
    </FileRef>
-   <FileRef
-      location = "group:Plugins/NeonPlugin">
-   </FileRef>
 </Workspace>
