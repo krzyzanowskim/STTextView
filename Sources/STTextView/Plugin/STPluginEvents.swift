@@ -10,6 +10,7 @@ public class STPluginEvents {
     var didChangeTextHandler: ((_ affectedRange: NSTextRange, _ replacementString: String?) -> Void)?
     var shouldChangeTextHandler: ((_ affectedCharRange: NSTextRange, _ replacementString: String?) -> Bool)?
     var onContextMenuHandler: ((_ location: NSTextLocation, _ contentManager: NSTextContentManager) -> NSMenu)?
+    var didLayoutViewportHandler: ((_ visibleRange: NSTextRange?) -> Void)?
 
     @discardableResult
     public func onWillChangeText(_ handler: @escaping (_ affectedRange: NSTextRange) -> Void) -> Self {
@@ -36,4 +37,15 @@ public class STPluginEvents {
         return self
     }
 
+    @discardableResult
+    public func onDidLayoutViewport(_ handler: @escaping (_ visibleRange: NSTextRange?) -> Void) -> Self {
+        didLayoutViewportHandler = handler
+        return self
+    }
+}
+
+extension Array<(plugin: STPlugin, events: STPluginEvents?)> {
+    var events: [STPluginEvents] {
+        compactMap({ $0.events })
+    }
 }

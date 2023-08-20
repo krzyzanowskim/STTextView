@@ -88,9 +88,3 @@ class STTextViewDelegateProxy: STTextViewDelegate {
         source?.textViewCompletionViewController(textView) ?? STCompletionViewController()
     }
 }
-
-private extension Array<(plugin: STPlugin, events: STPluginEvents?)> {
-    var events: [STPluginEvents] {
-        compactMap({ $0.events })
-    }
-}
