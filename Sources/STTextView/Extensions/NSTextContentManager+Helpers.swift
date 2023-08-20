@@ -6,20 +6,6 @@ import STTextKitPlus
 
 extension NSTextContentManager {
 
-    var documentString: String {
-        var result: String = ""
-        result.reserveCapacity(Int(PAGE_MAX_SIZE))
-
-        enumerateTextElements(from: nil) { textElement in
-            if let textParagraph = textElement as? NSTextParagraph {
-                result += textParagraph.attributedString.string
-            }
-
-            return true
-        }
-        return result
-    }
-
     /// Attributes at location
     func attributes(at location: NSTextLocation) -> [NSAttributedString.Key: Any] {
         guard !documentRange.isEmpty else {

@@ -253,7 +253,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             }
         }
         get {
-            textContentManager.documentString
+            textContentManager.attributedString(in: nil)?.string ?? ""
         }
     }
 
