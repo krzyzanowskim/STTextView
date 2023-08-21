@@ -1,1 +1,0 @@
-Dummy Plugin for STTextView. An example simple plugin.

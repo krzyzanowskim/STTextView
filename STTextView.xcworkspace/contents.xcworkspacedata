@@ -10,7 +10,4 @@
    <FileRef
       location = "group:TextEdit.SwiftUI/TextEdit.SwiftUI.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:Plugins/DummyPlugin">
-   </FileRef>
 </Workspace>

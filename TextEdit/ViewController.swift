@@ -5,8 +5,7 @@ import Cocoa
 import STTextView
 import SwiftUI
 
-import DummyPlugin
-import NeonPlugin
+// import DummyPlugin
 
 final class ViewController: NSViewController {
     private var textView: STTextView!
@@ -41,8 +40,7 @@ final class ViewController: NSViewController {
         textView.dataSource = self
 
         // Plugins
-        textView.addPlugin(DummyPlugin())
-        textView.addPlugin(NeonPlugin())
+        // textView.addPlugin(DummyPlugin())
 
         // Line numbers
         let rulerView = STLineNumberRulerView(textView: textView)
