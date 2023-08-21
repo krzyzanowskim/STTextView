@@ -29,12 +29,14 @@ https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-98
 - Multi-cursor editing
 - Search/Replace the text
 - Spelling and Grammar
+- Dictation
 - Display Invisible Characters
 - Customizable Completion support
 - Smooth scrolling of long content
 - Anchored annotations
 - LTR (Left To Right) / RTL (Right To Left) layout
 - Undo/Redo
+- Plugins
 
 ## 🤝 Support & Sponsors
 
@@ -45,7 +47,6 @@ The financial sustainability of the project is possible thanks to the ongoing co
   [Judo](https://judo.app) is a design and build tool for SwiftUI apps that writes production-ready code for you while you’re designing. Eliminate back-and-forth with developers and free them from unrewarding grunt work.
 
 [<img alt="judo.app" width="200" src="https://github-production-user-asset-6210df.s3.amazonaws.com/758033/257891209-932464f9-d756-4ddb-9946-198901ace96f.png" />](https://judo.app)
-
 
 ## 🗓️ Roadmap
 
@@ -73,6 +74,13 @@ let package = Package(
 ## Demo Application
 
 The demo app lets you explore the library. To try it out, just open and run the `STTextView.xcworkspace` in Xcode.
+
+## Plugins
+
+Plugins in a STTextView component offer additional functionalities and customizations beyond the basic text display. They enhance the core capabilities of the text view by adding features such as syntax highlighting, word count tracking, and more. These plugins expand the STTextView's utility while maintaining a modular and adaptable software structure.
+
+- [Plugin-Neon](https://github.com/krzyzanowskim/STTextView-Plugin-Neon) Source Code Syntax Highlighting with TreeSitter and Neon 
+- [Plugin-Template](https://github.com/krzyzanowskim/STTextView-Plugin-Template) Dummy plugin template repository ready bo build new plugin
 
 ## Usage
 
