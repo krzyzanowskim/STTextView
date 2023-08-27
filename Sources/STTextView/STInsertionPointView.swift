@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import Foundation
-import Cocoa
+import AppKit
 
 open class STInsertionPointView: NSView {
     private var timer: Timer?

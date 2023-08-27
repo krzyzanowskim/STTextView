@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 
-import Cocoa
+import AppKit
 import STTextKitPlus
 
 extension STTextView {

@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import Foundation
-import Cocoa
+import AppKit
 
 /// A set of optional methods that text view delegates can use to manage selection,
 /// set text attributes and more.

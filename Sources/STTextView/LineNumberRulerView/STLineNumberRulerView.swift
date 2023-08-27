@@ -1,7 +1,7 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-import Cocoa
+import AppKit
 import STTextKitPlus
 
 /// A ruler view to display line numbers to the side of the text view.

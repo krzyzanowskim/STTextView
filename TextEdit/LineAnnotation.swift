@@ -3,7 +3,7 @@
 
 import Foundation
 import STTextView
-import Cocoa
+import AppKit
 
 final class LineAnnotation: STLineAnnotation {
     let message: AttributedString

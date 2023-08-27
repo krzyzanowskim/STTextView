@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import Foundation
-import Cocoa
+import AppKit
 import SwiftUI
 
 private struct FontEnvironmentKey: EnvironmentKey {

@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import Foundation
-import Cocoa
+import AppKit
 
 class STTextViewDelegateProxy: STTextViewDelegate {
     weak var source: STTextViewDelegate?

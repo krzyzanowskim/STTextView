@@ -1,7 +1,7 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-import Cocoa
+import AppKit
 
 // These methods suppose that ranges of text in the document may have attached to them certain annotations relevant for text checking,
 // represented by dictionaries with various keys, such as NSSpellingStateAttributeName or ranges of text marked as misspelled.

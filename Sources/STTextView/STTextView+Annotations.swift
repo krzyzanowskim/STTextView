@@ -1,7 +1,7 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-import Cocoa
+import AppKit
 
 /// Line annotation entity.
 /// Usually work with subclass that carry more information about the annotation

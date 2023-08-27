@@ -7,7 +7,7 @@
 // That value hast to be handled to properly interact with other apps.
 // https://twitter.com/krzyzanowskim/status/1679442783759659009
 
-import Cocoa
+import AppKit
 import UniformTypeIdentifiers
 
 extension STTextView: NSServicesMenuRequestor {

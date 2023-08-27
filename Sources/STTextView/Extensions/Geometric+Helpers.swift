@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import CoreGraphics
-import Cocoa
+import AppKit
 
 extension CGRect {
 

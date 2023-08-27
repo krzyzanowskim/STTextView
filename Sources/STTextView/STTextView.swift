@@ -16,7 +16,7 @@
 // Althought NSTextInput is deprecated, it seem to be check here and there
 // whether view conforms to NSTextInput, hence it's here along the NSTextInputClient
 
-import Cocoa
+import AppKit
 import STTextKitPlus
 
 /// A TextKit2 text view without NSTextView baggage

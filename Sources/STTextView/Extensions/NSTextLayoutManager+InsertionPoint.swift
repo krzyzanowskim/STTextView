@@ -12,7 +12,7 @@
 // STTextView appends new insertion points as separate
 //
 
-import Cocoa
+import AppKit
 
 extension NSTextLayoutManager {
 

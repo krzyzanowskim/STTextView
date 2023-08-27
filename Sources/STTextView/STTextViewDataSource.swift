@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import Foundation
-import Cocoa
+import AppKit
 
 /// The methods that an object adopts to manage data and provide views for text view.
 public protocol STTextViewDataSource: AnyObject {
