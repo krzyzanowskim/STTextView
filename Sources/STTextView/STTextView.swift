@@ -485,8 +485,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     /// Generates and returns a scroll view with a STTextView set as its document view.
-    open class func scrollableTextView() -> NSScrollView {
-        let scrollView = NSScrollView()
+    open class func scrollableTextView(frame: NSRect = .zero) -> NSScrollView {
+        let scrollView = NSScrollView(frame: frame)
         let textView = STTextView()
 
         let textContainer = textView.textContainer
