@@ -53,13 +53,13 @@ extension NSTextLayoutManager {
     }
 
     func textSelectionsString() -> String? {
-        textSelections.flatMap(\.textRanges).compactMap { textRange in
+        textSelectionsRanges(.withoutInsertionPoints).compactMap { textRange in
             substring(in: textRange)
         }.joined(separator: "\n")
     }
 
     func textSelectionsAttributedString() -> NSAttributedString? {
-        textAttributedString(in: textSelections.flatMap(\.textRanges))
+        textAttributedString(in: textSelectionsRanges(.withoutInsertionPoints))
     }
 
     func textAttributedString(in textRange: NSTextRange) -> NSAttributedString? {
