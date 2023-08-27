@@ -18,6 +18,7 @@
 
 import AppKit
 import STTextKitPlus
+import AVFoundation
 
 /// A TextKit2 text view without NSTextView baggage
 open class STTextView: NSView, NSTextInput, NSTextContent {
@@ -391,7 +392,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, TextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
-    internal lazy var speechSynthesizer: NSSpeechSynthesizer = NSSpeechSynthesizer()
+    internal lazy var speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
 
     internal lazy var completionWindowController: CompletionWindowController? = {
         if let viewController = delegate?.textViewCompletionViewController(self) {

@@ -3,21 +3,33 @@
 
 import Foundation
 import AppKit
+import AVFoundation
 
 extension STTextView {
 
     /// Speaks the selected text, or all text if no selection.
     @objc func startSpeaking(_ sender: Any?) {
         stopSpeaking(sender)
-        speechSynthesizer.startSpeaking(textLayoutManager.textSelectionsString() ?? string)
+
+        let attrString: NSAttributedString
+        let selectionTextRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
+        if selectionTextRanges.isEmpty {
+            attrString = attributedString()
+        } else {
+            attrString = textLayoutManager.textAttributedString(in: selectionTextRanges) ?? NSAttributedString()
+        }
+
+        if !attrString.isEmpty {
+            let utterance = AVSpeechUtterance(attributedString: attrString)
+            utterance.prefersAssistiveTechnologySettings = true
+            speechSynthesizer.speak(utterance)
+        }
     }
 
     /// Stops the speaking of text.
     @objc func stopSpeaking(_ sender: Any?) {
-        guard speechSynthesizer.isSpeaking else {
-            return
+        if speechSynthesizer.isSpeaking {
+            speechSynthesizer.stopSpeaking(at: .word)
         }
-
-        speechSynthesizer.stopSpeaking(at: .immediateBoundary)
     }
 }
