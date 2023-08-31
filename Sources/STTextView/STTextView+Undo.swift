@@ -14,7 +14,7 @@ extension STTextView {
             return nil
         }
 
-        return delegate?.undoManager(for: self) ?? _undoManager
+        return delegateProxy.undoManager(for: self) ?? _undoManager
     }
 
     @objc func undo(_ sender: AnyObject?) {

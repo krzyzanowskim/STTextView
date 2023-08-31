@@ -33,7 +33,7 @@ extension STTextView {
         // move left by arbitrary 14px
         let characterSegmentFrame = textCharacterSegmentRect.moved(dx: -14, dy: textCharacterSegmentRect.height)
 
-        let completionItems = delegate?.textView(self, completionItemsAtLocation: insertionPointLocation) ?? []
+        let completionItems = delegateProxy.textView(self, completionItemsAtLocation: insertionPointLocation) ?? []
 
         dispatchPrecondition(condition: .onQueue(.main))
 
@@ -49,6 +49,6 @@ extension STTextView {
 
 extension STTextView: CompletionWindowDelegate {
     func completionWindowController(_ windowController: CompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement) {
-        delegate?.textView(self, insertCompletionItem: item)
+        delegateProxy.textView(self, insertCompletionItem: item)
     }
 }

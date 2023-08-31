@@ -7,7 +7,7 @@ import AppKit
 class STTextViewDelegateProxy: STTextViewDelegate {
     weak var source: STTextViewDelegate?
 
-    init(source: STTextViewDelegate) {
+    init(source: STTextViewDelegate?) {
         self.source = source
     }
 

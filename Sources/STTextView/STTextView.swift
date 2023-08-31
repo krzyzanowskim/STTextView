@@ -353,17 +353,19 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     /// The delegate for all text views sharing the same layout manager.
     public weak var delegate: STTextViewDelegate? {
-        didSet {
-            if let delegate {
-                self.delegateProxy = STTextViewDelegateProxy(source: delegate)
-                self.delegate = delegateProxy
-            } else {
-                self.delegateProxy = nil
-            }
+        set {
+            delegateProxy.source = newValue
+        }
+
+        get {
+            delegateProxy.source
         }
     }
-    private var delegateProxy: STTextViewDelegateProxy?
 
+    /// Proxy for delegate calls
+    internal let delegateProxy = STTextViewDelegateProxy(source: nil)
+
+    /// Data Source
     public weak var dataSource: STTextViewDataSource?
 
     /// The manager that lays out text for the text view's text container.
@@ -395,11 +397,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     internal lazy var speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
 
     internal lazy var completionWindowController: CompletionWindowController? = {
-        if let viewController = delegate?.textViewCompletionViewController(self) {
-            return CompletionWindowController(viewController)
-        }
-
-        return nil
+        let viewController = delegateProxy.textViewCompletionViewController(self)
+        return CompletionWindowController(viewController)
     }()
 
     internal var annotationViewMap: NSMapTable<STLineAnnotation, NSView>
@@ -604,7 +603,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             let textViewNotification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
 
             NotificationCenter.default.post(textViewNotification)
-            self.delegate?.textViewDidChangeSelection(textViewNotification)
+            self.delegateProxy.textViewDidChangeSelection(textViewNotification)
 
             // textCheckingController.didChangeSelectedRange()
         }
@@ -1066,7 +1065,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         let notification = Notification(name: STTextView.textWillChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
-        delegate?.textViewWillChangeText(notification)
+        delegateProxy.textViewWillChangeText(notification)
     }
 
     /// Sends out necessary notifications when a text change completes.
@@ -1089,7 +1088,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         let notification = Notification(name: STTextView.textDidChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
-        delegate?.textViewDidChangeText(notification)
+        delegateProxy.textViewDidChangeText(notification)
         YankingManager.shared.textChanged()
 
         // Because annotation location position changed
@@ -1203,7 +1202,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         textWillChange(self)
-        delegate?.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
+        delegateProxy.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
         textContentManager.performEditingTransaction {
             textContentManager.replaceContents(
@@ -1212,7 +1211,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             )
         }
 
-        delegate?.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
+        delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
 
         didChangeText(in: textRange)
     }
@@ -1221,7 +1220,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// this method should be called with information on the change.
     /// Coalesce consecutive typing events
     open func shouldChangeText(in affectedTextRange: NSTextRange, replacementString: String?) -> Bool {
-        let result = delegate?.textView(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString) ?? true
+        let result = delegateProxy.textView(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString)
         if !result {
             return result
         }
