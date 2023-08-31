@@ -12,6 +12,7 @@ public protocol STPlugin {
     func setUp(context: Context)
 
     /// Creates an object to coordinate with the text view.
+    @MainActor
     func makeCoordinator(context: CoordinatorContext) -> Self.Coordinator
 
     /// Provides an opportunity to perform cleanup after plugin is about to remove.

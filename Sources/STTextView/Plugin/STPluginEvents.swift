@@ -6,9 +6,11 @@ import AppKit
 
 public class STPluginEvents {
 
+    public typealias ShouldChangeTextHandler = @MainActor (_ affectedCharRange: NSTextRange, _ replacementString: String?) -> Bool
+
     var willChangeTextHandler: ((_ affectedRange: NSTextRange) -> Void)?
     var didChangeTextHandler: ((_ affectedRange: NSTextRange, _ replacementString: String?) -> Void)?
-    var shouldChangeTextHandler: ((_ affectedCharRange: NSTextRange, _ replacementString: String?) -> Bool)?
+    var shouldChangeTextHandler: ShouldChangeTextHandler?
     var onContextMenuHandler: ((_ location: NSTextLocation, _ contentManager: NSTextContentManager) -> NSMenu)?
     var didLayoutViewportHandler: ((_ visibleRange: NSTextRange?) -> Void)?
 
@@ -24,9 +26,8 @@ public class STPluginEvents {
         return self
     }
 
-
     @discardableResult
-    public func shouldChangeText(_ handler: @escaping (_ affectedCharRange: NSTextRange, _ replacementString: String?) -> Bool) -> Self {
+    public func shouldChangeText(_ handler: @escaping ShouldChangeTextHandler) -> Self {
         shouldChangeTextHandler = handler
         return self
     }

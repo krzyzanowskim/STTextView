@@ -27,6 +27,7 @@ public protocol STTextViewDelegate: AnyObject {
     func textViewDidChangeSelection(_ notification: Notification)
 
     /// Sent when a text view needs to determine if text in a specified range should be changed.
+    @MainActor
     func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool
 
     /// Sent when a text view will change text.
