@@ -61,11 +61,7 @@ extension NSTextLayoutManager {
         // while downstream affinity means that the selection is biased towards the following or later portion of the text. The affinity helps determine
         // the behavior of the text selection when the text is modified or manipulated.
         enumerateTextSegments(in: textRange, type: type, options: options) { _, textSegmentFrame, _, _ -> Bool in
-            if result == nil {
-                result = textSegmentFrame
-            } else {
-                result = result!.union(textSegmentFrame)
-            }
+            result = result?.union(textSegmentFrame) ?? textSegmentFrame
             return true
         }
         return result
