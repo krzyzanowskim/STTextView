@@ -1026,7 +1026,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     open override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
-        textLayoutManager.textViewportLayoutController.layoutViewport()
+        layoutViewport()
     }
 
     open override func layout() {
@@ -1036,9 +1036,17 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             scrollToVisible(textRange, type: .standard)
         }
 
-        textLayoutManager.textViewportLayoutController.layoutViewport()
+        layoutViewport()
         needsScrollToSelection = false
         layoutAnnotationViewsIfNeeded()
+    }
+
+    private func layoutViewport() {
+        // layoutViewport does not handle properly layout range
+        // for far jump it tries to layout everyting starting at location 0
+        // even to viewportrange is propertly calculated.
+        // No known workaround.
+        textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
     @discardableResult
