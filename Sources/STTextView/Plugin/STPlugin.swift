@@ -3,13 +3,20 @@
 
 import Foundation
 
+public protocol PluginContext<Plugin> {
+    associatedtype Plugin: STPlugin
+    var coordinator: Plugin.Coordinator { get }
+    var textView: STTextView { get }
+    var events: STPluginEvents { get }
+}
+
 public protocol STPlugin {
     associatedtype Coordinator = Void
-    typealias Context = STPluginContext<Self>
+    typealias Context = PluginContext<Self>
     typealias CoordinatorContext = STPluginCoordinatorContext
 
     /// Provides an opportunity to setup plugin environment
-    func setUp(context: Context)
+    func setUp(context: any Context)
 
     /// Creates an object to coordinate with the text view.
     func makeCoordinator(context: CoordinatorContext) -> Self.Coordinator

@@ -3,12 +3,12 @@
 
 import Foundation
 
-public struct STPluginContext<P: STPlugin> {
-    public let coordinator: P.Coordinator
+public struct STPluginContext<Plugin: STPlugin>: PluginContext {
+    public let coordinator: Plugin.Coordinator
     public let textView: STTextView
     public let events: STPluginEvents
 
-    init(coordinator: P.Coordinator, textView: STTextView, events: STPluginEvents) {
+    init(coordinator: Plugin.Coordinator, textView: STTextView, events: STPluginEvents) {
         self.coordinator = coordinator
         self.textView = textView
         self.events = events
