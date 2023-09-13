@@ -365,9 +365,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Proxy for delegate calls
     internal let delegateProxy = STTextViewDelegateProxy(source: nil)
 
-    /// Data Source
-    public weak var dataSource: STTextViewDataSource?
-
     /// The manager that lays out text for the text view's text container.
     public let textLayoutManager: NSTextLayoutManager
 
@@ -400,8 +397,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         let viewController = delegateProxy.textViewCompletionViewController(self)
         return CompletionWindowController(viewController)
     }()
-
-    internal var annotationViewMap: NSMapTable<STLineAnnotation, NSView>
 
     /// Search-and-replace find interface inside a view.
     public let textFinder: NSTextFinder
@@ -542,7 +537,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// - Parameter frameRect: The frame rectangle of the text view.
     override public init(frame frameRect: NSRect) {
         fragmentViewMap = .weakToWeakObjects()
-        annotationViewMap = .strongToWeakObjects()
 
         textContentManager = STTextContentStorage()
         textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude)))
@@ -1021,7 +1015,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         updateTextContainerSizeIfNeeded()
-        layoutAnnotationViewsIfNeeded(forceLayout: true)
     }
 
     open override func viewDidEndLiveResize() {
@@ -1038,7 +1031,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         layoutViewport()
         needsScrollToSelection = false
-        layoutAnnotationViewsIfNeeded()
     }
 
     private func layoutViewport() {
@@ -1098,11 +1090,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         NotificationCenter.default.post(notification)
         delegateProxy.textViewDidChangeText(notification)
         YankingManager.shared.textChanged()
-
-        // Because annotation location position changed
-        // we need to reposition all views that may be
-        // affected by the text change
-        layoutAnnotationViewsIfNeeded(forceLayout: true)
 
         needsDisplay = true
     }

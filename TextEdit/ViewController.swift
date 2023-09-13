@@ -9,11 +9,6 @@ import SwiftUI
 
 final class ViewController: NSViewController {
     private var textView: STTextView!
-    private var annotations: [LineAnnotation] = [] {
-        didSet {
-            textView.reloadData()
-        }
-    }
 
     private var completions: [Completion.Item] = []
 
@@ -37,7 +32,6 @@ final class ViewController: NSViewController {
         textView.isIncrementalSearchingEnabled = true
         textView.showsInvisibleCharacters = false
         textView.delegate = self
-        textView.dataSource = self
 
         // Plugins
         // textView.addPlugin(DummyPlugin())
@@ -80,19 +74,6 @@ final class ViewController: NSViewController {
         //     textView.insertText(attachmentString, replacementRange: NSRange(location: 20, length: 0))
         // }
 
-        // add annotation
-        do {
-            let stringRange = textView.string.startIndex..<textView.string.endIndex
-            if let ocurrenceRange = textView.string.range(of: "infamous", range: stringRange) {
-                let characterLocationOffset = textView.string.distance(from: textView.string.startIndex, to: ocurrenceRange.upperBound)
-                let annotation = try! LineAnnotation(
-                    message: AttributedString(markdown: "**TODO**: to cry _or_ not to cry"),
-                    location: textView.textLayoutManager.location(textView.textLayoutManager.documentRange.location, offsetBy: characterLocationOffset)!
-                )
-                annotations.append(annotation)
-
-            }
-        }
 
         // Emphasize first line
         textView.addAttributes(
@@ -112,10 +93,6 @@ final class ViewController: NSViewController {
 
     @IBAction func toggleInvisibles(_ sender: Any?) {
         textView.showsInvisibleCharacters.toggle()
-    }
-
-    @objc func removeAnnotation(_ annotation: STLineAnnotation) {
-        annotations.removeAll(where: { $0 == annotation })
     }
 
     override func viewDidDisappear() {
@@ -165,18 +142,6 @@ final class ViewController: NSViewController {
 extension ViewController: STTextViewDelegate {
 
     func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
-        // Adjust annotation location based on the edit
-        // The annotation location have to update its absolut position
-        // to accomodate insert/delete change in the document, to visually
-        // stay in the same place
-        let affectedCount = textView.textContentManager.offset(from: affectedCharRange.location, to: affectedCharRange.endLocation)
-        let replacementCount = replacementString.utf16.count
-        let deltaCount = replacementCount - affectedCount
-
-        for annotation in self.annotations where textView.textContentManager.offset(from: affectedCharRange.endLocation, to: annotation.location) >= 0 {
-            annotation.location = textView.textContentManager.location(annotation.location, offsetBy: deltaCount) ?? annotation.location
-        }
-
         // Continous completion update disabled due to bad performance for large strings
         // updateCompletionsInBackground()
     }
@@ -206,47 +171,6 @@ extension ViewController: STTextViewDelegate {
         }
 
         textView.insertText(completionItem.insertText)
-    }
-}
-
-// MARK: STTextViewDataSource
-
-extension ViewController: STTextViewDataSource {
-    func textViewAnnotations(_ textView: STTextView) -> [STLineAnnotation] {
-        annotations
-    }
-
-    func textView(_ textView: STTextView, viewForLineAnnotation lineAnnotation: STLineAnnotation, textLineFragment: NSTextLineFragment) -> NSView? {
-        guard let myLineAnnotation = lineAnnotation as? LineAnnotation else {
-            return nil
-        }
-
-        let messageFont = NSFont.preferredFont(forTextStyle: .body)
-
-        let decorationView = STAnnotationLabelView(
-            annotation: myLineAnnotation,
-            label: AnnotationLabelView(
-                message: myLineAnnotation.message,
-                action: { [weak self] annotation in
-                    self?.removeAnnotation(annotation)
-                },
-                lineAnnotation: lineAnnotation
-            )
-            .font(Font(messageFont))
-        )
-
-        // Position
-
-        let segmentFrame = textView.textLayoutManager.textSegmentFrame(at: lineAnnotation.location, type: .standard)!
-        let annotationHeight = min(textLineFragment.typographicBounds.height, textView.font?.boundingRectForFont.height ?? 24)
-
-        decorationView.frame = CGRect(
-            x: segmentFrame.maxX,
-            y: segmentFrame.minY + (segmentFrame.height - annotationHeight),
-            width: textView.bounds.width - segmentFrame.maxX,
-            height: annotationHeight
-        )
-        return decorationView
     }
 }
 
