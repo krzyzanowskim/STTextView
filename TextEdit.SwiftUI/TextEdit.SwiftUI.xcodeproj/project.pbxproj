@@ -23,6 +23,7 @@
 		752F2BE32A028FC5009E35E4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		752F2BE52A028FC5009E35E4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		752F2BE62A028FC5009E35E4 /* TextEditUI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TextEditUI.entitlements; sourceTree = "<group>"; };
+		758265CB2AB31F2900D5EFB5 /* STTextView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = STTextView; path = ..; sourceTree = "<group>"; };
 		758A710D2A070A7E00F7E836 /* content.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = content.txt; path = ../TextEdit/content.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -49,6 +50,7 @@
 		7544422E27B9332E00901C0E = {
 			isa = PBXGroup;
 			children = (
+				758265CB2AB31F2900D5EFB5 /* STTextView */,
 				759BE6512A06FEBA0095FCF1 /* TextEdit */,
 				7544423827B9332E00901C0E /* Products */,
 				7547090C27BD54B8001CA5B1 /* Frameworks */,

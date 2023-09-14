@@ -4,10 +4,4 @@
    <FileRef
       location = "self:">
    </FileRef>
-   <FileRef
-      location = "group:TextEdit/TextEdit.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:TextEdit.SwiftUI/TextEdit.SwiftUI.xcodeproj">
-   </FileRef>
 </Workspace>

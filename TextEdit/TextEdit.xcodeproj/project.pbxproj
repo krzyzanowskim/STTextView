@@ -26,6 +26,7 @@
 		7544424127B9332F00901C0E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		7544424327B9332F00901C0E /* TextEdit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TextEdit.entitlements; sourceTree = "<group>"; };
 		7544424927B9387300901C0E /* content.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = content.txt; sourceTree = "<group>"; };
+		758265CA2AB31EFF00D5EFB5 /* STTextView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = STTextView; path = ..; sourceTree = "<group>"; };
 		75BC2F7F2A62C86C00580249 /* SimpleParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleParser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -44,6 +45,7 @@
 		7544422E27B9332E00901C0E = {
 			isa = PBXGroup;
 			children = (
+				758265CA2AB31EFF00D5EFB5 /* STTextView */,
 				7544423927B9332E00901C0E /* TextEdit */,
 				7544423827B9332E00901C0E /* Products */,
 				7547090C27BD54B8001CA5B1 /* Frameworks */,
