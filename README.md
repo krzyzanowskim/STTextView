@@ -82,7 +82,7 @@ Plugins in a STTextView component offer additional functionalities and customiza
 
 - [Plugin-Neon](https://github.com/krzyzanowskim/STTextView-Plugin-Neon) Source Code Syntax Highlighting with [TreeSitter](https://tree-sitter.github.io/tree-sitter/) and [Neon](https://github.com/ChimeHQ/Neon).
 - [Plugin-TextFormation](https://github.com/ChimeHQ/STTextView-Plugin-TextFormation) Typing completions with [TextFormation](https://github.com/ChimeHQ/TextFormation).
-- [Plugin-Annotations](https://github.com/krzyzanowskim/STTextView-Plugin-Annotations)] Anchored annotations (eg. inlined error message)) plugin.
+- [Plugin-Annotations](https://github.com/krzyzanowskim/STTextView-Plugin-Annotations) Anchored annotations (eg. inlined error message)) plugin.
 - [Plugin-Template](https://github.com/krzyzanowskim/STTextView-Plugin-Template) Dummy plugin template repository ready bo build new plugin.
 - ... add more plugins
 
