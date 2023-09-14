@@ -3,6 +3,7 @@
 
 import Foundation
 
+@MainActor
 public protocol PluginContext<Plugin> {
     associatedtype Plugin: STPlugin
     var coordinator: Plugin.Coordinator { get }
@@ -10,6 +11,7 @@ public protocol PluginContext<Plugin> {
     var events: STPluginEvents { get }
 }
 
+@MainActor
 public protocol STPlugin {
     associatedtype Coordinator = Void
     typealias Context = PluginContext<Self>

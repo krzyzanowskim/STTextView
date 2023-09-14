@@ -613,8 +613,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     deinit {
-        plugins.forEach { plugin, _ in
-            plugin.tearDown()
+        Task { @MainActor in
+            plugins.forEach { plugin, _ in
+                plugin.tearDown()
+            }
         }
     }
 
