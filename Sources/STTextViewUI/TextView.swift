@@ -60,11 +60,13 @@ private struct TextViewRepresentable: NSViewRepresentable {
     @Binding private var text: AttributedString
     @Binding private var selection: NSRange?
     private let options: TextView.Options
+    private var plugins: [any STPlugin]
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = []) {
         self._text = text
         self._selection = selection
         self.options = options
+        self.plugins = plugins
     }
 
     func makeNSView(context: Context) -> NSScrollView {
@@ -78,6 +80,10 @@ private struct TextViewRepresentable: NSViewRepresentable {
         context.coordinator.isUpdating = true
         textView.setAttributedString(NSAttributedString(styledAttributedString(textView.typingAttributes)))
         context.coordinator.isUpdating = false
+
+        for plugin in plugins {
+            textView.addPlugin(plugin)
+        }
 
         return scrollView
     }

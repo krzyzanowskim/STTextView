@@ -107,7 +107,8 @@ struct ContentView: View {
         STTextViewUI.TextView(
             text: $text,
             selection: $selection,
-            options: [.wrapLines, .highlightSelectedLine]
+            options: [.wrapLines, .highlightSelectedLine],
+            plugins: [plugin1(), plugin2()]
         )
         .textViewFont(.preferredFont(forTextStyle: .body))
     }
