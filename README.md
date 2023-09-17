@@ -178,8 +178,6 @@ scrollView.documentView = textView
 let rulerView = STLineNumberRulerView(textView: textView)
 // Configure the ruler view
 rulerView.highlightSelectedLine = true
-// Set text color of the selected line number
-rulerView.highlightLineNumberColor = .textColor
 // Allows to set markers.
 // rulerView.allowsMarkers = true
 
