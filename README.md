@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="128" src="https://user-images.githubusercontent.com/758033/235909140-3589bb7d-51a0-4df3-8d71-2dc30fcabc8c.png">
+  <img width="64" src="https://user-images.githubusercontent.com/758033/235909140-3589bb7d-51a0-4df3-8d71-2dc30fcabc8c.png">
 </p>
 
 # STTextView
@@ -14,7 +14,7 @@ The component is developed to serve [Swift Studio](https://swiftstudio.app) need
 
 https://user-images.githubusercontent.com/758033/217397725-1e217c25-24ac-4d9b-9812-b3c7e324a1ca.mp4
 
-[TextKit 2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit 1 replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit 2 and provide support along TextKit 1 bits. As I started to learn more about `NSTextView` + TextKit2, I realized as of today (Feb 2022), neither `NSTextView` is fully functional, nor TextKit 2 classes are fully functional. Along the way, I reported several bug reports to Apple requesting DTS (support tickets). Eventually, I got blocked by specific bugs that pushed me to start this project.
+[TextKit 2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit 1 replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit 2 and provide support along TextKit 1 bit. As I started to learn more about `NSTextView` + TextKit2, I realized as of today (Feb 2022), neither `NSTextView` is fully functional, nor TextKit 2 classes are fully functional. Along the way, I reported several bug reports to Apple requesting DTS (support tickets). Eventually, I got blocked by specific bugs that pushed me to start this project.
 
 ## ✨ Features
 
@@ -51,7 +51,7 @@ The financial sustainability of the project is possible thanks to the ongoing co
 
 ## 🗓️ Roadmap
 
-STTextView is already well-suited as a text editor component, however it still needs improvements before the release of v1.0
+STTextView is already well-suited as a text editor component. However, it still needs improvements before the release of v1.0
 
 **Suggest** or **vote** for new features: [Feature Requests](https://github.com/krzyzanowskim/STTextView/discussions/14)
 
@@ -67,18 +67,17 @@ STTextView is already well-suited as a text editor component, however it still n
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.7.0")
+        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.8.0")
     ]
 )
 ```
 
 ## Demo Application
 
-The demo app lets you explore the library. To try it out, just open and run the `STTextView.xcworkspace` in Xcode.
-
+The demo applications [TextEdit](TextEdit) and [TextEdit.SwiftUI](TextEdit.SwiftUI) lets you explore the library.
 ## Plugins
 
-Plugins in a STTextView component offer additional functionalities and customizations beyond the basic text display. They enhance the core capabilities of the text view by adding features such as syntax highlighting, word count tracking, and more. These plugins expand the STTextView's utility while maintaining a modular and adaptable software structure.
+Plugins in an STTextView component offer additional functionalities and customizations beyond the basic text display. They enhance the core capabilities of the text view by adding features such as syntax highlighting, word count tracking, and more. These plugins expand the STTextView's utility while maintaining a modular and adaptable software structure.
 
 - [Plugin-Neon](https://github.com/krzyzanowskim/STTextView-Plugin-Neon) Source Code Syntax Highlighting with [TreeSitter](https://tree-sitter.github.io/tree-sitter/) and [Neon](https://github.com/ChimeHQ/Neon).
 - [Plugin-TextFormation](https://github.com/ChimeHQ/STTextView-Plugin-TextFormation) Typing completions with [TextFormation](https://github.com/ChimeHQ/TextFormation).
@@ -202,7 +201,7 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 - FB9925647: NSTextLayoutManager.replaceContents(in range: with attributedString:) is documented but is not part of the public API
 - FB9907261: NSTextElementProvider.replaceContents(in:with:) does not replace content as documented
 - FB9692714: Rendering attributes do not draw properly
-- FB9886911: NSTextView can't properly layout and display long lines (this one is nasty since it causes the view "jump" whenever text attribute updates)
+- FB9886911: NSTextView can't properly layout and display long lines (this one is nasty since it causes the view to "jump" whenever text attribute updates)
 - FB9713415: NSTextView drawInsertionPoint(in:color:turnedOn) is never called
 - FB9971054: NSLayoutManager.enumerateCaretOffsetsInLineFragment ignores starting location
 - FB9971054: NSTextView assert on selection when setup with TextKit2
@@ -220,7 +219,7 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 
 Start a new [discussion topic](https://github.com/krzyzanowskim/STTextView/discussions) or a pull request.
 
-I'd love to hear from you! Get in touch via twitter [@krzyzanowskim](https://twitter.com/krzyzanowskim), mastodon [@krzyzanowskim@mastodon.social](https://mastodon.social/@krzyzanowskim).
+I'd love to hear from you! Get in touch via X/Twitter [@krzyzanowskim](https://x.com/krzyzanowskim), mastodon [@krzyzanowskim@mastodon.social](https://mastodon.social/@krzyzanowskim).
 
 ## License
 
@@ -232,4 +231,4 @@ If you are creating an open-source application under a license compatible with t
 
 Get one [starting from €5](https://krzyzanowskim.gumroad.com/l/sttextview).
 
-If you want to use STTextView to develop non open sourced products and applications, the Commercial license is the appropriate license. With this option, your source code is kept proprietary. This means, you won't have to change your whole application source code to an open-source license. [Purchase a STTextView Commercial License](https://krzyzanowskim.gumroad.com/l/sttextview)
+If you want to use STTextView to develop non-open-sourced products and applications, the Commercial license is appropriate. With this option, your source code is kept proprietary. You won't have to change your whole application source code to an open-source license. [Purchase a STTextView Commercial License](https://krzyzanowskim.gumroad.com/l/sttextview)
