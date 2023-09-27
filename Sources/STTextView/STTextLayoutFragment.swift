@@ -52,11 +52,11 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
         }
 
         if showsInvisibleCharacters {
-            drawInvisibles(in: context)
+            drawInvisibles(at: point, in: context)
         }
     }
 
-    private func drawInvisibles(in context: CGContext) {
+    private func drawInvisibles(at point: CGPoint, in context: CGContext) {
         guard let textLayoutManager = textLayoutManager else {
             return
         }
@@ -74,13 +74,13 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
                           let segmentRange = NSTextRange(location: segmentLocation, end: segmentEndLocation),
                           let segmentFrame = textLayoutManager.textSegmentFrame(in: segmentRange, type: .standard)
                     else {
-                        assertionFailure()
+                        // assertionFailure()
                         continue
                     }
 
-                    let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width, height: segmentFrame.size.height))
+                    let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width, height: segmentFrame.size.height))
                     context.setFillColor(NSColor.placeholderTextColor.cgColor)
-                    let rect = CGRect(x: frameRect.midX - (frameRect.width / 8), y: frameRect.minY + (frameRect.height * 0.5), width: frameRect.width / 4, height: frameRect.width / 4)
+                    let rect = CGRect(x: frameRect.midX, y: frameRect.midY, width: frameRect.width / 4, height: frameRect.width / 4)
                     context.addEllipse(in: rect)
                     context.drawPath(using: .fill)
                 }
