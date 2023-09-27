@@ -429,13 +429,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
     /// A Boolean value that indicates whether to substitute visible glyphs for whitespace and other typically invisible characters.
-    open var showsInvisibleCharacters: Bool {
-        get {
-            (textLayoutManager as? STTextLayoutManager)?.showsInvisibleCharacters ?? false
-        }
-
-        set {
-            (textLayoutManager as? STTextLayoutManager)?.showsInvisibleCharacters = newValue
+    open var showsInvisibleCharacters: Bool = false {
+        didSet {
             textLayoutManager.invalidateLayout(for: textLayoutManager.documentRange)
         }
     }

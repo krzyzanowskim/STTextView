@@ -5,11 +5,10 @@ import AppKit
 
 final class STTextLayoutFragment: NSTextLayoutFragment {
     private let paragraphStyle: NSParagraphStyle
-    private let showsInvisibleCharacters: Bool
+    var showsInvisibleCharacters: Bool = false
 
-    init(textElement: NSTextElement, range rangeInElement: NSTextRange?, paragraphStyle: NSParagraphStyle, showsInvisibleCharacters: Bool) {
+    init(textElement: NSTextElement, range rangeInElement: NSTextRange?, paragraphStyle: NSParagraphStyle) {
         self.paragraphStyle = paragraphStyle
-        self.showsInvisibleCharacters = showsInvisibleCharacters
         super.init(textElement: textElement, range: rangeInElement)
     }
 

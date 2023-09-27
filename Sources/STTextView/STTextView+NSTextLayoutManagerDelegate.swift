@@ -9,8 +9,7 @@ extension STTextView: NSTextLayoutManagerDelegate {
         STTextLayoutFragment(
             textElement: textElement,
             range: textElement.elementRange,
-            paragraphStyle: typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? .default,
-            showsInvisibleCharacters: (textLayoutManager as? STTextLayoutManager)?.showsInvisibleCharacters ?? false
+            paragraphStyle: typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? .default
         )
     }
 }
