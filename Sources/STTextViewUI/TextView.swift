@@ -27,26 +27,31 @@ public struct TextView: SwiftUI.View {
     @Binding private var text: AttributedString
     @Binding private var selection: NSRange?
     private let options: Options
+    private let plugins: [any STPlugin]
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
     ///   - text: The attributed string content
     ///   - options: Editor options
+    ///   - plugins: Editor plugins
     public init(
         text: Binding<AttributedString>,
         selection: Binding<NSRange?> = .constant(nil),
-        options: Options = []
+        options: Options = [],
+        plugins: [any STPlugin] = []
     ) {
         _text = text
         _selection = selection
         self.options = options
+        self.plugins = plugins
     }
 
     public var body: some View {
         TextViewRepresentable(
             text: $text,
             selection: $selection,
-            options: options
+            options: options,
+            plugins: plugins
         )
         .background(.background)
     }
