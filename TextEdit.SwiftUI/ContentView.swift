@@ -3,7 +3,6 @@
 
 import SwiftUI
 import STTextViewUI
-import NeonPlugin
 
 struct ContentView: View {
     @State private var text: AttributedString = ""
@@ -16,8 +15,7 @@ struct ContentView: View {
             STTextViewUI.TextView(
                 text: $text,
                 selection: $selection,
-                options: [.wrapLines, .highlightSelectedLine],
-                plugins: [NeonPlugin(theme: .default)]
+                options: [.wrapLines, .highlightSelectedLine]
             )
             .textViewFont(.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular))
 

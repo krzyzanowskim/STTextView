@@ -13,7 +13,6 @@
 		752F2BE42A028FC5009E35E4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 752F2BE32A028FC5009E35E4 /* Preview Assets.xcassets */; };
 		7582A1FC2A07096F00F8AB20 /* STTextView in Frameworks */ = {isa = PBXBuildFile; productRef = 7582A1FB2A07096F00F8AB20 /* STTextView */; };
 		758A710E2A070A7E00F7E836 /* content.txt in Resources */ = {isa = PBXBuildFile; fileRef = 758A710D2A070A7E00F7E836 /* content.txt */; };
-		8A778BB02ACECB11009A1D9B /* NeonPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = 8A778BAF2ACECB11009A1D9B /* NeonPlugin */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,7 +33,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7582A1FC2A07096F00F8AB20 /* STTextView in Frameworks */,
-				8A778BB02ACECB11009A1D9B /* NeonPlugin in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,7 +104,6 @@
 			name = TextEdit.SwiftUI;
 			packageProductDependencies = (
 				7582A1FB2A07096F00F8AB20 /* STTextView */,
-				8A778BAF2ACECB11009A1D9B /* NeonPlugin */,
 			);
 			productName = TextEditUI;
 			productReference = 752F2BD82A028FC4009E35E4 /* TextEdit.SwiftUI.app */;
@@ -136,9 +133,6 @@
 				Base,
 			);
 			mainGroup = 7544422E27B9332E00901C0E;
-			packageReferences = (
-				8A778BAE2ACECB11009A1D9B /* XCRemoteSwiftPackageReference "STTextView-Plugin-Neon" */,
-			);
 			productRefGroup = 7544423827B9332E00901C0E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -368,26 +362,10 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		8A778BAE2ACECB11009A1D9B /* XCRemoteSwiftPackageReference "STTextView-Plugin-Neon" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:krzyzanowskim/STTextView-Plugin-Neon.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.0.5;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		7582A1FB2A07096F00F8AB20 /* STTextView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = STTextView;
-		};
-		8A778BAF2ACECB11009A1D9B /* NeonPlugin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8A778BAE2ACECB11009A1D9B /* XCRemoteSwiftPackageReference "STTextView-Plugin-Neon" */;
-			productName = NeonPlugin;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
