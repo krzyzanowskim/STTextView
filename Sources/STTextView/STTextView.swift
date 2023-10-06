@@ -608,7 +608,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     deinit {
-        Task { @MainActor in
+        guard !plugins.isEmpty else { return }
+        Task { @MainActor [plugins] in
             plugins.forEach { plugin, _ in
                 plugin.tearDown()
             }
