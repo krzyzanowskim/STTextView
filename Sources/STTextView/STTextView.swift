@@ -966,6 +966,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     // Update text view frame size
+    // Receiver changes its height to fit the height of its text (akin to isVerticallyResizable = true)
     internal func updateFrameSizeIfNeeded() {
         let currentSize = frame.size
         let viewportBounds = textLayoutManager.textViewportLayoutController.viewportBounds
@@ -988,20 +989,27 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         let proposedSize = CGSize(width: proposedWidth, height: proposedHeight)
         if !currentSize.isAlmostEqual(to: proposedSize) {
-            setFrameSize(proposedSize)
+            // call setFrameSize and updateTextContainerSizeIfNeeded()
+            // that is unfortunate sinze frame is set based on container size itself
+            frame.size = proposedSize
         }
     }
 
     // Update textContainer width to match textview width if track textview width
+    // widthTracksTextView = true
     fileprivate func updateTextContainerSizeIfNeeded() {
         var proposedSize = textContainer.size
 
         if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: visibleRect.width) {
             proposedSize.width = visibleRect.width
+        } else if !textContainer.widthTracksTextView {
+            proposedSize.width = CGFloat.infinity
         }
 
         if textContainer.heightTracksTextView, !textContainer.size.height.isAlmostEqual(to: bounds.height)  {
             proposedSize.height = bounds.height
+        } else if !textContainer.heightTracksTextView {
+            proposedSize.height = CGFloat.infinity
         }
 
         if !textContainer.size.isAlmostEqual(to: proposedSize)  {
