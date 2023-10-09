@@ -36,6 +36,12 @@ let package = Package(
             dependencies: [
                 .target(name: "STTextView")
             ]
+        ),
+        .testTarget(
+            name: "STTextKitPlusTests",
+            dependencies: [
+                .target(name: "STTextKitPlus")
+            ]
         )
     ]
 )

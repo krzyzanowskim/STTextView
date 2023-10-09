@@ -597,6 +597,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             // textCheckingController.didChangeSelectedRange()
         }
 
+
         usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.new]) { [weak self] textLayoutManager, change in
             self?.needsUpdateConstraints = true
         }
@@ -975,24 +976,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         } else {
             let endLocation = textLayoutManager.documentRange.endLocation
             textLayoutManager.ensureLayout(for: NSTextRange(location: endLocation))
-            textLayoutManager.enumerateTextLayoutFragments(from: endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-                // at times, reported height is way above the final value for the document
-                // it result in "jumping" the scroller, as frame height grow and shrink
-                proposedHeight = max(proposedHeight, layoutFragment.layoutFragmentFrame.maxY)
-                return false // stop
-            }
+            proposedHeight = textLayoutManager.usageBoundsForTextContainer.height
         }
 
         var proposedWidth: CGFloat = viewportBounds.width
         if !textContainer.widthTracksTextView {
-            // TODO: if offset didn't change since last time, it is not necessary to relayout
-            // not necessarly need to layout whole thing, is's enough to enumerate over visible area
-            let startLocation = textLayoutManager.textViewportLayoutController.viewportRange?.location ?? textLayoutManager.documentRange.location
-            let endLocation = textLayoutManager.textViewportLayoutController.viewportRange?.endLocation ?? textLayoutManager.documentRange.endLocation
-            textLayoutManager.enumerateTextLayoutFragments(in: NSTextRange(location: startLocation, end: endLocation)!, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-                proposedWidth = max(proposedWidth, layoutFragment.layoutFragmentFrame.maxX)
-                return true
-            }
+            proposedWidth = textLayoutManager.usageBoundsForTextContainer.width
         } else {
             proposedWidth = max(currentSize.width, proposedWidth)
         }
@@ -1004,7 +993,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     }
 
     // Update textContainer width to match textview width if track textview width
-    internal func updateTextContainerSizeIfNeeded() {
+    fileprivate func updateTextContainerSizeIfNeeded() {
         var proposedSize = textContainer.size
 
         if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: visibleRect.width) {
@@ -1262,13 +1251,20 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 // MARK: - NSViewInvalidating
 
 private extension NSViewInvalidating where Self == NSView.Invalidations.InsertionPoint {
-
     static var insertionPoint: NSView.Invalidations.InsertionPoint {
         NSView.Invalidations.InsertionPoint()
     }
+}
 
+private extension NSViewInvalidating where Self == NSView.Invalidations.CursorRects {
     static var cursorRects: NSView.Invalidations.CursorRects {
         NSView.Invalidations.CursorRects()
+    }
+}
+
+private extension NSViewInvalidating where Self == NSView.Invalidations.TextContainer {
+    static var textContainer: NSView.Invalidations.TextContainer {
+        NSView.Invalidations.TextContainer()
     }
 }
 
@@ -1290,6 +1286,18 @@ private extension NSView.Invalidations {
         func invalidate(view: NSView) {
             view.window?.invalidateCursorRects(for: view)
         }
+    }
+
+    struct TextContainer: NSViewInvalidating {
+
+        func invalidate(view: NSView) {
+            guard let textView = view as? STTextView else {
+                return
+            }
+
+            textView.updateTextContainerSizeIfNeeded()
+        }
+
     }
 
 }
