@@ -174,12 +174,13 @@ open class STLineNumberRulerView: NSRulerView {
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
                     let locationForFirstCharacter = CGPoint(x: 0, y: calculateDefaultLineHeight(for: lineTextAttributes[.font] as! NSFont))
+                    let lineFragmentFrame = CGRect(origin: CGPoint(x: 0, y: layoutFragment.layoutFragmentFrame.origin.y), size: layoutFragment.layoutFragmentFrame.size)
 
                     lines.append(
                         Line(
                             number: lineNumber,
-                            textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
-                            layoutFragmentFrame: CGRect(x: layoutFragment.layoutFragmentFrame.origin.x, y: layoutFragment.layoutFragmentFrame.origin.y, width: layoutFragment.layoutFragmentFrame.width, height: textView.typingLineHeight),
+                            textPosition: lineFragmentFrame.origin.moved(dy: locationForFirstCharacter.y + baselineOffset),
+                            layoutFragmentFrame: CGRect(x: 0, y: lineFragmentFrame.origin.y, width: lineFragmentFrame.width, height: textView.typingLineHeight),
                             ctLine: ctLine,
                             isSelected: true
                         )
@@ -196,10 +197,10 @@ open class STLineNumberRulerView: NSRulerView {
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                 for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
-                    var baselineOffset: CGFloat = 0
+                    var baselineYOffset: CGFloat = 0
 
                     if let paragraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                        baselineOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                        baselineYOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
                     }
 
                     let lineNumber = startLineIndex + lines.count + 1
@@ -233,7 +234,7 @@ open class STLineNumberRulerView: NSRulerView {
                     let attributedString = NSAttributedString(string: "\(lineNumber)", attributes: effectiveAttributes)
                     let ctLine = CTLineCreateWithAttributedString(attributedString)
 
-                    var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                    var lineFragmentFrame = CGRect(origin: CGPoint(x: 0, y: layoutFragment.layoutFragmentFrame.origin.y), size: layoutFragment.layoutFragmentFrame.size)
 
                     lineFragmentFrame.origin.y += lineFragment.typographicBounds.origin.y
                     if lineFragment.isExtraLineFragment {
@@ -245,7 +246,7 @@ open class STLineNumberRulerView: NSRulerView {
                     lines.append(
                         Line(
                             number: lineNumber,
-                            textPosition: layoutFragment.layoutFragmentFrame.origin.moved(dx: 0, dy: locationForFirstCharacter.y + baselineOffset),
+                            textPosition: lineFragmentFrame.origin.moved(dy: locationForFirstCharacter.y + baselineYOffset),
                             layoutFragmentFrame: lineFragmentFrame,
                             ctLine: ctLine,
                             isSelected: isLineSelected
@@ -360,14 +361,14 @@ open class STLineNumberRulerView: NSRulerView {
         
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
-        for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dx: 0, dy: relativePoint.y)) {
+        for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dy: relativePoint.y)) {
 
             // Draw a background rectangle to highlight the selected ruler line
             if highlightSelectedLine, line.isSelected, textView.textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty {
                 drawHighlightedRuler(line: line, at: relativePoint, in: dirtyRect)
             }
 
-            context.textPosition = line.textPosition.moved(dx: 0, dy: relativePoint.y)
+            context.textPosition = line.textPosition.moved(dy: relativePoint.y)
             CTLineDraw(line.ctLine, context)
         }
 
