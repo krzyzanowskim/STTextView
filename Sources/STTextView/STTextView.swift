@@ -534,7 +534,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         fragmentViewMap = .weakToWeakObjects()
 
         textContentManager = STTextContentStorage()
-        textContainer = NSTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude)))
+        textContainer = STTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude)))
         textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = textContainer
         textContentManager.addTextLayoutManager(textLayoutManager)
