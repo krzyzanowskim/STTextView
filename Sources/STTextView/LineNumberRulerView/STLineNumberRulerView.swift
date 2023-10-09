@@ -327,15 +327,8 @@ open class STLineNumberRulerView: NSRulerView {
         context.saveGState()
         context.setFillColor(selectedLineHighlightColor.cgColor)
 
-        let fillOrigin: CGPoint
-        if #available(macOS 14, *) {
-            // TODO: macOS 14 adds leading space. Investigate whether it's really ruler inset or something else
-            fillOrigin = line.layoutFragmentFrame.moved(dx: -rulerInsets.leading, dy: relativePoint.y).origin
-        } else {
-            fillOrigin = line.layoutFragmentFrame.moved(dx: 0, dy: relativePoint.y).origin
-        }
         let fillRect = CGRect(
-            origin: fillOrigin,
+            origin: CGPoint(x: 0, y: line.layoutFragmentFrame.origin.y + relativePoint.y),
             size: CGSize(
                 width: bounds.width,
                 height: line.layoutFragmentFrame.height
