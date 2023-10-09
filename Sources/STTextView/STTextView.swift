@@ -723,6 +723,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         updateInsertionPointStateAndRestartTimer()
     }
 
+    open override var intrinsicContentSize: NSSize {
+        textLayoutManager.usageBoundsForTextContainer.size
+    }
+
     open override class var isCompatibleWithResponsiveScrolling: Bool {
         true
     }
