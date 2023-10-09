@@ -784,7 +784,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             return
         }
 
-        let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange!
+        #if DEBUG
+        if textLayoutManager.textViewportLayoutController.viewportRange == nil {
+            assertionFailure("Unexpected empty viewportRange")
+        }
+        #endif
+
+        let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange
         textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
             let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
             for lineFragment in layoutFragment.textLineFragments {
