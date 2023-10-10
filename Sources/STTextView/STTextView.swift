@@ -1025,10 +1025,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
 
         var proposedWidth: CGFloat = viewportBounds.width
-        if !textContainer.widthTracksTextView {
+        if !widthTracksTextView {
             proposedWidth = textLayoutManager.usageBoundsForTextContainer.width
         } else {
-            proposedWidth = max(currentSize.width, proposedWidth)
+            proposedWidth = scrollView?.contentView.bounds.width ?? currentSize.width
         }
 
         let proposedSize = CGSize(width: proposedWidth, height: proposedHeight)
@@ -1044,15 +1044,15 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     fileprivate func updateTextContainerSizeIfNeeded() {
         var proposedSize = textContainer.size
 
-        if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: visibleRect.width) {
-            proposedSize.width = visibleRect.width
-        } else if !textContainer.widthTracksTextView {
+        if widthTracksTextView {
+            proposedSize.width = scrollView?.contentView.bounds.width ?? 0
+        } else {
             proposedSize.width = 0
         }
 
-        if textContainer.heightTracksTextView, !textContainer.size.height.isAlmostEqual(to: bounds.height)  {
+        if heightTracksTextView  {
             proposedSize.height = bounds.height
-        } else if !textContainer.heightTracksTextView {
+        } else {
             proposedSize.height = 0
         }
 
