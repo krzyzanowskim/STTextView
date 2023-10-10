@@ -869,7 +869,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                                 y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.origin.y
                             ),
                             size: CGSize(
-                                width: max(textLayoutManager.usageBoundsForTextContainer.width, bounds.width),
+                                width: max(scrollView?.contentSize.width ?? 0, bounds.width),
                                 height: lineFragmentFrame.size.height
                             )
                         )
