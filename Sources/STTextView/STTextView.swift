@@ -1026,7 +1026,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
         var proposedWidth: CGFloat = viewportBounds.width
         if !widthTracksTextView {
-            proposedWidth = textLayoutManager.usageBoundsForTextContainer.width
+            proposedWidth = textLayoutManager.usageBoundsForTextContainer.maxX
         } else {
             proposedWidth = scrollView?.contentView.bounds.width ?? currentSize.width
         }
