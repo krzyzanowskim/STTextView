@@ -1047,13 +1047,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         if textContainer.widthTracksTextView, !textContainer.size.width.isAlmostEqual(to: visibleRect.width) {
             proposedSize.width = visibleRect.width
         } else if !textContainer.widthTracksTextView {
-            proposedSize.width = CGFloat.infinity
+            proposedSize.width = 0
         }
 
         if textContainer.heightTracksTextView, !textContainer.size.height.isAlmostEqual(to: bounds.height)  {
             proposedSize.height = bounds.height
         } else if !textContainer.heightTracksTextView {
-            proposedSize.height = CGFloat.infinity
+            proposedSize.height = 0
         }
 
         if !textContainer.size.isAlmostEqual(to: proposedSize)  {
