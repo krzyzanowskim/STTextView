@@ -1074,11 +1074,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     open override func layout() {
         super.layout()
 
+        layoutViewport()
+
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)
         }
-
-        layoutViewport()
+        
         needsScrollToSelection = false
     }
 
