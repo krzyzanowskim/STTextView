@@ -265,6 +265,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
     ///
     /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.
+    ///
+    /// - Note: If you set both `widthTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
+    ///
+    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
     @objc dynamic public var widthTracksTextView: Bool {
         set {
             if textContainer.widthTracksTextView != newValue {
@@ -272,18 +276,61 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
                 updateTextContainerSizeIfNeeded()
 
-                if let scrollView = scrollView {
-                    setFrameSize(scrollView.contentSize)
-                }
+                needsLayout = true
+                needsDisplay = true
+            }
+        }
+
+        get {
+            textContainer.widthTracksTextView
+        }
+    }
+
+    /// A Boolean that controls whether the text container adjusts the height of its bounding rectangle when its text view resizes.
+    ///
+    /// When the value of this property is `true`, the text container adjusts its height when the height of its text view changes. The default value of this property is `false`.
+    ///
+    /// - Note: If you set both `heightTracksTextView` and `isVerticallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
+    ///
+    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
+    @objc dynamic public var heightTracksTextView: Bool {
+        set {
+            if textContainer.heightTracksTextView != newValue {
+                textContainer.heightTracksTextView = newValue
+
+                updateTextContainerSizeIfNeeded()
 
                 needsLayout = true
                 needsDisplay = true
             }
         }
+
         get {
-            textContainer.widthTracksTextView
+            textContainer.heightTracksTextView
         }
     }
+
+    /// A Boolean that controls whether the receiver changes its height to fit the height of its text.
+    ///
+    /// If flag is `true` it does; if flag is `false` it doesn’t. The default value of this property is `true`.
+    ///
+    /// - Note: If you set both `heightTracksTextView` and `isVerticallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
+    ///
+    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
+    ///
+    //@Invalidating(.textContainer)
+    //@objc dynamic public private(set) var isVerticallyResizable: Bool = true
+
+    /// A Boolean that controls whether the receiver changes its width to fit the width of its text.
+    ///
+    /// If flag is `true` it does; if flag is `false` it doesn’t. The default value of this property is `true`.
+    ///
+    /// - Note: If you set both `widthtTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
+    ///
+    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
+    ///
+    //@Invalidating(.textContainer)
+    //@objc dynamic public private(set) var isHorizontallyResizable: Bool = true
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
     @Invalidating(.display)
@@ -776,7 +823,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                             y: selectionFrame.origin.y
                         ),
                         size: CGSize(
-                            width: textContainer.size.width,
+                            width: scrollView?.contentSize.width ?? visibleRect.width,
                             height: typingLineHeight
                         )
                     )
@@ -785,13 +832,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             return
         }
 
-        #if DEBUG
-        if textLayoutManager.textViewportLayoutController.viewportRange == nil {
-            assertionFailure("Unexpected empty viewportRange")
+        guard let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
+            return
         }
-        #endif
 
-        let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange
         textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
             let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
             for lineFragment in layoutFragment.textLineFragments {
@@ -825,7 +869,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                                 y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.origin.y
                             ),
                             size: CGSize(
-                                width: textContainer.size.width,
+                                width: textLayoutManager.usageBoundsForTextContainer.width,
                                 height: lineFragmentFrame.size.height
                             )
                         )
