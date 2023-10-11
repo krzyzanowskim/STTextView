@@ -985,7 +985,15 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             // NOTE: enumerateTextSegments is very slow https://github.com/krzyzanowskim/STTextView/discussions/25#discussioncomment-6464398
             //       Clamp enumerated range to viewport range
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
-                let highlightFrame = textSegmentFrame.intersection(bounds).pixelAligned
+
+                var textSegmentFrame = textSegmentFrame
+                if textSegmentFrame.size.width < 0 {
+                    // New issue on macOS 14 (Sonoma): textSegmentFrame.size.width can be < 0 on the edge of viewportBounds (guess)
+                    //                        resulting in unexpected selection frame
+                    textSegmentFrame.size.width = 0
+                }
+
+                let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
                 guard !highlightFrame.isNull else {
                     return true
                 }
