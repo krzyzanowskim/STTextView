@@ -1001,7 +1001,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                 if !highlightFrame.size.width.isZero {
                     let highlightView = HighlightView(frame: highlightFrame)
                     highlightView.wantsLayer = true
-                    highlightView.layer?.backgroundColor = selectionBackgroundColor.cgColor
+                    
+                    let appearanceName = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua])
+                    let appearance = NSAppearance(named: appearanceName ?? .aqua)
+                    appearance?.performAsCurrentDrawingAppearance {
+                        highlightView.layer?.backgroundColor = selectionBackgroundColor.cgColor
+                    }
+                    
                     selectionView.addSubview(highlightView)
 
                     // Remove insertion point when selection
