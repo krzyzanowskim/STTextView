@@ -208,6 +208,7 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 - FB9743449, FB10019859: NSTextContentStorage.textElements(for:) returns no element, while enumerateTextElements does return elements
 - FB11898356: textSelections(interactingAt:inContainerAt:anchors:modifiers:selecting:bounds:) produces wrong selections for certain locations
 - FB12726775: Documentation to the NSTextParagraph.paragraphContentRange is incorrect
+- FB13272586: NSTextContainer.size default value is not as documented
 
 ... I'm aware that the list of issues is not complete. I managed to workaround most of the problems in STTextView.
 
