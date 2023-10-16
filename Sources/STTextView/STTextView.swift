@@ -1000,7 +1000,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
                 if !highlightFrame.size.width.isZero {
                     let highlightView = HighlightView(frame: highlightFrame)
-                    
                     selectionView.addSubview(highlightView)
 
                     // Remove insertion point when selection
