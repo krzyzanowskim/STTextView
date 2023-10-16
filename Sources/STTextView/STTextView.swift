@@ -1000,13 +1000,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
                 if !highlightFrame.size.width.isZero {
                     let highlightView = HighlightView(frame: highlightFrame)
-                    highlightView.wantsLayer = true
-                    
-                    let appearanceName = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua])
-                    let appearance = NSAppearance(named: appearanceName ?? .aqua)
-                    appearance?.performAsCurrentDrawingAppearance {
-                        highlightView.layer?.backgroundColor = selectionBackgroundColor.cgColor
-                    }
                     
                     selectionView.addSubview(highlightView)
 

@@ -11,4 +11,20 @@ final class HighlightView: NSView {
         false
 #endif
     }
+    
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
+            self?.layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
+        }
+    }
 }
