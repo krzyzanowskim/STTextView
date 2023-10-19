@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import STTextView
+import STCompletion
 
 enum Completion {
 

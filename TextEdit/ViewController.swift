@@ -3,6 +3,7 @@
 
 import AppKit
 import STTextView
+import STCompletion
 import SwiftUI
 
 // import DummyPlugin
