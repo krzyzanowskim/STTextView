@@ -3,19 +3,19 @@
 
 import AppKit
 
-internal final class CompletionWindowController: NSWindowController {
+open class CompletionWindowController: NSWindowController {
 
-    weak var delegate: CompletionWindowDelegate?
+    public weak var delegate: CompletionWindowDelegate?
 
     private var completionViewController: any STCompletionViewControllerProtocol {
         window!.contentViewController as! any STCompletionViewControllerProtocol
     }
 
-    var isVisible: Bool {
+    public var isVisible: Bool {
         window?.isVisible ?? false
     }
 
-    init<T: STCompletionViewControllerProtocol>(_ viewController: T) {
+    public init<T: STCompletionViewControllerProtocol>(_ viewController: T) {
         let contentViewController = viewController
 
         let window = CompletionWindow(contentViewController: contentViewController)
@@ -39,20 +39,20 @@ internal final class CompletionWindowController: NSWindowController {
         contentViewController.delegate = self
     }
 
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     @available(*, unavailable)
-    override func showWindow(_ sender: Any?) {
+    open override func showWindow(_ sender: Any?) {
         super.showWindow(sender)
     }
 
-    func show() {
+    public func show() {
         super.showWindow(nil)
     }
 
-    func showWindow(at origin: NSPoint, items: [any STCompletionItem], parent parentWindow: NSWindow) {
+    public func showWindow(at origin: NSPoint, items: [any STCompletionItem], parent parentWindow: NSWindow) {
         guard let window = window else { return }
 
         if !isVisible {
@@ -75,18 +75,18 @@ internal final class CompletionWindowController: NSWindowController {
         completionViewController.items.removeAll(keepingCapacity: true)
     }
 
-    override func close() {
+    open override func close() {
         guard isVisible else { return }
         super.close()
     }
 }
 
-protocol CompletionWindowDelegate: AnyObject {
+public protocol CompletionWindowDelegate: AnyObject {
     func completionWindowController(_ windowController: CompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement)
 }
 
 extension CompletionWindowController: STCompletionViewControllerDelegate {
-    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement) {
+    public func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement) {
         delegate?.completionWindowController(self, complete: item, movement: movement)
     }
 }

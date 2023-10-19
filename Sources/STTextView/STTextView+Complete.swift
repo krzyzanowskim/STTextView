@@ -3,6 +3,7 @@
 
 import Foundation
 import AppKit
+import STCompletion
 
 extension STTextView {
 
@@ -48,7 +49,7 @@ extension STTextView {
 }
 
 extension STTextView: CompletionWindowDelegate {
-    func completionWindowController(_ windowController: CompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement) {
+    public func completionWindowController(_ windowController: CompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement) {
         delegateProxy.textView(self, insertCompletionItem: item)
     }
 }

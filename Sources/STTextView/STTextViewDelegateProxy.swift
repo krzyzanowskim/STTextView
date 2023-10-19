@@ -3,6 +3,7 @@
 
 import Foundation
 import AppKit
+import STCompletion
 
 class STTextViewDelegateProxy: STTextViewDelegate {
     weak var source: STTextViewDelegate?

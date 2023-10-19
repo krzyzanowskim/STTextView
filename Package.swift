@@ -8,7 +8,11 @@ let package = Package(
     products: [
         .library(
             name: "STTextView",
-            targets: ["STTextView", "STTextViewUI"]
+            targets: ["STTextView", "STCompletion", "STTextViewUI"]
+        ),
+        .library(
+            name: "STCompletion",
+            targets: ["STCompletion"]
         ),
         .library(
             name: "STTextKitPlus",
@@ -19,11 +23,15 @@ let package = Package(
         .target(
             name: "STTextView",
             dependencies: [
-                .target(name: "STTextKitPlus")
+                .target(name: "STTextKitPlus"),
+                .target(name: "STCompletion")
             ]
         ),
         .target(
             name: "STTextKitPlus"
+        ),
+        .target(
+        	name: "STCompletion"
         ),
         .target(
             name: "STTextViewUI",
