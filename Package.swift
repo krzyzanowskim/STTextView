@@ -13,22 +13,18 @@ let package = Package(
         .library(
             name: "STCompletion",
             targets: ["STCompletion"]
-        ),
-        .library(
-            name: "STTextKitPlus",
-            targets: ["STTextKitPlus"]
-        ),
+        )
+    ],
+    dependencies: [
+        .package(url: "https://github.com/krzyzanowskim/STTextKitPlus", from: "0.0.1")
     ],
     targets: [
         .target(
             name: "STTextView",
             dependencies: [
-                .target(name: "STTextKitPlus"),
-                .target(name: "STCompletion")
+                .target(name: "STCompletion"),
+                .product(name: "STTextKitPlus", package: "STTextKitPlus")
             ]
-        ),
-        .target(
-            name: "STTextKitPlus"
         ),
         .target(
         	name: "STCompletion"
@@ -43,12 +39,6 @@ let package = Package(
             name: "STTextViewTests",
             dependencies: [
                 .target(name: "STTextView")
-            ]
-        ),
-        .testTarget(
-            name: "STTextKitPlusTests",
-            dependencies: [
-                .target(name: "STTextKitPlus")
             ]
         )
     ]
