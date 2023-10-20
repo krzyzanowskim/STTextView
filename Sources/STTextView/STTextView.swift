@@ -18,7 +18,7 @@
 
 import AppKit
 import STTextKitPlus
-import STCompletion
+@_exported import STCompletion
 import AVFoundation
 
 /// A TextKit2 text view without NSTextView baggage
