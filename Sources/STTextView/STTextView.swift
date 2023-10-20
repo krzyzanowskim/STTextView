@@ -1083,8 +1083,14 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     @discardableResult
     internal func scrollToVisible(_ selectionTextRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
-        guard let rect = textLayoutManager.textSegmentFrame(in: selectionTextRange, type: type) else {
+        guard var rect = textLayoutManager.textSegmentFrame(in: selectionTextRange, type: type) else {
             return false
+        }
+
+        if rect.width.isZero {
+            // add padding around the point to ensure the visibility the segment
+            // since the width of the segment is 0 for a selection
+            rect = rect.inset(by: .init(top: 0, left: -textContainer.lineFragmentPadding, bottom: 0, right: -textContainer.lineFragmentPadding))
         }
 
         return scrollToVisible(rect)
