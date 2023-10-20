@@ -425,7 +425,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     public let textContentManager: NSTextContentManager
 
     /// The text view's text container
-    public let textContainer: NSTextContainer
+    public var textContainer: NSTextContainer {
+        textLayoutManager.textContainer!
+    }
 
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
@@ -582,9 +584,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         fragmentViewMap = .weakToWeakObjects()
 
         textContentManager = STTextContentStorage()
-        textContainer = STTextContainer(containerSize: CGSize(width: CGFloat(Float.greatestFiniteMagnitude), height: CGFloat(Float.greatestFiniteMagnitude)))
         textLayoutManager = STTextLayoutManager()
-        textLayoutManager.textContainer = textContainer
+        textLayoutManager.textContainer = STTextContainer()
         textContentManager.addTextLayoutManager(textLayoutManager)
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
@@ -987,7 +988,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             //       Clamp enumerated range to viewport range
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
 
-                var textSegmentFrame = textSegmentFrame
                 let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
                 guard !highlightFrame.isNull else {
                     return true
