@@ -209,7 +209,8 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 - FB11898356: textSelections(interactingAt:inContainerAt:anchors:modifiers:selecting:bounds:) produces wrong selections for certain locations
 - FB12726775: Documentation to the NSTextParagraph.paragraphContentRange is incorrect
 - FB13272586: NSTextContainer.size default value is not as documented
-- [FB13290979](https://gist.github.com/krzyzanowskim/7adc5ee66be68df2f76b9752476aadfb): NSTextContainer.lineFragmentPadding does not affect end of the fragment usageBoundsForTextContainer rectangle 
+- [FB13290979](https://gist.github.com/krzyzanowskim/7adc5ee66be68df2f76b9752476aadfb): NSTextContainer.lineFragmentPadding does not affect end of the fragment usageBoundsForTextContainer rectangle
+- [FB13291926](https://gist.github.com/krzyzanowskim/33a2478fa2281b77816acb7a7f6f77ac): NSTextLayoutManager.usageBoundsForTextContainer observer is never trigerred
 
 ... I'm aware that the list of issues is not complete. I managed to workaround most of the problems in STTextView.
 
