@@ -73,9 +73,13 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         }
 
         func adjustViewportOffset() {
+            guard let viewportRange = viewportLayoutController.viewportRange else {
+                return
+            }
+
             let viewportLayoutController = textLayoutManager.textViewportLayoutController
             var layoutYPoint: CGFloat = 0
-            textLayoutManager.enumerateTextLayoutFragments(from: viewportLayoutController.viewportRange!.location, options: [.reverse, .ensuresLayout]) { layoutFragment in
+            textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: [.reverse, .ensuresLayout]) { layoutFragment in
                 layoutYPoint = layoutFragment.layoutFragmentFrame.origin.y
                 return true // NOTE: should break early (return false)?
             }
@@ -84,7 +88,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 let adjustmentDelta = bounds.minY - layoutYPoint
                 viewportLayoutController.adjustViewport(byVerticalOffset: adjustmentDelta)
                 scroll(CGPoint(x: clipView.bounds.minX, y: clipView.bounds.minY + adjustmentDelta))
-                reflectScrolledClipView(clipView)
             }
         }
 
