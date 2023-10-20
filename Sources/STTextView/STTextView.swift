@@ -1013,29 +1013,26 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     // Update text view frame size
     // Receiver changes its height to fit the height of its text (akin to isVerticallyResizable = true)
     internal func updateFrameSizeIfNeeded() {
-        let currentSize = frame.size
-        let viewportBounds = textLayoutManager.textViewportLayoutController.viewportBounds
+        let currentFrameSize = frame.size
 
-        var proposedHeight: CGFloat = viewportBounds.height
+        let proposedFrameHeight: CGFloat
         if textLayoutManager.documentRange.isEmpty {
-            proposedHeight = typingLineHeight
+            proposedFrameHeight = typingLineHeight
         } else {
             let endLocation = textLayoutManager.documentRange.endLocation
             textLayoutManager.ensureLayout(for: NSTextRange(location: endLocation))
-            proposedHeight = textLayoutManager.usageBoundsForTextContainer.height
+            proposedFrameHeight = textLayoutManager.usageBoundsForTextContainer.height
         }
 
-        var proposedWidth: CGFloat = viewportBounds.width
-        if !widthTracksTextView {
-            proposedWidth = textLayoutManager.usageBoundsForTextContainer.maxX
+        let proposedFrameWidth: CGFloat
+        if widthTracksTextView, let contentWidth = scrollView?.contentView.bounds.maxX {
+            proposedFrameWidth = contentWidth
         } else {
-            proposedWidth = scrollView?.contentView.bounds.width ?? currentSize.width
+            proposedFrameWidth = textLayoutManager.usageBoundsForTextContainer.maxX
         }
 
-        let proposedSize = CGSize(width: proposedWidth, height: proposedHeight)
-        if !currentSize.isAlmostEqual(to: proposedSize) {
-            // call setFrameSize and updateTextContainerSizeIfNeeded()
-            // that is unfortunate sinze frame is set based on container size itself
+        let proposedSize = CGSize(width: proposedFrameWidth, height: proposedFrameHeight)
+        if !currentFrameSize.isAlmostEqual(to: proposedSize) {
             frame.size = proposedSize
         }
     }
@@ -1043,19 +1040,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     // Update textContainer width to match textview width if track textview width
     // widthTracksTextView = true
     fileprivate func updateTextContainerSizeIfNeeded() {
-        var proposedSize = textContainer.size
 
-        if widthTracksTextView {
-            proposedSize.width = scrollView?.contentView.bounds.width ?? 0
-        } else {
-            proposedSize.width = 0
-        }
-
-        if heightTracksTextView  {
-            proposedSize.height = bounds.height
-        } else {
-            proposedSize.height = 0
-        }
+        let proposedSize = CGSize(
+            width: widthTracksTextView ? frame.width : STTextContainer().size.width,
+            height: heightTracksTextView ? frame.height : STTextContainer().size.height
+        )
 
         if !textContainer.size.isAlmostEqual(to: proposedSize)  {
             textContainer.size = proposedSize
@@ -1316,12 +1305,6 @@ private extension NSViewInvalidating where Self == NSView.Invalidations.CursorRe
     }
 }
 
-private extension NSViewInvalidating where Self == NSView.Invalidations.TextContainer {
-    static var textContainer: NSView.Invalidations.TextContainer {
-        NSView.Invalidations.TextContainer()
-    }
-}
-
 private extension NSView.Invalidations {
 
     struct InsertionPoint: NSViewInvalidating {
@@ -1340,18 +1323,6 @@ private extension NSView.Invalidations {
         func invalidate(view: NSView) {
             view.window?.invalidateCursorRects(for: view)
         }
-    }
-
-    struct TextContainer: NSViewInvalidating {
-
-        func invalidate(view: NSView) {
-            guard let textView = view as? STTextView else {
-                return
-            }
-
-            textView.updateTextContainerSizeIfNeeded()
-        }
-
     }
 
 }
