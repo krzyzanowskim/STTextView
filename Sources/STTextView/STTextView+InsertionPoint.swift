@@ -17,16 +17,10 @@ extension STTextView {
 
             let textSelectionFrames = insertionPointsRanges.compactMap { textRange -> CGRect? in
 
-                guard var textSegmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .selection, options: .rangeNotRequired) else {
+                guard let textSegmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .selection, options: .rangeNotRequired) else {
                     return nil
                 }
-
-                if textSegmentFrame.size.width < 0 {
-                    // New issue on macOS 14 (Sonoma): textSegmentFrame.size.width can be < 0 on the edge of viewportBounds (guess)
-                    //                        resulting in unexpected selection frame
-                    textSegmentFrame.size.width = 0
-                }
-
+                
                 let selectionFrame = textSegmentFrame.intersection(frame)
 
                 // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`

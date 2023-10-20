@@ -988,12 +988,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
 
                 var textSegmentFrame = textSegmentFrame
-                if textSegmentFrame.size.width < 0 {
-                    // New issue on macOS 14 (Sonoma): textSegmentFrame.size.width can be < 0 on the edge of viewportBounds (guess)
-                    //                        resulting in unexpected selection frame
-                    textSegmentFrame.size.width = 0
-                }
-
                 let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
                 guard !highlightFrame.isNull else {
                     return true
