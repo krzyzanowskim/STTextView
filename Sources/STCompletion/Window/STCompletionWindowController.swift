@@ -31,8 +31,6 @@ open class STCompletionWindowController: NSWindowController {
         window.standardWindowButton(.closeButton)?.isHidden = true
         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         window.standardWindowButton(.zoomButton)?.isHidden = true
-        window.setAnchorAttribute(.top, for: .vertical)
-        window.setAnchorAttribute(.leading, for: .horizontal)
 
         super.init(window: window)
 
