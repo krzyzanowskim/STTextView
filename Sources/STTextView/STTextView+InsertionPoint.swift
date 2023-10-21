@@ -36,10 +36,8 @@ extension STTextView {
             removeInsertionPointView()
 
             for selectionFrame in textSelectionFrames where !selectionFrame.isNull && !selectionFrame.isInfinite {
-                let insertionView = insertionPointViewClass.init(frame: selectionFrame)
+                let insertionView = STInsertionPointView(frame: selectionFrame)
                 insertionView.insertionPointColor = insertionPointColor
-                insertionView.insertionPointWidth = insertionPointWidth
-                insertionView.updateGeometry()
 
                 if isFirstResponder {
                     insertionView.blinkStart()

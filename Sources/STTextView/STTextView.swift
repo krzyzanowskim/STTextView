@@ -86,10 +86,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     @Invalidating(.display, .insertionPoint)
     @objc dynamic open var insertionPointColor: NSColor = .defaultTextInsertionPoint
 
-    /// The width of the insertion point.
-    @Invalidating(.display, .insertionPoint)
-    @objc dynamic open var insertionPointWidth: CGFloat = 2.0
-
     /// The font of the text.
     ///
     /// This property applies to the entire text string.

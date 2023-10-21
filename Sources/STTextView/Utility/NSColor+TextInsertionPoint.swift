@@ -5,6 +5,10 @@ import AppKit
 
 extension NSColor {
     static var defaultTextInsertionPoint: NSColor {
-        NSColor.controlAccentColor // textInsertionPoint in macOS 15
+        if #available(macOS 14, *) {
+            NSColor.textInsertionPointColor
+        } else {
+            NSColor.controlAccentColor
+        }
     }
 }
