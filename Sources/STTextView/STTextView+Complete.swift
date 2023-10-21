@@ -48,8 +48,8 @@ extension STTextView {
     }
 }
 
-extension STTextView: CompletionWindowDelegate {
-    public func completionWindowController(_ windowController: CompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement) {
+extension STTextView: STCompletionWindowDelegate {
+    public func completionWindowController(_ windowController: STCompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement) {
         delegateProxy.textView(self, insertCompletionItem: item)
     }
 }

@@ -439,9 +439,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     internal lazy var speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
 
-    internal lazy var completionWindowController: CompletionWindowController? = {
+    internal lazy var completionWindowController: STCompletionWindowController? = {
         let viewController = delegateProxy.textViewCompletionViewController(self)
-        return CompletionWindowController(viewController)
+        return STCompletionWindowController(viewController)
     }()
 
     /// Search-and-replace find interface inside a view.

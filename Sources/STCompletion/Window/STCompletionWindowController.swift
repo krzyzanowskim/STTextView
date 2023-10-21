@@ -3,9 +3,9 @@
 
 import AppKit
 
-open class CompletionWindowController: NSWindowController {
+open class STCompletionWindowController: NSWindowController {
 
-    public weak var delegate: CompletionWindowDelegate?
+    public weak var delegate: STCompletionWindowDelegate?
 
     private var completionViewController: any STCompletionViewControllerProtocol {
         window!.contentViewController as! any STCompletionViewControllerProtocol
@@ -18,7 +18,7 @@ open class CompletionWindowController: NSWindowController {
     public init<T: STCompletionViewControllerProtocol>(_ viewController: T) {
         let contentViewController = viewController
 
-        let window = CompletionWindow(contentViewController: contentViewController)
+        let window = STCompletionWindow(contentViewController: contentViewController)
         window.styleMask = [.resizable, .fullSizeContentView]
         window.autorecalculatesKeyViewLoop = true
         window.level = .popUpMenu
@@ -81,11 +81,11 @@ open class CompletionWindowController: NSWindowController {
     }
 }
 
-public protocol CompletionWindowDelegate: AnyObject {
-    func completionWindowController(_ windowController: CompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement)
+public protocol STCompletionWindowDelegate: AnyObject {
+    func completionWindowController(_ windowController: STCompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement)
 }
 
-extension CompletionWindowController: STCompletionViewControllerDelegate {
+extension STCompletionWindowController: STCompletionViewControllerDelegate {
     public func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement) {
         delegate?.completionWindowController(self, complete: item, movement: movement)
     }

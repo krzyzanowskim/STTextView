@@ -3,7 +3,7 @@
 
 import AppKit
 
-final class CompletionWindow: NSWindow {
+final class STCompletionWindow: NSWindow {
 
     override var canBecomeKey: Bool {
         // Disables keyboard events, but gives nice feeling where
