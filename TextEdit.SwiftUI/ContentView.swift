@@ -49,7 +49,7 @@ struct ContentView: View {
 
     private func loadContent() {
         let string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        self.text = AttributedString(string)
+        self.text = AttributedString(string, attributes: AttributeContainer().foregroundColor(NSColor.textColor))
     }
 }
 
