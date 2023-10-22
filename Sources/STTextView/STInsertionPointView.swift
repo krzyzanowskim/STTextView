@@ -13,21 +13,11 @@ open class STInsertionPointView: NSView {
 
     var insertionPointColor: NSColor {
         get {
-            if #available(macOS 14, *), let textInsertionIndicator = textInsertionIndicator as? STTextInsertionIndicatorNew {
-                return textInsertionIndicator.color
-            } else if let textInsertionIndicator = textInsertionIndicator as? STTextInsertionIndicatorOld {
-                return textInsertionIndicator.color
-            }
-
-            return .clear
+            textInsertionIndicator.insertionPointColor
         }
 
         set {
-            if #available(macOS 14, *), let textInsertionIndicator = textInsertionIndicator as? STTextInsertionIndicatorNew {
-                textInsertionIndicator.color = newValue
-            } else if let textInsertionIndicator = textInsertionIndicator as? STTextInsertionIndicatorOld {
-                textInsertionIndicator.color = newValue
-            }
+            textInsertionIndicator.insertionPointColor = newValue
         }
     }
 
@@ -48,24 +38,18 @@ open class STInsertionPointView: NSView {
     }
 
     func blinkStart() {
-        if #available(macOS 14, *), let textInsertionIndicator = textInsertionIndicator as? STTextInsertionIndicatorNew {
-            textInsertionIndicator.blinkStart()
-        } else if let textInsertionIndicator = textInsertionIndicator as? STTextInsertionIndicatorOld {
-            textInsertionIndicator.blinkStart()
-        }
+        textInsertionIndicator.blinkStart()
     }
 
     func blinkStop() {
-        if #available(macOS 14, *), let textInsertionIndicator = textInsertionIndicator as? STTextInsertionIndicatorNew {
-            textInsertionIndicator.blinkStop()
-        } else if let textInsertionIndicator = textInsertionIndicator as? STTextInsertionIndicatorOld {
-            textInsertionIndicator.blinkStop()
-        }
+        textInsertionIndicator.blinkStop()
     }
 
 }
 
 private protocol STInsertionPointProtocol: NSView {
+    var insertionPointColor: NSColor { get set }
+
     func blinkStart()
     func blinkStop()
 }
@@ -80,6 +64,16 @@ private class STTextInsertionIndicatorNew: NSTextInsertionIndicator, STInsertion
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    var insertionPointColor: NSColor {
+        get {
+            color
+        }
+
+        set {
+            color = newValue
+        }
     }
 
     func blinkStart() {
@@ -97,9 +91,10 @@ private class STTextInsertionIndicatorNew: NSTextInsertionIndicator, STInsertion
 
 private class STTextInsertionIndicatorOld: NSView, STInsertionPointProtocol {
     private var timer: Timer?
-    var color: NSColor = .defaultTextInsertionPoint {
+
+    var insertionPointColor: NSColor = .defaultTextInsertionPoint {
         didSet {
-            layer?.backgroundColor = color.cgColor
+            layer?.backgroundColor = insertionPointColor.cgColor
         }
     }
 
@@ -109,7 +104,7 @@ private class STTextInsertionIndicatorOld: NSView, STInsertionPointProtocol {
         super.init(frame: indicatorRect)
 
         wantsLayer = true
-        layer?.backgroundColor = color.withAlphaComponent(0.9).cgColor
+        layer?.backgroundColor = insertionPointColor.withAlphaComponent(0.9).cgColor
         layer?.cornerRadius = 1
     }
 
