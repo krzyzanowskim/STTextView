@@ -5,5 +5,5 @@ import AppKit
 
 struct TypingTextUndo {
     let textRange: NSTextRange
-    let attribugedString: NSAttributedString?
+    let attributedString: NSAttributedString?
 }

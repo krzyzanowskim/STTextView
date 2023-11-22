@@ -53,7 +53,7 @@ final class TextLayoutRangeView: NSView {
         textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
             // at what location start draw the line. the first character is at textRange.location
             // I want to draw just a part of the line fragment, however I can only draw the whole line
-            // so remove/delete unecessary part of the line
+            // so remove/delete unnecessary part of the line
             for textLineFragment in textLayoutFragment.textLineFragments {
                 guard let textLineFragmentRange = textLineFragment.textRange(in: textLayoutFragment) else {
                     continue

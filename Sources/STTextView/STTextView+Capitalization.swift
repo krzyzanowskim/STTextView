@@ -12,7 +12,7 @@ extension STTextView {
 
         selectWord(sender)
 
-        // capitalize attributed string witout loosing attributes
+        // capitalize attributed string without loosing attributes
         let selectionRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
         for selectionRange in selectionRanges {
             if let attributedString = textLayoutManager.textAttributedString(in: selectionRange) {
@@ -37,7 +37,7 @@ extension STTextView {
 
         selectWord(sender)
 
-        // capitalize attributed string witout loosing attributes
+        // capitalize attributed string without loosing attributes
         let selectionRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
         for selectionRange in selectionRanges {
             if let attributedString = textLayoutManager.textAttributedString(in: selectionRange) {
@@ -61,7 +61,7 @@ extension STTextView {
 
         selectWord(sender)
 
-        // capitalize attributed string witout loosing attributes
+        // capitalize attributed string without loosing attributes
         let selectionRanges = textLayoutManager.textSelectionsRanges(.withoutInsertionPoints)
         for selectionRange in selectionRanges {
             if let attributedString = textLayoutManager.textAttributedString(in: selectionRange) {
