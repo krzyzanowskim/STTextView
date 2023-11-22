@@ -1182,7 +1182,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                     {
                         undoManager.coalesce(TypingTextUndo(
                             textRange: undoTextRange,
-                            attribuggedString: NSAttributedString()
+                            attributedString: NSAttributedString()
                         ))
                         
                     } else {
@@ -1200,14 +1200,14 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
                     let startTypingUndo = TypingTextUndo(
                         textRange: undoRange,
-                        attribuggedString: previousStringInRange
+                        attributedString: previousStringInRange
                     )
 
                     undoManager.startCoalescing(startTypingUndo, withTarget: self) { textView, typingTextUndo in
                         // Undo coalesced session action
                         textView.replaceCharacters(
                             in: typingTextUndo.textRange,
-                            with: typingTextUndo.attribuggedString ?? NSAttributedString(),
+                            with: typingTextUndo.attributedString ?? NSAttributedString(),
                             allowsTypingCoalescing: false
                         )
                     }
