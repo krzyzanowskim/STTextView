@@ -22,7 +22,7 @@ import STTextKitPlus
 import AVFoundation
 
 /// A TextKit2 text view without NSTextView baggage
-open class STTextView: NSView, NSTextInput, NSTextContent {
+@objc open class STTextView: NSView, NSTextInput, NSTextContent {
     /// Posted before an object performs any operation that changes characters or formatting attributes.
     public static let textWillChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
 
@@ -239,7 +239,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     ///
     /// For performance reasons, this value is the current backing store of the text object.
     /// If you want to maintain a snapshot of this as you manipulate the text storage, you should make a copy of the appropriate substring.
-    public var string: String {
+    @objc public var string: String {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
@@ -255,7 +255,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
         }
     }
 
-    public func setAttributedString(_ attributedString: NSAttributedString) {
+    @objc public func setAttributedString(_ attributedString: NSAttributedString) {
         setString(attributedString)
     }
 
