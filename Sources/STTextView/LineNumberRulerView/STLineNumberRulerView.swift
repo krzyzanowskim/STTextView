@@ -45,7 +45,7 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
     
-    /// The text color of the highligted line numbers.
+    /// The text color of the highlighted line numbers.
     @Invalidating(.display)
     open var selectedLineTextColor: NSColor? = nil
 

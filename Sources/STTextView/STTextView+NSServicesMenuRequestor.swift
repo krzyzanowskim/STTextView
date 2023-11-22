@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 // On a Swift type level "NSPasteboardType.string = NSPasteboard.PasteboardType.string"
-// that's not necessarilty what is received. We receive old (deprecated) values that
+// that's not necessarily what is received. We receive old (deprecated) values that
 // uses different raw string representation (NSStringPboardType, ...).
 // That value hast to be handled to properly interact with other apps.
 // https://twitter.com/krzyzanowskim/status/1679442783759659009

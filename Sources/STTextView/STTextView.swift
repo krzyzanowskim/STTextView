@@ -13,7 +13,7 @@
 // an NSTextInputContext instance automatically if the view subclass conforms
 // to the NSTextInputClient protocol.
 //
-// Althought NSTextInput is deprecated, it seem to be check here and there
+// Although NSTextInput is deprecated, it seem to be check here and there
 // whether view conforms to NSTextInput, hence it's here along the NSTextInputClient
 
 import AppKit
@@ -322,7 +322,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
     ///
     /// If flag is `true` it does; if flag is `false` it doesn’t. The default value of this property is `true`.
     ///
-    /// - Note: If you set both `widthtTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
+    /// - Note: If you set both `widthTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
     ///
     /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
     ///
@@ -1071,8 +1071,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
     private func layoutViewport() {
         // layoutViewport does not handle properly layout range
-        // for far jump it tries to layout everyting starting at location 0
-        // even to viewportrange is propertly calculated.
+        // for far jump it tries to layout everything starting at location 0
+        // even to viewport range is properly calculated.
         // No known workaround.
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
@@ -1182,7 +1182,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
                     {
                         undoManager.coalesce(TypingTextUndo(
                             textRange: undoTextRange,
-                            attribugedString: NSAttributedString()
+                            attribuggedString: NSAttributedString()
                         ))
                         
                     } else {
@@ -1200,14 +1200,14 @@ open class STTextView: NSView, NSTextInput, NSTextContent {
 
                     let startTypingUndo = TypingTextUndo(
                         textRange: undoRange,
-                        attribugedString: previousStringInRange
+                        attribuggedString: previousStringInRange
                     )
 
                     undoManager.startCoalescing(startTypingUndo, withTarget: self) { textView, typingTextUndo in
                         // Undo coalesced session action
                         textView.replaceCharacters(
                             in: typingTextUndo.textRange,
-                            with: typingTextUndo.attribugedString ?? NSAttributedString(),
+                            with: typingTextUndo.attribuggedString ?? NSAttributedString(),
                             allowsTypingCoalescing: false
                         )
                     }
