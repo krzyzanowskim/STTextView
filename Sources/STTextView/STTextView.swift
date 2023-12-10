@@ -834,11 +834,14 @@ import AVFoundation
             return
         }
 
+        // build the rectangle out of fragments rectangles
+        var combinedFragmentsRect: CGRect?
+
         textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
             let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
             for lineFragment in layoutFragment.textLineFragments {
 
-                let isLineSelected: Bool = {
+                func isLineSelected() -> Bool {
                     textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
                         var result = true
                         if lineFragment.isExtraLineFragment {
@@ -854,27 +857,36 @@ import AVFoundation
                         }
                         return partialResult && result
                     }
-                }()
+                }
 
-                if isLineSelected {
+                if isLineSelected() {
                     var lineFragmentFrame = layoutFragment.layoutFragmentFrame
                     lineFragmentFrame.size.height = lineFragment.typographicBounds.height
 
-                    drawHighlight(
-                        in: CGRect(
-                            origin: CGPoint(
-                                x: bounds.minX,
-                                y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.origin.y
-                            ),
-                            size: CGSize(
-                                width: max(scrollView?.contentSize.width ?? 0, bounds.width),
-                                height: lineFragmentFrame.size.height
-                            )
+
+                    let r = CGRect(
+                        origin: CGPoint(
+                            x: bounds.minX,
+                            y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
+                        ),
+                        size: CGSize(
+                            width: max(scrollView?.contentSize.width ?? 0, bounds.width),
+                            height: lineFragmentFrame.height
                         )
                     )
+
+                    if let rect = combinedFragmentsRect {
+                        combinedFragmentsRect = rect.union(r)
+                    } else {
+                        combinedFragmentsRect = r
+                    }
                 }
             }
             return true
+        }
+
+        if let combinedFragmentsRect {
+            drawHighlight(in: combinedFragmentsRect)
         }
     }
 
