@@ -634,11 +634,13 @@ import AVFoundation
 
             YankingManager.shared.selectionChanged()
 
+
             let textViewNotification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
 
             NotificationCenter.default.post(textViewNotification)
             self.delegateProxy.textViewDidChangeSelection(textViewNotification)
 
+            NSAccessibility.post(element: self, notification: .selectedTextChanged)
             // textCheckingController.didChangeSelectedRange()
         }
 

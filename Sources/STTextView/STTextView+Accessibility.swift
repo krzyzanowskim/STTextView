@@ -17,6 +17,10 @@ extension STTextView  {
         .textArea
     }
 
+    open override func accessibilityRoleDescription() -> String? {
+        NSAccessibility.Role.description(for: self)
+    }
+
     open override func accessibilityLabel() -> String? {
         NSLocalizedString("Text Editor", comment: "")
     }
