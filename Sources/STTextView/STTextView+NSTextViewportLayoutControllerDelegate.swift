@@ -20,13 +20,27 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             minY = min(overdrawRect.minY, max(visibleRect.minY, bounds.minY))
             maxX = max(overdrawRect.maxX, visibleRect.maxX)
             maxY = max(overdrawRect.maxY, visibleRect.maxY)
-        } else {
+        } else if !visibleRect.isEmpty {
             // We use visible rect directly if preparedContentRect does not intersect.
             // This can happen if overdraw has not caught up with scrolling yet, such as before the first layout.
             minX = visibleRect.minX
             minY = visibleRect.minY
             maxX = visibleRect.maxX
             maxY = visibleRect.maxY
+        } else if let enclosingScrollView {
+            /// if not visible, but in the scroll view,
+            /// layout estimated size that enclosing scroll view display
+            minX = enclosingScrollView.documentVisibleRect.minX
+            minY = enclosingScrollView.documentVisibleRect.minY
+            maxX = enclosingScrollView.documentVisibleRect.maxX
+            maxY = enclosingScrollView.documentVisibleRect.maxY
+        } else {
+            // last reasort, when view is not visible
+            // and this is the fist time layout
+            minX = bounds.minX
+            minY = bounds.minY
+            maxX = bounds.maxX
+            maxY = bounds.maxY
         }
         return CGRect(x: minX, y: minY, width: maxX, height: maxY - minY)
     }
