@@ -141,40 +141,28 @@ import AVFoundation
         }
     }
 
-    /// Deprecated. The text view’s default paragraph style.
-    @available(*, deprecated, message: "Use typingAttributes[.paragraphStyle] instead")
-    @objc dynamic public var defaultParagraphStyle: NSParagraphStyle? {
-        get {
-            typingAttributes[.paragraphStyle] as? NSParagraphStyle
-        }
-
-        set {
-            typingAttributes[.paragraphStyle] = newValue
+    /// The receiver’s default paragraph style.
+    @objc @NSCopying dynamic public var defaultParagraphStyle: NSParagraphStyle? {
+        didSet {
+            typingAttributes[.paragraphStyle] = defaultParagraphStyle ?? .default
         }
     }
 
-    private static let defaultTypingAttributes: [NSAttributedString.Key: Any] = [
-        .paragraphStyle: NSParagraphStyle.default,
-        .font: NSFont.userFont(ofSize: 0) ?? .preferredFont(forTextStyle: .body),
-        .foregroundColor: NSColor.textColor
-    ]
+    private var defaultTypingAttributes: [NSAttributedString.Key: Any] {
+        [
+            .paragraphStyle: self.defaultParagraphStyle ?? NSParagraphStyle.default,
+            .font: NSFont.userFont(ofSize: 0) ?? .preferredFont(forTextStyle: .body),
+            .foregroundColor: NSColor.textColor
+        ]
+    }
 
-    /// The text view's typing attributes
+    /// The attributes to apply to new text that the user enters.
     ///
-    /// Typing attributes are reset automatically whenever the selection changes. However, if you add any user actions that change text attributes, the action should use this method to apply those attributes afterwards. User actions that change attributes should always set the typing attributes because there might not be a subsequent change in selection before the next typing.
+    /// This dictionary contains the attribute keys (and corresponding values) to apply to newly typed text.
+    /// When the text view’s selection changes, the contents of the dictionary are reset automatically.
     @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
         didSet {
-            // make sure to keep the main attributes set.
-            if typingAttributes.isEmpty {
-                typingAttributes = Self.defaultTypingAttributes
-            } else {
-                for key in Self.defaultTypingAttributes.keys {
-                    if typingAttributes[key] == nil {
-                        typingAttributes[key] = Self.defaultTypingAttributes[key]
-                    }
-                }
-            }
-
+            typingAttributes.merge(defaultTypingAttributes) { (current, _) in current }
             needsLayout = true
             needsDisplay = true
         }
@@ -218,9 +206,9 @@ import AVFoundation
         }
 
         // fill in with missing typing attributes if needed
-        for key in Self.defaultTypingAttributes.keys {
+        for key in self.defaultTypingAttributes.keys {
             if attrs[key] == nil {
-                attrs[key] = Self.defaultTypingAttributes[key]
+                attrs[key] = self.defaultTypingAttributes[key]
             }
         }
 
@@ -229,8 +217,8 @@ import AVFoundation
 
     // line height based on current typing font and current typing paragraph
     internal var typingLineHeight: CGFloat {
-        let font = typingAttributes[.font] as? NSFont ?? Self.defaultTypingAttributes[.font] as! NSFont
-        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? Self.defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
+        let font = typingAttributes[.font] as? NSFont ?? self.defaultTypingAttributes[.font] as! NSFont
+        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? self.defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
         let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
         return calculateDefaultLineHeight(for: font) * lineHeightMultiple
     }
@@ -592,12 +580,13 @@ import AVFoundation
         decorationView = DecorationView(textLayoutManager: textLayoutManager)
         decorationView.autoresizingMask = [.height, .width]
 
-        typingAttributes = Self.defaultTypingAttributes
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
 
         textFinder = NSTextFinder()
         textFinderClient = STTextFinderClient()
+
+        typingAttributes = [:]
 
         super.init(frame: frameRect)
 
