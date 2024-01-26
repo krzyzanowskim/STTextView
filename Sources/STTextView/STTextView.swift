@@ -206,12 +206,7 @@ import AVFoundation
         }
 
         // fill in with missing typing attributes if needed
-        for key in self.defaultTypingAttributes.keys {
-            if attrs[key] == nil {
-                attrs[key] = self.defaultTypingAttributes[key]
-            }
-        }
-
+        attrs.merge(defaultTypingAttributes, uniquingKeysWith: { current, _ in current})
         return attrs
     }
 
