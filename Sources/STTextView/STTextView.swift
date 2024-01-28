@@ -872,7 +872,7 @@ import AVFoundation
         }
 
         if let combinedFragmentsRect {
-            drawHighlight(in: combinedFragmentsRect)
+            drawHighlight(in: combinedFragmentsRect.pixelAligned)
         }
     }
 
