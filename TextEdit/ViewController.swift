@@ -27,7 +27,7 @@ final class ViewController: NSViewController {
 
         textView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        textView.widthTracksTextView = false // wrap
+        textView.isHorizontallyResizable = false // wrap
         textView.highlightSelectedLine = true
         textView.isIncrementalSearchingEnabled = true
         textView.showsInvisibleCharacters = false
@@ -88,7 +88,7 @@ final class ViewController: NSViewController {
     }
 
     @IBAction func toggleTextWrapMode(_ sender: Any?) {
-        textView.widthTracksTextView.toggle()
+        textView.isHorizontallyResizable.toggle()
     }
 
     @IBAction func toggleInvisibles(_ sender: Any?) {

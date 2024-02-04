@@ -60,7 +60,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        updateFrameSizeIfNeeded()
+        sizeToFit()
         updateSelectionHighlights()
         adjustViewportOffsetIfNeeded()
         scrollView?.verticalRulerView?.invalidateHashMarks()

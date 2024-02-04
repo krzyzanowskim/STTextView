@@ -249,13 +249,14 @@ import AVFoundation
     /// - Note: If you set both `widthTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
     ///
     /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
-    @objc dynamic public var widthTracksTextView: Bool {
+    @objc public var widthTracksTextView: Bool {
         set {
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
-
-                updateTextContainerSizeIfNeeded()
-
+                textContainer.containerSize = NSTextContainer().containerSize
+                if let clipView = scrollView?.contentView as? NSClipView {
+                    frame.size.width = clipView.bounds.size.width - clipView.contentInsets.horizontalInsets
+                }
                 needsLayout = true
                 needsDisplay = true
             }
@@ -284,12 +285,15 @@ import AVFoundation
     /// - Note: If you set both `heightTracksTextView` and `isVerticallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
     ///
     /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
-    @objc dynamic public var heightTracksTextView: Bool {
+    @objc public var heightTracksTextView: Bool {
         set {
             if textContainer.heightTracksTextView != newValue {
                 textContainer.heightTracksTextView = newValue
 
-                updateTextContainerSizeIfNeeded()
+                textContainer.containerSize = NSTextContainer().containerSize
+                if let clipView = scrollView?.contentView as? NSClipView {
+                    frame.size.height = clipView.bounds.size.height - clipView.contentInsets.verticalInsets
+                }
 
                 needsLayout = true
                 needsDisplay = true
@@ -311,28 +315,6 @@ import AVFoundation
             heightTracksTextView
         }
     }
-
-    /// A Boolean that controls whether the receiver changes its height to fit the height of its text.
-    ///
-    /// If flag is `true` it does; if flag is `false` it doesn’t. The default value of this property is `true`.
-    ///
-    /// - Note: If you set both `heightTracksTextView` and `isVerticallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
-    ///
-    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
-    ///
-    //@Invalidating(.textContainer)
-    //@objc dynamic public private(set) var isVerticallyResizable: Bool = true
-
-    /// A Boolean that controls whether the receiver changes its width to fit the width of its text.
-    ///
-    /// If flag is `true` it does; if flag is `false` it doesn’t. The default value of this property is `true`.
-    ///
-    /// - Note: If you set both `widthTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
-    ///
-    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
-    ///
-    //@Invalidating(.textContainer)
-    //@objc dynamic public private(set) var isHorizontallyResizable: Bool = true
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
     @Invalidating(.display)
@@ -530,10 +512,6 @@ import AVFoundation
         let scrollView = NSScrollView(frame: frame)
         let textView = Self()
 
-        let textContainer = textView.textContainer
-        textContainer.widthTracksTextView = true
-        textContainer.heightTracksTextView = false
-
         scrollView.wantsLayer = true
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = true
@@ -587,6 +565,8 @@ import AVFoundation
         textContentManager = STTextContentStorage()
         textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = STTextContainer()
+        textLayoutManager.textContainer?.widthTracksTextView = false
+        textLayoutManager.textContainer?.heightTracksTextView = true
         textContentManager.addTextLayoutManager(textLayoutManager)
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
@@ -1026,50 +1006,31 @@ import AVFoundation
         }
     }
 
-    // Update text view frame size
-    // Receiver changes its height to fit the height of its text (akin to isVerticallyResizable = true)
-    internal func updateFrameSizeIfNeeded() {
-        let currentFrameSize = frame.size
-
-        let proposedFrameHeight: CGFloat
-        if textLayoutManager.documentRange.isEmpty {
-            proposedFrameHeight = typingLineHeight
-        } else {
-            let endLocation = textLayoutManager.documentRange.endLocation
-            textLayoutManager.ensureLayout(for: NSTextRange(location: endLocation))
-            proposedFrameHeight = textLayoutManager.usageBoundsForTextContainer.height
+    // Update textContainer width to match textview width if track textview width
+    // widthTracksTextView = true
+    private func _configureTextContainerSize() {
+        var containerSize = textContainer.containerSize
+        if !isHorizontallyResizable {
+            containerSize.width = bounds.size.width // - _textContainerInset.width * 2
         }
 
-        let proposedFrameWidth: CGFloat
-        if widthTracksTextView, let contentWidth = scrollView?.contentView.bounds.maxX {
-            proposedFrameWidth = contentWidth
-        } else {
-            proposedFrameWidth = textLayoutManager.usageBoundsForTextContainer.maxX
+        if !isVerticallyResizable {
+            containerSize.height = bounds.size.height // - _textContainerInset.height * 2
         }
 
-        let proposedSize = CGSize(width: proposedFrameWidth, height: proposedFrameHeight)
-        if !currentFrameSize.isAlmostEqual(to: proposedSize) {
-            frame.size = proposedSize
+        if !textContainer.size.isAlmostEqual(to: containerSize)  {
+            textContainer.size = containerSize
         }
     }
 
-    // Update textContainer width to match textview width if track textview width
-    // widthTracksTextView = true
-    fileprivate func updateTextContainerSizeIfNeeded() {
-
-        let proposedSize = CGSize(
-            width: widthTracksTextView ? frame.width : STTextContainer().size.width,
-            height: heightTracksTextView ? frame.height : STTextContainer().size.height
-        )
-
-        if !textContainer.size.isAlmostEqual(to: proposedSize)  {
-            textContainer.size = proposedSize
-        }
+    open override func setFrameOrigin(_ newOrigin: NSPoint) {
+        super.setFrameOrigin(newOrigin)
+        _configureTextContainerSize()
     }
 
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        updateTextContainerSizeIfNeeded()
+        _configureTextContainerSize()
     }
 
     open override func viewDidEndLiveResize() {
@@ -1087,6 +1048,53 @@ import AVFoundation
         }
         
         needsScrollToSelection = false
+    }
+
+    /// Resizes the receiver to fit its text.
+    open func sizeToFit() {
+        _configureTextContainerSize()
+
+        var size = textLayoutManager.usageBoundsForTextContainer.size
+        // add textContainerInset at some point
+        // size.width += textContainerInset.width * 2;
+        // size.height += textContainerInset.height * 2;
+
+        var horizontalInsets: CGFloat = 0
+        var verticalInsets: CGFloat = 0
+        if let clipView = scrollView?.contentView as? NSClipView {
+            horizontalInsets = clipView.contentInsets.horizontalInsets
+            verticalInsets = clipView.contentInsets.verticalInsets
+        }
+
+        if isHorizontallyResizable {
+            size.width = max(frame.size.width - horizontalInsets, size.width)
+        } else {
+            size.width = frame.size.width - horizontalInsets
+        }
+
+        if isVerticallyResizable {
+            // we should at least be our frame size if we're not in a clip view
+            size.height = max(frame.size.height - verticalInsets, size.height)
+        } else {
+            size.height = frame.size.height - verticalInsets
+        }
+
+        // if we're in a clip view we should at be at least as big as the clip view
+        if let clipView = scrollView?.contentView as? NSClipView {
+
+            if size.width < clipView.bounds.size.width - horizontalInsets {
+                size.width = clipView.bounds.size.width - horizontalInsets
+            }
+
+            if size.height < clipView.bounds.size.height - verticalInsets {
+                size.height = clipView.bounds.size.height - verticalInsets
+            }
+
+        }
+
+        if !frame.size.isAlmostEqual(to: size) {
+            self.setFrameSize(size)
+        }
     }
 
     private func layoutViewport() {
