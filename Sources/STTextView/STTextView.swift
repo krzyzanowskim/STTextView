@@ -266,6 +266,17 @@ import AVFoundation
         }
     }
 
+    /// A Boolean that controls whether the receiver changes its width to fit the width of its text.
+    @objc public var isHorizontallyResizable: Bool {
+        set {
+            widthTracksTextView = newValue
+        }
+
+        get {
+            widthTracksTextView
+        }
+    }
+
     /// A Boolean that controls whether the text container adjusts the height of its bounding rectangle when its text view resizes.
     ///
     /// When the value of this property is `true`, the text container adjusts its height when the height of its text view changes. The default value of this property is `false`.
@@ -287,6 +298,17 @@ import AVFoundation
 
         get {
             textContainer.heightTracksTextView
+        }
+    }
+
+    /// A Boolean that controls whether the receiver changes its height to fit the height of its text.
+    @objc public var isVerticallyResizable: Bool {
+        set {
+            heightTracksTextView = newValue
+        }
+
+        get {
+            heightTracksTextView
         }
     }
 
