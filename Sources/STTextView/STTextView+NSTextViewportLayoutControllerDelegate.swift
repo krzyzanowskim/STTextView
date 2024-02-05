@@ -37,7 +37,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         // TODO: update difference, not all layers
         contentView.subviews.removeAll {
-            type(of: $0) != insertionPointViewClass
+            type(of: $0) != STInsertionPointView.self
         }
     }
 

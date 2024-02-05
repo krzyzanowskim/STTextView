@@ -32,9 +32,6 @@ import AVFoundation
     /// Sent when the selection range of characters changes.
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
-    /// Returns the type of layer used by the receiver.
-    open var insertionPointViewClass = STInsertionPointView.self
-
     /// Installed plugins. events value is available after plugin is setup
     internal var plugins: [(plugin: any STPlugin, events: STPluginEvents?)] = []
 

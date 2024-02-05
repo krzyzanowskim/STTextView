@@ -88,4 +88,9 @@ class STTextViewDelegateProxy: STTextViewDelegate {
     func textViewCompletionViewController(_ textView: STTextView) -> any STCompletionViewControllerProtocol {
         source?.textViewCompletionViewController(textView) ?? STCompletionViewController()
     }
+
+    func textViewInsertionPointView(_ textView: STTextView, frame: CGRect) -> (STInsertionPointIndicatorProtocol)? {
+        source?.textViewInsertionPointView(textView, frame: frame)
+    }
+
 }

@@ -38,11 +38,16 @@ public protocol STTextViewDelegate: AnyObject {
 
     /// Allows delegate to control the context menu returned by the text view.
     /// - Parameters:
-    ///   - view: The text view sending the message.
+    ///   - textView: The text view sending the message.
     ///   - menu: The proposed contextual menu.
     ///   - event: The mouse-down event that initiated the contextual menu’s display.
     /// - Returns: A menu to use as the contextual menu. You can return `menu` unaltered, or you can return a customized menu.
-    func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu?
+    func textView(_ textView: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu?
+
+    // MARK: custom insertion point
+
+    /// Custom insertion point view. Optional.
+    func textViewInsertionPointView(_ textView: STTextView, frame: CGRect) -> (any STInsertionPointIndicatorProtocol)?
 
     // MARK: Completion
 
@@ -104,5 +109,9 @@ public extension STTextViewDelegate {
 
     func textViewCompletionViewController(_ textView: STTextView) -> any STCompletionViewControllerProtocol {
         STCompletionViewController()
+    }
+
+    func textViewInsertionPointView(_ textView: STTextView, frame: CGRect) -> (any STInsertionPointIndicatorProtocol)? {
+        nil
     }
 }
