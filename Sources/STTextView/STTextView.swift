@@ -139,7 +139,7 @@ import AVFoundation
     }
 
     /// The receiver’s default paragraph style.
-    @objc @NSCopying dynamic public var defaultParagraphStyle: NSParagraphStyle? {
+    @NSCopying @objc dynamic public var defaultParagraphStyle: NSParagraphStyle? {
         didSet {
             typingAttributes[.paragraphStyle] = defaultParagraphStyle ?? .default
         }
@@ -235,6 +235,7 @@ import AVFoundation
         }
     }
 
+    /// Replaces the receiver’s entire contents with the characters and attributes of the given attributed string.
     @objc public func setAttributedString(_ attributedString: NSAttributedString) {
         setString(attributedString)
     }
@@ -335,8 +336,10 @@ import AVFoundation
         }
     }
 
+    /// A Boolean value that indicates whether the receiver allows its background color to change.
     @objc open dynamic var allowsDocumentBackgroundColorChange: Bool = true
 
+    /// An action method used to set the background color.
     @objc open func changeDocumentBackgroundColor(_ sender: Any?) {
         guard allowsDocumentBackgroundColorChange, let color = sender as? NSColor else {
             return
@@ -345,6 +348,7 @@ import AVFoundation
         backgroundColor = color
     }
 
+    /// The semantic meaning for a text input area.
     open var contentType: NSTextContentType?
 
     /// A Boolean value that indicates whether the receiver allows undo.
@@ -374,7 +378,7 @@ import AVFoundation
     /// The attributes used to draw marked text.
     ///
     /// Text color, background color, and underline are the only supported attributes for marked text.
-    public var markedTextAttributes: [NSAttributedString.Key : Any] = [.underlineStyle: NSUnderlineStyle.single.rawValue]
+    @objc open var markedTextAttributes: [NSAttributedString.Key : Any] = [.underlineStyle: NSUnderlineStyle.single.rawValue]
 
     /// A flag
     internal var processingKeyEvent: Bool = false
@@ -394,7 +398,7 @@ import AVFoundation
     internal let delegateProxy = STTextViewDelegateProxy(source: nil)
 
     /// The manager that lays out text for the text view's text container.
-    public let textLayoutManager: NSTextLayoutManager
+    @objc open private(set) var textLayoutManager: NSTextLayoutManager
 
     @available(*, deprecated, renamed: "textContentManager")
     open var textContentStorage: NSTextContentStorage {
@@ -402,7 +406,7 @@ import AVFoundation
     }
 
     /// The text view's text storage object.
-    public let textContentManager: NSTextContentManager
+    @objc open private(set) var textContentManager: NSTextContentManager
 
     /// The text view's text container
     public var textContainer: NSTextContainer {
@@ -429,7 +433,7 @@ import AVFoundation
     }()
 
     /// Search-and-replace find interface inside a view.
-    public let textFinder: NSTextFinder
+    open private(set) var textFinder: NSTextFinder
 
     /// NSTextFinderClient
     internal let textFinderClient: STTextFinderClient
@@ -518,12 +522,10 @@ import AVFoundation
     }
 
     internal var scrollView: NSScrollView? {
-        guard let result = enclosingScrollView else { return nil }
-        if result.documentView == self {
-            return result
-        } else {
+        guard let result = enclosingScrollView, result.documentView == self else {
             return nil
         }
+        return result
     }
 
     /// A dragging selection anchor
