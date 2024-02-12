@@ -17,9 +17,9 @@ extension STTextView: NSUserInterfaceValidations {
     public func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
         switch item.action {
         case #selector(copy(_:)), #selector(cut(_:)), #selector(delete(_:)):
-            return !textContentManager.documentRange.isEmpty && !selectedRange().isEmpty
+            return !textLayoutManager.documentRange.isEmpty && !selectedRange().isEmpty
         case #selector(selectAll(_:)):
-            return !textContentManager.documentRange.isEmpty
+            return !textLayoutManager.documentRange.isEmpty
         case #selector(paste(_:)), #selector(pasteAsPlainText(_:)), #selector(pasteAsRichText(_:)):
             return isEditable && NSPasteboard.general.string(forType: .string) != nil
         case #selector(undo(_:)):
@@ -44,7 +44,7 @@ extension STTextView: NSUserInterfaceValidations {
         case #selector(stopSpeaking(_:)):
             return speechSynthesizer.isSpeaking
         case #selector(startSpeaking(_:)):
-            return !textContentManager.documentRange.isEmpty
+            return !textLayoutManager.documentRange.isEmpty
         case #selector(toggleRuler(_:)):
             return usesRuler && enclosingScrollView?.hasHorizontalRuler == true || enclosingScrollView?.hasVerticalRuler == true
         case #selector(toggleContinuousSpellChecking(_:)):

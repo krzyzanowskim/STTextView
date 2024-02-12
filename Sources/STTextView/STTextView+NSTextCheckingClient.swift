@@ -21,10 +21,10 @@ extension STTextView: NSTextCheckingClient {
 
         // If the specified range is {NSNotFound, 0}, then the receiver should replace it with the entire range of the document.
         if adjRange == .notFound {
-            adjRange = NSRange(textContentManager.documentRange, in: textContentManager)
+            adjRange = NSRange(textLayoutManager.documentRange, in: textContentManager)
         }
 
-        guard var adjRange = adjRange.clamped(NSRange(textContentManager.documentRange, in: textContentManager)) else {
+        guard var adjRange = adjRange.clamped(NSRange(textLayoutManager.documentRange, in: textContentManager)) else {
             return nil
         }
 
@@ -79,7 +79,7 @@ extension STTextView: NSTextCheckingClient {
         }
 
         // add (apply) spellcheck attributes from rendering attributes where annotations are saved
-        let offset = textContentManager.offset(from: textContentManager.documentRange.location, to: actualTextRange.location)
+        let offset = textContentManager.offset(from: textLayoutManager.documentRange.location, to: actualTextRange.location)
         textLayoutManager.enumerateRenderingAttributes(in: actualTextRange, reverse: false) { textLayoutManager, attrs, attrTextRange in
             for spellcheckAttributeKey in attrs.keys.filter({ textCheckingController.validAnnotations().contains($0) }) {
                 guard let value = attrs[spellcheckAttributeKey],

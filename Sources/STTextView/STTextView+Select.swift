@@ -12,7 +12,7 @@ extension STTextView {
     }
 
     public func setSelectedTextRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
-        guard isSelectable, textRange.endLocation <= textContentManager.documentRange.endLocation else {
+        guard isSelectable, textRange.endLocation <= textLayoutManager.documentRange.endLocation else {
             return
         }
 

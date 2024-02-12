@@ -40,11 +40,11 @@ private func testIfNeedsBoundsWorkaround() -> Bool {
     textContentManager.attributedString = NSAttributedString(string: "01234567890123456789")
 
     textContainer.lineFragmentPadding = 5
-    textLayoutManager.ensureLayout(for: textContentManager.documentRange)
+    textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
     let bounds1 = textLayoutManager.usageBoundsForTextContainer
 
     textContainer.lineFragmentPadding = 0
-    textLayoutManager.ensureLayout(for: textContentManager.documentRange)
+    textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
     let bounds2 = textLayoutManager.usageBoundsForTextContainer
 
     if bounds1.width == bounds2.width {

@@ -90,10 +90,10 @@ import AVFoundation
     @objc dynamic open var font: NSFont? {
         get {
             // if not empty, return a font at location 0
-            if !textContentManager.documentRange.isEmpty {
-                let location = textContentManager.documentRange.location
-                let endLocation = textContentManager.location(location, offsetBy: 1)
-                return textContentManager.attributedString(in: NSTextRange(location: location, end: endLocation))?.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
+            if !textLayoutManager.documentRange.isEmpty {
+                let location = textLayoutManager.documentRange.location
+                let endLocation = textLayoutManager.location(location, offsetBy: 1)
+                return textLayoutManager.textContentManager?.attributedString(in: NSTextRange(location: location, end: endLocation))?.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
             }
 
             // otherwise return current typing attribute
@@ -106,8 +106,8 @@ import AVFoundation
                 return
             }
 
-            if !textContentManager.documentRange.isEmpty {
-                addAttributes([.font: newValue], range: textContentManager.documentRange)
+            if !textLayoutManager.documentRange.isEmpty {
+                addAttributes([.font: newValue], range: textLayoutManager.documentRange)
             }
 
             typingAttributes[.font] = newValue
@@ -179,15 +179,15 @@ import AVFoundation
     }
 
     internal func typingAttributes(at startLocation: NSTextLocation) -> [NSAttributedString.Key : Any] {
-        guard !textContentManager.documentRange.isEmpty else {
+        guard !textLayoutManager.documentRange.isEmpty else {
             return typingAttributes
         }
 
         var attrs: [NSAttributedString.Key: Any] = [:]
         // The attribute is derived from the previous (upstream) location,
         // except for the beginning of the document where it from whatever is at location 0
-        let options: NSTextContentManager.EnumerationOptions = startLocation == textContentManager.documentRange.location ? [] : [.reverse]
-        let offsetDiff = startLocation == textContentManager.documentRange.location ? 0 : -1
+        let options: NSTextContentManager.EnumerationOptions = startLocation == textLayoutManager.documentRange.location ? [] : [.reverse]
+        let offsetDiff = startLocation == textLayoutManager.documentRange.location ? 0 : -1
 
         textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
             if let textParagraph = textElement as? NSTextParagraph,
@@ -591,7 +591,7 @@ import AVFoundation
         textCheckingController = NSTextCheckingController(client: self)
 
         // Set insert point at the very beginning
-        setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location))
 
         postsBoundsChangedNotifications = true
         postsFrameChangedNotifications = true
@@ -797,10 +797,10 @@ import AVFoundation
             context.restoreGState()
         }
 
-        if textContentManager.documentRange.isEmpty {
+        if textLayoutManager.documentRange.isEmpty {
             // - empty document has no layout fragments, nothing, it's empt and has to be handled explicitly.
             // - there's no layout fragment at the document endLocation (technically it's out of bounds), has to be handled explicitly.
-            if let selectionFrame = textLayoutManager.textSegmentFrame(at: textContentManager.documentRange.location, type: .standard) {
+            if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
                 drawHighlight(
                     in: CGRect(
                         origin: CGPoint(
@@ -886,15 +886,15 @@ import AVFoundation
         if case .some(let string) = string {
             switch string {
             case let attributedString as NSAttributedString:
-                replaceCharacters(in: textContentManager.documentRange, with: attributedString, allowsTypingCoalescing: false)
+                replaceCharacters(in: textLayoutManager.documentRange, with: attributedString, allowsTypingCoalescing: false)
             case let string as String:
-                replaceCharacters(in: textContentManager.documentRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
+                replaceCharacters(in: textLayoutManager.documentRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
             default:
                 assertionFailure()
                 return
             }
         } else if case .none = string {
-            replaceCharacters(in: textContentManager.documentRange, with: "", useTypingAttributes: true, allowsTypingCoalescing: false)
+            replaceCharacters(in: textLayoutManager.documentRange, with: "", useTypingAttributes: true, allowsTypingCoalescing: false)
         }
     }
 

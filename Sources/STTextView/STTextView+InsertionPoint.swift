@@ -26,7 +26,7 @@ extension STTextView {
                 // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
                 // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
                 // therefore for empty override height with value manually calculated from font + paragraph style
-                if textRange == textContentManager.documentRange, textRange.isEmpty {
+                if textRange == textLayoutManager.documentRange, textRange.isEmpty {
                     return CGRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
                 }
 
