@@ -54,11 +54,15 @@ class STTextViewDelegateProxy: STTextViewDelegate {
     }
 
     func textView(_ textView: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu? {
+        guard let textContentManager = textView.textLayoutManager.textContentManager else {
+            return nil
+        }
+
         let effectiveMenu = source?.textView(textView, menu: menu, for: event, at: location)
 
         // Append plugins menus
         let pluginMenus = textView.plugins.events.compactMap { events in
-            events.onContextMenuHandler?(location, textView.textContentManager)
+            events.onContextMenuHandler?(location, textContentManager)
         }
 
         if let effectiveMenu, !pluginMenus.isEmpty {

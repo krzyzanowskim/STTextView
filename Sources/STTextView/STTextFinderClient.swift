@@ -29,13 +29,15 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
     }
 
     func shouldReplaceCharacters(inRanges ranges: [NSValue], with strings: [String]) -> Bool {
-        guard let textView = textView else {
+        guard let textView = textView,
+              let textContentManager = textView.textLayoutManager.textContentManager
+        else {
             return false
         }
 
         var result = true
         for (range, string) in zip(ranges.map(\.rangeValue), strings) {
-            if let textRange = NSTextRange(range, in: textView.textContentManager) {
+            if let textRange = NSTextRange(range, in: textContentManager) {
                 result = result && textView.shouldChangeText(in: textRange, replacementString: string)
             }
         }
@@ -44,7 +46,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
     }
 
     func replaceCharacters(in range: NSRange, with string: String) {
-        guard let textContentManager = textView?.textContentManager,
+        guard let textContentManager = textView?.textLayoutManager.textContentManager,
               let textRange = NSTextRange(range, in: textContentManager),
               let textView = textView
         else {
@@ -89,8 +91,8 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
         get {
             guard let textLayoutManager = textView?.textLayoutManager,
-                  let textContentManager = textLayoutManager.textContentManager,
-                  !textLayoutManager.textSelections.isEmpty
+                  !textLayoutManager.textSelections.isEmpty,
+                  let textContentManager = textLayoutManager.textContentManager
             else {
                 return []
             }
@@ -108,7 +110,8 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
     func scrollRangeToVisible(_ range: NSRange) {
         guard let textView = textView,
-              let textRange = NSTextRange(range, in: textView.textContentManager)
+              let textContentManager = textView.textLayoutManager.textContentManager,
+              let textRange = NSTextRange(range, in: textContentManager)
         else {
             return
         }
@@ -128,8 +131,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
     }
 
     func rects(forCharacterRange range: NSRange) -> [NSValue]? {
-        guard let textLayoutManager = textView?.textLayoutManager,
-              let textContentManager = textLayoutManager.textContentManager,
+        guard let textContentManager = textView?.textLayoutManager.textContentManager,
               let textRange = NSTextRange(range, in: textContentManager)
         else {
             return nil
