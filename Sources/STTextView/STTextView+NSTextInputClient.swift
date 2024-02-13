@@ -219,6 +219,8 @@ extension STTextView: NSTextInputClient {
         }
     }
 
+    // TODO: Adopting the system text cursor in custom text views
+    // https://developer.apple.com/documentation/appkit/text_display/adopting_the_system_text_cursor_in_custom_text_views
 }
 
 
