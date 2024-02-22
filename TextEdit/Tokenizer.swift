@@ -3,7 +3,7 @@
 
 import NaturalLanguage
 
-class SimpleParser {
+class Tokenizer {
 
     struct Word: CustomStringConvertible {
         let string: String

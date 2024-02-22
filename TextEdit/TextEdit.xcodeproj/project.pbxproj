@@ -14,7 +14,7 @@
 		7544424227B9332F00901C0E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7544424027B9332F00901C0E /* Main.storyboard */; };
 		7544424A27B9387300901C0E /* content.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7544424927B9387300901C0E /* content.txt */; };
 		7559DD832A0709D4004441B6 /* STTextView in Frameworks */ = {isa = PBXBuildFile; productRef = 7559DD822A0709D4004441B6 /* STTextView */; };
-		75BC2F802A62C86C00580249 /* SimpleParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BC2F7F2A62C86C00580249 /* SimpleParser.swift */; };
+		75BC2F802A62C86C00580249 /* Tokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BC2F7F2A62C86C00580249 /* Tokenizer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +27,7 @@
 		7544424327B9332F00901C0E /* TextEdit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TextEdit.entitlements; sourceTree = "<group>"; };
 		7544424927B9387300901C0E /* content.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = content.txt; sourceTree = "<group>"; };
 		758265CA2AB31EFF00D5EFB5 /* STTextView */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = STTextView; path = ..; sourceTree = "<group>"; };
-		75BC2F7F2A62C86C00580249 /* SimpleParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleParser.swift; sourceTree = "<group>"; };
+		75BC2F7F2A62C86C00580249 /* Tokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokenizer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,7 +66,7 @@
 				7544423A27B9332E00901C0E /* AppDelegate.swift */,
 				7544423C27B9332E00901C0E /* ViewController.swift */,
 				75055B6B2A5C9F3A00595DC2 /* CompletionItem.swift */,
-				75BC2F7F2A62C86C00580249 /* SimpleParser.swift */,
+				75BC2F7F2A62C86C00580249 /* Tokenizer.swift */,
 				7544424927B9387300901C0E /* content.txt */,
 				7544423E27B9332F00901C0E /* Assets.xcassets */,
 				7544424027B9332F00901C0E /* Main.storyboard */,
@@ -159,7 +159,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7544423D27B9332E00901C0E /* ViewController.swift in Sources */,
-				75BC2F802A62C86C00580249 /* SimpleParser.swift in Sources */,
+				75BC2F802A62C86C00580249 /* Tokenizer.swift in Sources */,
 				75055B6C2A5C9F3A00595DC2 /* CompletionItem.swift in Sources */,
 				7544423B27B9332E00901C0E /* AppDelegate.swift in Sources */,
 			);

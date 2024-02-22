@@ -108,7 +108,7 @@ final class ViewController: NSViewController {
         completionTask = Task(priority: .background) {
             var arr: Set<String> = []
 
-            for await word in SimpleParser.words(textView.string) where !Task.isCancelled {
+            for await word in Tokenizer.words(textView.string) where !Task.isCancelled {
                 arr.insert(word.string)
             }
 
