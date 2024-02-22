@@ -9,10 +9,6 @@ let package = Package(
         .library(
             name: "STTextView",
             targets: ["STTextView", "STCompletion", "STTextViewUI"]
-        ),
-        .library(
-            name: "STCompletion",
-            targets: ["STCompletion"]
         )
     ],
     dependencies: [
