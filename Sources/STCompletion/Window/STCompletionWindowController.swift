@@ -50,7 +50,7 @@ open class STCompletionWindowController: NSWindowController {
         super.showWindow(nil)
     }
 
-    public func showWindow(at origin: NSPoint, items: [any STCompletionItem], parent parentWindow: NSWindow) {
+    public func showWindow(at origin: CGPoint, items: [any STCompletionItem], parent parentWindow: NSWindow) {
         guard let window = window else { return }
 
         if !isVisible {

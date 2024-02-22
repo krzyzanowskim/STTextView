@@ -320,7 +320,7 @@ open class STLineNumberRulerView: NSRulerView {
         context.restoreGState()
     }
 
-    private func drawHighlightedRuler(line: Line, at relativePoint: NSPoint, in dirtyRect: NSRect) {
+    private func drawHighlightedRuler(line: Line, at relativePoint: CGPoint, in dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else {
             return
         }

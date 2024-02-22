@@ -182,7 +182,7 @@ extension STTextView: NSTextInputClient {
         return rect
     }
 
-    @objc public func characterIndex(for point: NSPoint) -> Int {
+    @objc public func characterIndex(for point: CGPoint) -> Int {
         let eventPoint = convert(window!.convertPoint(fromScreen: point), from: nil)
         guard let location = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location) else {
             return NSNotFound
