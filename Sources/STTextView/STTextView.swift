@@ -35,6 +35,9 @@ import AVFoundation
     /// Installed plugins. events value is available after plugin is setup
     internal var plugins: [(plugin: any STPlugin, events: STPluginEvents?)] = []
 
+    /// Whether or not the text view is fully set up and it can setup its plugins.
+    private var isSetUp = false
+
     /// A Boolean value that controls whether the text view allows the user to edit text.
     @Invalidating(.insertionPoint, .cursorRects)
     @objc dynamic open var isEditable: Bool = true {
@@ -668,24 +671,13 @@ import AVFoundation
             textFinder.client = textFinderClient
             textFinder.findBarContainer = enclosingScrollView
 
-            // unwrap any STPluginProtocol
-            func setUp(plugin: some STPlugin) -> STPluginEvents {
-                let events = STPluginEvents()
-                plugin.setUp(
-                    context: STPluginContext(
-                        coordinator: plugin.makeCoordinator(context: .init(textView: self)),
-                        textView: self,
-                        events: events
-                    )
-                )
-                return events
-            }
-
-            for (offset, (plugin, _)) in plugins.enumerated() {
-                let events = setUp(plugin: plugin)
-
-                // set events handler
-                plugins[offset] = (plugin, events)
+            if !isSetUp {
+                for (offset, (plugin, _)) in plugins.enumerated() {
+                    let events = setUp(plugin: plugin)
+                    // set events handler
+                    plugins[offset] = (plugin, events)
+                }
+                isSetUp = true
             }
         }
 
@@ -1316,7 +1308,20 @@ import AVFoundation
     }
 
     open func addPlugin(_ plugin: any STPlugin) {
-        plugins.append((plugin, nil))
+        let events = isSetUp ? setUp(plugin: plugin) : nil
+        plugins.append((plugin, events))
+    }
+
+    private func setUp(plugin: some STPlugin) -> STPluginEvents {
+        let events = STPluginEvents()
+        plugin.setUp(
+            context: STPluginContext(
+                coordinator: plugin.makeCoordinator(context: .init(textView: self)),
+                textView: self,
+                events: events
+            )
+        )
+        return events
     }
 }
 
