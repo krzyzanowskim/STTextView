@@ -668,19 +668,6 @@ import AVFoundation
             textFinder.client = textFinderClient
             textFinder.findBarContainer = enclosingScrollView
 
-            // unwrap any STPluginProtocol
-            func setUp(plugin: some STPlugin) -> STPluginEvents {
-                let events = STPluginEvents()
-                plugin.setUp(
-                    context: STPluginContext(
-                        coordinator: plugin.makeCoordinator(context: .init(textView: self)),
-                        textView: self,
-                        events: events
-                    )
-                )
-                return events
-            }
-
             for (offset, (plugin, _)) in plugins.enumerated() {
                 let events = setUp(plugin: plugin)
 
@@ -1316,7 +1303,23 @@ import AVFoundation
     }
 
     open func addPlugin(_ plugin: any STPlugin) {
-        plugins.append((plugin, nil))
+        if window != nil {
+            plugins.append((plugin, setUp(plugin: plugin)))
+        } else {
+            plugins.append((plugin, nil))
+        }
+    }
+
+    private func setUp(plugin: some STPlugin) -> STPluginEvents {
+        let events = STPluginEvents()
+        plugin.setUp(
+            context: STPluginContext(
+                coordinator: plugin.makeCoordinator(context: .init(textView: self)),
+                textView: self,
+                events: events
+            )
+        )
+        return events
     }
 }
 
