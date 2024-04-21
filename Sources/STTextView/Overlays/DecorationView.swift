@@ -13,9 +13,9 @@ final class DecorationView: NSView {
         wantsLayer = true
     }
 
-    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
+        wantsLayer = true
     }
 
     override var isFlipped: Bool {
@@ -24,10 +24,6 @@ final class DecorationView: NSView {
 #else
         false
 #endif
-    }
-
-    override func draw(_ dirtyRect: NSRect) {
-        super.draw(dirtyRect)
     }
 }
 //
