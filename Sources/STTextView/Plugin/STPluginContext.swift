@@ -3,6 +3,14 @@
 
 import Foundation
 
+@MainActor
+public protocol PluginContext<Plugin> {
+    associatedtype Plugin: STPlugin
+    var coordinator: Plugin.Coordinator { get }
+    var textView: STTextView { get }
+    var events: STPluginEvents { get }
+}
+
 public struct STPluginContext<Plugin: STPlugin>: PluginContext {
     public let coordinator: Plugin.Coordinator
     public let textView: STTextView

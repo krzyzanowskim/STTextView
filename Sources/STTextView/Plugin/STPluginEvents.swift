@@ -43,9 +43,3 @@ public class STPluginEvents {
         return self
     }
 }
-
-extension Array<(plugin: STPlugin, events: STPluginEvents?)> {
-    var events: [STPluginEvents] {
-        compactMap({ $0.events })
-    }
-}

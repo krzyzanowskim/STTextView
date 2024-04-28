@@ -33,7 +33,7 @@ import AVFoundation
     public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 
     /// Installed plugins. events value is available after plugin is setup
-    internal var plugins: [(plugin: any STPlugin, events: STPluginEvents?)] = []
+    internal var plugins: [Plugin] = []
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
     @Invalidating(.insertionPoint, .cursorRects)
@@ -643,8 +643,8 @@ import AVFoundation
     deinit {
         guard !plugins.isEmpty else { return }
         Task { @MainActor [plugins] in
-            plugins.forEach { plugin, _ in
-                plugin.tearDown()
+            plugins.forEach { plugin in
+                plugin.instance.tearDown()
             }
         }
     }
@@ -668,25 +668,8 @@ import AVFoundation
             textFinder.client = textFinderClient
             textFinder.findBarContainer = enclosingScrollView
 
-            // unwrap any STPluginProtocol
-            func setUp(plugin: some STPlugin) -> STPluginEvents {
-                let events = STPluginEvents()
-                plugin.setUp(
-                    context: STPluginContext(
-                        coordinator: plugin.makeCoordinator(context: .init(textView: self)),
-                        textView: self,
-                        events: events
-                    )
-                )
-                return events
-            }
-
-            for (offset, (plugin, _)) in plugins.enumerated() {
-                let events = setUp(plugin: plugin)
-
-                // set events handler
-                plugins[offset] = (plugin, events)
-            }
+            // setup registerd plugins
+            setupPlugins()
         }
 
     }
@@ -1315,8 +1298,36 @@ import AVFoundation
 
     }
 
-    open func addPlugin(_ plugin: any STPlugin) {
-        plugins.append((plugin, nil))
+    open func addPlugin(_ instance: any STPlugin) {
+        let plugin = Plugin(instance: instance)
+        plugins.append(plugin)
+
+        // setup plugin right away if view is already setup
+        if self.window != nil {
+            setupPlugins()
+        }
+    }
+
+    private func setupPlugins() {
+        for (offset, plugin) in plugins.enumerated() where plugin.events == nil {
+            // set events handler
+            var plugin = plugin
+            plugin.events = setUp(instance: plugin.instance)
+            plugins[offset] = plugin
+        }
+    }
+
+    private func setUp(instance: some STPlugin) -> STPluginEvents {
+        // unwrap any STPluginProtocol
+        let events = STPluginEvents()
+        instance.setUp(
+            context: STPluginContext(
+                coordinator: instance.makeCoordinator(context: .init(textView: self)),
+                textView: self,
+                events: events
+            )
+        )
+        return events
     }
 }
 
