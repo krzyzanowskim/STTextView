@@ -64,15 +64,24 @@ final class ViewController: NSViewController {
             }
         }
 
-        // Insert attachment image
-        // do {
-        //     let attachment = NSTextAttachment()
-        //     let img = NSImage(systemSymbolName: "figure.walk", accessibilityDescription: nil)
-        //     let cell = NSTextAttachmentCell(imageCell: img)
-        //     attachment.attachmentCell = cell
-        //     let attachmentString = NSAttributedString(attachment: attachment)
-        //     textView.insertText(attachmentString, replacementRange: NSRange(location: 20, length: 0))
-        // }
+//  Insert attachment image using NSTextAttachmentCell
+//
+//         do {
+//             let attachment = NSTextAttachment()
+//             let img = NSImage(systemSymbolName: "figure.walk", accessibilityDescription: nil)
+//             let cell = NSTextAttachmentCell(imageCell: img)
+//             attachment.attachmentCell = cell
+//             let attachmentString = NSAttributedString(attachment: attachment)
+//             textView.insertText(attachmentString, replacementRange: NSRange(location: 20, length: 0))
+//         }
+//
+
+//  Insert attachment image using NSTextAttachmentViewProvider
+        do {
+            let attachment = MyTextAttachment()
+            let attachmentString = NSAttributedString(attachment: attachment)
+            textView.insertText(attachmentString, replacementRange: NSRange(location: 30, length: 0))
+        }
 
 
         // Emphasize first line
@@ -191,4 +200,40 @@ private extension StringProtocol {
     }
 }
 
+// MARK: TextAttachment provider
 
+private class MyTextAttachmentViewProvider: NSTextAttachmentViewProvider {
+    override func loadView() {
+        // super.loadView()
+        let img = NSImage(systemSymbolName: "figure.walk", accessibilityDescription: nil)!
+        let imageView = NSImageView(image: img)
+        self.view = imageView
+    }
+
+    override func attachmentBounds(
+        for attributes: [NSAttributedString.Key : Any],
+        location: any NSTextLocation,
+        textContainer: NSTextContainer?,
+        proposedLineFragment: CGRect,
+        position: CGPoint
+    ) -> CGRect {
+        self.view?.bounds ?? .zero
+    }
+}
+
+private class MyTextAttachment: NSTextAttachment {
+    override func viewProvider(
+        for parentView: NSView?,
+        location: any NSTextLocation,
+        textContainer: NSTextContainer?
+    ) -> NSTextAttachmentViewProvider? {
+        let viewProvider = MyTextAttachmentViewProvider(
+            textAttachment: self,
+            parentView: parentView,
+            textLayoutManager: textContainer?.textLayoutManager,
+            location: location
+        )
+        viewProvider.tracksTextAttachmentViewBounds = true
+        return viewProvider
+    }
+}

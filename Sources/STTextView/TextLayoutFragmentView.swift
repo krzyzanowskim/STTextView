@@ -33,6 +33,25 @@ final class TextLayoutFragmentView: NSView {
         drawSpellCheckerAttributes(dirtyRect, in: context)
     }
 
+    override func layout() {
+        super.layout()
+        layoutAttachmentView()
+    }
+
+    private func layoutAttachmentView() {
+        for attachmentViewProvider in layoutFragment.textAttachmentViewProviders {
+            guard let attachmentView = attachmentViewProvider.view else {
+                continue
+            }
+
+            let viewOrig = layoutFragment.frameForTextAttachment(at: attachmentViewProvider.location).origin
+            attachmentView.frame.origin = viewOrig
+            if attachmentView.superview == nil {
+                addSubview(attachmentView)
+            }
+        }
+    }
+
     private func drawSpellCheckerAttributes(_ dirtyRect: NSRect, in context: CGContext) {
         guard let textLayoutManager = layoutFragment.textLayoutManager else {
             return
