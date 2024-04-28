@@ -19,7 +19,8 @@ let package = Package(
             name: "STTextView",
             dependencies: [
                 .target(name: "STCompletion"),
-                .product(name: "STTextKitPlus", package: "STTextKitPlus")
+                .product(name: "STTextKitPlus", package: "STTextKitPlus"),
+                "STObjCLandShim"
             ]
         ),
         .target(
@@ -30,6 +31,10 @@ let package = Package(
             dependencies: [
                 .target(name: "STTextView")
             ]
+        ),
+        .target(
+            name: "STObjCLandShim",
+            publicHeadersPath: "include"
         ),
         .testTarget(
             name: "STTextViewTests",

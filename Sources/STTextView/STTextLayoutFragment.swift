@@ -2,6 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import AppKit
+import STObjCLandShim
 
 final class STTextLayoutFragment: NSTextLayoutFragment {
     private let paragraphStyle: NSParagraphStyle
@@ -30,8 +31,20 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
         //
         // Center vertically after applying lineHeightMultiple value
         // super.draw(at: point.moved(dx: 0, dy: offset), in: context)
-        for lineFragment in textLineFragments {
 
+        context.saveGState()
+
+        // This seems to be available at least on 10.8 and later. The only reference to it is in
+        // WebKit. This causes text to render just a little lighter, which looks nicer.
+        let useThinStrokes = true // shouldSmooth
+        var savedFontSmoothingStyle: Int32 = 0
+        if useThinStrokes {
+            context.setShouldSmoothFonts(true)
+            savedFontSmoothingStyle = STContextGetFontSmoothingStyle(context)
+            STContextSetFontSmoothingStyle(context, 16)
+        }
+
+        for lineFragment in textLineFragments {
             // Determine paragraph style. Either from the fragment string or default for the text view
             // the ExtraLineFragment doesn't have information about typing attributes hence layout manager uses a default values - not from text view
             let paragraphStyle: NSParagraphStyle
@@ -51,9 +64,15 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
             }
         }
 
+        if (useThinStrokes) {
+            STContextSetFontSmoothingStyle(context, savedFontSmoothingStyle);
+        }
+
         if showsInvisibleCharacters {
             drawInvisibles(at: point, in: context)
         }
+        
+        context.restoreGState()
     }
 
     private func drawInvisibles(at point: CGPoint, in context: CGContext) {
