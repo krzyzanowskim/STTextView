@@ -633,7 +633,7 @@ import AVFoundation
         }
 
 
-        usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.new]) { [weak self] textLayoutManager, change in
+        usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] textLayoutManager, change in
             self?.needsUpdateConstraints = true
         }
     }
@@ -1039,7 +1039,16 @@ import AVFoundation
     open func sizeToFit() {
         _configureTextContainerSize()
 
+        // Estimate `usageBoundsForTextContainer` size is based on performed layout.
+        // If layout didn't happen for the whole document, it only cover
+        // the fragment that is known. And even after ensureLayout for the whole document
+        // `textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)`
+        // it can't report exact size (it must do internal estimations then).
+        //
+        // Because I use "lazy layout" with the viewport, there is no "layout everything"
+        // on launch (due to performance reason) hence the total size is not know in advance.
         var size = textLayoutManager.usageBoundsForTextContainer.size
+
         // add textContainerInset at some point
         // size.width += textContainerInset.width * 2;
         // size.height += textContainerInset.height * 2;
@@ -1085,7 +1094,7 @@ import AVFoundation
     private func layoutViewport() {
         // layoutViewport does not handle properly layout range
         // for far jump it tries to layout everything starting at location 0
-        // even to viewport range is properly calculated.
+        // even though viewport range is properly calculated.
         // No known workaround.
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
