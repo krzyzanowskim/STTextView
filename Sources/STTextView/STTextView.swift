@@ -360,6 +360,9 @@ import AVFoundation
     internal class MarkedText: CustomDebugStringConvertible {
         var markedText: NSAttributedString
         var markedRange: NSRange
+
+        // Not used currently in STTextView.
+        // that turned out to be good because it's buggy FB13789916 https://gist.github.com/krzyzanowskim/340c5810fc427e346b7c4b06d46b1e10
         var selectedRange: NSRange
 
         init(markedText: NSAttributedString, markedRange: NSRange, selectedRange: NSRange) {
