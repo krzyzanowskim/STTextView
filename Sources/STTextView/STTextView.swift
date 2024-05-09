@@ -1047,6 +1047,11 @@ import AVFoundation
         //
         // Because I use "lazy layout" with the viewport, there is no "layout everything"
         // on launch (due to performance reason) hence the total size is not know in advance.
+        // textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
+        //
+        // I conclude `usageBoundsForTextContainer` is 🍌 it's value randomly
+        // expand and shrinks for subsequent layouts of the same content.
+        // by no meaning is it realiable source for the text container
         var size = textLayoutManager.usageBoundsForTextContainer.size
 
         // add textContainerInset at some point
