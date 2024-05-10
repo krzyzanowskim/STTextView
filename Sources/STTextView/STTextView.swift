@@ -1050,11 +1050,17 @@ import AVFoundation
         //
         // Because I use "lazy layout" with the viewport, there is no "layout everything"
         // on launch (due to performance reason) hence the total size is not know in advance.
+        // TextKit estimate the usageBoundsForTextContainer until everything is layed out
+        // that may result in weird and unexpected values along the way
+        //
+        // Calling ensureLayout on the whole document should fix the value, however
+        // it may be time consuming (in seconds) hence not recommended:
         // textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
         //
-        // I conclude `usageBoundsForTextContainer` is 🍌 it's value randomly
-        // expand and shrinks for subsequent layouts of the same content.
-        // by no meaning is it realiable source for the text container
+        // Asking for the end location result in estimated `usageBoundsForTextContainer`
+        // that eventually get right as more and more layout happen (when scrolling)
+
+        textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
         var size = textLayoutManager.usageBoundsForTextContainer.size
 
         // add textContainerInset at some point
@@ -1075,8 +1081,12 @@ import AVFoundation
         }
 
         if isVerticallyResizable {
-            // we should at least be our frame size if we're not in a clip view
-            size.height = max(frame.size.height - verticalInsets, size.height)
+            // we should at least be the visible size if we're not in a clip view
+            // however the `size` may be bananas (estimated) and enlarge too much
+            // that going never going to shrink later.
+            // It is expected that vertically height going to grow and shring (that does not apply to horizontally)
+            //
+            // size.height = max(frame.size.height - verticalInsets, size.height)
         } else {
             size.height = frame.size.height - verticalInsets
         }
