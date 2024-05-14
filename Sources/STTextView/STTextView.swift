@@ -190,13 +190,13 @@ import AVFoundation
         let offsetDiff = startLocation == textLayoutManager.documentRange.location ? 0 : -1
 
         textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
-            if let textParagraph = textElement as? NSTextParagraph,
+            if let attributedTextElement = textElement as? STAttributedTextElement,
                let elementRange = textElement.elementRange,
                let textContentManager = textElement.textContentManager
             {
                 let offset = textContentManager.offset(from: elementRange.location, to: startLocation)
                 assert(offset != NSNotFound, "Unexpected location")
-                attrs = textParagraph.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
+                attrs = attributedTextElement.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
             }
 
             return false
@@ -814,7 +814,7 @@ import AVFoundation
         var combinedFragmentsRect: CGRect?
 
         textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
-            let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
+            let contentRangeInElement = layoutFragment.rangeInElement
             for lineFragment in layoutFragment.textLineFragments {
 
                 func isLineSelected() -> Bool {

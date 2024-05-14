@@ -9,7 +9,7 @@ final class STTextContentStorage: NSTextContentStorage {
         assert(hasEditingTransaction, "Not called inside performEditingTransaction")
 
         guard let textStorage = textStorage,
-              let paragraphElements = textElements?.compactMap({ $0 as? NSTextParagraph })
+              let attributedTextElements = textElements?.compactMap({ $0 as? STAttributedTextElement })
         else {
             // Non-functional (FB9925647)
             super.replaceContents(in: range, with: textElements)
@@ -19,8 +19,8 @@ final class STTextContentStorage: NSTextContentStorage {
 
         let replacementString = NSMutableAttributedString()
         replacementString.beginEditing()
-        for paragraphElement in paragraphElements {
-            replacementString.append(paragraphElement.attributedString)
+        for attributedTextElement in attributedTextElements {
+            replacementString.append(attributedTextElement.attributedString)
         }
         replacementString.endEditing()
 
