@@ -34,15 +34,18 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
 
         context.saveGState()
 
+#if USE_FONT_SMOOTHING_STYLE
         // This seems to be available at least on 10.8 and later. The only reference to it is in
         // WebKit. This causes text to render just a little lighter, which looks nicer.
         let useThinStrokes = true // shouldSmooth
         var savedFontSmoothingStyle: Int32 = 0
+
         if useThinStrokes {
             context.setShouldSmoothFonts(true)
             savedFontSmoothingStyle = STContextGetFontSmoothingStyle(context)
             STContextSetFontSmoothingStyle(context, 16)
         }
+#endif
 
         for lineFragment in textLineFragments {
             // Determine paragraph style. Either from the fragment string or default for the text view
@@ -64,9 +67,11 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
             }
         }
 
+#if USE_FONT_SMOOTHING_STYLE
         if (useThinStrokes) {
             STContextSetFontSmoothingStyle(context, savedFontSmoothingStyle);
         }
+#endif
 
         if showsInvisibleCharacters {
             drawInvisibles(at: point, in: context)

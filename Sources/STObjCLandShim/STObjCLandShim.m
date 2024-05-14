@@ -11,6 +11,10 @@
 //     CGContextSetFontSmoothingStyle(ctx, 16);
 // }
 
+
+#ifdef USE_FONT_SMOOTHING_STYLE
+// The use of non-public or deprecated APIs is not permitted on the App Store
+
 extern void CGContextSetFontSmoothingStyle(CGContextRef, int);
 extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
@@ -21,3 +25,4 @@ void STContextSetFontSmoothingStyle(CGContextRef context, int style) {
 int STContextGetFontSmoothingStyle(CGContextRef context) {
     return CGContextGetFontSmoothingStyle(context);
 }
+#endif
