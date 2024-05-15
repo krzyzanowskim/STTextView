@@ -654,8 +654,12 @@ import AVFoundation
 
     open override func resetCursorRects() {
         super.resetCursorRects()
-        if isSelectable {
+        if isSelectable, visibleRect != .zero {
             addCursorRect(visibleRect, cursor: .iBeam)
+
+            // TODO: NSAttributedString.Key.cursor attribute
+            // TODO: .pointingHand for .link attribute rectangles
+            // addCursorRect(visibleRect, cursor: .pointingHand)
         }
     }
 

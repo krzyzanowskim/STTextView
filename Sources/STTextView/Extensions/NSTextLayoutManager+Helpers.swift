@@ -66,6 +66,14 @@ extension NSTextLayoutManager {
         textAttributedString(in: textSelectionsRanges(.withoutInsertionPoints))
     }
 
+    func textAttributedString(at location: any NSTextLocation) -> NSAttributedString? {
+        if let range = NSTextRange(location: location, end: self.location(location, offsetBy: 1)), !range.isEmpty {
+            return textAttributedString(in: range)
+        }
+
+        return nil
+    }
+
     func textAttributedString(in textRange: NSTextRange) -> NSAttributedString? {
         textAttributedString(in: [textRange])
     }

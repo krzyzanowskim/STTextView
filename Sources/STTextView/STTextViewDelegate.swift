@@ -42,7 +42,17 @@ public protocol STTextViewDelegate: AnyObject {
     ///   - menu: The proposed contextual menu.
     ///   - event: The mouse-down event that initiated the contextual menu’s display.
     /// - Returns: A menu to use as the contextual menu. You can return `menu` unaltered, or you can return a customized menu.
-    func textView(_ textView: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu?
+    func textView(_ textView: STTextView, menu: NSMenu, for event: NSEvent, at location: any NSTextLocation) -> NSMenu?
+
+    // MARK: Clicking and Pasting
+    
+    /// Sent after the user clicks a link.
+    /// - Parameters:
+    ///   - textView: The text view sending the message.
+    ///   - link: The link that was clicked; the value of link is either URL or String.
+    ///   - location: The location where the click occurred.
+    /// - Returns: true if the click was handled; otherwise, false to allow the next responder to handle it.
+    func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool
 
     // MARK: custom insertion point
 
@@ -52,7 +62,7 @@ public protocol STTextViewDelegate: AnyObject {
     // MARK: Completion
 
     /// Completion items
-    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]?
+    func textView(_ textView: STTextView, completionItemsAtLocation location: any NSTextLocation) -> [any STCompletionItem]?
 
     /// Insert completion item
     func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem)
@@ -95,11 +105,11 @@ public extension STTextViewDelegate {
 
     }
 
-    func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: NSTextLocation) -> NSMenu? {
+    func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: any NSTextLocation) -> NSMenu? {
         menu
     }
 
-    func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]? {
+    func textView(_ textView: STTextView, completionItemsAtLocation location: any NSTextLocation) -> [any STCompletionItem]? {
         nil
     }
 
@@ -114,4 +124,21 @@ public extension STTextViewDelegate {
     func textViewInsertionPointView(_ textView: STTextView, frame: CGRect) -> (any STInsertionPointIndicatorProtocol)? {
         nil
     }
+
+    func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool {
+        // let linkURL: URL? = switch link {
+        //     case let value as URL:
+        //         value
+        //     case let value as String:
+        //         URL(string: value)
+        //     default:
+        //         nil
+        //     }
+        //
+        // if NSWorkspace.shared.urlForApplication(toOpen: linkURL) != nil {
+        //    NSWorkspace.shared.open(linkURL)
+        // }
+        false
+    }
+
 }

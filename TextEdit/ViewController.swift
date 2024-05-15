@@ -54,12 +54,12 @@ final class ViewController: NSViewController {
 
         // Add attributes
 
-        // highlight occurence of STTextView
+        // add link to occurences of STTextView
         do {
             let str = textView.string
             var currentRange = str.startIndex..<str.endIndex
             while let ocurrenceRange = str.range(of: "STTextView", range: currentRange) {
-                textView.addAttributes([.foregroundColor: NSColor.controlAccentColor], range: NSRange(ocurrenceRange, in: str))
+                textView.addAttributes([.link: URL(string: "https://swift.best")! as NSURL], range: NSRange(ocurrenceRange, in: str))
                 currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
             }
         }

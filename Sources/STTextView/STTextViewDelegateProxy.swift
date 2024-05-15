@@ -97,4 +97,8 @@ class STTextViewDelegateProxy: STTextViewDelegate {
         source?.textViewInsertionPointView(textView, frame: frame)
     }
 
+    func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool {
+        source?.textView(textView, clickedOnLink: link, at: location) ?? false
+    }
+
 }
