@@ -657,9 +657,43 @@ import AVFoundation
         if isSelectable, visibleRect != .zero {
             addCursorRect(visibleRect, cursor: .iBeam)
 
-            // TODO: NSAttributedString.Key.cursor attribute
-            // TODO: .pointingHand for .link attribute rectangles
-            // addCursorRect(visibleRect, cursor: .pointingHand)
+            // This iteration may be performance intensive. I think it can be debounced without
+            // affecting the correctness
+            if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange,
+               let viewportAttributedString = textContentManager.attributedString(in: viewportRange)
+            {
+                viewportAttributedString.enumerateAttribute(.link, in: viewportAttributedString.range, options: .longestEffectiveRangeNotRequired) { attributeValue, attributeRange, stop in
+                    guard attributeValue != nil else {
+                        return
+                    }
+
+                    if let startLocation = textLayoutManager.location(viewportRange.location, offsetBy: attributeRange.location),
+                       let endLocation = textLayoutManager.location(startLocation, offsetBy: attributeRange.length),
+                       let linkTextRange = NSTextRange(location: startLocation, end: endLocation),
+                       let linkTypographicBounds = textLayoutManager.typographicBounds(in: linkTextRange)
+                    {
+                        addCursorRect(linkTypographicBounds, cursor: .pointingHand)
+                    } else {
+                        stop.pointee = true
+                    }
+                }
+
+                viewportAttributedString.enumerateAttribute(.cursor, in: viewportAttributedString.range, options: .longestEffectiveRangeNotRequired) { attributeValue, attributeRange, stop in
+                    guard let cursorValue = attributeValue as? NSCursor else {
+                        return
+                    }
+
+                    if let startLocation = textLayoutManager.location(viewportRange.location, offsetBy: attributeRange.location),
+                       let endLocation = textLayoutManager.location(startLocation, offsetBy: attributeRange.length),
+                       let linkTextRange = NSTextRange(location: startLocation, end: endLocation),
+                       let linkTypographicBounds = textLayoutManager.typographicBounds(in: linkTextRange)
+                    {
+                        addCursorRect(linkTypographicBounds, cursor: cursorValue)
+                    } else {
+                        stop.pointee = true
+                    }
+                }
+            }
         }
     }
 
