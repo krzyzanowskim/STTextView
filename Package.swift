@@ -30,7 +30,11 @@ let package = Package(
             ]
         ),
         .target(
-            name: "STTextViewiOS"
+            name: "STTextViewiOS",
+            dependencies: [
+                .target(name: "STObjCLandShim", condition: .when(platforms: [.iOS])),
+                .product(name: "STTextKitPlus", package: "STTextKitPlus")
+            ]
         ),
         .target(
             name: "STTextViewUI",
