@@ -3,7 +3,6 @@
 
 import Foundation
 import AppKit
-import STCompletion
 
 extension STTextView {
 

@@ -1,4 +1,11 @@
+#include <TargetConditionals.h>
+
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#elif TARGET_OS_OSX
 #import <Cocoa/Cocoa.h>
+#endif
+
 #import "CGContextShim.h"
 
 // https://github.com/gnachman/iTerm2/blob/b7d3fc6d9372a083ffadc2effbba01b67c040a69/sources/iTermGraphicsUtilities.m#L23

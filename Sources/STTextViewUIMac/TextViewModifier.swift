@@ -6,7 +6,7 @@ import SwiftUI
 
 public protocol TextViewModifier: SwiftUI.View { }
 
-extension STTextViewUI.TextView: TextViewModifier {
+extension STTextViewUIMac.TextView: TextViewModifier {
 
     public struct EnvironmentModifier<Content: View, V>: View, TextViewModifier {
         let content: Content

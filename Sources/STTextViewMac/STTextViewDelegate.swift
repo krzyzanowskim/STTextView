@@ -3,7 +3,6 @@
 
 import Foundation
 import AppKit
-import STCompletion
 
 /// A set of optional methods that text view delegates can use to manage selection,
 /// set text attributes and more.
