@@ -64,6 +64,14 @@ final class ViewController: NSViewController {
             }
         }
 
+        do {
+            let str = textView.string
+            var currentRange = str.startIndex..<str.endIndex
+            while let ocurrenceRange = str.range(of: "vim", range: currentRange) {
+                textView.addAttributes([.cursor: NSCursor.operationNotAllowed], range: NSRange(ocurrenceRange, in: str))
+                currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
+            }
+        }
 //  Insert attachment image using NSTextAttachmentCell
 //
 //         do {

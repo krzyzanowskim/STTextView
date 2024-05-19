@@ -8,7 +8,7 @@ import AVFoundation
 extension STTextView {
 
     /// Speaks the selected text, or all text if no selection.
-    @objc func startSpeaking(_ sender: Any?) {
+    @objc open func startSpeaking(_ sender: Any?) {
         stopSpeaking(sender)
 
         let attrString: NSAttributedString
@@ -27,7 +27,7 @@ extension STTextView {
     }
 
     /// Stops the speaking of text.
-    @objc func stopSpeaking(_ sender: Any?) {
+    @objc open func stopSpeaking(_ sender: Any?) {
         if speechSynthesizer.isSpeaking {
             speechSynthesizer.stopSpeaking(at: .word)
         }
