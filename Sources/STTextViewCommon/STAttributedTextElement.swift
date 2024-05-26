@@ -1,10 +1,15 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
-import Cocoa
 
+#if canImport(AppKit)
+import AppKit
+#endif
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// An attributed string backed text element
-protocol STAttributedTextElement: NSTextElement {
+package protocol STAttributedTextElement: NSTextElement {
     var attributedString: NSAttributedString { get }
 }
 

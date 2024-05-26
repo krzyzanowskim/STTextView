@@ -18,6 +18,7 @@
 
 import AppKit
 import STTextKitPlus
+import STTextViewCommon
 import AVFoundation
 
 /// A TextKit2 text view without NSTextView baggage
@@ -29,7 +30,7 @@ import AVFoundation
     public static let textDidChangeNotification = NSText.didChangeNotification
 
     /// Sent when the selection range of characters changes.
-    public static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
+    public static let didChangeSelectionNotification = STTextLayoutManager.didChangeSelectionNotification
 
     /// Installed plugins. events value is available after plugin is setup
     internal var plugins: [Plugin] = []
@@ -616,13 +617,13 @@ import AVFoundation
         }
 
         // Forward didChangeSelectionNotification from STTextLayoutManager
-        NotificationCenter.default.addObserver(forName: STTextView.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
+        NotificationCenter.default.addObserver(forName: Self.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
             YankingManager.shared.selectionChanged()
 
 
-            let textViewNotification = Notification(name: STTextView.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
+            let textViewNotification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
 
             NotificationCenter.default.post(textViewNotification)
             self.delegateProxy.textViewDidChangeSelection(textViewNotification)

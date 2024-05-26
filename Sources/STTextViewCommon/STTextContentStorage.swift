@@ -1,11 +1,18 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
+#if canImport(AppKit)
 import AppKit
+#endif
+#if canImport(UIKit)
+import UIKit
+#endif
 
-final class STTextContentStorage: NSTextContentStorage {
+import STTextKitPlus
 
-    override func replaceContents(in range: NSTextRange, with textElements: [NSTextElement]?) {
+package final class STTextContentStorage: NSTextContentStorage {
+
+    package override func replaceContents(in range: NSTextRange, with textElements: [NSTextElement]?) {
         assert(hasEditingTransaction, "Not called inside performEditingTransaction")
 
         guard let textStorage = textStorage,

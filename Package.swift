@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.9
 
 import PackageDescription
 
@@ -23,8 +23,15 @@ let package = Package(
             ]
         ),
         .target(
+            name: "STTextViewCommon",
+            dependencies: [
+                .product(name: "STTextKitPlus", package: "STTextKitPlus")
+            ]
+        ),
+        .target(
             name: "STTextViewMac",
             dependencies: [
+                .target(name: "STTextViewCommon"),
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.macOS])),
                 .product(name: "STTextKitPlus", package: "STTextKitPlus")
             ]
@@ -32,6 +39,7 @@ let package = Package(
         .target(
             name: "STTextViewiOS",
             dependencies: [
+                .target(name: "STTextViewCommon"),
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.iOS])),
                 .product(name: "STTextKitPlus", package: "STTextKitPlus")
             ]
