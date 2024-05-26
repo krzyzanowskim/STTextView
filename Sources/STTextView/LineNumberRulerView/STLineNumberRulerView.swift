@@ -194,7 +194,7 @@ open class STLineNumberRulerView: NSRulerView {
             let startLineIndex = textElements.count
 
             textView.textLayoutManager.enumerateTextLayoutFragments(in: viewportRange, options: [.ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-                let contentRangeInElement = layoutFragment.rangeInElement
+                let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                 for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
                     var baselineYOffset: CGFloat = 0

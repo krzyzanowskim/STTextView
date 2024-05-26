@@ -825,7 +825,7 @@ import AVFoundation
         }
 
         if textLayoutManager.documentRange.isEmpty {
-            // - empty document has no layout fragments, nothing, it's empt and has to be handled explicitly.
+            // - empty document has no layout fragments, nothing, it's empty and has to be handled explicitly.
             // - there's no layout fragment at the document endLocation (technically it's out of bounds), has to be handled explicitly.
             if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
                 drawHighlight(
@@ -851,8 +851,17 @@ import AVFoundation
         // build the rectangle out of fragments rectangles
         var combinedFragmentsRect: CGRect?
 
+        // TODO some beutiful day:
+        // Don't rely on NSTextParagraph.paragraphContentRange, but that
+        // makes tricky to get all the conditions right (especially for last line)
+        // Problem is that NSTextParagraph.rangeInElement span across two lines (eg. "abc\n" are two lines) while
+        // paragraphContentRange is just one ("abc")
+        //
+        // Another idea here is to use `textLayoutManager.textLayoutFragment(for: selectionTextRange.location)`
+        // to find the layout fragment and us its frame as highlight area. It has its issue when it comes to the
+        // extra line fragment area (sic).
         textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
-            let contentRangeInElement = layoutFragment.rangeInElement
+            let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
             for lineFragment in layoutFragment.textLineFragments {
 
                 func isLineSelected() -> Bool {
