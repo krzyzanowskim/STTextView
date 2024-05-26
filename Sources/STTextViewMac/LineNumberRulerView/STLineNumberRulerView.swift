@@ -3,6 +3,7 @@
 
 import AppKit
 import STTextKitPlus
+import STTextViewCommon
 
 /// A ruler view to display line numbers to the side of the text view.
 open class STLineNumberRulerView: NSRulerView {

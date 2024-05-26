@@ -58,7 +58,7 @@ extension FloatingPoint {
   /// - Returns: `true` if `self` is almost equal to `other`; otherwise
   ///   `false`.
   @inlinable
-  internal func isAlmostEqual(
+  package func isAlmostEqual(
     to other: Self,
     tolerance: Self = Self.ulpOfOne.squareRoot()
   ) -> Bool {
@@ -110,7 +110,7 @@ extension FloatingPoint {
   /// - Returns: `true` if `abs(self)` is less than `absoluteTolerance`.
   ///            `false` otherwise.
   @inlinable
-  internal func isAlmostZero(
+  package func isAlmostZero(
     absoluteTolerance tolerance: Self = Self.ulpOfOne.squareRoot()
   ) -> Bool {
     assert(tolerance > 0)
@@ -121,7 +121,7 @@ extension FloatingPoint {
   /// is infinite. We also handle NaN here so that the fast path doesn't
   /// need to worry about it.
   @usableFromInline
-  internal func rescaledAlmostEqual(to other: Self, tolerance: Self) -> Bool {
+  package func rescaledAlmostEqual(to other: Self, tolerance: Self) -> Bool {
     // NaN is considered to be not approximately equal to anything, not even
     // itself.
     if self.isNaN || other.isNaN { return false }

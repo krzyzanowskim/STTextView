@@ -26,7 +26,7 @@ final class ViewController: NSViewController {
         textView.typingAttributes[.paragraphStyle] = paragraph
 
         textView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
-        textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
+//        textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.isHorizontallyResizable = false // wrap
         textView.highlightSelectedLine = true
         textView.isIncrementalSearchingEnabled = true
@@ -85,21 +85,21 @@ final class ViewController: NSViewController {
 //
 
 //  Insert attachment image using NSTextAttachmentViewProvider
-        do {
-            let attachment = MyTextAttachment()
-            let attachmentString = NSAttributedString(attachment: attachment)
-            textView.insertText(attachmentString, replacementRange: NSRange(location: 30, length: 0))
-        }
+//        do {
+//            let attachment = MyTextAttachment()
+//            let attachmentString = NSAttributedString(attachment: attachment)
+//            textView.insertText(attachmentString, replacementRange: NSRange(location: 30, length: 0))
+//        }
 
 
         // Emphasize first line
-        textView.addAttributes(
-            [
-                .foregroundColor: NSColor.controlAccentColor,
-                .font: NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize * 1.2, weight: .bold)
-            ],
-            range: NSRange(textView.string.linesRanges().first!, in: textView.string)
-        )
+//        textView.addAttributes(
+//            [
+//                .foregroundColor: NSColor.controlAccentColor,
+//                .font: NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize * 1.2, weight: .bold)
+//            ],
+//            range: NSRange(textView.string.linesRanges().first!, in: textView.string)
+//        )
 
         updateCompletionsInBackground()
     }

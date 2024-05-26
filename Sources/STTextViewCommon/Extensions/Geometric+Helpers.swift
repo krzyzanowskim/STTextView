@@ -2,9 +2,21 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import CoreGraphics
-import AppKit
 
-extension CGRect {
+#if canImport(AppKit)
+import AppKit
+#endif
+#if canImport(UIKit)
+import UIKit
+#endif
+
+package extension CGRect {
+
+    #if canImport(AppKit)
+    typealias EdgeInsets = NSEdgeInsets
+    #else
+    typealias EdgeInsets = UIEdgeInsets
+    #endif
 
     enum Inset {
         case left(CGFloat)
@@ -13,7 +25,7 @@ extension CGRect {
         case bottom(CGFloat)
     }
 
-    func inset(by edgeInsets: NSEdgeInsets) -> CGRect {
+    func inset(by edgeInsets: EdgeInsets) -> CGRect {
         var result = self
         result.origin.x += edgeInsets.left
         result.origin.y += edgeInsets.top
@@ -27,13 +39,13 @@ extension CGRect {
         for inset in insets {
             switch inset {
                 case .left(let value):
-                    result = self.inset(by: NSEdgeInsets(top: 0, left: value, bottom: 0, right: 0))
+                    result = self.inset(by: EdgeInsets(top: 0, left: value, bottom: 0, right: 0))
                 case .right(let value):
-                    result = self.inset(by: NSEdgeInsets(top: 0, left: 0, bottom: 0, right: value))
+                    result = self.inset(by: EdgeInsets(top: 0, left: 0, bottom: 0, right: value))
                 case .top(let value):
-                    result = self.inset(by: NSEdgeInsets(top: value, left: 0, bottom: 0, right: 0))
+                    result = self.inset(by: EdgeInsets(top: value, left: 0, bottom: 0, right: 0))
                 case .bottom(let value):
-                    result = self.inset(by: NSEdgeInsets(top: 0, left: 0, bottom: value, right: 0))
+                    result = self.inset(by: EdgeInsets(top: 0, left: 0, bottom: value, right: 0))
             }
         }
         return result
@@ -64,7 +76,7 @@ extension CGRect {
     }
 }
 
-extension CGPoint {
+package extension CGPoint {
     func moved(dx: CGFloat = 0, dy: CGFloat = 0) -> CGPoint {
         applying(.init(translationX: dx, y: dy))
     }
@@ -74,19 +86,19 @@ extension CGPoint {
     }
 }
 
-extension CGRect {
+package extension CGRect {
     func isAlmostEqual(to other: CGRect) -> Bool {
         origin.isAlmostEqual(to: other.origin) && size.isAlmostEqual(to: other.size)
     }
 }
 
-extension CGPoint {
+package extension CGPoint {
     func isAlmostEqual(to other: CGPoint) -> Bool {
         x.isAlmostEqual(to: other.x) && y.isAlmostEqual(to: other.y)
     }
 }
 
-extension CGSize {
+package extension CGSize {
     func isAlmostEqual(to other: CGSize) -> Bool {
         width.isAlmostEqual(to: other.width) && height.isAlmostEqual(to: other.height)
     }

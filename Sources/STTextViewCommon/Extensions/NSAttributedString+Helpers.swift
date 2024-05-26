@@ -3,7 +3,7 @@
 
 import Foundation
 
-extension NSAttributedString {
+package extension NSAttributedString {
     func attributes(in range: NSRange, options: NSAttributedString.EnumerationOptions = []) -> Set<NSAttributedString.Key> {
         var usedAttributes: Set<NSAttributedString.Key> = []
 
