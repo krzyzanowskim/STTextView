@@ -7,6 +7,7 @@ final class ContentView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         isOpaque = false
+        isUserInteractionEnabled = false
     }
 
     required init?(coder: NSCoder) {

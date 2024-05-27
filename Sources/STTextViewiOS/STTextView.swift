@@ -143,7 +143,6 @@ import STTextViewCommon
         addSubview(selectionView)
         addSubview(contentView)
 
-
         editableTextInteraction.textInput = self
         editableTextInteraction.delegate = self
 
