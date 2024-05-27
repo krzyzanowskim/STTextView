@@ -11,6 +11,7 @@ class ViewController: UIViewController {
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.backgroundColor = .red
+        textView.text = "ala ma kota"
         // textView.contentInsetAdjustmentBehavior = .always
         view.addSubview(textView)
 

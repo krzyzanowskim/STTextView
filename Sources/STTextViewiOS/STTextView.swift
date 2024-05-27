@@ -24,6 +24,22 @@ import STTextViewCommon
     private let editableTextInteraction = UITextInteraction(for: .editable)
     private let nonEditableTextInteraction = UITextInteraction(for: .nonEditable)
 
+    public weak var inputDelegate: UITextInputDelegate?
+
+    /// The text that the text view displays.
+    public var text: String? {
+        set {
+            setString(newValue)
+        }
+
+        get {
+            textContentManager.attributedString(in: nil)?.string
+        }
+    }
+
+    /// The styled text that the text view displays.
+    // @NSCopying public var attributedText: NSAttributedString?
+
     /// A Boolean value that controls whether the text view allows the user to edit text.
     // @Invalidating(.insertionPoint, .cursorRects)
     @objc dynamic open var isEditable: Bool {
@@ -52,36 +68,18 @@ import STTextViewCommon
         !isFirstResponder && isEditable
     }
 
-//    open override func becomeFirstResponder() -> Bool {
-//        let isFirstResponder = self.isFirstResponder
-//        let result = super.becomeFirstResponder()
-//
-//        if isFirstResponder == false && self.isFirstResponder == true {
-//
-//        }
-//
-//        return result
-//    }
-
-//    open override func resignFirstResponder() -> Bool {
-//        // let isFirstResponder = self.isFirstResponder
-//        let result = super.resignFirstResponder()
-//
-//        // if isFirstResponder == true && self.isFirstResponder == false {
-//        //  removeInteraction(editableTextInteraction)
-//        //  addInteraction(nonEditableTextInteraction)
-//        // }
-//
-//        return result
-//    }
-
     public override init(frame: CGRect) {
         textContentManager = STTextContentStorage()
         textLayoutManager = STTextLayoutManager()
 
+        textLayoutManager.textContainer = NSTextContainer()
+        textLayoutManager.textContainer?.widthTracksTextView = false
+        textLayoutManager.textContainer?.heightTracksTextView = true
+        textContentManager.addTextLayoutManager(textLayoutManager)
+        textContentManager.primaryTextLayoutManager = textLayoutManager
+
         isSelectable = true
         isEditable = true
-
 
         super.init(frame: frame)
 
@@ -90,8 +88,6 @@ import STTextViewCommon
 
         nonEditableTextInteraction.textInput = self
         nonEditableTextInteraction.delegate = self
-
-        // isUserInteractionEnabled = true
 
         updateEditableInteraction()
     }
@@ -123,12 +119,86 @@ import STTextViewCommon
         fatalError("init(coder:) has not been implemented")
     }
 
-    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesBegan(touches, with: event)
+    internal func setString(_ string: Any?) {
+        undoManager?.disableUndoRegistration()
+        defer {
+            undoManager?.enableUndoRegistration()
+        }
+
+        if case .some(let string) = string {
+            switch string {
+            case let attributedString as NSAttributedString:
+                replaceCharacters(in: textLayoutManager.documentRange, with: attributedString, allowsTypingCoalescing: false)
+            case let string as String:
+                replaceCharacters(in: textLayoutManager.documentRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
+            default:
+                assertionFailure()
+                return
+            }
+        } else if case .none = string {
+            replaceCharacters(in: textLayoutManager.documentRange, with: "", useTypingAttributes: true, allowsTypingCoalescing: false)
+        }
     }
 
-    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesEnded(touches, with: event)
-        //becomeFirstResponder()
+    /// Whenever text is to be changed due to some user-induced action,
+    /// this method should be called with information on the change.
+    /// Coalesce consecutive typing events
+    open func shouldChangeText(in affectedTextRange: NSTextRange, replacementString: String?) -> Bool {
+        //let result = delegateProxy.textView(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString)
+        //if !result {
+        //    return result
+        //}
+        //
+        //return result
+        // TODO
+        return true
+    }
+
+    internal func shouldChangeText(in affectedTextRanges: [NSTextRange], replacementString: String?) -> Bool {
+        affectedTextRanges.allSatisfy { textRange in
+            shouldChangeText(in: textRange, replacementString: replacementString)
+        }
+    }
+
+    public func replaceCharacters(in range: NSTextRange, with string: String) {
+        replaceCharacters(in: range, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
+    }
+
+    internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
+        self.replaceCharacters(
+            in: textRanges,
+            with: NSAttributedString(string: replacementString/*, attributes: useTypingAttributes ? typingAttributes : [:]*/),
+            allowsTypingCoalescing: allowsTypingCoalescing
+        )
+    }
+
+    internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
+        // Replace from the end to beginning of the document
+        for textRange in textRanges.sorted(by: { $0.location > $1.location }) {
+            replaceCharacters(in: textRange, with: replacementString, allowsTypingCoalescing: true)
+        }
+    }
+
+    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
+        self.replaceCharacters(
+            in: textRange,
+            with: NSAttributedString(string: replacementString/*, attributes: useTypingAttributes ? typingAttributes : [:]*/),
+            allowsTypingCoalescing: allowsTypingCoalescing
+        )
+    }
+
+    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
+        //textWillChange(self)
+        //delegateProxy.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
+
+        textContentManager.performEditingTransaction {
+            textContentManager.replaceContents(
+                in: textRange,
+                with: [NSTextParagraph(attributedString: replacementString)]
+            )
+        }
+
+        //delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
+        //didChangeText(in: textRange)
     }
 }

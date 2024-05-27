@@ -4,28 +4,43 @@
 import UIKit
 
 extension STTextView: UITextInput {
+
     public func text(in range: UITextRange) -> String? {
-        // TODO: implement
-        nil
+        // FB13810290: UITextInput.textInRange is not maked as nullable, that result in crash when used from Swift
+        let range: UITextRange? = range
+        guard let range else {
+            return nil
+        }
+
+        return textContentManager.attributedString(in: range.nsTextRange)?.string
     }
 
     public func replace(_ range: UITextRange, withText text: String) {
-        // TODO: implement
+        let textRange = range.nsTextRange
+
+        if shouldChangeText(in: textRange, replacementString: text) {
+            replaceCharacters(in: textRange, with: text, useTypingAttributes: true, allowsTypingCoalescing: true)
+        }
     }
 
     public var selectedTextRange: UITextRange? {
         get {
-            // TODO: implement
-            nil
+            textLayoutManager.textSelections.last?.textRanges.last?.uiTextRange
         }
-        set(selectedTextRange) {
-            // TODO: implement
+        set {
+            if let textRange = newValue?.nsTextRange {
+                textLayoutManager.textSelections = [
+                    NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
+                ]
+            } else {
+                textLayoutManager.textSelections = []
+            }
         }
     }
 
     public var markedTextRange: UITextRange? {
-        // TODO: implement
-        nil
+        // assertionFailure("Not Implemented")
+        return nil
     }
 
     public var markedTextStyle: [NSAttributedString.Key : Any]? {
@@ -39,70 +54,70 @@ extension STTextView: UITextInput {
     }
 
     public func setMarkedText(_ markedText: String?, selectedRange: NSRange) {
-        // TODO: implement
+        assertionFailure("Not Implemented")
     }
 
     public func unmarkText() {
-        // TODO: implement
+        assertionFailure("Not Implemented")
     }
 
     public var beginningOfDocument: UITextPosition {
-        // TODO: implement
-        .init()
+        textContentManager.documentRange.location.uiTextPosition
     }
 
     public var endOfDocument: UITextPosition {
-        // TODO: implement
-        .init()
+        textContentManager.documentRange.endLocation.uiTextPosition
     }
 
     public func textRange(from fromPosition: UITextPosition, to toPosition: UITextPosition) -> UITextRange? {
-        // TODO: implement
-        nil
+        guard let fromPosition = fromPosition as? UITextLocation, let toPosition = toPosition as? UITextLocation else {
+            return nil
+        }
+
+        return NSTextRange(location: fromPosition.location, end: toPosition.location)?.uiTextRange
     }
 
     public func position(from position: UITextPosition, offset: Int) -> UITextPosition? {
-        // TODO: implement
-        nil
+        guard let textLocation = position as? UITextLocation else {
+            return nil
+        }
+
+        return textContentManager.location(textLocation.location, offsetBy: offset)?.uiTextPosition
     }
 
     public func position(from position: UITextPosition, in direction: UITextLayoutDirection, offset: Int) -> UITextPosition? {
-        // TODO: implement
-        nil
+        assertionFailure("Not Implemented")
+        return nil
     }
 
     public func compare(_ position: UITextPosition, to other: UITextPosition) -> ComparisonResult {
-        // TODO: implement
-        .orderedSame
+        guard let lhs = position as? UITextLocation, let rhs = other as? UITextLocation else {
+            return .orderedSame
+        }
+
+        return lhs.location.compare(rhs.location)
     }
 
     public func offset(from: UITextPosition, to toPosition: UITextPosition) -> Int {
-        // TODO: implement
-        0
-    }
+        guard let fromTextLocation = from as? UITextLocation, let toTextLocation = toPosition as? UITextLocation else {
+            return 0
+        }
 
-    public var inputDelegate: (any UITextInputDelegate)? {
-        get {
-            // TODO: implement
-            nil
-        }
-        set(inputDelegate) {
-            // TODO: implement
-        }
+        return textContentManager.offset(from: fromTextLocation.location, to: toTextLocation.location)
     }
 
     public var tokenizer: any UITextInputTokenizer {
-        fatalError()
+        UITextInputStringTokenizer(textInput: self)
     }
 
     public func position(within range: UITextRange, farthestIn direction: UITextLayoutDirection) -> UITextPosition? {
-        // TODO: implement
-        nil
+        assertionFailure("Not Implemented")
+        return nil
     }
 
     public func characterRange(byExtending position: UITextPosition, in direction: UITextLayoutDirection) -> UITextRange? {
-        nil
-        // TODO: implement
+        assertionFailure("Not Implemented")
+        return nil
     }
 
     public func baseWritingDirection(for position: UITextPosition, in direction: UITextStorageDirection) -> NSWritingDirection {

@@ -6,16 +6,18 @@ import UIKit
 extension STTextView: UIKeyInput {
 
     public var hasText: Bool {
-        // TODO: implement
-        false
+        !textContentManager.documentRange.isEmpty
     }
 
     public func insertText(_ text: String) {
-        // TODO: implement
+        let textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
+        if shouldChangeText(in: textRanges, replacementString: text) {
+            replaceCharacters(in: textRanges, with: text, useTypingAttributes: true, allowsTypingCoalescing: true)
+        }
     }
 
     public func deleteBackward() {
-        // TODO: implement
+        assertionFailure("Not Implemented")
     }
 
 }
