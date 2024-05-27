@@ -16,7 +16,7 @@ final class TextLayoutFragmentView: NSView {
         #endif
     }
 
-    init(layoutFragment: NSTextLayoutFragment, frame: NSRect) {
+    init(layoutFragment: NSTextLayoutFragment, frame: CGRect) {
         self.layoutFragment = layoutFragment
         super.init(frame: frame)
         wantsLayer = true
@@ -27,7 +27,7 @@ final class TextLayoutFragmentView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func draw(_ dirtyRect: NSRect) {
+    override func draw(_ dirtyRect: CGRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         layoutFragment.draw(at: .zero, in: context)
         drawSpellCheckerAttributes(dirtyRect, in: context)
@@ -52,7 +52,7 @@ final class TextLayoutFragmentView: NSView {
         }
     }
 
-    private func drawSpellCheckerAttributes(_ dirtyRect: NSRect, in context: CGContext) {
+    private func drawSpellCheckerAttributes(_ dirtyRect: CGRect, in context: CGContext) {
         guard let textLayoutManager = layoutFragment.textLayoutManager else {
             return
         }

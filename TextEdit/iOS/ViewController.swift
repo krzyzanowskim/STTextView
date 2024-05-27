@@ -10,8 +10,7 @@ class ViewController: UIViewController {
 
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
-        textView.backgroundColor = .red
-        textView.text = "ala ma kota"
+        textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         // textView.contentInsetAdjustmentBehavior = .always
         view.addSubview(textView)
 

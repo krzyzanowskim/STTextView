@@ -3,7 +3,8 @@
 //
 //
 //  STTextView
-//
+//      |---selectionView
+//      |---contentView
 
 import UIKit
 import STTextKitPlus
@@ -19,6 +20,17 @@ import STTextViewCommon
 
     /// The text view's text storage object.
     @objc open private(set) var textContentManager: NSTextContentManager
+
+    /// The text view's text container
+    public var textContainer: NSTextContainer {
+        textLayoutManager.textContainer!
+    }
+
+    /// Content view. Layout fragments content.
+    internal let contentView: ContentView
+    internal let selectionView: SelectionView
+
+    internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, TextLayoutFragmentView>
 
     /// An input delegate that receives a notification when text changes or when the selection changes.
     ///
@@ -63,6 +75,33 @@ import STTextViewCommon
         }
     }
 
+    /// The receiver’s default paragraph style.
+    @NSCopying @objc dynamic public var defaultParagraphStyle: NSParagraphStyle? {
+        didSet {
+            typingAttributes[.paragraphStyle] = defaultParagraphStyle ?? .default
+        }
+    }
+
+    /// The attributes to apply to new text that the user enters.
+    ///
+    /// This dictionary contains the attribute keys (and corresponding values) to apply to newly typed text.
+    /// When the text view’s selection changes, the contents of the dictionary are reset automatically.
+    @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
+        didSet {
+            typingAttributes.merge(defaultTypingAttributes) { (current, _) in current }
+            setNeedsLayout()
+            setNeedsDisplay()
+        }
+    }
+
+    private var defaultTypingAttributes: [NSAttributedString.Key: Any] {
+        [
+            .paragraphStyle: self.defaultParagraphStyle ?? NSParagraphStyle.default,
+            .font: UIFont.preferredFont(forTextStyle: .body),
+            .foregroundColor: UIColor.label
+        ]
+    }
+
     private let editableTextInteraction = UITextInteraction(for: .editable)
     private let nonEditableTextInteraction = UITextInteraction(for: .nonEditable)
 
@@ -75,6 +114,8 @@ import STTextViewCommon
     }
 
     public override init(frame: CGRect) {
+        fragmentViewMap = .weakToWeakObjects()
+
         textContentManager = STTextContentStorage()
         textLayoutManager = STTextLayoutManager()
 
@@ -87,7 +128,21 @@ import STTextViewCommon
         isSelectable = true
         isEditable = true
 
+        contentView = ContentView()
+        contentView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+        selectionView = SelectionView()
+        selectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+
+        typingAttributes = [:]
+
         super.init(frame: frame)
+
+        textLayoutManager.delegate = self
+        textLayoutManager.textViewportLayoutController.delegate = self
+
+        addSubview(selectionView)
+        addSubview(contentView)
+
 
         editableTextInteraction.textInput = self
         editableTextInteraction.delegate = self
@@ -96,6 +151,10 @@ import STTextViewCommon
         nonEditableTextInteraction.delegate = self
 
         updateEditableInteraction()
+    }
+
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func updateEditableInteraction() {
@@ -119,10 +178,6 @@ import STTextViewCommon
         } else {
             setupNonEditableInteraction()
         }
-    }
-
-    required public init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 
     internal func setString(_ string: Any?) {
@@ -206,5 +261,19 @@ import STTextViewCommon
 
         //delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
         //didChangeText(in: textRange)
+    }
+
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+
+        layoutViewport()
+    }
+
+    private func layoutViewport() {
+        // layoutViewport does not handle properly layout range
+        // for far jump it tries to layout everything starting at location 0
+        // even though viewport range is properly calculated.
+        // No known workaround.
+        textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 }

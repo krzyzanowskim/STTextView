@@ -622,7 +622,6 @@ import AVFoundation
 
             YankingManager.shared.selectionChanged()
 
-
             let textViewNotification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
 
             NotificationCenter.default.post(textViewNotification)
