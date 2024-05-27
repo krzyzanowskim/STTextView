@@ -115,6 +115,18 @@ extension STTextView: UITextInput {
         return nil
     }
 
+    public func characterOffset(of position: UITextPosition, within range: UITextRange) -> Int {
+        // Optional
+        assertionFailure("Not Implemented")
+        return 0
+    }
+
+    public func position(within range: UITextRange, atCharacterOffset offset: Int) -> UITextPosition? {
+        // Optional
+        assertionFailure("Not Implemented")
+        return nil
+    }
+
     public func characterRange(byExtending position: UITextPosition, in direction: UITextLayoutDirection) -> UITextRange? {
         assertionFailure("Not Implemented")
         return nil

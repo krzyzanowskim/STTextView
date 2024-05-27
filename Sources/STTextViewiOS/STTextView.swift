@@ -20,10 +20,9 @@ import STTextViewCommon
     /// The text view's text storage object.
     @objc open private(set) var textContentManager: NSTextContentManager
 
-
-    private let editableTextInteraction = UITextInteraction(for: .editable)
-    private let nonEditableTextInteraction = UITextInteraction(for: .nonEditable)
-
+    /// An input delegate that receives a notification when text changes or when the selection changes.
+    ///
+    /// The text input system automatically assigns a delegate to this property at runtime.
     public weak var inputDelegate: UITextInputDelegate?
 
     /// The text that the text view displays.
@@ -62,6 +61,13 @@ import STTextViewCommon
                 isEditable = false
             }
         }
+    }
+
+    private let editableTextInteraction = UITextInteraction(for: .editable)
+    private let nonEditableTextInteraction = UITextInteraction(for: .nonEditable)
+
+    @objc public var textInputView: UIView {
+        self
     }
 
     open override var canBecomeFirstResponder: Bool {
