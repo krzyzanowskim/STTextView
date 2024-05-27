@@ -40,7 +40,14 @@ import STTextViewCommon
     /// The text that the text view displays.
     public var text: String? {
         set {
+            let prevLocation = textLayoutManager.insertionPointLocations.first
+
             setString(newValue)
+
+            // restore selection location
+            if let prevLocation = prevLocation {
+                setSelectedTextRange(NSTextRange(location: prevLocation))
+            }
         }
 
         get {
@@ -137,6 +144,9 @@ import STTextViewCommon
 
         super.init(frame: frame)
 
+        // Set insert point at the very beginning
+        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location))
+
         textLayoutManager.delegate = self
         textLayoutManager.textViewportLayoutController.delegate = self
 
@@ -154,6 +164,22 @@ import STTextViewCommon
 
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    public func setSelectedTextRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
+        guard isSelectable, textRange.endLocation <= textLayoutManager.documentRange.endLocation else {
+            return
+        }
+
+        textLayoutManager.textSelections = [
+            NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
+        ]
+
+        // TODO: updateTypingAttributes(at: textRange.location)
+
+        if updateLayout {
+            setNeedsLayout()
+        }
     }
 
     private func updateEditableInteraction() {
