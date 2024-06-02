@@ -5,9 +5,28 @@ import UIKit
 import STTextKitPlus
 
 extension STTextView: UITextInput {
-    
+
+    /// Text may have a selection, either zero-length (a caret) or ranged.  Editing operations are
+    /// always performed on the text from this selection.  nil corresponds to no selection.
+    public var selectedTextRange: UITextRange? {
+        get {
+            textLayoutManager.textSelections.last?.textRanges.last?.uiTextRange
+        }
+        set {
+            inputDelegate?.selectionWillChange(self)
+            if let textRange = newValue?.nsTextRange {
+                textLayoutManager.textSelections = [
+                    NSTextSelection(range: textRange, affinity: .upstream, granularity: .character)
+                ]
+            } else {
+                textLayoutManager.textSelections = []
+            }
+            inputDelegate?.selectionDidChange(self)
+        }
+    }
+
     /* Methods for manipulating text. */
-    
+
     public func text(in range: UITextRange) -> String? {
         // FB13810290: UITextInput.textInRange is not maked as nullable, that result in crash when used from Swift
         let range: UITextRange? = range
@@ -26,39 +45,6 @@ extension STTextView: UITextInput {
         }
     }
 
-    /* Text may have a selection, either zero-length (a caret) or ranged.  Editing operations are
-     * always performed on the text from this selection.  nil corresponds to no selection. */
-
-    public var selectedTextRange: UITextRange? {
-        get {
-            textLayoutManager.textSelections.last?.textRanges.last?.uiTextRange
-        }
-        set {
-            inputDelegate?.selectionWillChange(self)
-            if let textRange = newValue?.nsTextRange {
-                textLayoutManager.textSelections = [
-                    NSTextSelection(range: textRange, affinity: .upstream, granularity: .character)
-                ]
-            } else {
-                textLayoutManager.textSelections = []
-            }
-            inputDelegate?.selectionDidChange(self)
-        }
-    }
-
-    /* If text can be selected, it can be marked. Marked text represents provisionally
-     * inserted text that has yet to be confirmed by the user.  It requires unique visual
-     * treatment in its display.  If there is any marked text, the selection, whether a
-     * caret or an extended range, always resides within.
-     *
-     * Setting marked text either replaces the existing marked text or, if none is present,
-     * inserts it from the current selection. */
-
-    public var markedTextRange: UITextRange? {
-        // assertionFailure("Not Implemented")
-        return nil
-    }
-
     public func setMarkedText(_ markedText: String?, selectedRange: NSRange) {
         assertionFailure("Not Implemented")
     }
@@ -67,24 +53,14 @@ extension STTextView: UITextInput {
         assertionFailure("Not Implemented")
     }
 
-    public var markedTextStyle: [NSAttributedString.Key : Any]? {
-        get {
-            // TODO: implement
-            nil
-        }
-        set(markedTextStyle) {
-            // TODO: implement
-        }
-    }
-
     /* The end and beginning of the the text document. */
-    
+
     public var beginningOfDocument: UITextPosition {
-        textContentManager.documentRange.location.uiTextPosition
+        textLayoutManager.documentRange.location.uiTextPosition
     }
 
     public var endOfDocument: UITextPosition {
-        textContentManager.documentRange.endLocation.uiTextPosition
+        textLayoutManager.documentRange.endLocation.uiTextPosition
     }
 
     /* Methods for creating ranges and positions. */
@@ -102,7 +78,7 @@ extension STTextView: UITextInput {
             return nil
         }
 
-        return textContentManager.location(textLocation.location, offsetBy: offset)?.uiTextPosition
+        return textLayoutManager.location(textLocation.location, offsetBy: offset)?.uiTextPosition
     }
 
     public func position(from position: UITextPosition, in direction: UITextLayoutDirection, offset: Int) -> UITextPosition? {
@@ -112,6 +88,7 @@ extension STTextView: UITextInput {
     
     /* Simple evaluation of positions */
 
+    /// Returns how one text position compares to another text position.
     public func compare(_ position: UITextPosition, to other: UITextPosition) -> ComparisonResult {
         guard let lhs = position as? STTextLocation, let rhs = other as? STTextLocation else {
             return .orderedSame
@@ -120,6 +97,7 @@ extension STTextView: UITextInput {
         return lhs.location.compare(rhs.location)
     }
 
+    /// Returns the number of UTF-16 characters between one text position and another text position.
     public func offset(from: UITextPosition, to toPosition: UITextPosition) -> Int {
         guard let fromTextLocation = from as? STTextLocation, let toTextLocation = toPosition as? STTextLocation else {
             return 0
@@ -128,14 +106,9 @@ extension STTextView: UITextInput {
         return textContentManager.offset(from: fromTextLocation.location, to: toTextLocation.location)
     }
 
-    /* A tokenizer must be provided to inform the text input system about text units of varying granularity. */
-
-    public var tokenizer: any UITextInputTokenizer {
-        UITextInputStringTokenizer(textInput: self)
-    }
-
     /* Layout questions. */
 
+    /// Returns the text position that is at the farthest extent in a specified layout direction within a range of text.
     public func position(within range: UITextRange, farthestIn direction: UITextLayoutDirection) -> UITextPosition? {
         assertionFailure("Not Implemented")
         return nil
@@ -161,12 +134,11 @@ extension STTextView: UITextInput {
     /* Writing direction */
 
     public func baseWritingDirection(for position: UITextPosition, in direction: UITextStorageDirection) -> NSWritingDirection {
-        // TODO: implement
         .natural
     }
 
     public func setBaseWritingDirection(_ writingDirection: NSWritingDirection, for range: UITextRange) {
-        // TODO: implement
+
     }
 
     /* Geometry used to provide, for example, a correction rect. */
@@ -203,7 +175,7 @@ extension STTextView: UITextInput {
     /* Hit testing. */
 
     public func closestPosition(to point: CGPoint) -> UITextPosition? {
-        textLayoutManager.location(interactingAt: point, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition
+        return textLayoutManager.location(interactingAt: point, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition
     }
 
     public func closestPosition(to point: CGPoint, within range: UITextRange) -> UITextPosition? {

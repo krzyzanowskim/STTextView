@@ -45,6 +45,20 @@ import STTextViewCommon
     /// The text input system automatically assigns a delegate to this property at runtime.
     public weak var inputDelegate: UITextInputDelegate?
 
+    public var markedTextStyle: [NSAttributedString.Key : Any]?
+
+    /// If text can be selected, it can be marked. Marked text represents provisionally
+    /// inserted text that has yet to be confirmed by the user.  It requires unique visual
+    /// treatment in its display.  If there is any marked text, the selection, whether a
+    /// caret or an extended range, always resides within.
+    ///
+    /// Setting marked text either replaces the existing marked text or, if none is present,
+    /// inserts it from the current selection.
+    public var markedTextRange: UITextRange?
+
+    /// A tokenizer must be provided to inform the text input system about text units of varying granularity.
+    public lazy var tokenizer: UITextInputTokenizer = UITextInputStringTokenizer(textInput: self)
+
     /// The text that the text view displays.
     public var text: String? {
         set {
@@ -148,6 +162,8 @@ import STTextViewCommon
 
         typingAttributes = [:]
 
+//        _selectedTextRange = STTextLocationRange(textRange: NSTextRange(location: textLayoutManager.documentRange.location))
+
         super.init(frame: frame)
 
         // Set insert point at the very beginning
@@ -185,7 +201,7 @@ import STTextViewCommon
             return
         }
 
-        self.selectedTextRange = textRange.uiTextRange
+        selectedTextRange = textRange.uiTextRange
 
         // TODO: updateTypingAttributes(at: textRange.location)
 

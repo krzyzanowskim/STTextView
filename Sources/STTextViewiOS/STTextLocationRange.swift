@@ -4,14 +4,26 @@
 import UIKit
 
 internal class STTextLocationRange: UITextRange {
-    let textRange: NSTextRange
+    fileprivate let textRange: NSTextRange
+
+    init(textRange: NSTextRange) {
+        self.textRange = textRange
+    }
 
     override var debugDescription: String {
         textRange.description
     }
 
-    init(textRange: NSTextRange) {
-        self.textRange = textRange
+    override var start: UITextPosition {
+        textRange.location.uiTextPosition
+    }
+
+    override var end: UITextPosition {
+        textRange.endLocation.uiTextPosition
+    }
+
+    override var isEmpty: Bool {
+        textRange.isEmpty
     }
 }
 
