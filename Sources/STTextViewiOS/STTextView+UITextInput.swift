@@ -10,7 +10,11 @@ extension STTextView: UITextInput {
     /// always performed on the text from this selection.  nil corresponds to no selection.
     public var selectedTextRange: UITextRange? {
         get {
-            textLayoutManager.textSelections.last?.textRanges.last?.uiTextRange
+            guard let textSelection = textLayoutManager.textSelections.last else {
+                return nil
+            }
+
+            return textSelection.textRanges.last?.uiTextRange
         }
         set {
             inputDelegate?.selectionWillChange(self)
@@ -70,7 +74,11 @@ extension STTextView: UITextInput {
             return nil
         }
 
-        return NSTextRange(location: fromPosition.location, end: toPosition.location)?.uiTextRange
+        if fromPosition.location < toPosition.location {
+            return NSTextRange(location: fromPosition.location, end: toPosition.location)?.uiTextRange
+        } else {
+            return NSTextRange(location: toPosition.location, end: fromPosition.location)?.uiTextRange
+        }
     }
 
     public func position(from position: UITextPosition, offset: Int) -> UITextPosition? {
@@ -163,8 +171,8 @@ extension STTextView: UITextInput {
             return [STTextSelectionRect(
                 rect: rect,
                 writingDirection: .natural,
-                containsStart: true,
-                containsEnd: true,
+                containsStart: false,
+                containsEnd: false,
                 isVertical: false
             )]
         }

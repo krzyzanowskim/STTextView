@@ -162,8 +162,6 @@ import STTextViewCommon
 
         typingAttributes = [:]
 
-//        _selectedTextRange = STTextLocationRange(textRange: NSTextRange(location: textLayoutManager.documentRange.location))
-
         super.init(frame: frame)
 
         // Set insert point at the very beginning
