@@ -43,7 +43,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
-        let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) ?? TextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: .zero)
+        let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) ?? STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: .zero)
         // Adjust position
         let oldFrame = fragmentView.frame
         fragmentView.frame = textLayoutFragment.layoutFragmentFrame//.pixelAligned
@@ -52,9 +52,9 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             fragmentView.setNeedsDisplay()
         }
 
-         if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment {
-            // textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
-         }
+        //if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment {
+        //    textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
+        //}
 
         contentView.addSubview(fragmentView)
         fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)

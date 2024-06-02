@@ -3,7 +3,6 @@
 //
 //
 //  STTextView
-//      |---selectionView
 //      |---contentView
 
 import UIKit
@@ -14,6 +13,16 @@ import STTextViewCommon
 
     /// Sent when the selection range of characters changes.
     public static let didChangeSelectionNotification = STTextLayoutManager.didChangeSelectionNotification
+
+    public var autocorrectionType: UITextAutocorrectionType = .default
+    public var autocapitalizationType: UITextAutocapitalizationType = .sentences
+    public var smartQuotesType: UITextSmartQuotesType = .default
+    public var smartDashesType: UITextSmartDashesType = .default
+    public var smartInsertDeleteType: UITextSmartInsertDeleteType = .default
+    public var spellCheckingType: UITextSpellCheckingType = .default
+    public var keyboardType: UIKeyboardType = .default
+    public var keyboardAppearance: UIKeyboardAppearance = .default
+    public var returnKeyType: UIReturnKeyType = .default
 
     /// The manager that lays out text for the text view's text container.
     @objc open private(set) var textLayoutManager: NSTextLayoutManager
@@ -28,9 +37,8 @@ import STTextViewCommon
 
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
-    internal let selectionView: SelectionView
 
-    internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, TextLayoutFragmentView>
+    internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
 
     /// An input delegate that receives a notification when text changes or when the selection changes.
     ///
@@ -137,8 +145,6 @@ import STTextViewCommon
 
         contentView = ContentView()
         contentView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-        selectionView = SelectionView()
-        selectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
 
         typingAttributes = [:]
 
@@ -150,7 +156,6 @@ import STTextViewCommon
         textLayoutManager.delegate = self
         textLayoutManager.textViewportLayoutController.delegate = self
 
-        addSubview(selectionView)
         addSubview(contentView)
 
         editableTextInteraction.textInput = self
@@ -160,6 +165,15 @@ import STTextViewCommon
         nonEditableTextInteraction.delegate = self
 
         updateEditableInteraction()
+
+        NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
+            guard let self = self else { return }
+            let textViewNotification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
+
+            NotificationCenter.default.post(textViewNotification)
+            // self.delegateProxy.textViewDidChangeSelection(textViewNotification)
+            // NSAccessibility.post(element: self, notification: .selectedTextChanged)
+        }
     }
 
     required public init?(coder: NSCoder) {
@@ -171,9 +185,7 @@ import STTextViewCommon
             return
         }
 
-        textLayoutManager.textSelections = [
-            NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
-        ]
+        self.selectedTextRange = textRange.uiTextRange
 
         // TODO: updateTypingAttributes(at: textRange.location)
 
@@ -274,7 +286,7 @@ import STTextViewCommon
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
-        //textWillChange(self)
+        inputDelegate?.textWillChange(self)
         //delegateProxy.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
         textContentManager.performEditingTransaction {
@@ -285,7 +297,7 @@ import STTextViewCommon
         }
 
         //delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
-        //didChangeText(in: textRange)
+        inputDelegate?.textDidChange(self)
     }
 
     open override func layoutSubviews() {

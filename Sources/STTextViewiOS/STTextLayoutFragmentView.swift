@@ -5,7 +5,7 @@ import UIKit
 import CoreGraphics
 import STTextKitPlus
 
-final class TextLayoutFragmentView: UIView {
+final class STTextLayoutFragmentView: UIView {
     private let layoutFragment: NSTextLayoutFragment
 
     init(layoutFragment: NSTextLayoutFragment, frame: CGRect) {

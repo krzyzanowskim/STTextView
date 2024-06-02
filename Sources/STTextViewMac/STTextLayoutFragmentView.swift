@@ -5,7 +5,7 @@ import AppKit
 import CoreGraphics
 import STTextKitPlus
 
-final class TextLayoutFragmentView: NSView {
+final class STTextLayoutFragmentView: NSView {
     private let layoutFragment: NSTextLayoutFragment
 
     override var isFlipped: Bool {

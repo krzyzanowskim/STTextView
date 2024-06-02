@@ -5,7 +5,7 @@
 //  STTextView
 //      |---selectionView
 //      |---contentView
-//              |---(STInsertionPointView | TextLayoutFragmentView)
+//              |---(STInsertionPointView | STTextLayoutFragmentView)
 //      |---decorationView
 //
 //
@@ -425,7 +425,7 @@ import AVFoundation
     /// Layout fragments decoration, custom rendering attributes
     internal let decorationView: DecorationView
 
-    internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, TextLayoutFragmentView>
+    internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
     internal lazy var speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
@@ -617,7 +617,7 @@ import AVFoundation
         }
 
         // Forward didChangeSelectionNotification from STTextLayoutManager
-        NotificationCenter.default.addObserver(forName: Self.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
+        NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
             YankingManager.shared.selectionChanged()

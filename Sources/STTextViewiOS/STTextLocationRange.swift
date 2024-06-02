@@ -3,7 +3,7 @@
 
 import UIKit
 
-internal class UITextLocationRange: UITextRange {
+internal class STTextLocationRange: UITextRange {
     let textRange: NSTextRange
 
     override var debugDescription: String {
@@ -16,14 +16,14 @@ internal class UITextLocationRange: UITextRange {
 }
 
 internal extension NSTextRange {
-    var uiTextRange: UITextLocationRange {
-        UITextLocationRange(textRange: self)
+    var uiTextRange: STTextLocationRange {
+        STTextLocationRange(textRange: self)
     }
 }
 
 internal extension UITextRange {
     var nsTextRange: NSTextRange {
-        guard let range = self as? UITextLocationRange else {
+        guard let range = self as? STTextLocationRange else {
             fatalError("Invalid type")
         }
         return range.textRange
