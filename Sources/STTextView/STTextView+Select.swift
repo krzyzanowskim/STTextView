@@ -104,7 +104,8 @@ extension STTextView {
         setTextSelections(
             direction: .left,
             destination: .character,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -112,7 +113,8 @@ extension STTextView {
         setTextSelections(
             direction: .left,
             destination: .character,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -120,7 +122,8 @@ extension STTextView {
         setTextSelections(
             direction: .right,
             destination: .character,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -128,7 +131,8 @@ extension STTextView {
         setTextSelections(
             direction: .right,
             destination: .character,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -136,7 +140,8 @@ extension STTextView {
         setTextSelections(
             direction: .up,
             destination: .character,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -144,7 +149,8 @@ extension STTextView {
         setTextSelections(
             direction: .up,
             destination: .character,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -152,7 +158,8 @@ extension STTextView {
         setTextSelections(
             direction: .down,
             destination: .character,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -160,7 +167,8 @@ extension STTextView {
         setTextSelections(
             direction: .down,
             destination: .character,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -168,7 +176,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .character,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -176,7 +185,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .character,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -184,7 +194,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .character,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -192,7 +203,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .character,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -200,7 +212,8 @@ extension STTextView {
         setTextSelections(
             direction: .left,
             destination: .word,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -208,7 +221,8 @@ extension STTextView {
         setTextSelections(
             direction: .left,
             destination: .word,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -216,7 +230,8 @@ extension STTextView {
         setTextSelections(
             direction: .right,
             destination: .word,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -224,7 +239,8 @@ extension STTextView {
         setTextSelections(
             direction: .right,
             destination: .word,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -232,7 +248,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .word,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -240,7 +257,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .word,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -248,7 +266,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .word,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -256,7 +275,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .word,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -264,7 +284,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .line,
-            extending: false
+            extending: false,
+            confined: true
         )
     }
 
@@ -272,7 +293,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .line,
-            extending: true
+            extending: true,
+            confined: true
         )
     }
 
@@ -280,7 +302,8 @@ extension STTextView {
         setTextSelections(
             direction: .left,
             destination: .line,
-            extending: false
+            extending: false,
+            confined: true
         )
     }
 
@@ -288,7 +311,8 @@ extension STTextView {
         setTextSelections(
             direction: .left,
             destination: .line,
-            extending: true
+            extending: true,
+            confined: true
         )
     }
 
@@ -296,7 +320,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .line,
-            extending: false
+            extending: false,
+            confined: true
         )
     }
 
@@ -304,7 +329,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .line,
-            extending: true
+            extending: true,
+            confined: true
         )
     }
 
@@ -312,7 +338,8 @@ extension STTextView {
         setTextSelections(
             direction: .right,
             destination: .line,
-            extending: false
+            extending: false,
+            confined: true
         )
     }
 
@@ -320,7 +347,8 @@ extension STTextView {
         setTextSelections(
             direction: .right,
             destination: .line,
-            extending: true
+            extending: true,
+            confined: true
         )
     }
 
@@ -328,7 +356,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .paragraph,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -336,7 +365,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .paragraph,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -344,7 +374,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .paragraph,
-            extending: false
+            extending: false,
+            confined: true
         )
     }
 
@@ -352,7 +383,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .paragraph,
-            extending: true
+            extending: true,
+            confined: true
         )
     }
 
@@ -360,7 +392,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .paragraph,
-            extending: false
+            extending: false,
+            confined: true
         )
     }
 
@@ -368,7 +401,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .paragraph,
-            extending: true
+            extending: true,
+            confined: true
         )
     }
 
@@ -376,7 +410,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .document,
-            extending: false
+            extending: false,
+            confined: false
         )
     }
 
@@ -384,7 +419,8 @@ extension STTextView {
         setTextSelections(
             direction: .backward,
             destination: .document,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
@@ -392,7 +428,8 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .document,
-            extending: false
+            extending: false, 
+            confined: false
         )
     }
 
@@ -400,11 +437,17 @@ extension STTextView {
         setTextSelections(
             direction: .forward,
             destination: .document,
-            extending: true
+            extending: true,
+            confined: false
         )
     }
 
-    private func setTextSelections(direction: NSTextSelectionNavigation.Direction, destination: NSTextSelectionNavigation.Destination, extending: Bool) {
+    private func setTextSelections(
+        direction: NSTextSelectionNavigation.Direction,
+        destination: NSTextSelectionNavigation.Destination,
+        extending: Bool,
+        confined: Bool
+    ) {
         guard isSelectable else { return }
 
         textLayoutManager.textSelections = textLayoutManager.textSelections.compactMap { textSelection in
@@ -413,7 +456,7 @@ extension STTextView {
                 direction: direction,
                 destination: destination,
                 extending: extending,
-                confined: false
+                confined: confined
             )
         }
 
