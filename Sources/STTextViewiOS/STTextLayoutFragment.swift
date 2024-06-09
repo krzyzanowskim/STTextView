@@ -6,7 +6,6 @@ import STObjCLandShim
 
 final class STTextLayoutFragment: NSTextLayoutFragment {
     private let paragraphStyle: NSParagraphStyle
-    var showsInvisibleCharacters: Bool = false
 
     init(textElement: NSTextElement, range rangeInElement: NSTextRange?, paragraphStyle: NSParagraphStyle) {
         self.paragraphStyle = paragraphStyle
@@ -15,7 +14,6 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
 
     required init?(coder: NSCoder) {
         self.paragraphStyle = NSParagraphStyle.default
-        self.showsInvisibleCharacters = false
         super.init(coder: coder)
     }
 
@@ -72,45 +70,6 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
             STContextSetFontSmoothingStyle(context, savedFontSmoothingStyle);
         }
 #endif
-
-        if showsInvisibleCharacters {
-            drawInvisibles(at: point, in: context)
-        }
-
-        context.restoreGState()
-    }
-
-    private func drawInvisibles(at point: CGPoint, in context: CGContext) {
-        guard let textLayoutManager = textLayoutManager else {
-            return
-        }
-
-        context.saveGState()
-
-        for lineFragment in textLineFragments where !lineFragment.isExtraLineFragment {
-            let string = lineFragment.attributedString.string
-            if let textLineTextRange = lineFragment.textRange(in: self) {
-                for (offset, character) in string.utf16.enumerated() where Unicode.Scalar(character)?.properties.isWhitespace == true {
-                    // FIXME: if fail to draw for right-to-left writing direction
-                    let writingDirection = textLayoutManager.baseWritingDirection(at: textLineTextRange.location)
-                    guard let segmentLocation = textLayoutManager.location(textLineTextRange.location, offsetBy: offset),
-                          let segmentEndLocation = textLayoutManager.location(textLineTextRange.location, offsetBy: offset + (writingDirection == .leftToRight ? 1 : 0)),
-                          let segmentRange = NSTextRange(location: segmentLocation, end: segmentEndLocation),
-                          let segmentFrame = textLayoutManager.textSegmentFrame(in: segmentRange, type: .standard)
-                    else {
-                        // assertionFailure()
-                        continue
-                    }
-
-                    let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width, height: segmentFrame.size.height))
-                    context.setFillColor(UIColor.placeholderText.cgColor)
-                    let rect = CGRect(x: frameRect.midX, y: frameRect.midY, width: frameRect.width / 4, height: frameRect.width / 4)
-                    context.addEllipse(in: rect)
-                    context.drawPath(using: .fill)
-                }
-            }
-        }
-
         context.restoreGState()
     }
 }

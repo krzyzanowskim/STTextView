@@ -20,7 +20,7 @@ extension STTextView: UITextInput {
             inputDelegate?.selectionWillChange(self)
             if let textRange = newValue?.nsTextRange {
                 textLayoutManager.textSelections = [
-                    NSTextSelection(range: textRange, affinity: .upstream, granularity: .character)
+                    NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
                 ]
             } else {
                 textLayoutManager.textSelections = []
@@ -90,8 +90,42 @@ extension STTextView: UITextInput {
     }
 
     public func position(from position: UITextPosition, in direction: UITextLayoutDirection, offset: Int) -> UITextPosition? {
-        assertionFailure("Not Implemented")
-        return nil
+        guard let position = position as? STTextLocation else {
+            return nil
+        }
+
+        var textSelectionDirection: NSTextSelectionNavigation.Direction? {
+            switch direction {
+            case .up:
+                return .up
+            case .down:
+                return .down
+            case .left:
+                return .left
+            case .right:
+                return .right
+            @unknown default:
+                return nil
+            }
+        }
+
+        guard let textSelectionDirection else {
+            return nil
+        }
+
+        let positionSelection = NSTextSelection(position.location, affinity: .downstream)
+        var currentDestination: NSTextSelection? = positionSelection
+        for _ in 0..<offset {
+            currentDestination = textLayoutManager.textSelectionNavigation.destinationSelection(
+                for: currentDestination ?? positionSelection,
+                direction: textSelectionDirection,
+                destination: .character,
+                extending: false,
+                confined: false
+            )
+        }
+
+        return currentDestination?.textRanges.first?.location.uiTextPosition
     }
     
     /* Simple evaluation of positions */
