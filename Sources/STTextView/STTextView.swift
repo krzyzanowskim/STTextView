@@ -1239,7 +1239,7 @@ import AVFoundation
     internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
         // Replace from the end to beginning of the document
         for textRange in textRanges.sorted(by: { $0.location > $1.location }) {
-            replaceCharacters(in: textRange, with: replacementString, allowsTypingCoalescing: true)
+            replaceCharacters(in: textRange, with: replacementString, allowsTypingCoalescing: allowsTypingCoalescing)
         }
     }
 
@@ -1252,75 +1252,7 @@ import AVFoundation
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
-        if allowsUndo, let undoManager = undoManager, undoManager.isUndoRegistrationEnabled {
-            // typing coalescing
-            if processingKeyEvent, allowsTypingCoalescing,
-               let undoManager = undoManager as? CoalescingUndoManager
-            {
-                if undoManager.isCoalescing {
-                    // Extend existing coalesce range
-                    if let coalescingValue = undoManager.coalescing?.value,
-                       textRange.location == coalescingValue.textRange.endLocation,
-                       let undoEndLocation = textContentManager.location(textRange.location, offsetBy: replacementString.length),
-                       let undoTextRange = NSTextRange(location: coalescingValue.textRange.location, end: undoEndLocation)
-                    {
-                        undoManager.coalesce(TypingTextUndo(
-                            textRange: undoTextRange,
-                            attributedString: NSAttributedString()
-                        ))
-                        
-                    } else {
-                        breakUndoCoalescing()
-                    }
-                }
-
-                if !undoManager.isCoalescing {
-                    let undoRange = NSTextRange(
-                        location: textRange.location,
-                        end: textContentManager.location(textRange.location, offsetBy: replacementString.length)
-                    ) ?? textRange
-
-                    let previousStringInRange = (textContentManager as? NSTextContentStorage)!.attributedString!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
-
-                    let startTypingUndo = TypingTextUndo(
-                        textRange: undoRange,
-                        attributedString: previousStringInRange
-                    )
-
-                    undoManager.startCoalescing(startTypingUndo, withTarget: self) { textView, typingTextUndo in
-                        // Undo coalesced session action
-                        textView.replaceCharacters(
-                            in: typingTextUndo.textRange,
-                            with: typingTextUndo.attributedString ?? NSAttributedString(),
-                            allowsTypingCoalescing: false
-                        )
-                    }
-                }
-            } else if !undoManager.isUndoing, !undoManager.isRedoing, undoManager.isUndoRegistrationEnabled {
-                breakUndoCoalescing()
-
-                // Reach to NSTextStorage because NSTextContentStorage range extraction is cumbersome.
-                // A range that is as long as replacement string, so when undo it undo
-                let undoRange = NSTextRange(
-                    location: textRange.location,
-                    end: textContentManager.location(textRange.location, offsetBy: replacementString.length)
-                ) ?? textRange
-
-                let previousStringInRange = (textContentManager as! NSTextContentStorage).attributedString!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
-
-                // Register undo/redo
-                // I can't control internal redoStack, and coalescing messes up with the state
-                // resulting in broken undo/redo availability
-                undoManager.registerUndo(withTarget: self) { textView in
-                    // Regular undo action
-                    textView.replaceCharacters(
-                        in: undoRange,
-                        with: previousStringInRange,
-                        allowsTypingCoalescing: false
-                    )
-                }
-            }
-        }
+        let previousStringInRange = (textContentManager as? NSTextContentStorage)!.attributedString!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
 
         textWillChange(self)
         delegateProxy.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
@@ -1333,8 +1265,35 @@ import AVFoundation
         }
 
         delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
-
         didChangeText(in: textRange)
+        
+        guard allowsUndo, let undoManager = undoManager, undoManager.isUndoRegistrationEnabled, !undoManager.isRedoing, !undoManager.isUndoing else { return }
+
+        // Reach to NSTextStorage because NSTextContentStorage range extraction is cumbersome.
+        // A range that is as long as replacement string, so when undo it undo
+        let undoRange = NSTextRange(
+            location: textRange.location,
+            end: textContentManager.location(textRange.location, offsetBy: replacementString.length)
+        ) ?? textRange
+
+       if let coalescingUndoManager = undoManager as? CoalescingUndoManager {
+           if allowsTypingCoalescing && processingKeyEvent {
+               coalescingUndoManager.checkCoalescing(range: undoRange)
+           } else {
+               coalescingUndoManager.endCoalescing()
+           }
+        }
+        undoManager.beginUndoGrouping()
+        undoManager.registerUndo(withTarget: self) { textView in
+            // Regular undo action
+            textView.replaceCharacters(
+                in: undoRange,
+                with: previousStringInRange,
+                allowsTypingCoalescing: false
+            )
+            textView.setSelectedTextRange(textRange)
+        }
+        undoManager.endUndoGrouping()
     }
 
     /// Whenever text is to be changed due to some user-induced action,
@@ -1357,12 +1316,7 @@ import AVFoundation
 
     /// Informs the receiver that it should begin coalescing successive typing operations in a new undo grouping
     public func breakUndoCoalescing() {
-        (undoManager as? CoalescingUndoManager)?.breakCoalescing()
-    }
-
-    /// A Boolean value that indicates whether undo coalescing is in progress.
-    public var isCoalescingUndo: Bool {
-        (undoManager as? CoalescingUndoManager)?.isCoalescing ?? false
+        (undoManager as? CoalescingUndoManager)?.endCoalescing()
     }
 
     /// Releases the drag information still existing after the dragging session has completed.
