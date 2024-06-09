@@ -919,18 +919,15 @@ import AVFoundation
             undoManager?.enableUndoRegistration()
         }
 
-        if case .some(let string) = string {
-            switch string {
-            case let attributedString as NSAttributedString:
-                replaceCharacters(in: textLayoutManager.documentRange, with: attributedString, allowsTypingCoalescing: false)
-            case let string as String:
-                replaceCharacters(in: textLayoutManager.documentRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
-            default:
-                assertionFailure()
-                return
-            }
-        } else if case .none = string {
+        switch string {
+        case let string as String:
+            replaceCharacters(in: textLayoutManager.documentRange, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
+        case let attributedString as NSAttributedString:
+            replaceCharacters(in: textLayoutManager.documentRange, with: attributedString, allowsTypingCoalescing: false)
+        case .none:
             replaceCharacters(in: textLayoutManager.documentRange, with: "", useTypingAttributes: true, allowsTypingCoalescing: false)
+        default:
+            return assertionFailure()
         }
     }
 
