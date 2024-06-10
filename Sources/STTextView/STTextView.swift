@@ -1267,7 +1267,7 @@ import AVFoundation
         delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
         didChangeText(in: textRange)
         
-        guard allowsUndo, let undoManager = undoManager, undoManager.isUndoRegistrationEnabled, !undoManager.isRedoing, !undoManager.isUndoing else { return }
+        guard allowsUndo, let undoManager = undoManager, undoManager.isUndoRegistrationEnabled else { return }
 
         // Reach to NSTextStorage because NSTextContentStorage range extraction is cumbersome.
         // A range that is as long as replacement string, so when undo it undo
@@ -1276,8 +1276,8 @@ import AVFoundation
             end: textContentManager.location(textRange.location, offsetBy: replacementString.length)
         ) ?? textRange
 
-       if let coalescingUndoManager = undoManager as? CoalescingUndoManager {
-           if allowsTypingCoalescing && processingKeyEvent {
+        if let coalescingUndoManager = undoManager as? CoalescingUndoManager, !undoManager.isUndoing, !undoManager.isRedoing {
+            if allowsTypingCoalescing && processingKeyEvent {
                coalescingUndoManager.checkCoalescing(range: undoRange)
            } else {
                coalescingUndoManager.endCoalescing()

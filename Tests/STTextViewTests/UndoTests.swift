@@ -58,4 +58,25 @@ final class UndoTests: XCTestCase {
         textView.undo(nil)
         XCTAssertEqual(textView.string, "")
     }
+
+    func testRedo() {
+        let textView = STTextView()
+        textView.insertText("123456789")
+        textView.setSelectedRange(NSRange(location: 3, length: 3))
+
+        textView.insertText("a")
+        XCTAssertEqual(textView.string, "123a789")
+
+        textView.undo(nil)
+        XCTAssertEqual(textView.string, "123456789")
+
+        textView.undo(nil)
+        XCTAssertEqual(textView.string, "")
+
+        textView.redo(nil)
+        XCTAssertEqual(textView.string, "123456789")
+
+        textView.redo(nil)
+        XCTAssertEqual(textView.string, "123a789")
+    }
 }

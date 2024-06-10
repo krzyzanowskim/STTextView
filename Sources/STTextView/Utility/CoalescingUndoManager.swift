@@ -25,6 +25,13 @@ final class CoalescingUndoManager: UndoManager {
         super.undo()
     }
 
+    override func redo() {
+        if groupingLevel == 1 {
+            endUndoGrouping()
+        }
+        super.redo()
+    }
+
     func checkCoalescing(range: NSTextRange) {
         defer {
             lastRange = range
