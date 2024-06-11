@@ -8,9 +8,7 @@ final class CoalescingUndoManager: UndoManager {
 
     private var lastRange: NSTextRange?
 
-    var isCoalescing: Bool {
-        lastRange != nil
-    }
+    private var isCoalescing: Bool = false
 
     override init() {
         super.init()
@@ -19,15 +17,15 @@ final class CoalescingUndoManager: UndoManager {
     }
 
     override func undo() {
-        if groupingLevel == 1 {
-            endUndoGrouping()
+        if isCoalescing {
+            endCoalescing()
         }
         super.undo()
     }
 
     override func redo() {
-        if groupingLevel == 1 {
-            endUndoGrouping()
+        if isCoalescing {
+            endCoalescing()
         }
         super.redo()
     }
@@ -36,18 +34,25 @@ final class CoalescingUndoManager: UndoManager {
         defer {
             lastRange = range
         }
-        guard let lastRange else {
-            beginUndoGrouping()
+        guard isCoalescing, let lastRange else {
+            startCoalescing()
             return
         }
         if !lastRange.intersects(range) && lastRange.endLocation != range.location {
             endCoalescing()
-            beginUndoGrouping()
+            startCoalescing()
         }
     }
 
+    func startCoalescing() {
+        guard !isCoalescing else { return }
+        isCoalescing = true
+        beginUndoGrouping()
+    }
+
     func endCoalescing() {
-        guard groupingLevel > 0 else { return }
+        guard isCoalescing else { return }
+        isCoalescing = false
         lastRange = nil
         endUndoGrouping()
     }
