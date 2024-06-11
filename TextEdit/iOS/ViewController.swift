@@ -20,6 +20,15 @@ class ViewController: UIViewController {
             textView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             textView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
+
+        // Emphasize first line
+        textView.addAttributes(
+            [
+                .foregroundColor: UIColor.tintColor,
+                .font: UIFont.monospacedSystemFont(ofSize: UIFont.systemFontSize * 1.2, weight: .bold)
+            ],
+            range: NSRange(location: 0, length: 20)
+        )
     }
 
 }

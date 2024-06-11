@@ -208,6 +208,28 @@ import STTextViewCommon
         }
     }
 
+    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            preconditionFailure("Invalid range \(range)")
+        }
+
+        addAttributes(attrs, range: textRange, updateLayout: updateLayout)
+    }
+
+    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
+        }
+
+        if updateLayout {
+            // TODO: updateTypingAttributes()
+            setNeedsLayout()
+        }
+    }
+
     private func updateEditableInteraction() {
 
         func setupEditableInteraction() {
