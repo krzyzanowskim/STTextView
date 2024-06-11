@@ -44,7 +44,9 @@ extension STTextView {
 
     open override func insertNewline(_ sender: Any?) {
         // insert newline with current typing attributes
+        breakUndoCoalescing()
         insertText("\n")
+        breakUndoCoalescing()
     }
 
     open override func insertNewlineIgnoringFieldEditor(_ sender: Any?) {
