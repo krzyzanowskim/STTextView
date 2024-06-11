@@ -195,6 +195,7 @@ extension STTextView: UITextInput {
         }
 
         var rect = textLayoutManager.textSegmentFrame(at: textLocation.location, type: .selection) ?? .zero
+        rect.origin.x -= 1
         rect.size.width = 2
         return rect
     }
