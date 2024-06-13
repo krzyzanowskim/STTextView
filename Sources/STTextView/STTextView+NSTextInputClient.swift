@@ -39,8 +39,8 @@ extension STTextView: NSTextInputClient {
     @objc public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
         let attributedMarkedString: NSAttributedString
         switch string {
-        case is NSAttributedString:
-            let attributedString = NSMutableAttributedString(attributedString: string as! NSAttributedString)
+        case let attributedString as NSAttributedString:
+            let attributedString = NSMutableAttributedString(attributedString: attributedString)
 
             // it comes with unexpected NSUnderlineColorAttributeName with a clear color that makes it not visible
             // probably it should be more sophisticated to care about the clear underline and do something about
@@ -50,9 +50,9 @@ extension STTextView: NSTextInputClient {
             let attrs = typingAttributes.merging(markedTextAttributes) { (_, new) in new }
             attributedString.addAttributes(attrs, range: NSRange(location: 0, length: attributedString.length))
             attributedMarkedString = attributedString
-        case is String:
+        case let string as String:
             let attrs = typingAttributes.merging(markedTextAttributes) { (_, new) in new }
-            attributedMarkedString = NSAttributedString(string: string as! String, attributes: attrs)
+            attributedMarkedString = NSAttributedString(string: string, attributes: attrs)
         default:
             assertionFailure()
             return
