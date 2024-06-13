@@ -202,17 +202,18 @@ extension STTextView: UITextInput {
 
     /// Returns an array of selection rects corresponding to the range of text.
     public func selectionRects(for range: UITextRange) -> [UITextSelectionRect] {
-        if let rect = textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .selection) {
-            return [STTextSelectionRect(
-                rect: rect,
+        var result: [UITextSelectionRect] = []
+        textLayoutManager.enumerateTextSegments(in: range.nsTextRange, type: .selection, options: .rangeNotRequired) { (_, textSegmentFrame, _, _)in
+            result.append(STTextSelectionRect(
+                rect: textSegmentFrame,
                 writingDirection: .natural,
                 containsStart: false,
                 containsEnd: false,
                 isVertical: false
-            )]
+            ))
+            return true // keep going
         }
-
-        return []
+        return result
     }
 
     /* Hit testing. */
