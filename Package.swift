@@ -19,7 +19,7 @@ let package = Package(
             name: "STTextView",
             dependencies: [
                 .target(name: "STTextViewMac", condition: .when(platforms: [.macOS])),
-                .target(name: "STTextViewiOS", condition: .when(platforms: [.iOS]))
+                .target(name: "STTextViewUIKit", condition: .when(platforms: [.iOS]))
             ]
         ),
         .target(
@@ -37,7 +37,7 @@ let package = Package(
             ]
         ),
         .target(
-            name: "STTextViewiOS",
+            name: "STTextViewUIKit",
             dependencies: [
                 .target(name: "STTextViewCommon"),
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.iOS])),

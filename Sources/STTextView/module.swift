@@ -5,5 +5,5 @@ import Foundation
 #endif
 
 #if os(iOS)
-@_exported import STTextViewiOS
+@_exported import STTextViewUIKit
 #endif
