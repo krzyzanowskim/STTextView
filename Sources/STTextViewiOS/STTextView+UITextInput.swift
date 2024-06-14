@@ -219,7 +219,7 @@ extension STTextView: UITextInput {
     /* Hit testing. */
 
     public func closestPosition(to point: CGPoint) -> UITextPosition? {
-        return textLayoutManager.location(interactingAt: point, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition
+        textLayoutManager.location(interactingAt: point, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition
     }
 
     public func closestPosition(to point: CGPoint, within range: UITextRange) -> UITextPosition? {
@@ -227,8 +227,10 @@ extension STTextView: UITextInput {
         return nil
     }
 
+    /// Returns the character or range of characters that is at a specified point in a document.
     public func characterRange(at point: CGPoint) -> UITextRange? {
         assertionFailure("Not Implemented")
+        
         return nil
     }
 }

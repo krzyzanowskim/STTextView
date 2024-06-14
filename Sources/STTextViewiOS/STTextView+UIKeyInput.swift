@@ -17,7 +17,20 @@ extension STTextView: UIKeyInput {
     }
 
     public func deleteBackward() {
-        assertionFailure("Not Implemented")
+        let textRanges = textLayoutManager.textSelections.flatMap { textSelection -> [NSTextRange] in
+            textLayoutManager.textSelectionNavigation.deletionRanges(
+                for: textSelection,
+                direction: .backward,
+                destination: .character,
+                allowsDecomposition: false
+            )
+        }
+
+        if textRanges.isEmpty || !shouldChangeText(in: textRanges, replacementString: "") {
+            return
+        }
+
+        replaceCharacters(in: textRanges, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)
     }
 
 }
