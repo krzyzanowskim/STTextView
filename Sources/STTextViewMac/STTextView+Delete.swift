@@ -8,55 +8,55 @@ extension STTextView {
 
     open override func deleteForward(_ sender: Any?) {
         if let deletedString = delete(direction: .forward, destination: .character, allowsDecomposition: false) {
-            YankingManager.shared.kill(action: .delete, string: deletedString)
+            _yankingManager.kill(action: .delete, string: deletedString)
         }
     }
 
     open override func deleteBackward(_ sender: Any?) {
         if let deletedString = delete(direction: .backward, destination: .character, allowsDecomposition: false) {
-            YankingManager.shared.kill(action: .delete, string: deletedString)
+            _yankingManager.kill(action: .delete, string: deletedString)
         }
     }
 
     open override func deleteBackwardByDecomposingPreviousCharacter(_ sender: Any?) {
         if let deletedString = delete(direction: .backward, destination: .character, allowsDecomposition: true) {
-            YankingManager.shared.kill(action: .delete, string: deletedString)
+            _yankingManager.kill(action: .delete, string: deletedString)
         }
     }
 
     open override func deleteWordBackward(_ sender: Any?) {
         if let deletedString = delete(direction: .backward, destination: .word, allowsDecomposition: false) {
-            YankingManager.shared.kill(action: .deleteWordBackward, string: deletedString)
+            _yankingManager.kill(action: .deleteWordBackward, string: deletedString)
         }
     }
 
     open override func deleteWordForward(_ sender: Any?) {
         if let deletedString = delete(direction: .forward, destination: .word, allowsDecomposition: false) {
-            YankingManager.shared.kill(action: .deleteWordForward, string: deletedString)
+            _yankingManager.kill(action: .deleteWordForward, string: deletedString)
         }
     }
 
     open override func deleteToBeginningOfLine(_ sender: Any?) {
         if let deletedString = delete(direction: .backward, destination: .line, allowsDecomposition: false) {
-            YankingManager.shared.kill(action: .deleteToBeginningOfLine, string: deletedString)
+            _yankingManager.kill(action: .deleteToBeginningOfLine, string: deletedString)
         }
     }
 
     open override func deleteToEndOfLine(_ sender: Any?) {
         if let deletedString = delete(direction: .forward, destination: .line, allowsDecomposition: false) {
-            YankingManager.shared.kill(action: .deleteToEndOfLine, string: deletedString)
+            _yankingManager.kill(action: .deleteToEndOfLine, string: deletedString)
         }
     }
 
     open override func deleteToBeginningOfParagraph(_ sender: Any?) {
         if let deletedString = delete(direction: .backward, destination: .paragraph, allowsDecomposition: false) {
-            YankingManager.shared.kill(action: .deleteToBeginningOfLine, string: deletedString)
+            _yankingManager.kill(action: .deleteToBeginningOfLine, string: deletedString)
         }
     }
 
     open override func deleteToEndOfParagraph(_ sender: Any?) {
         if let deletedString = delete(direction: .forward, destination: .paragraph, allowsDecomposition: false) {
-            YankingManager.shared.kill(action: .deleteToEndOfParagraph, string: deletedString)
+            _yankingManager.kill(action: .deleteToEndOfParagraph, string: deletedString)
         }
     }
 

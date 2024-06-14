@@ -11,7 +11,7 @@ extension STTextView {
     open override func yank(_ sender: Any?) {
         replaceCharacters(
             in: textLayoutManager.insertionPointSelections.flatMap(\.textRanges),
-            with: YankingManager.shared.yank(),
+            with: _yankingManager.yank(),
             useTypingAttributes: true,
             allowsTypingCoalescing: false
         )

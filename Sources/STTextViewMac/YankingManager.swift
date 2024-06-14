@@ -7,8 +7,6 @@ import Foundation
 /// https://www.gnu.org/software/emacs/manual/html_node/emacs/Yanking.html
 final class YankingManager {
 
-    static let shared = YankingManager()
-
     enum DeleteAction {
         case delete
         case deleteToMark

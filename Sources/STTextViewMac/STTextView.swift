@@ -356,6 +356,7 @@ import AVFoundation
     /// `true` if the receiver allows undo, otherwise `false`. Default `true`.
     @objc dynamic open var allowsUndo: Bool
     internal var _undoManager: UndoManager?
+    internal var _yankingManager = YankingManager()
 
     internal class MarkedText: CustomDebugStringConvertible {
         var markedText: NSAttributedString
@@ -620,7 +621,7 @@ import AVFoundation
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
 
-            YankingManager.shared.selectionChanged()
+            _yankingManager.selectionChanged()
 
             let textViewNotification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
 
@@ -1214,7 +1215,7 @@ import AVFoundation
         let notification = Notification(name: STTextView.textDidChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         delegateProxy.textViewDidChangeText(notification)
-        YankingManager.shared.textChanged()
+        _yankingManager.textChanged()
 
         needsDisplay = true
     }
