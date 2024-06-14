@@ -67,7 +67,7 @@ import STTextViewCommon
             setString(newValue)
 
             // restore selection location
-            if let prevLocation = prevLocation {
+            if let prevLocation {
                 setSelectedTextRange(NSTextRange(location: prevLocation))
             }
         }
@@ -78,7 +78,24 @@ import STTextViewCommon
     }
 
     /// The styled text that the text view displays.
-    // @NSCopying public var attributedText: NSAttributedString?
+    ///
+    /// Assigning a new value to this property also replaces the value of the `text` property with the same string data, albeit without any formatting information. In addition, the `font`, `textColor`, and `textAlignment` properties are updated to reflect the typing attributes of the text view.
+    public var attributedText: NSAttributedString? {
+        set {
+            let prevLocation = textLayoutManager.insertionPointLocations.first
+
+            setString(newValue)
+
+            // restore selection location
+            if let prevLocation {
+                setSelectedTextRange(NSTextRange(location: prevLocation))
+            }
+        }
+
+        get {
+            textContentManager.attributedString(in: nil)
+        }
+    }
 
     /// A Boolean value that controls whether the text view allows the user to edit text.
     // @Invalidating(.insertionPoint, .cursorRects)
