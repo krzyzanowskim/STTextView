@@ -2,7 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import SwiftUI
-import STTextViewUI
+import STTextViewSwiftUI
 
 struct ContentView: View {
     @State private var text: AttributedString = ""
@@ -12,7 +12,7 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             // this is fast
-            STTextViewUI.TextView(
+            TextView(
                 text: $text,
                 selection: $selection,
                 options: [.wrapLines, .highlightSelectedLine]

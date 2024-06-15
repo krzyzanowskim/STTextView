@@ -8,7 +8,7 @@ let package = Package(
     products: [
         .library(
             name: "STTextView",
-            targets: ["STTextView", "STTextViewUI"]
+            targets: ["STTextView", "STTextViewSwiftUI"]
         )
     ],
     dependencies: [
@@ -45,13 +45,13 @@ let package = Package(
             ]
         ),
         .target(
-            name: "STTextViewUI",
+            name: "STTextViewSwiftUI",
             dependencies: [
-                .target(name: "STTextViewUIAppKit", condition: .when(platforms: [.macOS]))
+                .target(name: "STTextViewSwiftUIAppKit", condition: .when(platforms: [.macOS]))
             ]
         ),
         .target(
-            name: "STTextViewUIAppKit",
+            name: "STTextViewSwiftUIAppKit",
             dependencies: [
                 .target(name: "STTextView")
             ]
