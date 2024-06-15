@@ -18,7 +18,7 @@ let package = Package(
         .target(
             name: "STTextView",
             dependencies: [
-                .target(name: "STTextViewMac", condition: .when(platforms: [.macOS])),
+                .target(name: "STTextViewAppKit", condition: .when(platforms: [.macOS])),
                 .target(name: "STTextViewUIKit", condition: .when(platforms: [.iOS]))
             ]
         ),
@@ -29,7 +29,7 @@ let package = Package(
             ]
         ),
         .target(
-            name: "STTextViewMac",
+            name: "STTextViewAppKit",
             dependencies: [
                 .target(name: "STTextViewCommon"),
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.macOS])),
@@ -47,11 +47,11 @@ let package = Package(
         .target(
             name: "STTextViewUI",
             dependencies: [
-                .target(name: "STTextViewUIMac", condition: .when(platforms: [.macOS]))
+                .target(name: "STTextViewUIAppKit", condition: .when(platforms: [.macOS]))
             ]
         ),
         .target(
-            name: "STTextViewUIMac",
+            name: "STTextViewUIAppKit",
             dependencies: [
                 .target(name: "STTextView")
             ]

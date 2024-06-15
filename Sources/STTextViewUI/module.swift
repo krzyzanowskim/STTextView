@@ -1,7 +1,7 @@
 import Foundation
 
 #if os(macOS)
-@_exported import STTextViewUIMac
+@_exported import STTextViewUIAppKit
 #endif
 
 // #if os(iOS)
