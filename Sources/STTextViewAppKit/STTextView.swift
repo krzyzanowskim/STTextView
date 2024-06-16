@@ -251,7 +251,7 @@ import AVFoundation
         set {
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
-                textContainer.containerSize = NSTextContainer().containerSize
+                textContainer.size = NSTextContainer().size
                 if let clipView = scrollView?.contentView as? NSClipView {
                     frame.size.width = clipView.bounds.size.width - clipView.contentInsets.horizontalInsets
                 }
@@ -288,7 +288,7 @@ import AVFoundation
             if textContainer.heightTracksTextView != newValue {
                 textContainer.heightTracksTextView = newValue
 
-                textContainer.containerSize = NSTextContainer().containerSize
+                textContainer.size = NSTextContainer().size
                 if let clipView = scrollView?.contentView as? NSClipView {
                     frame.size.height = clipView.bounds.size.height - clipView.contentInsets.verticalInsets
                 }
@@ -1041,7 +1041,7 @@ import AVFoundation
     // Update textContainer width to match textview width if track textview width
     // widthTracksTextView = true
     private func _configureTextContainerSize() {
-        var containerSize = textContainer.containerSize
+        var containerSize = textContainer.size
         if !isHorizontallyResizable {
             containerSize.width = bounds.size.width // - _textContainerInset.width * 2
         }

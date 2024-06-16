@@ -20,15 +20,15 @@ import STTextViewCommon
     /// Posted after an object performs any operation that changes characters or formatting attributes.
     public static let textDidChangeNotification = UITextView.textDidChangeNotification
 
-    public var autocorrectionType: UITextAutocorrectionType = .default
-    public var autocapitalizationType: UITextAutocapitalizationType = .sentences
-    public var smartQuotesType: UITextSmartQuotesType = .default
-    public var smartDashesType: UITextSmartDashesType = .default
-    public var smartInsertDeleteType: UITextSmartInsertDeleteType = .default
-    public var spellCheckingType: UITextSpellCheckingType = .default
-    public var keyboardType: UIKeyboardType = .default
-    public var keyboardAppearance: UIKeyboardAppearance = .default
-    public var returnKeyType: UIReturnKeyType = .default
+    open var autocorrectionType: UITextAutocorrectionType = .default
+    open var autocapitalizationType: UITextAutocapitalizationType = .sentences
+    open var smartQuotesType: UITextSmartQuotesType = .default
+    open var smartDashesType: UITextSmartDashesType = .default
+    open var smartInsertDeleteType: UITextSmartInsertDeleteType = .default
+    open var spellCheckingType: UITextSpellCheckingType = .default
+    open var keyboardType: UIKeyboardType = .default
+    open var keyboardAppearance: UIKeyboardAppearance = .default
+    open var returnKeyType: UIReturnKeyType = .default
 
     /// The manager that lays out text for the text view's text container.
     @objc open private(set) var textLayoutManager: NSTextLayoutManager
@@ -38,7 +38,78 @@ import STTextViewCommon
 
     /// The text view's text container
     public var textContainer: NSTextContainer {
-        textLayoutManager.textContainer!
+        get {
+            textLayoutManager.textContainer!
+        }
+
+        set {
+            textLayoutManager.textContainer = newValue
+        }
+    }
+
+    /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
+    ///
+    /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.
+    ///
+    /// - Note: If you set both `widthTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
+    ///
+    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
+    @objc public var widthTracksTextView: Bool {
+        set {
+            if textContainer.widthTracksTextView != newValue {
+                textContainer.widthTracksTextView = newValue
+                textContainer.size = NSTextContainer().size
+
+                setNeedsLayout()
+                setNeedsDisplay()
+            }
+        }
+
+        get {
+            textContainer.widthTracksTextView
+        }
+    }
+
+    /// A Boolean that controls whether the receiver changes its width to fit the width of its text.
+    @objc public var isHorizontallyResizable: Bool {
+        set {
+            widthTracksTextView = newValue
+        }
+
+        get {
+            widthTracksTextView
+        }
+    }
+
+    /// When the value of this property is `true`, the text container adjusts its height when the height of its text view changes. The default value of this property is `false`.
+    ///
+    /// - Note: If you set both `heightTracksTextView` and `isVerticallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
+    ///
+    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
+    @objc public var heightTracksTextView: Bool {
+        set {
+            if textContainer.heightTracksTextView != newValue {
+                textContainer.heightTracksTextView = newValue
+
+                setNeedsLayout()
+                setNeedsDisplay()
+            }
+        }
+
+        get {
+            textContainer.heightTracksTextView
+        }
+    }
+
+    /// A Boolean that controls whether the receiver changes its height to fit the height of its text.
+    @objc public var isVerticallyResizable: Bool {
+        set {
+            heightTracksTextView = newValue
+        }
+
+        get {
+            heightTracksTextView
+        }
     }
 
     /// Content view. Layout fragments content.
@@ -163,6 +234,11 @@ import STTextViewCommon
 
     open override var canBecomeFirstResponder: Bool {
         !isFirstResponder && isEditable
+    }
+
+    public convenience init(frame: CGRect, textContainer: NSTextContainer?) {
+        self.init(frame: frame)
+        textLayoutManager.textContainer = textContainer
     }
 
     public override init(frame: CGRect) {
@@ -294,6 +370,50 @@ import STTextViewCommon
             }
         } else if case .none = string {
             replaceCharacters(in: textLayoutManager.documentRange, with: "", useTypingAttributes: true, allowsTypingCoalescing: false)
+        }
+    }
+
+    open override func sizeToFit() {
+        super.sizeToFit()
+        contentView.frame.size = contentSize
+
+        _configureTextContainerSize()
+
+        // Estimate `usageBoundsForTextContainer` size is based on performed layout.
+        // If layout didn't happen for the whole document, it only cover
+        // the fragment that is known. And even after ensureLayout for the whole document
+        // `textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)`
+        // it can't report exact size (it must do internal estimations then).
+        //
+        // Because I use "lazy layout" with the viewport, there is no "layout everything"
+        // on launch (due to performance reason) hence the total size is not know in advance.
+        // TextKit estimate the usageBoundsForTextContainer until everything is layed out
+        // that may result in weird and unexpected values along the way
+        //
+        // Calling ensureLayout on the whole document should fix the value, however
+        // it may be time consuming (in seconds) hence not recommended:
+        // textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
+        //
+        // Asking for the end location result in estimated `usageBoundsForTextContainer`
+        // that eventually get right as more and more layout happen (when scrolling)
+
+        textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
+    }
+
+    // Update textContainer width to match textview width if track textview width
+    // widthTracksTextView = true
+    private func _configureTextContainerSize() {
+        var containerSize = textContainer.size
+        if !isHorizontallyResizable {
+            containerSize.width = bounds.size.width // - _textContainerInset.width * 2
+        }
+
+        if !isVerticallyResizable {
+            containerSize.height = bounds.size.height // - _textContainerInset.height * 2
+        }
+
+        if !textContainer.size.isAlmostEqual(to: containerSize)  {
+            textContainer.size = containerSize
         }
     }
 

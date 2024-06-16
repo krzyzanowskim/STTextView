@@ -58,8 +58,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         contentSize = textLayoutManager.usageBoundsForTextContainer.size
-        contentView.frame.size = contentSize
-        // sizeToFit()
+        sizeToFit()
         // updateSelectionHighlights()
         // adjustViewportOffsetIfNeeded()
         // scrollView?.verticalRulerView?.invalidateHashMarks()
