@@ -5,14 +5,18 @@ import UIKit
 import STTextView
 
 class ViewController: UIViewController {
+
+    @ViewLoading
+    private var textView: STTextView
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        // textView.contentInsetAdjustmentBehavior = .always
         view.addSubview(textView)
+        self.textView = textView
 
         NSLayoutConstraint.activate([
             textView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -25,10 +29,13 @@ class ViewController: UIViewController {
         textView.addAttributes(
             [
                 .foregroundColor: UIColor.tintColor,
-                .font: UIFont.monospacedSystemFont(ofSize: UIFont.systemFontSize * 1.2, weight: .bold)
             ],
             range: NSRange(location: 0, length: 20)
         )
+    }
+
+    @objc func toggleTextWrapMode(_ sender: Any?) {
+        textView.widthTracksTextView.toggle()
     }
 
 }
