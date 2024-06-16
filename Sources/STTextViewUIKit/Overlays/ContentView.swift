@@ -4,6 +4,11 @@
 import UIKit
 
 final class ContentView: UIView {
+
+    override class var layerClass: AnyClass {
+        CATiledLayer.self
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         isOpaque = false
