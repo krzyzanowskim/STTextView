@@ -22,9 +22,12 @@ extension STTextView: UITextInput {
                 textLayoutManager.textSelections = [
                     NSTextSelection(range: textRange, affinity: .downstream, granularity: .character)
                 ]
+                updateTypingAttributes(at: textRange.location)
             } else {
                 textLayoutManager.textSelections = []
             }
+
+
             inputDelegate?.selectionDidChange(self)
         }
     }

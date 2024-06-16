@@ -112,6 +112,48 @@ import STTextViewCommon
         }
     }
 
+    /// The font of the text.
+    ///
+    /// This property applies to the entire text string.
+    /// Assigning a new value to this property causes the new font to be applied to the entire contents of the text view.
+    @objc dynamic open var font: UIFont? {
+        get {
+            // if not empty, return a font at location 0
+            if !textLayoutManager.documentRange.isEmpty {
+                let location = textLayoutManager.documentRange.location
+                let endLocation = textLayoutManager.location(location, offsetBy: 1)
+                return textLayoutManager.textContentManager?.attributedString(in: NSTextRange(location: location, end: endLocation))?.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+            }
+
+            // otherwise return current typing attribute
+            return typingAttributes[.font] as? UIFont
+        }
+
+        set {
+            guard let newValue else {
+                NSException(name: .invalidArgumentException, reason: "nil UIFont given").raise()
+                return
+            }
+
+            if !textLayoutManager.documentRange.isEmpty {
+                addAttributes([.font: newValue], range: textLayoutManager.documentRange)
+            }
+
+            typingAttributes[.font] = newValue
+        }
+    }
+
+    /// The text color of the text view.
+    @objc dynamic open var textColor: UIColor? {
+        get {
+            typingAttributes[.foregroundColor] as? UIColor
+        }
+
+        set {
+            typingAttributes[.foregroundColor] = newValue
+        }
+    }
+
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
 
@@ -216,6 +258,49 @@ import STTextViewCommon
             setNeedsDisplay()
         }
     }
+    
+
+    internal func updateTypingAttributes(at location: NSTextLocation? = nil) {
+        if let location {
+            self.typingAttributes = typingAttributes(at: location)
+        } else {
+            // TODO: doesn't work work correctly (at all) for multiple insertion points where each has different typing attribute
+            if let insertionPointSelection = textLayoutManager.insertionPointSelections.first,
+               let startLocation = insertionPointSelection.textRanges.first?.location
+            {
+                self.typingAttributes = typingAttributes(at: startLocation)
+            }
+        }
+    }
+
+    internal func typingAttributes(at startLocation: NSTextLocation) -> [NSAttributedString.Key : Any] {
+        guard !textLayoutManager.documentRange.isEmpty else {
+            return typingAttributes
+        }
+
+        var attrs: [NSAttributedString.Key: Any] = [:]
+        // The attribute is derived from the previous (upstream) location,
+        // except for the beginning of the document where it from whatever is at location 0
+        let options: NSTextContentManager.EnumerationOptions = startLocation == textLayoutManager.documentRange.location ? [] : [.reverse]
+        let offsetDiff = startLocation == textLayoutManager.documentRange.location ? 0 : -1
+
+        textContentManager.enumerateTextElements(from: startLocation, options: options) { textElement in
+            if let attributedTextElement = textElement as? STAttributedTextElement,
+               let elementRange = textElement.elementRange,
+               let textContentManager = textElement.textContentManager
+            {
+                let offset = textContentManager.offset(from: elementRange.location, to: startLocation)
+                assert(offset != NSNotFound, "Unexpected location")
+                attrs = attributedTextElement.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
+            }
+
+            return false
+        }
+
+        // fill in with missing typing attributes if needed
+        attrs.merge(defaultTypingAttributes, uniquingKeysWith: { current, _ in current})
+        return attrs
+    }
 
     private var defaultTypingAttributes: [NSAttributedString.Key: Any] {
         [
@@ -300,7 +385,7 @@ import STTextViewCommon
 
         selectedTextRange = textRange.uiTextRange
 
-        // TODO: updateTypingAttributes(at: textRange.location)
+        updateTypingAttributes(at: textRange.location)
 
         if updateLayout {
             setNeedsLayout()
@@ -324,7 +409,7 @@ import STTextViewCommon
         }
 
         if updateLayout {
-            // TODO: updateTypingAttributes()
+            updateTypingAttributes()
             setNeedsLayout()
         }
     }
@@ -444,7 +529,7 @@ import STTextViewCommon
     internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
         self.replaceCharacters(
             in: textRanges,
-            with: NSAttributedString(string: replacementString/*, attributes: useTypingAttributes ? typingAttributes : [:]*/),
+            with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]),
             allowsTypingCoalescing: allowsTypingCoalescing
         )
     }
@@ -459,7 +544,7 @@ import STTextViewCommon
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
         self.replaceCharacters(
             in: textRange,
-            with: NSAttributedString(string: replacementString/*, attributes: useTypingAttributes ? typingAttributes : [:]*/),
+            with: NSAttributedString(string: replacementString, attributes: useTypingAttributes ? typingAttributes : [:]),
             allowsTypingCoalescing: allowsTypingCoalescing
         )
     }
