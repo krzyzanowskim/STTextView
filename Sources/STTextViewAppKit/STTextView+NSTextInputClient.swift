@@ -162,10 +162,12 @@ extension STTextView: NSTextInputClient {
     ///
     /// Returns an empty array if no attributes are supported.
     @objc public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
-        // Properly implementing this would allow things like bolded underline
-        // for certain texts in the marked range. I only half-understand how it works
-        // hence leave it like this.
-        return []
+        [
+            .underlineStyle,
+            .underlineColor,
+            .markedClauseSegment,
+            NSAttributedString.Key("NSTextInputReplacementRangeAttributeName")
+        ]
     }
 
     @objc public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
