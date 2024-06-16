@@ -4,9 +4,9 @@
 
 # STTextView
 
-Performant [macOS](https://www.apple.com/macos) TextView with line numbers and much more. (NSTextView replacement)
+Performant [macOS](https://www.apple.com/macos) and [iOS](https://www.apple.com/ios) TextView with line numbers and much more. (NSTextView/UITextView replacement)
 
-The goal of this project is to build [NSTextView](https://developer.apple.com/documentation/appkit/nstextview) replacement component utilizing [TextKit 2](https://developer.apple.com/videos/play/wwdc2021/10061/) framework. [due to many good reasons](#-textkit-2-bug-reports-list).
+The goal of this project is to build [NSTextView](https://developer.apple.com/documentation/appkit/nstextview)/[UITextView](https://developer.apple.com/documentation/uikit/uitextview) replacement component utilizing [TextKit 2](https://developer.apple.com/videos/play/wwdc2021/10061/) framework. [due to many good reasons](#-textkit-2-bug-reports-list).
 
 The component is developed to serve [Swift Studio](https://swiftstudio.app) needs as a **source code editor**.
 
@@ -67,7 +67,7 @@ STTextView is already well-suited as a text editor component. However, it still 
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.8.0")
+        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.9.0")
     ]
 )
 ```
@@ -95,7 +95,7 @@ The `TextView` is a [SwiftUI](https://developer.apple.com/xcode/swiftui/) view t
 * Faster than SwiftUI.TextEdit (https://twitter.com/krzyzanowskim/status/1677628085217243137)
 
 ```swift
-import STTextViewUI
+import STTextViewSwiftUI
 
 struct ContentView: View {
 
@@ -103,7 +103,7 @@ struct ContentView: View {
     @State private var selection: NSRange?
 
     var body: some View {
-        STTextViewUI.TextView(
+        TextView(
             text: $text,
             selection: $selection,
             options: [.wrapLines, .highlightSelectedLine],
@@ -223,7 +223,7 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 
 Start a new [discussion topic](https://github.com/krzyzanowskim/STTextView/discussions) or a pull request.
 
-I'd love to hear from you! Get in touch via X/Twitter [@krzyzanowskim](https://x.com/krzyzanowskim), mastodon [@krzyzanowskim@mastodon.social](https://mastodon.social/@krzyzanowskim).
+I'd love to hear from you! Get in touch via X/Twitter [@krzyzanowskim](https://x.com/krzyzanowskim), Mastodon [@krzyzanowskim@mastodon.social](https://mastodon.social/@krzyzanowskim).
 
 ## License
 
