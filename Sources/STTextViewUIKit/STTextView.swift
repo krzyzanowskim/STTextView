@@ -14,6 +14,12 @@ import STTextViewCommon
     /// Sent when the selection range of characters changes.
     public static let didChangeSelectionNotification = STTextLayoutManager.didChangeSelectionNotification
 
+    /// Posted before an object performs any operation that changes characters or formatting attributes.
+    public static let textWillChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
+
+    /// Posted after an object performs any operation that changes characters or formatting attributes.
+    public static let textDidChangeNotification = UITextView.textDidChangeNotification
+
     public var autocorrectionType: UITextAutocorrectionType = .default
     public var autocapitalizationType: UITextAutocapitalizationType = .sentences
     public var smartQuotesType: UITextSmartQuotesType = .default
@@ -338,8 +344,29 @@ import STTextViewCommon
         )
     }
 
-    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
+    open func textWillChange(_ sender: Any?) {
+        let notification = Notification(name: Self.textWillChangeNotification, object: self, userInfo: nil)
+        NotificationCenter.default.post(notification)
+
         inputDelegate?.textWillChange(self)
+        // delegateProxy.textViewWillChangeText(notification)
+    }
+
+    /// Sends out necessary notifications when a text change completes.
+    ///
+    /// Invoked automatically at the end of a series of changes, this method posts an `textDidChangeNotification` to the default notification center, which also results in the delegate receiving `textViewDidChangeText(_:)` message.
+    /// Subclasses implementing methods that change their text should invoke this method at the end of those methods.
+    open func didChangeText() {
+        let notification = Notification(name: Self.textDidChangeNotification, object: self, userInfo: nil)
+        NotificationCenter.default.post(notification)
+
+        inputDelegate?.textDidChange(self)
+        // delegateProxy.textViewDidChangeText(notification)
+
+    }
+
+    internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
+        textWillChange(self)
         //delegateProxy.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
         textContentManager.performEditingTransaction {
@@ -350,7 +377,7 @@ import STTextViewCommon
         }
 
         //delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
-        inputDelegate?.textDidChange(self)
+        didChangeText()
     }
 
     open override func layoutSubviews() {

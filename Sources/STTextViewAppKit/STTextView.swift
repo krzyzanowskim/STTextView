@@ -1189,7 +1189,7 @@ import AVFoundation
             textFinder.noteClientStringWillChange()
         }
 
-        let notification = Notification(name: STTextView.textWillChangeNotification, object: self, userInfo: nil)
+        let notification = Notification(name: Self.textWillChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         delegateProxy.textViewWillChangeText(notification)
     }

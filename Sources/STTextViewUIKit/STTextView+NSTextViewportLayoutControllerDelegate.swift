@@ -7,7 +7,7 @@ import STTextKitPlus
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        bounds
+        contentView.bounds
 //        let overdrawRect = preparedContentRect
 //        let minY: CGFloat
 //        let maxY: CGFloat
@@ -58,6 +58,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         contentSize = textLayoutManager.usageBoundsForTextContainer.size
+        contentView.frame.size = contentSize
         // sizeToFit()
         // updateSelectionHighlights()
         // adjustViewportOffsetIfNeeded()
