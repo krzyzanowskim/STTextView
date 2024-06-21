@@ -25,6 +25,7 @@ package extension CGRect {
         case bottom(CGFloat)
     }
 
+#if canImport(AppKit)
     func inset(by edgeInsets: EdgeInsets) -> CGRect {
         var result = self
         result.origin.x += edgeInsets.left
@@ -33,6 +34,7 @@ package extension CGRect {
         result.size.height -= edgeInsets.top + edgeInsets.bottom
         return result
     }
+#endif
 
     func inset(_ insets: Inset...) -> CGRect {
         var result = self
