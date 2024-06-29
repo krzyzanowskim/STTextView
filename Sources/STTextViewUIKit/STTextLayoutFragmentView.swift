@@ -60,8 +60,8 @@ final class STTextLayoutFragmentView: UIView {
 
                     glyphLayer.bounds.origin.y -= textLineFragment.typographicBounds.height - textLineFragment.glyphOrigin.y
 
-                    glyphLayer.setNeedsDisplay()
                     layer.addSublayer(glyphLayer)
+                    glyphLayer.setNeedsDisplay()
                 }
             }
         }

@@ -7,7 +7,7 @@ import STTextKitPlus
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        bounds
+        bounds.inset(dx: -128, dy: -128)
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
@@ -20,9 +20,8 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
         let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) ?? STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: textLayoutFragment.layoutFragmentFrame)
         // Adjust position
-        let oldFrame = fragmentView.frame
-        fragmentView.frame = textLayoutFragment.layoutFragmentFrame//.pixelAligned
-        if !oldFrame.isAlmostEqual(to: fragmentView.frame)  {
+        if !fragmentView.frame.isAlmostEqual(to: textLayoutFragment.layoutFragmentFrame)  {
+            fragmentView.frame = textLayoutFragment.layoutFragmentFrame
             fragmentView.setNeedsLayout()
             fragmentView.setNeedsDisplay()
         }
