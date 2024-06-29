@@ -179,11 +179,11 @@ extension STTextView: UITextInput {
     /* Writing direction */
 
     public func baseWritingDirection(for position: UITextPosition, in direction: UITextStorageDirection) -> NSWritingDirection {
-        .natural
+        baseWritingDirection
     }
 
     public func setBaseWritingDirection(_ writingDirection: NSWritingDirection, for range: UITextRange) {
-
+        baseWritingDirection = writingDirection
     }
 
     /* Geometry used to provide, for example, a correction rect. */
@@ -209,7 +209,7 @@ extension STTextView: UITextInput {
         textLayoutManager.enumerateTextSegments(in: range.nsTextRange, type: .selection, options: .rangeNotRequired) { (_, textSegmentFrame, _, _)in
             result.append(STTextSelectionRect(
                 rect: textSegmentFrame,
-                writingDirection: .natural,
+                writingDirection: baseWritingDirection,
                 containsStart: false,
                 containsEnd: false,
                 isVertical: false

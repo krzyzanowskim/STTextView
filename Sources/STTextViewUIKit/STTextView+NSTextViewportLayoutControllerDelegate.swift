@@ -12,7 +12,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         // TODO: update difference, not all layers
-        for subview in contentView.subviews {
+        for subview in contentView.subviews.filter({ $0 is STTextLayoutFragmentView }) {
             subview.removeFromSuperview()
         }
     }

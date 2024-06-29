@@ -158,6 +158,7 @@ import STTextViewCommon
     internal let contentView: ContentView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
+    internal var baseWritingDirection: NSWritingDirection = .natural
 
     /// An input delegate that receives a notification when text changes or when the selection changes.
     ///
