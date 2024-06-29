@@ -12,7 +12,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextKitPlus", from: "0.1.2")
+        .package(url: "https://github.com/krzyzanowskim/STTextKitPlus", from: "0.1.2"),
+        .package(url: "https://github.com/krzyzanowskim/CoreTextSwift", from: "0.2.0")
     ],
     targets: [
         .target(
@@ -41,7 +42,8 @@ let package = Package(
             dependencies: [
                 .target(name: "STTextViewCommon"),
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.iOS])),
-                .product(name: "STTextKitPlus", package: "STTextKitPlus")
+                .product(name: "STTextKitPlus", package: "STTextKitPlus"),
+                .product(name: "CoreTextSwift", package: "CoreTextSwift")
             ]
         ),
         .target(
