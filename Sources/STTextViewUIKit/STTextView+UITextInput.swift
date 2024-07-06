@@ -102,38 +102,19 @@ extension STTextView: UITextInput {
             return nil
         }
 
-        var textSelectionDirection: NSTextSelectionNavigation.Direction? {
-            switch direction {
-            case .up:
-                return .up
-            case .down:
-                return .down
-            case .left:
-                return .left
-            case .right:
-                return .right
-            @unknown default:
-                return nil
-            }
-        }
-
-        guard let textSelectionDirection else {
-            return nil
-        }
-
         let positionSelection = NSTextSelection(position.location, affinity: .downstream)
-        var currentDestination: NSTextSelection? = positionSelection
+        var destination: NSTextSelection? = positionSelection
         for _ in 0..<offset {
-            currentDestination = textLayoutManager.textSelectionNavigation.destinationSelection(
-                for: currentDestination ?? positionSelection,
-                direction: textSelectionDirection,
+            destination = textLayoutManager.textSelectionNavigation.destinationSelection(
+                for: destination ?? positionSelection,
+                direction: direction.textSelectionNavigationDirection,
                 destination: .character,
                 extending: false,
                 confined: false
             )
         }
 
-        return currentDestination?.textRanges.first?.location.uiTextPosition
+        return destination?.textRanges.first?.location.uiTextPosition
     }
     
     /* Simple evaluation of positions */
@@ -184,11 +165,26 @@ extension STTextView: UITextInput {
     /* Writing direction */
 
     public func baseWritingDirection(for position: UITextPosition, in direction: UITextStorageDirection) -> NSWritingDirection {
-        baseWritingDirection
+        guard let textLocation = position as? STTextLocation else {
+            return .natural
+        }
+
+        let writingDirection = textLayoutManager.baseWritingDirection(at: textLocation.location)
+        switch writingDirection {
+        case .leftToRight:
+            return .leftToRight
+        case .rightToLeft:
+            return .rightToLeft
+        @unknown default:
+            return .natural
+        }
     }
 
     public func setBaseWritingDirection(_ writingDirection: NSWritingDirection, for range: UITextRange) {
-        baseWritingDirection = writingDirection
+        textContentManager.performEditingTransaction {
+            let attrs: [NSAttributedString.Key: Any] = [:]
+            (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range.nsTextRange, in: textContentManager))
+        }
     }
 
     /* Geometry used to provide, for example, a correction rect. */
@@ -214,7 +210,7 @@ extension STTextView: UITextInput {
         textLayoutManager.enumerateTextSegments(in: range.nsTextRange, type: .selection, options: .rangeNotRequired) { (_, textSegmentFrame, _, _)in
             result.append(STTextSelectionRect(
                 rect: textSegmentFrame,
-                writingDirection: baseWritingDirection,
+                writingDirection: baseWritingDirection(for: range.start, in: .forward),
                 containsStart: false,
                 containsEnd: false,
                 isVertical: false

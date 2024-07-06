@@ -161,7 +161,6 @@ import STTextViewCommon
     internal let contentView: ContentView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
-    internal var baseWritingDirection: NSWritingDirection = .natural
 
     /// The delegate for all text views sharing the same layout manager.
     @_nonoverride
