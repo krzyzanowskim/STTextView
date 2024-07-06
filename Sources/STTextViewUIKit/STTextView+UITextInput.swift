@@ -3,6 +3,7 @@
 
 import UIKit
 import STTextKitPlus
+import STTextViewCommon
 
 extension STTextView: UITextInput {
 
@@ -58,11 +59,27 @@ extension STTextView: UITextInput {
     }
 
     public func setMarkedText(_ markedText: String?, selectedRange: NSRange) {
-        assertionFailure("Not Implemented")
+        let range = self.markedText?.markedRange ?? selectedRange
+        let markedText = markedText ?? ""
+
+        self.markedText = STMarkedText(
+            markedText: NSAttributedString(string: markedText),
+            markedRange: range,
+            selectedRange: selectedRange
+        )
+
+        assertionFailure("Not implemented")
+
+        // self.replace(
+        //     STTextLocationRange(
+        //         textRange: NSTextRange(_, in: textContentManager)
+        //     ),
+        //     withText: markedText
+        // )
     }
 
     public func unmarkText() {
-        assertionFailure("Not Implemented")
+        markedText = nil
     }
 
     /* The end and beginning of the the text document. */

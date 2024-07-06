@@ -192,7 +192,15 @@ import STTextViewCommon
     ///
     /// Setting marked text either replaces the existing marked text or, if none is present,
     /// inserts it from the current selection.
-    public var markedTextRange: UITextRange?
+    public var markedTextRange: UITextRange? {
+        if let markedText, let textRange = NSTextRange(markedText.markedRange, in: textContentManager) {
+            return STTextLocationRange(textRange: textRange)
+        }
+
+        return nil
+    }
+    
+    internal var markedText: STMarkedText? = nil
 
     /// A tokenizer must be provided to inform the text input system about text units of varying granularity.
     public lazy var tokenizer: UITextInputTokenizer = STTextInputTokenizer(textLayoutManager)
