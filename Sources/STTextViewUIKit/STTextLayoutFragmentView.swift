@@ -12,7 +12,10 @@ final class STTextLayoutFragmentView: UIView {
     init(layoutFragment: NSTextLayoutFragment, frame: CGRect) {
         self.layoutFragment = layoutFragment
         super.init(frame: frame)
+        isOpaque = false
+#if USE_LAYERS_FOR_GLYPHS
         layoutGlyphLayers()
+#endif
     }
 
     @available(*, unavailable)
@@ -36,6 +39,18 @@ final class STTextLayoutFragmentView: UIView {
         layer.sublayers?.forEach { $0.contentsScale = newScale }
     }
 
+#if !USE_LAYERS_FOR_GLYPHS
+    override func draw(_ rect: CGRect) {
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return
+        }
+        super.draw(rect)
+        layoutFragment.draw(at: .zero, in: context)
+        // TODO: drawSpellCheckerAttributes(dirtyRect, in: context)
+    }
+#endif
+
+#if USE_LAYERS_FOR_GLYPHS
     private func layoutGlyphLayers() {
         // layout each character on separate layer, so it can be animable
         for textLineFragment in layoutFragment.textLineFragments {
@@ -62,10 +77,42 @@ final class STTextLayoutFragmentView: UIView {
 
                     layer.addSublayer(glyphLayer)
                     glyphLayer.setNeedsDisplay()
+
+                    // Exmaple animation
+                    //do {
+                    //     let animation1 = CABasicAnimation(keyPath: "transform.translation.x")
+                    //     animation1.fromValue = Double.random(in: -2...0)
+                    //     animation1.toValue = Double.random(in: 0...2)
+                    //     animation1.timingFunction = .init(name: .easeInEaseOut)
+                    //
+                    //     let animation2 = CABasicAnimation(keyPath: "transform.translation.y")
+                    //     animation2.fromValue = Double.random(in: -2...0)
+                    //     animation2.toValue = Double.random(in: 0...1)
+                    //     animation2.timingFunction = .init(name: .linear)
+                    //
+                    //     let animation3 = CABasicAnimation(keyPath: "transform.rotation.y")
+                    //     animation3.fromValue = Double.random(in: -(30 * .pi / 180)...0)
+                    //     animation3.toValue = Double.random(in: 0...(30 * .pi / 180))
+                    //     animation3.timingFunction = .init(name: .linear)
+                    //
+                    //     let animation4 = CABasicAnimation(keyPath: "transform.rotation.z")
+                    //     animation4.fromValue = Double.random(in: -(15 * .pi / 180)...0)
+                    //     animation4.toValue = Double.random(in: 0...(15 * .pi / 180))
+                    //     animation4.timingFunction = .init(name: .linear)
+                    //
+                    //     let groupAnimation = CAAnimationGroup()
+                    //     groupAnimation.duration = Double.random(in: 1..<2)
+                    //     groupAnimation.animations = [animation1, animation2, animation3, animation4]
+                    //     groupAnimation.isRemovedOnCompletion = false
+                    //     groupAnimation.autoreverses = true
+                    //     groupAnimation.repeatCount = .greatestFiniteMagnitude
+                    //     glyphLayer.add(groupAnimation, forKey: "itsmine")
+                    // }
                 }
             }
         }
     }
+#endif
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -73,6 +120,7 @@ final class STTextLayoutFragmentView: UIView {
     }
 }
 
+#if USE_LAYERS_FOR_GLYPHS
 private class GlyphLayer: CALayer {
     let color: UIColor
     let font: CTFont
@@ -98,3 +146,4 @@ private class GlyphLayer: CALayer {
         fatalError("init(coder:) has not been implemented")
     }
 }
+#endif

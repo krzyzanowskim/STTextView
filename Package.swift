@@ -44,6 +44,9 @@ let package = Package(
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.iOS])),
                 .product(name: "STTextKitPlus", package: "STTextKitPlus"),
                 .product(name: "CoreTextSwift", package: "CoreTextSwift")
+            ],
+            swiftSettings: [
+                // .define("USE_LAYERS_FOR_GLYPHS")
             ]
         ),
         .target(
