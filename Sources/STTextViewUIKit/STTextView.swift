@@ -154,11 +154,30 @@ import STTextViewCommon
         }
     }
 
+    /// Installed plugins. events value is available after plugin is setup
+    internal var plugins: [Plugin] = []
+
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     internal var baseWritingDirection: NSWritingDirection = .natural
+
+    /// The delegate for all text views sharing the same layout manager.
+    @_nonoverride
+    public weak var delegate: (any STTextViewDelegate)? {
+        set {
+            super.delegate = newValue
+            delegateProxy.source = newValue
+        }
+
+        get {
+            delegateProxy.source
+        }
+    }
+
+    /// Proxy for delegate calls
+    internal let delegateProxy = STTextViewDelegateProxy(source: nil)
 
     /// An input delegate that receives a notification when text changes or when the selection changes.
     ///
@@ -370,7 +389,7 @@ import STTextViewCommon
             let textViewNotification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
 
             NotificationCenter.default.post(textViewNotification)
-            // self.delegateProxy.textViewDidChangeSelection(textViewNotification)
+            self.delegateProxy.textViewDidChangeSelection(textViewNotification)
             // NSAccessibility.post(element: self, notification: .selectedTextChanged)
         }
     }
@@ -507,14 +526,12 @@ import STTextViewCommon
     /// this method should be called with information on the change.
     /// Coalesce consecutive typing events
     open func shouldChangeText(in affectedTextRange: NSTextRange, replacementString: String?) -> Bool {
-        //let result = delegateProxy.textView(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString)
-        //if !result {
-        //    return result
-        //}
-        //
-        //return result
-        // TODO
-        return true
+        let result = delegateProxy.textView(self, shouldChangeTextIn: affectedTextRange, replacementString: replacementString)
+        if !result {
+            return result
+        }
+        
+        return result
     }
 
     internal func shouldChangeText(in affectedTextRanges: [NSTextRange], replacementString: String?) -> Bool {
@@ -551,11 +568,12 @@ import STTextViewCommon
     }
 
     open func textWillChange(_ sender: Any?) {
+        inputDelegate?.textWillChange(self)
+
         let notification = Notification(name: Self.textWillChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
 
-        inputDelegate?.textWillChange(self)
-        // delegateProxy.textViewWillChangeText(notification)
+        delegateProxy.textViewWillChangeText(notification)
     }
 
     /// Sends out necessary notifications when a text change completes.
@@ -567,13 +585,12 @@ import STTextViewCommon
         NotificationCenter.default.post(notification)
 
         inputDelegate?.textDidChange(self)
-        // delegateProxy.textViewDidChangeText(notification)
-
+        delegateProxy.textViewDidChangeText(notification)
     }
 
     internal func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
         textWillChange(self)
-        //delegateProxy.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
+        delegateProxy.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
         textContentManager.performEditingTransaction {
             textContentManager.replaceContents(
@@ -582,7 +599,7 @@ import STTextViewCommon
             )
         }
 
-        //delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
+        delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)
         didChangeText()
     }
 
