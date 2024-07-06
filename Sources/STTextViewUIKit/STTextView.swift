@@ -195,7 +195,7 @@ import STTextViewCommon
     public var markedTextRange: UITextRange?
 
     /// A tokenizer must be provided to inform the text input system about text units of varying granularity.
-    public lazy var tokenizer: UITextInputTokenizer = UITextInputStringTokenizer(textInput: self)
+    public lazy var tokenizer: UITextInputTokenizer = STTextInputTokenizer(textLayoutManager)
 
     /// The text that the text view displays.
     public var text: String? {

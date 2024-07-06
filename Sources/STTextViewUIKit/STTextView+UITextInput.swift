@@ -206,13 +206,32 @@ extension STTextView: UITextInput {
 
     /// Returns an array of selection rects corresponding to the range of text.
     public func selectionRects(for range: UITextRange) -> [UITextSelectionRect] {
+        guard let range = range as? STTextLocationRange else {
+            return []
+        }
+
         var result: [UITextSelectionRect] = []
-        textLayoutManager.enumerateTextSegments(in: range.nsTextRange, type: .selection, options: .rangeNotRequired) { (_, textSegmentFrame, _, _)in
+        textLayoutManager.enumerateTextSegments(in: range.nsTextRange, type: .selection, options: .upstreamAffinity) { (textSegmentRange, textSegmentFrame, _, _)in
+
+            var containsStart: Bool {
+                if let textSegmentRange, textSegmentRange.location == range.textRange.location {
+                    return true
+                }
+                return false
+            }
+
+            var containsEnd: Bool {
+                if let textSegmentRange, textSegmentRange.endLocation == range.textRange.endLocation {
+                    return true
+                }
+                return false
+            }
+
             result.append(STTextSelectionRect(
                 rect: textSegmentFrame,
                 writingDirection: baseWritingDirection(for: range.start, in: .forward),
-                containsStart: false,
-                containsEnd: false,
+                containsStart: containsStart,
+                containsEnd: containsEnd,
                 isVertical: false
             ))
             return true // keep going

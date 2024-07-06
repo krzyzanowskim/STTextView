@@ -4,7 +4,7 @@
 import UIKit
 
 internal class STTextLocationRange: UITextRange {
-    fileprivate let textRange: NSTextRange
+    let textRange: NSTextRange
 
     init(textRange: NSTextRange) {
         self.textRange = textRange
