@@ -2,6 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import AppKit
+import STTextViewCommon
 
 extension STTextView: NSTextInputClient {
 
@@ -64,7 +65,7 @@ extension STTextView: NSTextInputClient {
 
         if replacementRange.location != NSNotFound {
             if markedText == nil {
-                self.markedText = MarkedText(
+                self.markedText = STMarkedText(
                     markedText: attributedMarkedString,
                     markedRange: NSRange(location: replacementRange.location, length: attributedMarkedString.length),
                     selectedRange: NSRange(location: replacementRange.location + selectedRange.location, length: selectedRange.length)
@@ -80,7 +81,7 @@ extension STTextView: NSTextInputClient {
             // continue updates.dictation begins with this case
 
             if markedText == nil {
-                self.markedText = MarkedText(
+                self.markedText = STMarkedText(
                     markedText: attributedMarkedString,
                     markedRange: NSRange(location: self.selectedRange().location, length: attributedMarkedString.length),
                     selectedRange: NSRange(location: self.selectedRange().location + selectedRange.location, length: selectedRange.length)

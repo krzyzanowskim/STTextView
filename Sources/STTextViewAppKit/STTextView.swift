@@ -358,26 +358,7 @@ import AVFoundation
     internal var _undoManager: UndoManager?
     internal var _yankingManager = YankingManager()
 
-    internal class MarkedText: CustomDebugStringConvertible {
-        var markedText: NSAttributedString
-        var markedRange: NSRange
-
-        // Not used currently in STTextView.
-        // that turned out to be good because it's buggy FB13789916 https://gist.github.com/krzyzanowskim/340c5810fc427e346b7c4b06d46b1e10
-        var selectedRange: NSRange
-
-        init(markedText: NSAttributedString, markedRange: NSRange, selectedRange: NSRange) {
-            self.markedText = markedText
-            self.markedRange = markedRange
-            self.selectedRange = selectedRange
-        }
-
-        var debugDescription: String {
-            "markedText: \"\(markedText.string)\", markedRange: \(markedRange), selectedRange: \(selectedRange)"
-        }
-    }
-
-    internal var markedText: MarkedText? = nil
+    internal var markedText: STMarkedText? = nil
 
     /// The attributes used to draw marked text.
     ///

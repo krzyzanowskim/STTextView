@@ -29,6 +29,7 @@ class ViewController: UIViewController {
         textView.addAttributes(
             [
                 .foregroundColor: UIColor.tintColor,
+                .font: UIFont.preferredFont(forTextStyle: .largeTitle)
             ],
             range: NSRange(location: 0, length: 20)
         )
