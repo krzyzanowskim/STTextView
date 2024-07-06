@@ -28,6 +28,11 @@ final class STTextInputTokenizer: NSObject, UITextInputTokenizer {
                 for: granularity.textSelectionGranularity,
                 enclosing: positionSelection
             )
+
+            if destination.granularity != granularity.textSelectionGranularity {
+                return nil
+            }
+
             return destination.textRanges.first?.uiTextRange
         case .document:
             return textLayoutManager.documentRange.uiTextRange
@@ -79,6 +84,11 @@ final class STTextInputTokenizer: NSObject, UITextInputTokenizer {
                     for: granularity.textSelectionGranularity,
                     enclosing: positionSelection
                 )
+
+                if destination.granularity != granularity.textSelectionGranularity {
+                    return nil
+                }
+
                 return destination.textRanges.first?.uiTextRange
             case .document:
                 return textLayoutManager.documentRange.uiTextRange
