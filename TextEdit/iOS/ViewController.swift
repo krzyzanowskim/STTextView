@@ -14,6 +14,12 @@ class ViewController: UIViewController {
 
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
+
+        let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        paragraph.lineHeightMultiple = 1.2
+
+        textView.typingAttributes[.paragraphStyle] = paragraph
+        textView.font = UIFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         view.addSubview(textView)
         self.textView = textView
@@ -63,8 +69,9 @@ class ViewController: UIViewController {
 private class MyTextAttachmentViewProvider: NSTextAttachmentViewProvider {
     override func loadView() {
         // super.loadView()
-        let img = UIImage(systemName: "figure.walk")!
-        let imageView = UIImageView(image: img)
+        let image = UIImage(systemName: "figure.walk")!
+        let imageView = UIImageView(image: image)
+        imageView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(paletteColors: [UIColor.label])
         self.view = imageView
     }
 

@@ -25,7 +25,7 @@ final class ViewController: NSViewController {
         paragraph.lineHeightMultiple = 1.2
         textView.typingAttributes[.paragraphStyle] = paragraph
 
-        textView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
+        textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.isHorizontallyResizable = false // wrap
         textView.highlightSelectedLine = true
@@ -96,7 +96,7 @@ final class ViewController: NSViewController {
         textView.addAttributes(
             [
                 .foregroundColor: NSColor.controlAccentColor,
-                .font: NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize * 1.2, weight: .bold)
+                .font: NSFont.preferredFont(forTextStyle: .largeTitle)
             ],
             range: NSRange(textView.string.linesRanges().first!, in: textView.string)
         )
@@ -213,8 +213,9 @@ private extension StringProtocol {
 private class MyTextAttachmentViewProvider: NSTextAttachmentViewProvider {
     override func loadView() {
         // super.loadView()
-        let img = NSImage(systemSymbolName: "figure.walk", accessibilityDescription: nil)!
-        let imageView = NSImageView(image: img)
+        let image = NSImage(systemSymbolName: "figure.walk", accessibilityDescription: nil)!
+        let imageView = NSImageView(image: image)
+        imageView.symbolConfiguration = NSImage.SymbolConfiguration(paletteColors: [NSColor.labelColor])
         self.view = imageView
     }
 

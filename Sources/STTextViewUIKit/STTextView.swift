@@ -441,6 +441,52 @@ import STTextViewCommon
         }
     }
 
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            preconditionFailure("Invalid range \(range)")
+        }
+
+        setAttributes(attrs, range: textRange, updateLayout: updateLayout)
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
+        }
+
+
+        if updateLayout {
+            updateTypingAttributes()
+            setNeedsLayout()
+        }
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            preconditionFailure("Invalid range \(range)")
+        }
+
+        removeAttribute(attribute, range: textRange, updateLayout: updateLayout)
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
+
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
+        }
+
+        updateTypingAttributes()
+
+        if updateLayout {
+            setNeedsLayout()
+        }
+    }
+
     private func updateEditableInteraction() {
 
         func setupEditableInteraction() {
