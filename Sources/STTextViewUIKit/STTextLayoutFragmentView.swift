@@ -116,7 +116,21 @@ final class STTextLayoutFragmentView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        // TODO: layoutAttachmentView()
+        layoutAttachmentView()
+    }
+
+    private func layoutAttachmentView() {
+        for attachmentViewProvider in layoutFragment.textAttachmentViewProviders {
+            guard let attachmentView = attachmentViewProvider.view else {
+                continue
+            }
+
+            let viewOrig = layoutFragment.frameForTextAttachment(at: attachmentViewProvider.location).origin
+            attachmentView.frame.origin = viewOrig
+            if attachmentView.superview == nil {
+                addSubview(attachmentView)
+            }
+        }
     }
 }
 

@@ -33,10 +33,65 @@ class ViewController: UIViewController {
             ],
             range: NSRange(location: 0, length: 20)
         )
+
+        // add link to occurences of STTextView
+        if let str = textView.text {
+            var currentRange = str.startIndex..<str.endIndex
+            while let ocurrenceRange = str.range(of: "STTextView", range: currentRange) {
+                textView.addAttributes([.link: URL(string: "https://swift.best")! as NSURL], range: NSRange(ocurrenceRange, in: str))
+                currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
+            }
+        }
+
+        //  Insert attachment image using NSTextAttachmentViewProvider
+        do {
+             let attachment = MyTextAttachment()
+             let attachmentString = NSAttributedString(attachment: attachment)
+             textView.insertText(attachmentString, replacementRange: NSRange(location: 30, length: 0))
+        }
+
     }
 
     @objc func toggleTextWrapMode(_ sender: Any?) {
         textView.widthTracksTextView.toggle()
     }
 
+}
+
+// MARK: TextAttachment provider
+
+private class MyTextAttachmentViewProvider: NSTextAttachmentViewProvider {
+    override func loadView() {
+        // super.loadView()
+        let img = UIImage(systemName: "figure.walk")!
+        let imageView = UIImageView(image: img)
+        self.view = imageView
+    }
+
+    override func attachmentBounds(
+        for attributes: [NSAttributedString.Key : Any],
+        location: any NSTextLocation,
+        textContainer: NSTextContainer?,
+        proposedLineFragment: CGRect,
+        position: CGPoint
+    ) -> CGRect {
+        self.view?.bounds ?? .zero
+    }
+}
+
+private class MyTextAttachment: NSTextAttachment {
+    override func viewProvider(
+        for parentView: UIView?,
+        location: any NSTextLocation,
+        textContainer: NSTextContainer?
+    ) -> NSTextAttachmentViewProvider? {
+        let viewProvider = MyTextAttachmentViewProvider(
+            textAttachment: self,
+            parentView: parentView,
+            textLayoutManager: textContainer?.textLayoutManager,
+            location: location
+        )
+        viewProvider.tracksTextAttachmentViewBounds = true
+        return viewProvider
+    }
 }

@@ -547,8 +547,36 @@ import STTextViewCommon
         }
     }
 
-    public func replaceCharacters(in range: NSTextRange, with string: String) {
+    open func replaceCharacters(in range: NSTextRange, with string: String) {
         replaceCharacters(in: range, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
+    }
+
+    open func insertText(_ string: Any, replacementRange: NSRange) {
+        unmarkText()
+
+        var textRanges: [NSTextRange] = []
+
+        if replacementRange == .notFound {
+            textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
+        }
+
+        let replacementTextRange = NSTextRange(replacementRange, in: textContentManager)
+        if let replacementTextRange, !textRanges.contains(where: { $0 == replacementTextRange }) {
+            textRanges.append(replacementTextRange)
+        }
+
+        switch string {
+        case let string as String:
+            if shouldChangeText(in: textRanges, replacementString: string) {
+                replaceCharacters(in: textRanges, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
+            }
+        case let attributedString as NSAttributedString:
+            if shouldChangeText(in: textRanges, replacementString: attributedString.string) {
+                replaceCharacters(in: textRanges, with: attributedString, allowsTypingCoalescing: true)
+            }
+        default:
+            assertionFailure()
+        }
     }
 
     internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
