@@ -59,7 +59,7 @@ final class STTextInputTokenizer: NSObject, UITextInputTokenizer {
             direction: direction.textSelectionNavigationDirection,
             destination: granularity.textSelectionDestination,
             extending: false,
-            confined: false
+            confined: true
         )
 
         return destination?.textRanges.first?.location.uiTextPosition
