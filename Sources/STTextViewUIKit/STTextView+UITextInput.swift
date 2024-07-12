@@ -118,20 +118,9 @@ extension STTextView: UITextInput {
         guard let position = position as? STTextLocation else {
             return nil
         }
-
-        let positionSelection = NSTextSelection(position.location, affinity: .downstream)
-        var destination: NSTextSelection? = positionSelection
-        for _ in 0..<offset {
-            destination = textLayoutManager.textSelectionNavigation.destinationSelection(
-                for: destination ?? positionSelection,
-                direction: direction.textSelectionNavigationDirection,
-                destination: .character,
-                extending: false,
-                confined: false
-            )
-        }
-
-        return destination?.textRanges.first?.location.uiTextPosition
+        let location = position.location
+        let direction = direction.textSelectionNavigationDirection
+        return textLayoutManager.location(from: location, in: direction, offset: offset)?.uiTextPosition
     }
     
     /* Simple evaluation of positions */
