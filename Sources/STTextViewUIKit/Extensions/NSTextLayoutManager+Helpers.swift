@@ -13,18 +13,18 @@ extension NSTextLayoutManager {
         guard offset > 0 else {
             return originTextSelection
         }
-        let destinationTextSelection = textSelectionNavigation.destinationSelection(
+        let result = textSelectionNavigation.destinationSelection(
             for: originTextSelection,
             direction: direction,
             destination: .character,
             extending: false,
             confined: false
         )
-        guard let destinationTextSelection else {
+        guard let result else {
             return nil
         }
         return destinationSelection(
-            from: destinationTextSelection,
+            from: result,
             in: direction,
             offset: offset - 1
         )
