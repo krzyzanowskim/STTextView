@@ -78,7 +78,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = STTextView.scrollableTextView()
         let textView = scrollView.documentView as! STTextView
-        textView.delegate = context.coordinator
+        textView.textDelegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.widthTracksTextView = options.contains(.wrapLines)
         textView.setSelectedRange(NSRange())

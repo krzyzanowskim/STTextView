@@ -31,7 +31,7 @@ final class ViewController: NSViewController {
         textView.highlightSelectedLine = true
         textView.isIncrementalSearchingEnabled = true
         textView.showsInvisibleCharacters = false
-        textView.delegate = self
+        textView.textDelegate = self
 
         // Plugins
         // textView.addPlugin(DummyPlugin())
