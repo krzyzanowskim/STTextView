@@ -67,6 +67,34 @@ class ViewController: UIViewController {
 
 extension ViewController: STTextViewDelegate {
 
+    func textViewWillChangeText(_ notification: Notification) {
+        print("textViewWillChangeText")
+    }
+
+    func textViewDidChangeText(_ notification: Notification) {
+        print("textViewDidChangeText")
+    }
+
+    func textViewDidChangeSelection(_ notification: Notification) {
+        print("textViewDidChangeSelection")
+    }
+
+    func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool {
+        true
+    }
+
+    func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
+
+    }
+
+    func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
+
+    }
+
+    func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool {
+        false
+    }
+
 }
 
 // MARK: TextAttachment provider

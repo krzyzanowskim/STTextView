@@ -66,9 +66,15 @@ let package = Package(
             publicHeadersPath: "include"
         ),
         .testTarget(
-            name: "STTextViewTests",
+            name: "STTextViewAppKitTests",
             dependencies: [
-                .target(name: "STTextView")
+                .target(name: "STTextViewAppKit", condition: .when(platforms: [.macOS]))
+            ]
+        ),
+        .testTarget(
+            name: "STTextViewUIKitTests",
+            dependencies: [
+                .target(name: "STTextViewUIKit", condition: .when(platforms: [.iOS]))
             ]
         )
     ]

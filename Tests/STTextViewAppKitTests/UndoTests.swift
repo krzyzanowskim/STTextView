@@ -1,5 +1,6 @@
+#if os(macOS)
 import XCTest
-@testable import STTextView
+@testable import STTextViewAppKit
 
 final class UndoTests: XCTestCase {
     func testInsertingAtEndAndUndo() {
@@ -80,3 +81,4 @@ final class UndoTests: XCTestCase {
         XCTAssertEqual(textView.string, "123a789")
     }
 }
+#endif

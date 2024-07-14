@@ -1,5 +1,6 @@
+#if os(macOS)
 import XCTest
-@testable import STTextView
+@testable import STTextViewAppKit
 
 class TypingAttributesTests : XCTestCase {
 
@@ -102,3 +103,4 @@ class TypingAttributesTests : XCTestCase {
         XCTAssertNotEqual(textView.typingAttributes[.font] as? NSFont, beforeChange[.font] as? NSFont)
     }
 }
+#endif

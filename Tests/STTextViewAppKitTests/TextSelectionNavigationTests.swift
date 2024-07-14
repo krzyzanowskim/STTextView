@@ -1,5 +1,6 @@
+#if os(macOS)
 import XCTest
-import STTextView
+@testable import STTextViewAppKit
 
 final class TextSelectionNavigationTests: XCTestCase {
     func testMoveLeft() {
@@ -434,3 +435,4 @@ extension NSTextView {
         textStorage?.setAttributedString(attributedString)
     }
 }
+#endif
