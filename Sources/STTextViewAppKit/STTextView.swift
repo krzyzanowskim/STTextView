@@ -369,7 +369,19 @@ import AVFoundation
     internal var processingKeyEvent: Bool = false
 
     /// The delegate for all text views sharing the same layout manager.
+    @available(*, deprecated, renamed: "textDelegate")
     public weak var delegate: (any STTextViewDelegate)? {
+        set {
+            textDelegate = newValue
+        }
+
+        get {
+            textDelegate
+        }
+    }
+
+    /// The delegate for all text views sharing the same layout manager.
+    public weak var textDelegate: (any STTextViewDelegate)? {
         set {
             delegateProxy.source = newValue
         }

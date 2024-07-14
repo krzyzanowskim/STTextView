@@ -14,6 +14,7 @@ class ViewController: UIViewController {
 
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.textDelegate = self
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.2
@@ -61,6 +62,10 @@ class ViewController: UIViewController {
     @objc func toggleTextWrapMode(_ sender: Any?) {
         textView.widthTracksTextView.toggle()
     }
+
+}
+
+extension ViewController: STTextViewDelegate {
 
 }
 

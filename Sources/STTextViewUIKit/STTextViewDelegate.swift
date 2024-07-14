@@ -6,7 +6,7 @@ import UIKit
 
 /// A set of optional methods that text view delegates can use to manage selection,
 /// set text attributes and more.
-public protocol STTextViewDelegate: UIScrollViewDelegate {
+public protocol STTextViewDelegate: AnyObject {
     /// Returns the undo manager for the specified text view.
     ///
     /// This method provides the flexibility to return a custom undo manager for the text view.

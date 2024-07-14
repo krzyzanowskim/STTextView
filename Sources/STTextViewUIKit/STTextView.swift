@@ -163,10 +163,8 @@ import STTextViewCommon
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
 
     /// The delegate for all text views sharing the same layout manager.
-    @_nonoverride
-    public weak var delegate: (any STTextViewDelegate)? {
+    public weak var textDelegate: (any STTextViewDelegate)? {
         set {
-            super.delegate = newValue
             delegateProxy.source = newValue
         }
 
@@ -401,6 +399,7 @@ import STTextViewCommon
         }
     }
 
+    @available(*, unavailable)
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
