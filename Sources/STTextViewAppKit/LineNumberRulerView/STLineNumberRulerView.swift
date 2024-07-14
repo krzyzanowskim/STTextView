@@ -210,7 +210,7 @@ open class STLineNumberRulerView: NSRulerView {
                     var effectiveAttributes = lineTextAttributes
 
                     let isLineSelected: Bool = {
-                        textView.textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
+                        textView.textLayoutManager.textSelections.flatMap(\.textRanges).reduce(!textView.textLayoutManager.insertionPointSelections.isEmpty) { partialResult, selectionTextRange in
                             var result = true
                             if lineFragment.isExtraLineFragment {
                                 let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
@@ -365,7 +365,7 @@ open class STLineNumberRulerView: NSRulerView {
         for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dy: relativePoint.y)) {
 
             // Draw a background rectangle to highlight the selected ruler line
-            if highlightSelectedLine, line.isSelected, textView.textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty {
+            if highlightSelectedLine, line.isSelected, textView.textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty, !textView.textLayoutManager.insertionPointSelections.isEmpty {
                 drawHighlightedRuler(line: line, at: relativePoint, in: dirtyRect)
             }
 

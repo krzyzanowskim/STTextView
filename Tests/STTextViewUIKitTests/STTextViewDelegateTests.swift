@@ -6,7 +6,7 @@ class STTextViewDelegateTests : XCTestCase {
 
     func testInitialState() {
         let textView = STTextView()
-        // XCTAssertNil(textView.selectedTextRange)
+        XCTAssertNil(textView.selectedTextRange)
     }
 
 }

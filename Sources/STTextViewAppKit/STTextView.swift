@@ -587,9 +587,6 @@ import AVFoundation
         textFinderClient.textView = self
         textCheckingController = NSTextCheckingController(client: self)
 
-        // Set insert point at the very beginning
-        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location))
-
         postsBoundsChangedNotifications = true
         postsFrameChangedNotifications = true
 
@@ -797,12 +794,15 @@ import AVFoundation
 
     /// Draws the background of the text view.
     open func drawBackground(in rect: NSRect) {
-        if highlightSelectedLine,
-           // don't highlight when there's selection
-           textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty
-        {
-            drawHighlightedLine(in: rect)
+        guard highlightSelectedLine,
+              textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty,
+              !textLayoutManager.insertionPointSelections.isEmpty
+        else {
+            // don't highlight when there's selection
+            return
         }
+
+        drawHighlightedLine(in: rect)
     }
 
     private func drawHighlightedLine(in rect: NSRect) {

@@ -373,9 +373,6 @@ import STTextViewCommon
 
         super.init(frame: frame)
 
-        // Set insert point at the very beginning
-        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location))
-
         textLayoutManager.delegate = self
         textLayoutManager.textViewportLayoutController.delegate = self
 

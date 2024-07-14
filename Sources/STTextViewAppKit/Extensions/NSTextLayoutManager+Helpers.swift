@@ -46,9 +46,10 @@ extension NSTextLayoutManager {
     struct TextSelectionRangesOptions: OptionSet {
         let rawValue: UInt
         static let withoutInsertionPoints = TextSelectionRangesOptions(rawValue: 1 << 0)
+        static let withInsertionPoints = TextSelectionRangesOptions(rawValue: 1 << 1)
     }
 
-    func textSelectionsRanges(_ options: TextSelectionRangesOptions = []) -> [NSTextRange] {
+    func textSelectionsRanges(_ options: TextSelectionRangesOptions = .withInsertionPoints) -> [NSTextRange] {
         if options.contains(.withoutInsertionPoints) {
             return textSelections.flatMap(\.textRanges).filter({ !$0.isEmpty }).sorted(by: { $0.location < $1.location })
         } else {
