@@ -121,7 +121,7 @@ extension STTextView: UITextInput {
         guard let textLayoutFragment = textLayoutManager.textLayoutFragment(for: position.location) else {
             return nil
         }
-        guard let textLineFragment = textLayoutManager.textLineFragment(at: position.location) else {
+        guard let textLineFragment = textLayoutFragment.textLineFragment(at: position.location) else {
             return nil
         }
         let characterOffset = textLayoutManager.offset(from: textLayoutFragment.rangeInElement.location, to: position.location)
