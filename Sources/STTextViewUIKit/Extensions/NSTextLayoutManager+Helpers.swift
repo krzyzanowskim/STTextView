@@ -30,28 +30,4 @@ extension NSTextLayoutManager {
         )
     }
 
-    func textLayoutFragmentAndTextLineFragment(
-        at textLocation: NSTextLocation
-    ) -> (NSTextLayoutFragment, NSTextLineFragment)? {
-        guard let textLayoutFragment = textLayoutFragment(at: textLocation) else {
-            return nil
-        }
-        let offset = offset(from: textLayoutFragment.rangeInElement.location, to: textLocation)
-        let textLineFragments = textLayoutFragment.textLineFragments
-        guard let textLineFragment = textLineFragments.first(where: { $0.characterRange.contains(offset) }) else {
-            return nil
-        }
-        return (textLayoutFragment, textLineFragment)
-    }
-}
-
-private extension NSTextLayoutManager {
-    private func textLayoutFragment(at textLocation: NSTextLocation) -> NSTextLayoutFragment? {
-        var result: NSTextLayoutFragment?
-        enumerateTextLayoutFragments(from: textLocation) { textLayoutFragment in
-            result = textLayoutFragment
-            return false
-        }
-        return result
-    }
 }
