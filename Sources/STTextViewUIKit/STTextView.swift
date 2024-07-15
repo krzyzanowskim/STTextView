@@ -210,9 +210,12 @@ import STTextViewCommon
 
             setString(newValue)
 
-            // restore selection location
             if let prevLocation {
+                // restore selection location
                 setSelectedTextRange(NSTextRange(location: prevLocation))
+            } else {
+                // or try to set at the begining of the document
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
             }
         }
 
@@ -230,9 +233,12 @@ import STTextViewCommon
 
             setString(newValue)
 
-            // restore selection location
             if let prevLocation {
+                // restore selection location
                 setSelectedTextRange(NSTextRange(location: prevLocation))
+            } else {
+                // or try to set at the begining of the document
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
             }
         }
 
