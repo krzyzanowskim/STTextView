@@ -3,7 +3,9 @@
 //
 //
 //  STTextView
-//      |---contentView
+//      |---ContentView
+//              |---LineHighlightView
+//              |---STTextLayoutFragmentView
 
 import UIKit
 import STTextKitPlus
