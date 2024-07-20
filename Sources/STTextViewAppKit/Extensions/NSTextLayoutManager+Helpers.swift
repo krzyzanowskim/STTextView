@@ -6,31 +6,6 @@ import STTextKitPlus
 
 extension NSTextLayoutManager {
 
-    /// A String in range
-    /// - Parameter range: Text range
-    /// - Returns: String in the range
-    func substring(in range: NSTextRange) -> String {
-        guard !range.isEmpty else { return "" }
-        var output = String()
-        if let textContentManager {
-            output.reserveCapacity(range.length(in: textContentManager))
-        } else {
-            output.reserveCapacity(128)
-        }
-        enumerateSubstrings(from: range.location, options: .byComposedCharacterSequences) { (substring, substringRange, _, stop) in
-            let shouldContinue = substringRange.location <= range.endLocation
-            if !shouldContinue {
-                stop.pointee = true
-                return
-            }
-
-            if let substring = substring {
-                output += substring
-            }
-        }
-        return output
-    }
-
     func enumerateSubstrings(in range: NSTextRange, options: String.EnumerationOptions = [], using block: (String?, NSTextRange, NSTextRange?, UnsafeMutablePointer<ObjCBool>) -> Void) {
         enumerateSubstrings(from: range.location, options: options) { substring, substringRange, enclosingRange, stop in
             let shouldContinue = substringRange.location <= range.endLocation
@@ -41,59 +16,6 @@ extension NSTextLayoutManager {
 
             block(substring, substringRange, enclosingRange, stop)
         }
-    }
-
-    struct TextSelectionRangesOptions: OptionSet {
-        let rawValue: UInt
-        static let withoutInsertionPoints = TextSelectionRangesOptions(rawValue: 1 << 0)
-        static let withInsertionPoints = TextSelectionRangesOptions(rawValue: 1 << 1)
-    }
-
-    func textSelectionsRanges(_ options: TextSelectionRangesOptions = .withInsertionPoints) -> [NSTextRange] {
-        if options.contains(.withoutInsertionPoints) {
-            return textSelections.flatMap(\.textRanges).filter({ !$0.isEmpty }).sorted(by: { $0.location < $1.location })
-        } else {
-            return textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location })
-        }
-    }
-
-    func textSelectionsString() -> String? {
-        textSelectionsRanges(.withoutInsertionPoints).compactMap { textRange in
-            substring(in: textRange)
-        }.joined(separator: "\n")
-    }
-
-    func textSelectionsAttributedString() -> NSAttributedString? {
-        textAttributedString(in: textSelectionsRanges(.withoutInsertionPoints))
-    }
-
-    func textAttributedString(at location: any NSTextLocation) -> NSAttributedString? {
-        if let range = NSTextRange(location: location, end: self.location(location, offsetBy: 1)), !range.isEmpty {
-            return textAttributedString(in: range)
-        }
-
-        return nil
-    }
-
-    func textAttributedString(in textRange: NSTextRange) -> NSAttributedString? {
-        textAttributedString(in: [textRange])
-    }
-
-    func textAttributedString(in textRanges: [NSTextRange]) -> NSAttributedString? {
-        let attributedString = textRanges.reduce(NSMutableAttributedString()) { partialResult, range in
-            if let attributedString = textContentManager?.attributedString(in: range) {
-                if partialResult.length != 0 {
-                    partialResult.append(NSAttributedString(string: "\n"))
-                }
-                partialResult.append(attributedString)
-            }
-            return partialResult
-        }
-
-        if attributedString.length == 0 {
-            return nil
-        }
-        return attributedString
     }
 
     /// Enumerates rendering attributes in the range you provide.

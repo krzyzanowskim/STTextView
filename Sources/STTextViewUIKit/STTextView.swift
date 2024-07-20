@@ -112,6 +112,16 @@ import STTextViewCommon
         }
     }
 
+    /// A Boolean that controls whether the text view highlights the currently selected line.
+    @Invalidating(.display)
+    @objc dynamic open var highlightSelectedLine: Bool = false
+
+    /// The highlight color of the selected line.
+    ///
+    /// Note: Needs ``highlightSelectedLine`` to be set to `true`
+    @Invalidating(.display)
+    @objc dynamic open var selectedLineHighlightColor: UIColor = UIColor.tintColor.withAlphaComponent(0.15)
+
     /// The font of the text.
     ///
     /// This property applies to the entire text string.
@@ -159,6 +169,7 @@ import STTextViewCommon
 
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
+    internal let lineHighlightView: LineHighlightView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
 
@@ -341,6 +352,14 @@ import STTextViewCommon
         ]
     }
 
+    // line height based on current typing font and current typing paragraph
+    internal var typingLineHeight: CGFloat {
+        let font = typingAttributes[.font] as? UIFont ?? self.defaultTypingAttributes[.font] as! UIFont
+        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? self.defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
+        let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
+        return calculateDefaultLineHeight(for: font) * lineHeightMultiple
+    }
+
     private let editableTextInteraction = UITextInteraction(for: .editable)
     private let nonEditableTextInteraction = UITextInteraction(for: .nonEditable)
 
@@ -375,6 +394,9 @@ import STTextViewCommon
         contentView = ContentView()
         contentView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
 
+        lineHighlightView = LineHighlightView()
+        lineHighlightView.isHidden = true
+
         typingAttributes = [:]
 
         super.init(frame: frame)
@@ -383,6 +405,7 @@ import STTextViewCommon
         textLayoutManager.textViewportLayoutController.delegate = self
 
         addSubview(contentView)
+        contentView.addSubview(lineHighlightView)
 
         editableTextInteraction.textInput = self
         editableTextInteraction.delegate = self
@@ -690,6 +713,7 @@ import STTextViewCommon
         super.layoutSubviews()
 
         layoutViewport()
+        layoutLineHighlight()
     }
 
     private func layoutViewport() {
@@ -698,5 +722,106 @@ import STTextViewCommon
         // even though viewport range is properly calculated.
         // No known workaround.
         textLayoutManager.textViewportLayoutController.layoutViewport()
+    }
+
+    private func layoutLineHighlight() {
+        guard highlightSelectedLine,
+              textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty,
+              !textLayoutManager.insertionPointSelections.isEmpty
+        else {
+            // don't highlight when there's selection
+            lineHighlightView.isHidden = true
+            return
+        }
+
+        lineHighlightView.isHidden = false
+        lineHighlightView.backgroundColor = selectedLineHighlightColor
+
+        if textLayoutManager.documentRange.isEmpty {
+            // - empty document has no layout fragments, nothing, it's empty and has to be handled explicitly.
+            // - there's no layout fragment at the document endLocation (technically it's out of bounds), has to be handled explicitly.
+            if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
+                lineHighlightView.frame = CGRect(
+                    origin: CGPoint(
+                        x: bounds.minX,
+                        y: selectionFrame.origin.y
+                    ),
+                    size: CGSize(
+                        width: max(contentSize.width, bounds.width),
+                        height: typingLineHeight
+                    )
+                )
+            }
+            return
+        }
+
+        guard let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
+            return
+        }
+
+        // build the rectangle out of fragments rectangles
+        var combinedFragmentsRect: CGRect?
+
+        // TODO some beutiful day:
+        // Don't rely on NSTextParagraph.paragraphContentRange, but that
+        // makes tricky to get all the conditions right (especially for last line)
+        // Problem is that NSTextParagraph.rangeInElement span across two lines (eg. "abc\n" are two lines) while
+        // paragraphContentRange is just one ("abc")
+        //
+        // Another idea here is to use `textLayoutManager.textLayoutFragment(for: selectionTextRange.location)`
+        // to find the layout fragment and us its frame as highlight area. It has its issue when it comes to the
+        // extra line fragment area (sic).
+        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
+            let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
+            for lineFragment in layoutFragment.textLineFragments {
+
+                func isLineSelected() -> Bool {
+                    textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
+                        var result = true
+                        if lineFragment.isExtraLineFragment {
+                            let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
+                            result = result && c1
+                        } else {
+                            let c1 = contentRangeInElement.contains(selectionTextRange)
+                            let c2 = contentRangeInElement.intersects(selectionTextRange)
+                            let c3 = selectionTextRange.contains(contentRangeInElement)
+                            let c4 = selectionTextRange.intersects(contentRangeInElement)
+                            let c5 = contentRangeInElement.endLocation == selectionTextRange.location
+                            result = result && (c1 || c2 || c3 || c4 || c5)
+                        }
+                        return partialResult && result
+                    }
+                }
+
+                if isLineSelected() {
+                    var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                    lineFragmentFrame.size.height = lineFragment.typographicBounds.height
+
+
+                    let r = CGRect(
+                        origin: CGPoint(
+                            x: bounds.minX,
+                            y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
+                        ),
+                        size: CGSize(
+                            width: max(contentSize.width, bounds.width),
+                            height: lineFragmentFrame.height
+                        )
+                    )
+
+                    if let rect = combinedFragmentsRect {
+                        combinedFragmentsRect = rect.union(r)
+                    } else {
+                        combinedFragmentsRect = r
+                    }
+                }
+            }
+            return true
+        }
+
+        if let combinedFragmentsRect {
+            lineHighlightView.frame = combinedFragmentsRect.pixelAligned
+        }
+
     }
 }
