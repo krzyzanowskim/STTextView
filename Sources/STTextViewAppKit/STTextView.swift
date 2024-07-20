@@ -563,6 +563,7 @@ import AVFoundation
 
         textContentManager = STTextContentStorage()
         textLayoutManager = STTextLayoutManager()
+        textLayoutManager.layoutQueue = OperationQueue()
         textLayoutManager.textContainer = STTextContainer()
         textLayoutManager.textContainer?.widthTracksTextView = false
         textLayoutManager.textContainer?.heightTracksTextView = true
