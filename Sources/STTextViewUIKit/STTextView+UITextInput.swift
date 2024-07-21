@@ -209,7 +209,7 @@ extension STTextView: UITextInput {
     /* Geometry used to provide, for example, a correction rect. */
 
     public func firstRect(for range: UITextRange) -> CGRect {
-        textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .selection) ?? .zero
+        textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .selection)?.moved(dx: -contentView.bounds.origin.x) ?? .zero
     }
 
     public func caretRect(for position: UITextPosition) -> CGRect {
@@ -220,7 +220,7 @@ extension STTextView: UITextInput {
         var rect = textLayoutManager.textSegmentFrame(at: textLocation.location, type: .selection) ?? .zero
         rect.origin.x -= 1
         rect.size.width = 2
-        return rect
+        return rect.moved(dx: -contentView.bounds.origin.x)
     }
 
     /// Returns an array of selection rects corresponding to the range of text.
@@ -247,7 +247,7 @@ extension STTextView: UITextInput {
             }
 
             result.append(STTextSelectionRect(
-                rect: textSegmentFrame,
+                rect: textSegmentFrame.moved(dx: -contentView.bounds.origin.x),
                 writingDirection: baseWritingDirection(for: range.start, in: .forward),
                 containsStart: containsStart,
                 containsEnd: containsEnd,
@@ -261,7 +261,7 @@ extension STTextView: UITextInput {
     /* Hit testing. */
 
     public func closestPosition(to point: CGPoint) -> UITextPosition? {
-        textLayoutManager.location(interactingAt: point, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition
+        textLayoutManager.location(interactingAt: point.moved(dx: contentView.bounds.origin.x), inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition
     }
 
     public func closestPosition(to point: CGPoint, within range: UITextRange) -> UITextPosition? {

@@ -6,6 +6,7 @@
 //      |---ContentView
 //              |---LineHighlightView
 //              |---STTextLayoutFragmentView
+//      |---RulerView
 
 import UIKit
 import STTextKitPlus
@@ -172,6 +173,7 @@ import STTextViewCommon
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
     internal let lineHighlightView: LineHighlightView
+    internal let rulerView: RulerView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
 
@@ -394,10 +396,12 @@ import STTextViewCommon
         isEditable = true
 
         contentView = ContentView()
-        contentView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
 
         lineHighlightView = LineHighlightView()
         lineHighlightView.isHidden = true
+
+        rulerView = RulerView()
+        rulerView.frame.size.width = 20
 
         typingAttributes = [:]
 
@@ -408,6 +412,7 @@ import STTextViewCommon
 
         addSubview(contentView)
         contentView.addSubview(lineHighlightView)
+        self.addSubview(rulerView)
 
         editableTextInteraction.textInput = self
         editableTextInteraction.delegate = self
@@ -559,7 +564,8 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
-        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width)
+        contentView.bounds.origin.x = -rulerView.frame.width
+        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width - rulerView.frame.width)
         contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, bounds.height)
         contentSize = contentView.frame.size
 
@@ -719,6 +725,12 @@ import STTextViewCommon
 
         layoutViewport()
         layoutLineHighlight()
+        layoutRuler()
+    }
+
+    private func layoutRuler() {
+        rulerView.frame.origin = contentOffset
+        rulerView.frame.size.height = visibleSize.height
     }
 
     private func layoutViewport() {
