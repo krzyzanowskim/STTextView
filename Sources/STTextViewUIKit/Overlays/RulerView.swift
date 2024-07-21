@@ -12,7 +12,7 @@ final class RulerView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         isUserInteractionEnabled = false
-        backgroundColor = UIColor.systemGroupedBackground
+        backgroundColor = UIColor.secondarySystemBackground
     }
 
     required init?(coder: NSCoder) {
