@@ -559,6 +559,8 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
+        contentSize = textLayoutManager.usageBoundsForTextContainer.size
+
         super.sizeToFit()
         contentView.frame.size = contentSize
 
