@@ -559,10 +559,11 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
-        contentSize = textLayoutManager.usageBoundsForTextContainer.size
+        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width)
+        contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, bounds.height)
+        contentSize = contentView.frame.size
 
         super.sizeToFit()
-        contentView.frame.size = contentSize
 
         _configureTextContainerSize()
 
@@ -751,7 +752,7 @@ import STTextViewCommon
                         y: selectionFrame.origin.y
                     ),
                     size: CGSize(
-                        width: max(contentSize.width, bounds.width),
+                        width: contentSize.width,
                         height: typingLineHeight
                     )
                 )
@@ -804,11 +805,11 @@ import STTextViewCommon
 
                     let r = CGRect(
                         origin: CGPoint(
-                            x: bounds.minX,
+                            x: bounds.origin.x,
                             y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
                         ),
                         size: CGSize(
-                            width: max(contentSize.width, bounds.width),
+                            width: contentSize.width,
                             height: lineFragmentFrame.height
                         )
                     )
