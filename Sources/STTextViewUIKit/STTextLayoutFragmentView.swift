@@ -8,11 +8,19 @@ import CoreTextSwift
 
 final class STTextLayoutFragmentView: UIView {
     private let layoutFragment: NSTextLayoutFragment
+    private var layoutStateObservation: NSKeyValueObservation?
 
     init(layoutFragment: NSTextLayoutFragment, frame: CGRect) {
         self.layoutFragment = layoutFragment
         super.init(frame: frame)
         isOpaque = false
+
+        layoutStateObservation = layoutFragment.observe(\.state, options: [.new, .initial]) { [weak self] layoutFragment, change in
+            if layoutFragment.state == .layoutAvailable {
+                self?.layoutAttachmentView()
+                self?.layoutStateObservation = nil
+            }
+        }
 #if USE_LAYERS_FOR_GLYPHS
         layoutGlyphLayers()
 #endif
@@ -125,7 +133,8 @@ final class STTextLayoutFragmentView: UIView {
                 continue
             }
 
-            let viewOrig = layoutFragment.frameForTextAttachment(at: attachmentViewProvider.location).origin
+            let layoutFragment = layoutFragment.frameForTextAttachment(at: attachmentViewProvider.location)
+            let viewOrig = layoutFragment.origin
             attachmentView.frame.origin = viewOrig
             if attachmentView.superview == nil {
                 addSubview(attachmentView)
