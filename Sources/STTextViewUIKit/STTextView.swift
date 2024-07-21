@@ -593,11 +593,11 @@ import STTextViewCommon
     private func _configureTextContainerSize() {
         var containerSize = textContainer.size
         if !isHorizontallyResizable {
-            containerSize.width = bounds.size.width // - _textContainerInset.width * 2
+            containerSize.width = contentSize.width // - _textContainerInset.width * 2
         }
 
         if !isVerticallyResizable {
-            containerSize.height = bounds.size.height // - _textContainerInset.height * 2
+            containerSize.height = contentSize.height // - _textContainerInset.height * 2
         }
 
         if !textContainer.size.isAlmostEqual(to: containerSize)  {
@@ -748,11 +748,11 @@ import STTextViewCommon
             if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
                 lineHighlightView.frame = CGRect(
                     origin: CGPoint(
-                        x: bounds.minX,
+                        x: contentView.frame.origin.x,
                         y: selectionFrame.origin.y
                     ),
                     size: CGSize(
-                        width: contentSize.width,
+                        width: contentView.frame.width,
                         height: typingLineHeight
                     )
                 )
@@ -805,11 +805,11 @@ import STTextViewCommon
 
                     let r = CGRect(
                         origin: CGPoint(
-                            x: bounds.origin.x,
+                            x: contentView.frame.origin.x,
                             y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
                         ),
                         size: CGSize(
-                            width: contentSize.width,
+                            width: contentView.frame.size.width,
                             height: lineFragmentFrame.height
                         )
                     )
