@@ -116,8 +116,16 @@ import STTextViewCommon
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
-    @Invalidating(.display)
+    @Invalidating(.layout)
     @objc dynamic open var highlightSelectedLine: Bool = false
+
+    /// Enable to show line numbers in the gutter.
+    @Invalidating(.layout)
+    open var showLineNumbers: Bool = false {
+        didSet {
+            updateRulerState()
+        }
+    }
 
     /// The highlight color of the selected line.
     ///
@@ -173,7 +181,7 @@ import STTextViewCommon
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
     internal let lineHighlightView: STLineHighlightView
-    internal let rulerView: STRulerView
+    internal var rulerView: STRulerView?
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
 
@@ -400,9 +408,6 @@ import STTextViewCommon
         lineHighlightView = STLineHighlightView()
         lineHighlightView.isHidden = true
 
-        rulerView = STRulerView()
-        rulerView.frame.size.width = 40
-
         typingAttributes = [:]
 
         super.init(frame: frame)
@@ -412,7 +417,6 @@ import STTextViewCommon
 
         addSubview(contentView)
         contentView.addSubview(lineHighlightView)
-        self.addSubview(rulerView)
 
         editableTextInteraction.textInput = self
         editableTextInteraction.delegate = self
@@ -421,6 +425,7 @@ import STTextViewCommon
         nonEditableTextInteraction.delegate = self
 
         updateEditableInteraction()
+        updateRulerState()
 
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
@@ -435,6 +440,17 @@ import STTextViewCommon
     @available(*, unavailable)
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    private func updateRulerState() {
+        if showLineNumbers {
+            rulerView = STRulerView()
+            rulerView?.frame.size.width = 40
+            self.addSubview(rulerView!)
+        } else {
+            rulerView?.removeFromSuperview()
+            rulerView = nil
+        }
     }
 
     public func setSelectedTextRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
@@ -564,8 +580,8 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
-        contentView.bounds.origin.x = -rulerView.frame.width
-        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width - rulerView.frame.width)
+        contentView.bounds.origin.x = -(rulerView?.frame.width ?? 0)
+        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width - (rulerView?.frame.width ?? 0))
         contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, bounds.height)
         contentSize = contentView.frame.size
 
@@ -730,8 +746,8 @@ import STTextViewCommon
     }
 
     private func layoutRuler() {
-        rulerView.frame.origin = contentOffset
-        rulerView.frame.size.height = visibleSize.height
+        rulerView?.frame.origin = contentOffset
+        rulerView?.frame.size.height = visibleSize.height
     }
 
     private func layoutViewport() {
@@ -844,7 +860,7 @@ import STTextViewCommon
     }
 
     private func layoutLineNumbers(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        guard let viewportRange = textViewportLayoutController.viewportRange else {
+        guard let rulerView, let viewportRange = textViewportLayoutController.viewportRange else {
             return
         }
 

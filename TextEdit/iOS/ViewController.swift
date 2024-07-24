@@ -15,6 +15,7 @@ class ViewController: UIViewController {
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.highlightSelectedLine = true
+        textView.showLineNumbers = true
         textView.textDelegate = self
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
