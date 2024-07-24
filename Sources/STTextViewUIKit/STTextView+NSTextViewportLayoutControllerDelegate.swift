@@ -34,10 +34,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         sizeToFit()
         // adjustViewportOffsetIfNeeded()
 
-        // if let viewportRange = textViewportLayoutController.viewportRange {
-        //    for events in plugins.events {
-        //        events.didLayoutViewportHandler?(viewportRange)
-        //    }
-        // }
+        if let viewportRange = textViewportLayoutController.viewportRange {
+           for events in plugins.events {
+               events.didLayoutViewportHandler?(viewportRange)
+           }
+        }
     }
 }

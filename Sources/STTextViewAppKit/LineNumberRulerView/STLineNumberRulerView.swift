@@ -378,38 +378,36 @@ open class STLineNumberRulerView: NSRulerView {
     
 }
 
-private extension STLineNumberRulerView {
-    func adjustFont(_ font: NSFont) -> NSFont {
-        // https://useyourloaf.com/blog/ios-9-proportional-numbers/
-        // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html
-        let features: [[NSFontDescriptor.FeatureKey: Int]] = [
-            [
-                .typeIdentifier: kTextSpacingType,
-                .selectorIdentifier: kMonospacedTextSelector
-            ],
-            [
-                .typeIdentifier: kNumberSpacingType,
-                .selectorIdentifier: kMonospacedNumbersSelector
-            ],
-            [
-                .typeIdentifier: kNumberCaseType,
-                .selectorIdentifier: kUpperCaseNumbersSelector
-            ],
-            [
-                .typeIdentifier: kStylisticAlternativesType,
-                .selectorIdentifier: kStylisticAltOneOnSelector
-            ],
-            [
-                .typeIdentifier: kStylisticAlternativesType,
-                .selectorIdentifier: kStylisticAltTwoOnSelector
-            ],
-            [
-                .typeIdentifier: kTypographicExtrasType,
-                .selectorIdentifier: kSlashedZeroOnSelector
-            ]
+private func adjustFont(_ font: NSFont) -> NSFont {
+    // https://useyourloaf.com/blog/ios-9-proportional-numbers/
+    // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html
+    let features: [[NSFontDescriptor.FeatureKey: Int]] = [
+        [
+            .typeIdentifier: kTextSpacingType,
+            .selectorIdentifier: kMonospacedTextSelector
+        ],
+        [
+            .typeIdentifier: kNumberSpacingType,
+            .selectorIdentifier: kMonospacedNumbersSelector
+        ],
+        [
+            .typeIdentifier: kNumberCaseType,
+            .selectorIdentifier: kUpperCaseNumbersSelector
+        ],
+        [
+            .typeIdentifier: kStylisticAlternativesType,
+            .selectorIdentifier: kStylisticAltOneOnSelector
+        ],
+        [
+            .typeIdentifier: kStylisticAlternativesType,
+            .selectorIdentifier: kStylisticAltTwoOnSelector
+        ],
+        [
+            .typeIdentifier: kTypographicExtrasType,
+            .selectorIdentifier: kSlashedZeroOnSelector
         ]
+    ]
 
-        let adjustedFont = NSFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: 0)
-        return adjustedFont ?? font
-    }
+    let adjustedFont = NSFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: 0)
+    return adjustedFont ?? font
 }

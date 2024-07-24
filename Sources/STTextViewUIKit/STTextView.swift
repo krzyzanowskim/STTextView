@@ -4,7 +4,7 @@
 //
 //  STTextView
 //      |---ContentView
-//              |---LineHighlightView
+//              |---STLineHighlightView
 //              |---STTextLayoutFragmentView
 //      |---STRulerView
 
@@ -401,7 +401,7 @@ import STTextViewCommon
         lineHighlightView.isHidden = true
 
         rulerView = STRulerView()
-        rulerView.frame.size.width = 20
+        rulerView.frame.size.width = 40
 
         typingAttributes = [:]
 
@@ -726,6 +726,7 @@ import STTextViewCommon
         layoutViewport()
         layoutLineHighlight()
         layoutRuler()
+        layoutLineNumbers(textLayoutManager.textViewportLayoutController)
     }
 
     private func layoutRuler() {
@@ -840,5 +841,57 @@ import STTextViewCommon
             lineHighlightView.frame = combinedFragmentsRect.pixelAligned
         }
 
+    }
+
+    private func layoutLineNumbers(_ textViewportLayoutController: NSTextViewportLayoutController) {
+        guard let viewportRange = textViewportLayoutController.viewportRange else {
+            return
+        }
+
+        rulerView.lineNumberView.subviews.forEach { v in
+            v.removeFromSuperview()
+        }
+
+        let textElements = textContentManager.textElements(
+            for: NSTextRange(
+                location: textLayoutManager.documentRange.location,
+                end: viewportRange.location
+            )!
+        )
+
+        let startLineIndex = textElements.count
+        var linesCount = 0
+        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
+            for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
+                var baselineYOffset: CGFloat = 0
+                if let paragraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                    baselineYOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                }
+
+                let lineNumber = startLineIndex + linesCount + 1
+                let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
+
+                var lineFragmentFrame = CGRect(origin: CGPoint(x: 0, y: layoutFragment.layoutFragmentFrame.origin.y - contentOffset.y), size: layoutFragment.layoutFragmentFrame.size)
+
+                lineFragmentFrame.origin.y += lineFragment.typographicBounds.origin.y
+                if lineFragment.isExtraLineFragment {
+                    lineFragmentFrame.size.height = lineFragment.typographicBounds.height
+                } else if !lineFragment.isExtraLineFragment, let extraLineFragment = layoutFragment.textLineFragments.first(where: { $0.isExtraLineFragment }) {
+                    lineFragmentFrame.size.height -= extraLineFragment.typographicBounds.height
+                }
+
+                let numberView = STLineNumberView.NumberView(firstBaseline: locationForFirstCharacter.y + baselineYOffset, number: lineNumber)
+                numberView.frame.origin = lineFragmentFrame.origin
+                numberView.frame.size = CGSize(
+                    width: max(lineFragmentFrame.intersection(rulerView.lineNumberView.frame).width, rulerView.lineNumberView.frame.width),
+                    height: lineFragmentFrame.size.height
+                )
+
+                rulerView.lineNumberView.addSubview(numberView)
+                linesCount += 1
+            }
+
+            return true
+        }
     }
 }

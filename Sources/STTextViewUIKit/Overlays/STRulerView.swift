@@ -5,6 +5,7 @@ import UIKit
 
 final class STRulerView: UIView {
     let lineNumberView: STLineNumberView
+    var drawSeparator: Bool = true
 
     override init(frame: CGRect) {
         lineNumberView = STLineNumberView(frame: frame)
@@ -20,5 +21,20 @@ final class STRulerView: UIView {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+
+        guard let ctx = UIGraphicsGetCurrentContext() else {
+            return
+        }
+
+        if drawSeparator {
+            ctx.setLineWidth(1)
+            ctx.setStrokeColor(UIColor.separator.cgColor)
+            ctx.addLines(between: [CGPoint(x: frame.width - 0.5, y: 0), CGPoint(x: frame.width - 0.5, y: bounds.maxY) ])
+            ctx.strokePath()
+        }
     }
 }
