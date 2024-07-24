@@ -3,18 +3,21 @@
 
 import UIKit
 
-final class LineHighlightView: UIView {
-
-    override class var layerClass: AnyClass {
-        CATiledLayer.self
-    }
+final class STRulerView: UIView {
+    let lineNumberView: STLineNumberView
 
     override init(frame: CGRect) {
+        lineNumberView = STLineNumberView(frame: frame)
+        lineNumberView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
         super.init(frame: frame)
-        isOpaque = false
         isUserInteractionEnabled = false
+        backgroundColor = UIColor.secondarySystemBackground
+
+        addSubview(lineNumberView)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

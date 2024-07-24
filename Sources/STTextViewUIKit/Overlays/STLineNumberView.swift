@@ -3,18 +3,13 @@
 
 import UIKit
 
-final class RulerView: UIView {
-
-    override class var layerClass: AnyClass {
-        CATiledLayer.self
-    }
+final class STLineNumberView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        isUserInteractionEnabled = false
-        backgroundColor = UIColor.secondarySystemBackground
     }
-
+    
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

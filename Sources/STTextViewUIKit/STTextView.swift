@@ -6,7 +6,7 @@
 //      |---ContentView
 //              |---LineHighlightView
 //              |---STTextLayoutFragmentView
-//      |---RulerView
+//      |---STRulerView
 
 import UIKit
 import STTextKitPlus
@@ -172,8 +172,8 @@ import STTextViewCommon
 
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
-    internal let lineHighlightView: LineHighlightView
-    internal let rulerView: RulerView
+    internal let lineHighlightView: STLineHighlightView
+    internal let rulerView: STRulerView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
 
@@ -397,10 +397,10 @@ import STTextViewCommon
 
         contentView = ContentView()
 
-        lineHighlightView = LineHighlightView()
+        lineHighlightView = STLineHighlightView()
         lineHighlightView.isHidden = true
 
-        rulerView = RulerView()
+        rulerView = STRulerView()
         rulerView.frame.size.width = 20
 
         typingAttributes = [:]
