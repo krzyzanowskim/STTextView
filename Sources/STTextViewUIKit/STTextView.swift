@@ -6,7 +6,7 @@
 //      |---ContentView
 //              |---STLineHighlightView
 //              |---STTextLayoutFragmentView
-//      |---STRulerView
+//      |---STGutterView
 
 import UIKit
 import STTextKitPlus
@@ -181,7 +181,7 @@ import STTextViewCommon
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
     internal let lineHighlightView: STLineHighlightView
-    internal var rulerView: STRulerView?
+    internal var gutterView: STGutterView?
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
 
@@ -444,12 +444,12 @@ import STTextViewCommon
 
     private func updateRulerState() {
         if showLineNumbers {
-            rulerView = STRulerView()
-            rulerView?.frame.size.width = 40
-            self.addSubview(rulerView!)
+            gutterView = STGutterView()
+            gutterView?.frame.size.width = 40
+            self.addSubview(gutterView!)
         } else {
-            rulerView?.removeFromSuperview()
-            rulerView = nil
+            gutterView?.removeFromSuperview()
+            gutterView = nil
         }
     }
 
@@ -580,8 +580,8 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
-        contentView.bounds.origin.x = -(rulerView?.frame.width ?? 0)
-        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width - (rulerView?.frame.width ?? 0))
+        contentView.bounds.origin.x = -(gutterView?.frame.width ?? 0)
+        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width - (gutterView?.frame.width ?? 0))
         contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, bounds.height)
         contentSize = contentView.frame.size
 
@@ -746,8 +746,8 @@ import STTextViewCommon
     }
 
     private func layoutRuler() {
-        rulerView?.frame.origin = contentOffset
-        rulerView?.frame.size.height = visibleSize.height
+        gutterView?.frame.origin = contentOffset
+        gutterView?.frame.size.height = visibleSize.height
     }
 
     private func layoutViewport() {
@@ -860,11 +860,11 @@ import STTextViewCommon
     }
 
     private func layoutLineNumbers(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        guard let rulerView, let viewportRange = textViewportLayoutController.viewportRange else {
+        guard let gutterView, let viewportRange = textViewportLayoutController.viewportRange else {
             return
         }
 
-        rulerView.lineNumberView.subviews.forEach { v in
+        gutterView.lineNumberView.subviews.forEach { v in
             v.removeFromSuperview()
         }
 
@@ -899,11 +899,11 @@ import STTextViewCommon
                 let numberView = STLineNumberView.NumberView(firstBaseline: locationForFirstCharacter.y + baselineYOffset, number: lineNumber)
                 numberView.frame.origin = lineFragmentFrame.origin
                 numberView.frame.size = CGSize(
-                    width: max(lineFragmentFrame.intersection(rulerView.lineNumberView.frame).width, rulerView.lineNumberView.frame.width),
+                    width: max(lineFragmentFrame.intersection(gutterView.lineNumberView.frame).width, gutterView.lineNumberView.frame.width),
                     height: lineFragmentFrame.size.height
                 )
 
-                rulerView.lineNumberView.addSubview(numberView)
+                gutterView.lineNumberView.addSubview(numberView)
                 linesCount += 1
             }
 

@@ -3,7 +3,7 @@
 
 import UIKit
 
-final class STRulerView: UIView {
+final class STGutterView: UIView {
     let lineNumberView: STLineNumberView
     var drawSeparator: Bool = true
 
