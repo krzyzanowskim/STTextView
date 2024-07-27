@@ -3,8 +3,11 @@
 
 import UIKit
 
-final class STGutterView: UIView {
-    let lineNumberView: STLineNumberView
+final class STRulerView: UIView {
+    internal let lineNumberView: STLineNumberView
+
+    /// A Boolean indicating whether to draw a separator or not.
+    @Invalidating(.display)
     var drawSeparator: Bool = true
 
     override init(frame: CGRect) {
