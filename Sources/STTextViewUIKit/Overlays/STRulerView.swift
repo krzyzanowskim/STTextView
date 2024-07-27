@@ -13,7 +13,7 @@ final class STRulerView: UIView {
 
         super.init(frame: frame)
         isUserInteractionEnabled = false
-        backgroundColor = UIColor.secondarySystemBackground
+        isOpaque = false
 
         addSubview(lineNumberView)
     }
@@ -21,6 +21,11 @@ final class STRulerView: UIView {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        backgroundColor = UIColor.secondarySystemBackground.resolvedColor(with: traitCollection)
     }
 
     override func draw(_ rect: CGRect) {
