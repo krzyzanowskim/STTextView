@@ -44,27 +44,9 @@ package final class STTextLayoutManager: NSTextLayoutManager {
 }
 
 
-// FB13290979: NSTextContainer.lineFragmentPadding does not affect end of the fragment usageBoundsForTextContainer rectangle
+// Changed in macOS 14 https://developer.apple.com/documentation/macos-release-notes/appkit-release-notes-for-macos-14#TextKit-API-Coordinate-System-Changes
 private func testIfNeedsBoundsWorkaround() -> Bool {
-    let textContentManager = NSTextContentStorage()
-    let textLayoutManager = NSTextLayoutManager()
-    textContentManager.addTextLayoutManager(textLayoutManager)
-    textContentManager.primaryTextLayoutManager = textLayoutManager
-
-    let textContainer = NSTextContainer()
-    textLayoutManager.textContainer = textContainer
-
-    textContentManager.attributedString = NSAttributedString(string: "01234567890123456789")
-
-    textContainer.lineFragmentPadding = 5
-    textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
-    let bounds1 = textLayoutManager.usageBoundsForTextContainer
-
-    textContainer.lineFragmentPadding = 0
-    textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
-    let bounds2 = textLayoutManager.usageBoundsForTextContainer
-
-    if bounds1.width == bounds2.width {
+    if #available(macOS 14, iOS 17, *) {
         return true
     }
 
