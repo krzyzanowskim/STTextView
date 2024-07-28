@@ -883,7 +883,7 @@ import STTextViewCommon
             return
         }
 
-        rulerView.lineNumberView.subviews.forEach { v in
+        rulerView.lineNumberViewContainer.subviews.forEach { v in
             v.removeFromSuperview()
         }
 
@@ -893,6 +893,11 @@ import STTextViewCommon
                 end: viewportRange.location
             )!
         )
+
+        let lineTextAttributes: [NSAttributedString.Key: Any] = [
+            .font: adjustFont(UIFont(descriptor: UIFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.traitCondensed)!, size: 0)),
+            .foregroundColor: UIColor.secondaryLabel.cgColor
+        ]
 
         let startLineIndex = textElements.count
         var linesCount = 0
@@ -915,14 +920,14 @@ import STTextViewCommon
                     lineFragmentFrame.size.height -= extraLineFragment.typographicBounds.height
                 }
 
-                let numberView = STLineNumberView.NumberView(firstBaseline: locationForFirstCharacter.y + baselineYOffset, number: lineNumber)
+                let numberView = STLineNumberView(firstBaseline: locationForFirstCharacter.y + baselineYOffset, attributes: lineTextAttributes, number: lineNumber)
                 numberView.frame.origin = lineFragmentFrame.origin
                 numberView.frame.size = CGSize(
-                    width: max(lineFragmentFrame.intersection(rulerView.lineNumberView.frame).width, rulerView.lineNumberView.frame.width),
+                    width: max(lineFragmentFrame.intersection(rulerView.lineNumberViewContainer.frame).width, rulerView.lineNumberViewContainer.frame.width),
                     height: lineFragmentFrame.size.height
                 )
 
-                rulerView.lineNumberView.addSubview(numberView)
+                rulerView.lineNumberViewContainer.addSubview(numberView)
                 linesCount += 1
             }
 

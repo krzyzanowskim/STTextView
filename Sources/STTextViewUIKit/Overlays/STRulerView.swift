@@ -4,21 +4,21 @@
 import UIKit
 
 final class STRulerView: UIView {
-    internal let lineNumberView: STLineNumberView
+    internal let lineNumberViewContainer: STLineNumberViewContainer
 
     /// A Boolean indicating whether to draw a separator or not.
     @Invalidating(.display)
     var drawSeparator: Bool = true
 
     override init(frame: CGRect) {
-        lineNumberView = STLineNumberView(frame: frame)
-        lineNumberView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        lineNumberViewContainer = STLineNumberViewContainer(frame: frame)
+        lineNumberViewContainer.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         super.init(frame: frame)
         isUserInteractionEnabled = false
         isOpaque = false
 
-        addSubview(lineNumberView)
+        addSubview(lineNumberViewContainer)
     }
 
     @available(*, unavailable)
@@ -28,7 +28,7 @@ final class STRulerView: UIView {
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        backgroundColor = UIColor.secondarySystemBackground.resolvedColor(with: traitCollection)
+        backgroundColor = UIColor.systemBackground.resolvedColor(with: traitCollection)
     }
 
     override func draw(_ rect: CGRect) {
