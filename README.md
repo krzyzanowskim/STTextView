@@ -176,15 +176,7 @@ let scrollView = NSScrollView()
 scrollView.documentView = textView
 
 // Line numbers
-let rulerView = STLineNumberRulerView(textView: textView)
-// Configure the ruler view
-rulerView.highlightSelectedLine = true
-// Allows to set markers.
-// rulerView.allowsMarkers = true
-
-// Add to NSScrollView containing STTextView
-scrollView.verticalRulerView = rulerView
-scrollView.rulersVisible = true
+textView.showLineNumbers = true
 ```
 
 Enable an optional search-and-replace find interface inside a view, usually a scroll view.
