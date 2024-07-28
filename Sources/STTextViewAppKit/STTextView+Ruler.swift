@@ -13,6 +13,14 @@ extension STTextView {
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
     public var isRulerVisible: Bool {
         set {
+            if newValue {
+                let rulerView = STLineNumberRulerView(textView: self)
+                rulerView.allowsMarkers = true
+                rulerView.highlightSelectedLine = true
+                enclosingScrollView?.verticalRulerView = rulerView
+            } else {
+                enclosingScrollView?.verticalRulerView = nil
+            }
             enclosingScrollView?.rulersVisible = newValue
         }
         get {
@@ -85,5 +93,13 @@ extension STTextView {
             }
         }
         ruler.needsDisplay = true
+    }
+
+    internal func updateRulerVisibility() {
+        if showLineNumbers {
+            isRulerVisible = true
+        } else {
+            isRulerVisible = false
+        }
     }
 }

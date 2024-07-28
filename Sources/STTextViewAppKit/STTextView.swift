@@ -321,6 +321,14 @@ import AVFoundation
     @Invalidating(.display)
     @objc dynamic open var highlightSelectedLine: Bool = false
 
+    /// Enable to show line numbers in the gutter.
+    @Invalidating(.layout)
+    open var showLineNumbers: Bool = false {
+        didSet {
+            updateRulerVisibility()
+        }
+    }
+
     /// The highlight color of the selected line.
     ///
     /// Note: Needs ``highlightSelectedLine`` to be set to `true`

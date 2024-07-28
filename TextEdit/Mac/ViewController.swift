@@ -32,17 +32,10 @@ final class ViewController: NSViewController {
         textView.isIncrementalSearchingEnabled = true
         textView.showsInvisibleCharacters = false
         textView.textDelegate = self
+        textView.showLineNumbers = true
 
         // Plugins
         // textView.addPlugin(DummyPlugin())
-
-        // Line numbers
-        let rulerView = STLineNumberRulerView(textView: textView)
-        rulerView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
-        rulerView.allowsMarkers = true
-        rulerView.highlightSelectedLine = true
-        scrollView.verticalRulerView = rulerView
-        scrollView.rulersVisible = true
 
         view.addSubview(scrollView)
         NSLayoutConstraint.activate([
