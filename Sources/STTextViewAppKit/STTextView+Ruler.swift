@@ -16,7 +16,7 @@ extension STTextView {
             if newValue {
                 let rulerView = STLineNumberRulerView(textView: self)
                 rulerView.allowsMarkers = true
-                rulerView.highlightSelectedLine = true
+                usesRuler = true
                 enclosingScrollView?.verticalRulerView = rulerView
             } else {
                 enclosingScrollView?.verticalRulerView = nil
@@ -24,7 +24,7 @@ extension STTextView {
             enclosingScrollView?.rulersVisible = newValue
         }
         get {
-            enclosingScrollView?.rulersVisible ?? false
+            usesRuler && enclosingScrollView?.rulersVisible ?? false
         }
     }
 

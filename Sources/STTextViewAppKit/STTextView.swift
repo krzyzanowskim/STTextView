@@ -794,9 +794,6 @@ import AVFoundation
     open override func prepareContent(in rect: NSRect) {
         super.prepareContent(in: rect.inset(dy: -visibleRect.height / 2))
         needsLayout = true
-        #if DEBUG
-        logger.debug("\(#function) prepareContent \(rect.debugDescription) -> \(self.preparedContentRect.debugDescription)")
-        #endif
     }
 
     open override func draw(_ dirtyRect: NSRect) {
