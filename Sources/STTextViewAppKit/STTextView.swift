@@ -329,6 +329,7 @@ import AVFoundation
         }
     }
 
+    /// Gutter view
     open var gutterView: STLineNumberRulerView? {
         get {
             scrollView?.verticalRulerView as? STLineNumberRulerView

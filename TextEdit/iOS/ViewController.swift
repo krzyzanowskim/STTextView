@@ -15,7 +15,6 @@ class ViewController: UIViewController {
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.highlightSelectedLine = true
-        textView.showLineNumbers = true
         textView.textDelegate = self
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
@@ -24,6 +23,7 @@ class ViewController: UIViewController {
         textView.typingAttributes[.paragraphStyle] = paragraph
         textView.font = UIFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
+        textView.showLineNumbers = true
         view.addSubview(textView)
         self.textView = textView
 

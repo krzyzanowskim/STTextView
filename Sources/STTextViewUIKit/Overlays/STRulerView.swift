@@ -2,13 +2,25 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import UIKit
+import STTextViewCommon
 
-final class STRulerView: UIView {
+public final class STRulerView: UIView {
     internal let lineNumberViewContainer: STLineNumberViewContainer
+
+    /// The font used to draw line numbers.
+    ///
+    /// Initialized with a textView font value and does not update automatically when
+    /// text view font changes.
+    @Invalidating(.display)
+    public var font: UIFont = adjustFont(UIFont(descriptor: UIFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.traitCondensed)!, size: 0))
 
     /// A Boolean indicating whether to draw a separator or not.
     @Invalidating(.display)
-    var drawSeparator: Bool = true
+    public var drawSeparator: Bool = true
+
+    /// The insets of the ruler view.
+    @Invalidating(.display)
+    public var rulerInsets: STRulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
 
     override init(frame: CGRect) {
         lineNumberViewContainer = STLineNumberViewContainer(frame: frame)
@@ -26,12 +38,12 @@ final class STRulerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         backgroundColor = UIColor.systemBackground.resolvedColor(with: traitCollection)
     }
 
-    override func draw(_ rect: CGRect) {
+    public override func draw(_ rect: CGRect) {
         super.draw(rect)
 
         guard let ctx = UIGraphicsGetCurrentContext() else {

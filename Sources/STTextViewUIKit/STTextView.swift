@@ -175,6 +175,11 @@ import STTextViewCommon
         }
     }
 
+    /// Gutter view
+    public var gutterView: STRulerView? {
+        rulerView
+    }
+
     /// Installed plugins. events value is available after plugin is setup
     internal var plugins: [Plugin] = []
 
@@ -452,6 +457,9 @@ import STTextViewCommon
         set {
             if rulerView == nil, newValue == true {
                 rulerView = STRulerView()
+                if let font {
+                    rulerView?.font = font
+                }
                 rulerView?.frame.size.width = 40
                 self.addSubview(rulerView!)
             } else if newValue == false {
@@ -470,8 +478,6 @@ import STTextViewCommon
         }
 
         selectedTextRange = textRange.uiTextRange
-
-        updateTypingAttributes(at: textRange.location)
 
         if updateLayout {
             setNeedsLayout()
@@ -887,7 +893,7 @@ import STTextViewCommon
         )
 
         let lineTextAttributes: [NSAttributedString.Key: Any] = [
-            .font: adjustFont(UIFont(descriptor: UIFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.traitCondensed)!, size: 0)),
+            .font: rulerView.font,
             .foregroundColor: UIColor.secondaryLabel.cgColor
         ]
 
@@ -912,11 +918,20 @@ import STTextViewCommon
                     lineFragmentFrame.size.height -= extraLineFragment.typographicBounds.height
                 }
 
-                let numberView = STLineNumberView(firstBaseline: locationForFirstCharacter.y + baselineYOffset, attributes: lineTextAttributes, number: lineNumber)
-                numberView.frame.origin = lineFragmentFrame.origin
-                numberView.frame.size = CGSize(
-                    width: max(lineFragmentFrame.intersection(rulerView.lineNumberViewContainer.frame).width, rulerView.lineNumberViewContainer.frame.width),
-                    height: lineFragmentFrame.size.height
+                let numberView = STLineNumberView(
+                    firstBaseline: locationForFirstCharacter.y + baselineYOffset,
+                    attributes: lineTextAttributes,
+                    number: lineNumber
+                )
+
+                numberView.insets = rulerView.rulerInsets
+
+                numberView.frame = CGRect(
+                    origin: lineFragmentFrame.origin,
+                    size: CGSize(
+                        width: max(lineFragmentFrame.intersection(rulerView.lineNumberViewContainer.frame).width, rulerView.lineNumberViewContainer.frame.width),
+                        height: lineFragmentFrame.size.height
+                    )
                 )
 
                 rulerView.lineNumberViewContainer.addSubview(numberView)
