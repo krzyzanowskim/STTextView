@@ -22,6 +22,7 @@ final class STLineNumberView: UIView {
         super.init(frame: .zero)
         clipsToBounds = true
         isOpaque = false
+        isUserInteractionEnabled = false
     }
 
     @available(*, unavailable)

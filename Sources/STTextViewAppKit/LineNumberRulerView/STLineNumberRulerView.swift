@@ -31,6 +31,12 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var drawSeparator: Bool = true
 
+    /// The color of the separator.
+    ///
+    /// Needs ``drawSeparator`` to be set to `true`.
+    @Invalidating(.display)
+    open var separatorColor: NSColor = NSColor.separatorColor
+
     /// The background color of the ruler view.
     @Invalidating(.display)
     open var backgroundColor: NSColor = NSColor.controlBackgroundColor
@@ -39,7 +45,7 @@ open class STLineNumberRulerView: NSRulerView {
     @Invalidating(.display)
     open var highlightSelectedLine: Bool = false
 
-    /// A Boolean value that indicates whether the receiver draws its background.
+    /// A Boolean value that indicates whether the receiver draws its background. Default true.
     @Invalidating(.display)
     open var drawsBackground: Bool = true
     
@@ -50,12 +56,6 @@ open class STLineNumberRulerView: NSRulerView {
     /// The text color of the highlighted line numbers.
     @Invalidating(.display)
     open var selectedLineTextColor: NSColor? = nil
-
-    /// The color of the separator.
-    ///
-    /// Needs ``drawSeparator`` to be set to `true`.
-    @Invalidating(.display)
-    open var separatorColor: NSColor = NSColor.separatorColor
 
     /// The bottom baseline offset of each line number.
     ///
@@ -79,7 +79,7 @@ open class STLineNumberRulerView: NSRulerView {
         }
     }
 
-    let lineNumberViewContainer: STLineNumberViewContainer
+    private let lineNumberViewContainer: STLineNumberViewContainer
 
     public required init(textView: STTextView, scrollView: NSScrollView? = nil) {
         lineNumberViewContainer = STLineNumberViewContainer()
@@ -332,7 +332,9 @@ open class STLineNumberRulerView: NSRulerView {
     }
 
     open override func draw(_ dirtyRect: NSRect) {
-        guard let context = NSGraphicsContext.current?.cgContext else { return }
+        guard let context = NSGraphicsContext.current?.cgContext else {
+            return
+        }
 
         drawBackground(in: dirtyRect)
         drawHashMarksAndLabels(in: dirtyRect)
