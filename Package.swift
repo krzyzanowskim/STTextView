@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "STTextView",
-    platforms: [.macOS(.v12), .iOS(.v16)],
+    platforms: [.macOS(.v12), .iOS(.v16), .macCatalyst(.v16)],
     products: [
         .library(
             name: "STTextView",
@@ -20,7 +20,7 @@ let package = Package(
             name: "STTextView",
             dependencies: [
                 .target(name: "STTextViewAppKit", condition: .when(platforms: [.macOS])),
-                .target(name: "STTextViewUIKit", condition: .when(platforms: [.iOS]))
+                .target(name: "STTextViewUIKit", condition: .when(platforms: [.iOS, .macCatalyst]))
             ]
         ),
         .target(
@@ -41,7 +41,7 @@ let package = Package(
             name: "STTextViewUIKit",
             dependencies: [
                 .target(name: "STTextViewCommon"),
-                .target(name: "STObjCLandShim", condition: .when(platforms: [.iOS])),
+                .target(name: "STObjCLandShim", condition: .when(platforms: [.iOS, .macCatalyst])),
                 .product(name: "STTextKitPlus", package: "STTextKitPlus"),
                 .product(name: "CoreTextSwift", package: "CoreTextSwift")
             ],
@@ -74,7 +74,7 @@ let package = Package(
         .testTarget(
             name: "STTextViewUIKitTests",
             dependencies: [
-                .target(name: "STTextViewUIKit", condition: .when(platforms: [.iOS]))
+                .target(name: "STTextViewUIKit", condition: .when(platforms: [.iOS, .macCatalyst]))
             ]
         )
     ]

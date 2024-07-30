@@ -9,16 +9,16 @@ extension CGRect {
     package var pixelAligned: CGRect {
         // https://developer.apple.com/library/archive/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/APIs/APIs.html#//apple_ref/doc/uid/TP40012302-CH5-SW9
         // NSIntegralRectWithOptions(self, [.alignMinXOutward, .alignMinYOutward, .alignWidthOutward, .alignMaxYOutward])
-        #if os(macOS)
-            NSIntegralRectWithOptions(self, .alignAllEdgesNearest)
-        #else
-            NSIntegralRectWithOptions(self, .alignAllEdgesNearest)
+        #if os(macOS) && !targetEnvironment(macCatalyst)
+            NSIntegralRectWithOptions(self, AlignmentOptions.alignAllEdgesNearest)
+        #elseif os(iOS) || targetEnvironment(macCatalyst)
+            NSIntegralRectWithOptions(self, AlignmentOptions.alignAllEdgesNearest)
         #endif
     }
 
 }
 
-#if os(iOS)
+#if os(iOS) || targetEnvironment(macCatalyst)
 
 // https://github.com/apple/swift-corelibs-foundation/blob/ca3669eb9ac282c649e71824d9357dbe140c8251/Sources/Foundation/NSGeometry.swift#L812
 // Copyright (c) 2014 - 2016 Apple Inc. and the Swift project authors

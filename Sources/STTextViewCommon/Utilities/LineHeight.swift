@@ -1,7 +1,7 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-#if canImport(AppKit)
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
 import AppKit
 #endif
 #if canImport(UIKit)
@@ -33,7 +33,7 @@ package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
         descent = 3
     }
 
-#if os(iOS)
+#if os(iOS) || targetEnvironment(macCatalyst)
     let adjustment = shouldUseAdjustment(familyName) ? ceil(ascent + descent) * kLineHeightAdjustment : 0
     lineGap = ceil(lineGap)
     lineSpacing = ceil(ascent) + adjustment + ceil(descent) + lineGap

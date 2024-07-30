@@ -3,7 +3,7 @@
 
 import CoreGraphics
 
-#if canImport(AppKit)
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
 import AppKit
 #endif
 #if canImport(UIKit)
@@ -12,7 +12,7 @@ import UIKit
 
 package extension CGRect {
 
-    #if canImport(AppKit)
+    #if canImport(AppKit) && !targetEnvironment(macCatalyst)
     typealias EdgeInsets = NSEdgeInsets
     #else
     typealias EdgeInsets = UIEdgeInsets
@@ -25,7 +25,7 @@ package extension CGRect {
         case bottom(CGFloat)
     }
 
-#if canImport(AppKit)
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
     func inset(by edgeInsets: EdgeInsets) -> CGRect {
         var result = self
         result.origin.x += edgeInsets.left

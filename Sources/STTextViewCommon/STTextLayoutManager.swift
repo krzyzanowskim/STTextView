@@ -1,7 +1,7 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-#if canImport(AppKit)
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
 import AppKit
 #endif
 #if canImport(UIKit)
@@ -12,7 +12,7 @@ import STTextKitPlus
 
 package final class STTextLayoutManager: NSTextLayoutManager {
 
-#if canImport(AppKit)
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
     /// Posted when the selected range of characters changes.
     package static let didChangeSelectionNotification = NSTextView.didChangeSelectionNotification
 #else

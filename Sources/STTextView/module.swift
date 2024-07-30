@@ -4,6 +4,6 @@ import Foundation
 @_exported import STTextViewAppKit
 #endif
 
-#if os(iOS)
+#if os(iOS) || targetEnvironment(macCatalyst)
 @_exported import STTextViewUIKit
 #endif

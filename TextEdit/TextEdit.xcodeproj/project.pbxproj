@@ -14,12 +14,12 @@
 		7544424227B9332F00901C0E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7544424027B9332F00901C0E /* Main.storyboard */; platformFilters = (macos, ); };
 		7544424A27B9387300901C0E /* content.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7544424927B9387300901C0E /* content.txt */; };
 		7559DD832A0709D4004441B6 /* STTextView in Frameworks */ = {isa = PBXBuildFile; productRef = 7559DD822A0709D4004441B6 /* STTextView */; };
-		758D03942BFA7A9300DF35A0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 758D03922BFA7A9300DF35A0 /* Main.storyboard */; platformFilter = ios; };
-		758D03992BFA7C8F00DF35A0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 758D03982BFA7C8F00DF35A0 /* ViewController.swift */; platformFilter = ios; };
-		75A86D232BFA882200E01FF6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 75A86D222BFA882100E01FF6 /* LaunchScreen.storyboard */; platformFilter = ios; };
+		758D03942BFA7A9300DF35A0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 758D03922BFA7A9300DF35A0 /* Main.storyboard */; platformFilters = (ios, maccatalyst, ); };
+		758D03992BFA7C8F00DF35A0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 758D03982BFA7C8F00DF35A0 /* ViewController.swift */; platformFilters = (ios, maccatalyst, ); };
+		75A86D232BFA882200E01FF6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 75A86D222BFA882100E01FF6 /* LaunchScreen.storyboard */; platformFilters = (ios, maccatalyst, ); };
 		75BC2F802A62C86C00580249 /* Tokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BC2F7F2A62C86C00580249 /* Tokenizer.swift */; platformFilters = (macos, ); };
-		75E485E52BFA788600F1EAAB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75E485E42BFA788600F1EAAB /* AppDelegate.swift */; platformFilter = ios; };
-		75E486072BFA79C900F1EAAB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75E486062BFA79C900F1EAAB /* SceneDelegate.swift */; platformFilter = ios; };
+		75E485E52BFA788600F1EAAB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75E485E42BFA788600F1EAAB /* AppDelegate.swift */; platformFilters = (ios, maccatalyst, ); };
+		75E486072BFA79C900F1EAAB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75E486062BFA79C900F1EAAB /* SceneDelegate.swift */; platformFilters = (ios, maccatalyst, ); };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -360,6 +360,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_FILE[sdk=iphoneos*]" = iOS/Info.plist;
 				"INFOPLIST_FILE[sdk=iphonesimulator*]" = iOS/Info.plist;
+				"INFOPLIST_FILE[sdk=macosx*]" = iOS/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Marcin Krzyżanowski";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -379,10 +380,9 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "Text Editor";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Debug;
 		};
@@ -420,10 +420,9 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "Text Editor";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Release;
 		};
