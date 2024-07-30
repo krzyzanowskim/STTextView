@@ -325,7 +325,7 @@ import AVFoundation
     @Invalidating(.layout)
     open var showLineNumbers: Bool = false {
         didSet {
-            updateRulerVisibility()
+            isRulerVisible = showLineNumbers
         }
     }
 

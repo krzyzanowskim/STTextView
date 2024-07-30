@@ -28,6 +28,8 @@ extension STTextView {
         }
     }
 
+    // MARK: - NSRulerMarkerClientViewDelegation informal protocol
+
     open override func rulerView(_ ruler: NSRulerView, willAdd marker: NSRulerMarker, atLocation location: CGFloat) -> CGFloat {
         location
     }
@@ -93,13 +95,5 @@ extension STTextView {
             }
         }
         ruler.needsDisplay = true
-    }
-
-    internal func updateRulerVisibility() {
-        if showLineNumbers {
-            isRulerVisible = true
-        } else {
-            isRulerVisible = false
-        }
     }
 }

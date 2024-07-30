@@ -123,7 +123,7 @@ import STTextViewCommon
     @Invalidating(.layout)
     open var showLineNumbers: Bool = false {
         didSet {
-            updateRulerVisibility()
+            isRulerVisible = showLineNumbers
         }
     }
 
@@ -425,7 +425,7 @@ import STTextViewCommon
         nonEditableTextInteraction.delegate = self
 
         updateEditableInteraction()
-        updateRulerVisibility()
+        isRulerVisible = showLineNumbers
 
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
@@ -461,14 +461,6 @@ import STTextViewCommon
         }
         get {
             rulerView != nil
-        }
-    }
-
-    private func updateRulerVisibility() {
-        if showLineNumbers {
-            isRulerVisible = true
-        } else {
-            isRulerVisible = false
         }
     }
 
