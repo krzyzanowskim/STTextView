@@ -78,7 +78,7 @@ open class STLineNumberRulerView: NSRulerView {
         }
     }
 
-    struct Line {
+    private struct LineCache {
         let number: Int
         let textPosition: CGPoint
         let layoutFragmentFrame: CGRect
@@ -86,7 +86,7 @@ open class STLineNumberRulerView: NSRulerView {
         let isSelected: Bool
     }
     
-    private var lines: [Line] = []
+    private var cachedLines: [LineCache] = []
     
     public required init(textView: STTextView, scrollView: NSScrollView? = nil) {
         super.init(scrollView: scrollView ?? textView.enclosingScrollView, orientation: .verticalRuler)
@@ -150,7 +150,7 @@ open class STLineNumberRulerView: NSRulerView {
             .foregroundColor: (selectedLineTextColor ?? textColor).cgColor
         ]
 
-        lines.removeAll(keepingCapacity: true)
+        cachedLines.removeAll(keepingCapacity: true)
 
         if textView.textLayoutManager.documentRange.isEmpty {
             // For empty document, layout the extra line as if it has text in it
@@ -163,7 +163,7 @@ open class STLineNumberRulerView: NSRulerView {
                         baselineOffset = -(textView.typingLineHeight * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
                     }
 
-                    let lineNumber = lines.count + 1
+                    let lineNumber = cachedLines.count + 1
 
                     var effectiveAttributes = lineTextAttributes
 
@@ -177,8 +177,8 @@ open class STLineNumberRulerView: NSRulerView {
                     let locationForFirstCharacter = CGPoint(x: 0, y: calculateDefaultLineHeight(for: lineTextAttributes[.font] as! NSFont))
                     let lineFragmentFrame = CGRect(origin: CGPoint(x: 0, y: layoutFragment.layoutFragmentFrame.origin.y), size: layoutFragment.layoutFragmentFrame.size)
 
-                    lines.append(
-                        Line(
+                    cachedLines.append(
+                        LineCache(
                             number: lineNumber,
                             textPosition: lineFragmentFrame.origin.moved(dy: locationForFirstCharacter.y + baselineOffset),
                             layoutFragmentFrame: CGRect(x: 0, y: lineFragmentFrame.origin.y, width: lineFragmentFrame.width, height: textView.typingLineHeight),
@@ -204,7 +204,7 @@ open class STLineNumberRulerView: NSRulerView {
                         baselineYOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
                     }
 
-                    let lineNumber = startLineIndex + lines.count + 1
+                    let lineNumber = startLineIndex + cachedLines.count + 1
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
 
                     var effectiveAttributes = lineTextAttributes
@@ -244,8 +244,8 @@ open class STLineNumberRulerView: NSRulerView {
                         lineFragmentFrame.size.height -= extraLineFragment.typographicBounds.height
                     }
 
-                    lines.append(
-                        Line(
+                    cachedLines.append(
+                        LineCache(
                             number: lineNumber,
                             textPosition: lineFragmentFrame.origin.moved(dy: locationForFirstCharacter.y + baselineYOffset),
                             layoutFragmentFrame: lineFragmentFrame,
@@ -262,7 +262,7 @@ open class STLineNumberRulerView: NSRulerView {
         // Adjust ruleThickness based on last (longest) value
         let prevThickness = ruleThickness
         var calculatedThickness: CGFloat = ruleThickness
-        if let lastLine = lines.last {
+        if let lastLine = cachedLines.last {
             let ctLineWidth = ceil(CTLineGetTypographicBounds(lastLine.ctLine, nil, nil, nil))
             if calculatedThickness < (ctLineWidth + (rulerInsets.leading + rulerInsets.trailing)) {
                 calculatedThickness = max(calculatedThickness, ctLineWidth + (rulerInsets.leading + rulerInsets.trailing))
@@ -281,10 +281,10 @@ open class STLineNumberRulerView: NSRulerView {
         }
 
         // align to right
-        lines = lines.map {
+        cachedLines = cachedLines.map {
             let ctLineWidth = ceil(CTLineGetTypographicBounds($0.ctLine, nil, nil, nil))
 
-            return Line(
+            return LineCache(
                 number: $0.number,
                 textPosition: $0.textPosition.moved(dx: requiredThickness - (ctLineWidth + rulerInsets.trailing), dy: -baselineOffset),
                 layoutFragmentFrame: $0.layoutFragmentFrame,
@@ -321,7 +321,7 @@ open class STLineNumberRulerView: NSRulerView {
         context.restoreGState()
     }
 
-    private func drawHighlightedRuler(line: Line, at relativePoint: CGPoint, in dirtyRect: NSRect) {
+    private func drawHighlightedRuler(line: LineCache, at relativePoint: CGPoint, in dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else {
             return
         }
@@ -362,7 +362,7 @@ open class STLineNumberRulerView: NSRulerView {
         
         context.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
-        for line in lines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dy: relativePoint.y)) {
+        for line in cachedLines where dirtyRect.inset(dy: -font.pointSize).contains(line.textPosition.moved(dy: relativePoint.y)) {
 
             // Draw a background rectangle to highlight the selected ruler line
             if highlightSelectedLine, line.isSelected, textView.textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty, !textView.textLayoutManager.insertionPointSelections.isEmpty {
