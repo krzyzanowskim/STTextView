@@ -115,7 +115,7 @@ import STTextViewCommon
         }
     }
 
-    /// A Boolean that controls whether the text view highlights the currently selected line.
+    /// A Boolean that controls whether the text view highlights the currently selected line. Default false.
     @Invalidating(.layout)
     @objc dynamic open var highlightSelectedLine: Bool = false
 

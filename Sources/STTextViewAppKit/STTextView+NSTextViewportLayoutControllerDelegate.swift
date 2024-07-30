@@ -62,7 +62,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         sizeToFit()
         updateSelectionHighlights()
         adjustViewportOffsetIfNeeded()
-        scrollView?.verticalRulerView?.invalidateHashMarks()
+        scrollView?.verticalRulerView?.needsLayout = true
 
         if let viewportRange = textViewportLayoutController.viewportRange {
             for events in plugins.events {

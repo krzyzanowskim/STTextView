@@ -15,16 +15,15 @@ extension STTextView {
         set {
             if newValue {
                 let rulerView = STLineNumberRulerView(textView: self)
-                rulerView.allowsMarkers = true
                 usesRuler = true
-                enclosingScrollView?.verticalRulerView = rulerView
+                scrollView?.verticalRulerView = rulerView
             } else {
-                enclosingScrollView?.verticalRulerView = nil
+                scrollView?.verticalRulerView = nil
             }
-            enclosingScrollView?.rulersVisible = newValue
+            scrollView?.rulersVisible = newValue
         }
         get {
-            usesRuler && enclosingScrollView?.rulersVisible ?? false
+            usesRuler && scrollView?.rulersVisible ?? false
         }
     }
 

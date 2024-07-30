@@ -33,6 +33,7 @@ final class ViewController: NSViewController {
         textView.showsInvisibleCharacters = false
         textView.textDelegate = self
         textView.showLineNumbers = true
+        textView.gutterView?.drawSeparator = true
 
         // Plugins
         // textView.addPlugin(DummyPlugin())

@@ -329,6 +329,12 @@ import AVFoundation
         }
     }
 
+    open var gutterView: STLineNumberRulerView? {
+        get {
+            scrollView?.verticalRulerView as? STLineNumberRulerView
+        }
+    }
+
     /// The highlight color of the selected line.
     ///
     /// Note: Needs ``highlightSelectedLine`` to be set to `true`
