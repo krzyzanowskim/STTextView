@@ -177,6 +177,7 @@ scrollView.documentView = textView
 
 // Line numbers
 textView.showLineNumbers = true
+textView.gutterView?.drawSeparator = true
 ```
 
 Enable an optional search-and-replace find interface inside a view, usually a scroll view.
