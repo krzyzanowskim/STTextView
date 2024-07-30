@@ -10,11 +10,7 @@ The goal of this project is to build [NSTextView](https://developer.apple.com/do
 
 The component is mainly developed to serve [Swift Studio](https://swiftstudio.app) needs as a **source code editor**.
 
-<img width="100%" alt="STTextView Window" src="https://user-images.githubusercontent.com/758033/233873957-3f94a73a-a401-4f54-9631-3002600ba6f8.png">
-
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/a63808d2-47bc-4afa-aa00-e1c2d404106f" width="100%" />
-</div>
+![Poster](https://github.com/user-attachments/assets/53a57fc6-8ad6-4a13-a295-d362c49794d2)
 
 [TextKit 2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit 1 replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit 2 and provide support along TextKit 1 bit. As I started to learn more about `NSTextView` + TextKit2, I realized as of today (Feb 2022), neither `NSTextView` is fully functional, nor TextKit 2 classes are fully functional. Along the way, I reported several bug reports to Apple requesting DTS (support tickets). Eventually, I got blocked by specific bugs that pushed me to start this project.
 
@@ -40,6 +36,10 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 - Plugins
 - Anchored annotations (via plugin)
 - Source Code syntax highlighting (via plugin)
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/e18c058b-8a58-47e0-a57c-a3b01f3d93db" width="90%" />
+</div>
 
 ## 🤝 Support & Sponsors
 
