@@ -23,7 +23,7 @@ final class STTextInputTokenizer: NSObject, UITextInputTokenizer {
 
         switch granularity {
         case .character, .line, .paragraph, .sentence, .word:
-            let positionSelection = NSTextSelection(position.location, affinity: .downstream)
+            let positionSelection = NSTextSelection(position.location, affinity: direction == .storage(.backward) ? .downstream : .upstream)
             let destination = textLayoutManager.textSelectionNavigation.textSelection(
                 for: granularity.textSelectionGranularity,
                 enclosing: positionSelection

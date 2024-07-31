@@ -764,14 +764,16 @@ import STTextViewCommon
             return selectedTextRange?.isEmpty == false
         case #selector(cut(_:)):
             return isEditable && selectedTextRange?.isEmpty == false
-        case #selector(selectAll(_:)):
-            return isSelectable
-//        case #selector(select(_:)):
-//            return isSelectable
         case #selector(paste(_:)):
             return isEditable && UIPasteboard.general.hasStrings
+        case #selector(selectAll(_:)):
+            return isSelectable
+        case #selector(select(_:)):
+            return isSelectable
         case #selector(replace(_:)):
             return isEditable
+        case #selector(delete(_:)):
+            return isEditable && selectedTextRange?.isEmpty == false
         default:
             return super.canPerformAction(action, withSender: sender)
         }

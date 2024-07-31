@@ -69,10 +69,38 @@ extension STTextView {
         }
     }
 
-//    @objc open override func select(_ sender: Any?) {
-//        assertionFailure("Not implemented")
-//        super.select(sender)
-//    }
+    /// Selects the content in your responder.
+    ///
+    /// UIKit calls this method when the user selects the Select command from an editing menu.
+    /// The command is used for the targeted selection of content in a view.
+    /// For example, a text view uses this to select one or more words in the view and to display the selection interface.
+    @objc open override func select(_ sender: Any?) {
+        if let selectedTextRange = selectedTextRange {
+            let positionSelection = NSTextSelection(range: selectedTextRange.nsTextRange, affinity: .downstream, granularity: .word)
+
+            let destinationBackward = textLayoutManager.textSelectionNavigation.destinationSelection(
+                for: positionSelection,
+                direction: .backward,
+                destination: .word,
+                extending: true,
+                confined: true
+            )
+
+            let destinationForward = textLayoutManager.textSelectionNavigation.destinationSelection(
+                for: positionSelection,
+                direction: .forward,
+                destination: .word,
+                extending: true,
+                confined: true
+            )
+
+            if let textRange = destinationBackward?.textRanges.first, !textRange.isEmpty {
+                self.selectedTextRange = textRange.uiTextRange
+            } else if let textRange = destinationForward?.textRanges.first, !textRange.isEmpty {
+                self.selectedTextRange = textRange.uiTextRange
+            }
+        }
+    }
 
     @objc open override func selectAll(_ sender: Any?) {
         guard isSelectable else {
