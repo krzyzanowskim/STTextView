@@ -29,7 +29,7 @@ public extension STPlugin {
 public extension STPlugin where Coordinator == Void {
 
     func makeCoordinator(context: CoordinatorContext) -> Coordinator {
-        return ()
+        Coordinator()
     }
 
 }
