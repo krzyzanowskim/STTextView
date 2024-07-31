@@ -766,8 +766,8 @@ import STTextViewCommon
             return isEditable && selectedTextRange?.isEmpty == false
         case #selector(selectAll(_:)):
             return isSelectable
-        case #selector(select(_:)):
-            return isSelectable
+//        case #selector(select(_:)):
+//            return isSelectable
         case #selector(paste(_:)):
             return isEditable && UIPasteboard.general.hasStrings
         case #selector(replace(_:)):
