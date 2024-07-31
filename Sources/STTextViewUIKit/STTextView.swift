@@ -758,6 +758,25 @@ import STTextViewCommon
         didChangeText()
     }
 
+    open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        switch action {
+        case #selector(copy(_:)):
+            return selectedTextRange?.isEmpty == false
+        case #selector(cut(_:)):
+            return isEditable && selectedTextRange?.isEmpty == false
+        case #selector(selectAll(_:)):
+            return isSelectable
+        case #selector(select(_:)):
+            return isSelectable
+        case #selector(paste(_:)):
+            return isEditable && UIPasteboard.general.hasStrings
+        case #selector(replace(_:)):
+            return isEditable
+        default:
+            return super.canPerformAction(action, withSender: sender)
+        }
+    }
+
     open override func layoutSubviews() {
         super.layoutSubviews()
 

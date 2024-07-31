@@ -12,7 +12,9 @@ extension STTextView: UIKeyInput {
     public func insertText(_ text: String) {
         let textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
         if shouldChangeText(in: textRanges, replacementString: text) {
+            inputDelegate?.selectionWillChange(self)
             replaceCharacters(in: textRanges, with: text, useTypingAttributes: true, allowsTypingCoalescing: true)
+            inputDelegate?.selectionDidChange(self)
         }
     }
 
@@ -30,7 +32,9 @@ extension STTextView: UIKeyInput {
             return
         }
 
+        inputDelegate?.selectionWillChange(self)
         replaceCharacters(in: textRanges, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)
+        inputDelegate?.selectionDidChange(self)
     }
 
 }

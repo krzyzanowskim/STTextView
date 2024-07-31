@@ -54,10 +54,18 @@ extension STTextView: UITextInput {
         let textRange = range.nsTextRange
 
         if shouldChangeText(in: textRange, replacementString: text) {
+            inputDelegate?.selectionWillChange(self)
             replaceCharacters(in: textRange, with: text, useTypingAttributes: true, allowsTypingCoalescing: true)
+            inputDelegate?.selectionDidChange(self)
         }
     }
 
+    /// Inserts the provided text and marks it to indicate that it is part of an active input session.
+    /// - Parameters:
+    ///   - markedText: The text to be marked.
+    ///   - selectedRange: A range within markedText that indicates the current selection. This range is always relative to `markedText`.
+    ///
+    /// Setting marked text either replaces the existing marked text or, if none is present, inserts it in place of the current selection.
     public func setMarkedText(_ markedText: String?, selectedRange: NSRange) {
         let range = self.markedText?.markedRange ?? selectedRange
         let markedText = markedText ?? ""
@@ -68,18 +76,25 @@ extension STTextView: UITextInput {
             selectedRange: selectedRange
         )
 
-        assertionFailure("Not implemented")
+        let selectionRange = NSRange(location: range.location + selectedRange.location, length: selectedRange.length)
+        guard let selectionTextRange = NSTextRange(selectionRange, in: textContentManager) else {
+            return
+        }
 
-        // self.replace(
-        //     STTextLocationRange(
-        //         textRange: NSTextRange(_, in: textContentManager)
-        //     ),
-        //     withText: markedText
-        // )
+        inputDelegate?.selectionWillChange(self)
+        self.replace(
+            STTextLocationRange(
+                textRange: selectionTextRange
+            ),
+            withText: markedText
+        )
+        inputDelegate?.selectionDidChange(self)
     }
 
     public func unmarkText() {
+        inputDelegate?.selectionWillChange(self)
         markedText = nil
+        inputDelegate?.selectionDidChange(self)
     }
 
     /* The end and beginning of the the text document. */
