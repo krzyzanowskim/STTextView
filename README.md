@@ -128,6 +128,8 @@ let textView = STTextView()
 view.addSubView(textView)
 ```
 
+(macOS) add to scroll view
+
 ```swift
 let textView = STTextView()
 let scrollView = NSScrollView()
@@ -159,7 +161,7 @@ textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
 textView.textColor = .textColor
 
 // Set text value
-textView.string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ornare lobortis sem a vulputate."
+textView.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ornare lobortis sem a vulputate."
 textView.addAttributes([.foregroundColor: NSColor.red], range: NSRange(location: 10, length: 5))
 
 // Wrap/No wrap lines to editor width
@@ -181,7 +183,7 @@ textView.showLineNumbers = true
 textView.gutterView?.drawSeparator = true
 ```
 
-Enable an optional search-and-replace find interface inside a view, usually a scroll view.
+(macOS) Enable an optional search-and-replace find interface inside a view, usually a scroll view.
 
 ```swift
 textView.isIncrementalSearchingEnabled = true
