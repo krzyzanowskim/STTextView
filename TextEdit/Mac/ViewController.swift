@@ -26,7 +26,7 @@ final class ViewController: NSViewController {
         textView.typingAttributes[.paragraphStyle] = paragraph
 
         textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
-        textView.string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
+        textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.isHorizontallyResizable = false // wrap
         textView.highlightSelectedLine = true
         textView.isIncrementalSearchingEnabled = true
@@ -50,7 +50,7 @@ final class ViewController: NSViewController {
 
         // add link to occurences of STTextView
         do {
-            let str = textView.string
+            let str = textView.text!
             var currentRange = str.startIndex..<str.endIndex
             while let ocurrenceRange = str.range(of: "STTextView", range: currentRange) {
                 textView.addAttributes([.link: URL(string: "https://swift.best")! as NSURL], range: NSRange(ocurrenceRange, in: str))
@@ -59,7 +59,7 @@ final class ViewController: NSViewController {
         }
 
         do {
-            let str = textView.string
+            let str = textView.text!
             var currentRange = str.startIndex..<str.endIndex
             while let ocurrenceRange = str.range(of: "vim", range: currentRange) {
                 textView.addAttributes([.cursor: NSCursor.operationNotAllowed], range: NSRange(ocurrenceRange, in: str))
@@ -92,7 +92,7 @@ final class ViewController: NSViewController {
                 .foregroundColor: NSColor.controlAccentColor,
                 .font: NSFont.preferredFont(forTextStyle: .largeTitle)
             ],
-            range: NSRange(textView.string.linesRanges().first!, in: textView.string)
+            range: NSRange(textView.text!.linesRanges().first!, in: textView.text!)
         )
 
         updateCompletionsInBackground()
@@ -119,7 +119,7 @@ final class ViewController: NSViewController {
         completionTask = Task(priority: .background) {
             var arr: Set<String> = []
 
-            for await word in Tokenizer.words(textView.string) where !Task.isCancelled {
+            for await word in Tokenizer.words(textView.text ?? "") where !Task.isCancelled {
                 arr.insert(word.string)
             }
 

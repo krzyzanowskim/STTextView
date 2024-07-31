@@ -84,7 +84,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.setSelectedRange(NSRange())
 
         context.coordinator.isUpdating = true
-        textView.setAttributedString(NSAttributedString(styledAttributedString(textView.typingAttributes)))
+        textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
         context.coordinator.isUpdating = false
 
         for plugin in plugins {
@@ -102,7 +102,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
         do {
             context.coordinator.isUpdating = true
             if context.coordinator.isDidChangeText == false {
-                textView.setAttributedString(NSAttributedString(styledAttributedString(textView.typingAttributes)))
+                textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
             }
             context.coordinator.isUpdating = false
             context.coordinator.isDidChangeText = false

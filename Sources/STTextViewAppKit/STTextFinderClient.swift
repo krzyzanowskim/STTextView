@@ -9,7 +9,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
     weak var textView: STTextView?
 
     var string: String {
-        textView?.string ?? ""
+        textView?.text ?? ""
     }
 
     func stringLength() -> Int {

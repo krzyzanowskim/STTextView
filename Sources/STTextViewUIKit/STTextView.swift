@@ -12,7 +12,7 @@ import UIKit
 import STTextKitPlus
 import STTextViewCommon
 
-@objc open class STTextView: UIScrollView {
+@objc open class STTextView: UIScrollView, STTextViewProtocol {
 
     /// Sent when the selection range of characters changes.
     public static let didChangeSelectionNotification = STTextLayoutManager.didChangeSelectionNotification
@@ -722,7 +722,7 @@ import STTextViewCommon
         )
     }
 
-    open func textWillChange(_ sender: Any?) {
+    public func textWillChange(_ sender: Any?) {
         inputDelegate?.textWillChange(self)
 
         let notification = Notification(name: Self.textWillChangeNotification, object: self, userInfo: nil)
@@ -735,7 +735,7 @@ import STTextViewCommon
     ///
     /// Invoked automatically at the end of a series of changes, this method posts an `textDidChangeNotification` to the default notification center, which also results in the delegate receiving `textViewDidChangeText(_:)` message.
     /// Subclasses implementing methods that change their text should invoke this method at the end of those methods.
-    open func didChangeText() {
+    public func didChangeText() {
         let notification = Notification(name: Self.textDidChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
 

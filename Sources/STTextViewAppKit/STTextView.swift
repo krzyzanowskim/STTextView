@@ -22,7 +22,7 @@ import STTextViewCommon
 import AVFoundation
 
 /// A TextKit2 text view without NSTextView baggage
-@objc open class STTextView: NSView, NSTextInput, NSTextContent {
+@objc open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Posted before an object performs any operation that changes characters or formatting attributes.
     public static let textWillChangeNotification = NSNotification.Name("NSTextWillChangeNotification")
 
@@ -219,7 +219,7 @@ import AVFoundation
     ///
     /// For performance reasons, this value is the current backing store of the text object.
     /// If you want to maintain a snapshot of this as you manipulate the text storage, you should make a copy of the appropriate substring.
-    @objc public var string: String {
+    @objc public var text: String? {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
@@ -238,9 +238,26 @@ import AVFoundation
         }
     }
 
-    /// Replaces the receiver’s entire contents with the characters and attributes of the given attributed string.
-    @objc public func setAttributedString(_ attributedString: NSAttributedString) {
-        setString(attributedString)
+    /// The styled text that the text view displays.
+    ///
+    /// Assigning a new value to this property also replaces the value of the `text` property with the same string data, albeit without any formatting information. In addition, the `font`, `textColor`, and `textAlignment` properties are updated to reflect the typing attributes of the text view.
+    @objc public var attributedText: NSAttributedString? {
+        set {
+            let prevLocation = textLayoutManager.insertionPointLocations.first
+
+            setString(newValue)
+
+            if let prevLocation {
+                // restore selection location
+                setSelectedTextRange(NSTextRange(location: prevLocation))
+            } else {
+                // or try to set at the begining of the document
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+            }
+        }
+        get {
+            textContentManager.attributedString(in: nil)
+        }
     }
 
     /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
@@ -425,7 +442,13 @@ import AVFoundation
 
     /// The text view's text container
     public var textContainer: NSTextContainer {
-        textLayoutManager.textContainer!
+        get {
+            textLayoutManager.textContainer!
+        }
+
+        set {
+            textLayoutManager.textContainer = newValue
+        }
     }
 
     /// Content view. Layout fragments content.

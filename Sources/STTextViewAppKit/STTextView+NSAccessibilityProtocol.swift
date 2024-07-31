@@ -26,7 +26,7 @@ extension STTextView  {
     }
 
     open override func accessibilityValue() -> Any? {
-        string
+        text
     }
 
     open override func setAccessibilityValue(_ accessibilityValue: Any?) {
@@ -34,7 +34,7 @@ extension STTextView  {
             return
         }
 
-        self.string = string
+        self.text = string
     }
 
     open override func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
@@ -54,7 +54,7 @@ extension STTextView  {
     }
 
     open override func accessibilityNumberOfCharacters() -> Int {
-        string.count
+        text?.count ?? 0
     }
 
     open override func accessibilitySelectedText() -> String? {
