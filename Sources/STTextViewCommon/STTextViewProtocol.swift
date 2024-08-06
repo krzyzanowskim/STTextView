@@ -38,6 +38,7 @@ package protocol STTextViewProtocol {
     var defaultParagraphStyle: NSParagraphStyle? { get set }
     var typingAttributes: [NSAttributedString.Key: Any] { get set }
     var gutterView: RulerView? { get }
+    var allowsUndo: Bool { get set }
 
     var textDelegate: Delegate? { get set }
 
