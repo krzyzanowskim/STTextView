@@ -71,15 +71,15 @@ class ViewController: UIViewController {
 extension ViewController: STTextViewDelegate {
 
     func textViewWillChangeText(_ notification: Notification) {
-        print("textViewWillChangeText")
+
     }
 
     func textViewDidChangeText(_ notification: Notification) {
-        print("textViewDidChangeText")
+
     }
 
     func textViewDidChangeSelection(_ notification: Notification) {
-        print("textViewDidChangeSelection")
+
     }
 
     func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool {

@@ -1,36 +1,46 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
 import AppKit
+#endif
+#if canImport(UIKit)
+import UIKit
+#endif
+
 import STTextKitPlus
 
-final class CoalescingUndoManager: UndoManager {
+package class CoalescingUndoManager: UndoManager {
 
     private var lastRange: NSTextRange?
 
     private var isCoalescing: Bool = false
 
-    override init() {
+    package override init() {
         super.init()
+        #if os(macOS)
         self.runLoopModes = [.default, .common, .eventTracking, .modalPanel]
+        #else
+        self.runLoopModes = [.default, .common, .tracking]
+        #endif
         self.groupsByEvent = false
     }
 
-    override func undo() {
+    package override func undo() {
         if isCoalescing {
             endCoalescing()
         }
         super.undo()
     }
 
-    override func redo() {
+    package override func redo() {
         if isCoalescing {
             endCoalescing()
         }
         super.redo()
     }
 
-    func checkCoalescing(range: NSTextRange) {
+    package func checkCoalescing(range: NSTextRange) {
         defer {
             lastRange = range
         }
@@ -44,13 +54,13 @@ final class CoalescingUndoManager: UndoManager {
         }
     }
 
-    func startCoalescing() {
+    package func startCoalescing() {
         guard !isCoalescing else { return }
         isCoalescing = true
         beginUndoGrouping()
     }
 
-    func endCoalescing() {
+    package func endCoalescing() {
         guard isCoalescing else { return }
         isCoalescing = false
         lastRange = nil
