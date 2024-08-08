@@ -80,7 +80,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
         let textView = scrollView.documentView as! STTextView
         textView.textDelegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
-        textView.widthTracksTextView = options.contains(.wrapLines)
+        textView.isHorizontallyResizable = !options.contains(.wrapLines)
         textView.setSelectedRange(NSRange())
 
         context.coordinator.isUpdating = true
@@ -120,13 +120,12 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.isSelectable = isEnabled
         }
 
-        let wrapLines = options.contains(.wrapLines)
-        if wrapLines != textView.widthTracksTextView {
-            textView.widthTracksTextView = options.contains(.wrapLines)
-        }
-
         if textView.font != font {
             textView.font = font
+        }
+
+        if options.contains(.wrapLines) != textView.isHorizontallyResizable {
+            textView.isHorizontallyResizable = !options.contains(.wrapLines)
         }
     }
 
