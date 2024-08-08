@@ -23,6 +23,9 @@ public struct TextView: SwiftUI.View {
 
         /// Highlighted selected line
         public static let highlightSelectedLine = Options(rawValue: 1 << 1)
+
+        /// Enable to show line numbers in the gutter.
+        public static let showLineNumbers = Options(rawValue: 1 << 2)
     }
 
     @Environment(\.colorScheme) private var colorScheme
@@ -81,9 +84,9 @@ private struct TextViewRepresentable: UIViewRepresentable {
         textView.textDelegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
+        textView.showLineNumbers = options.contains(.showLineNumbers)
         // textView.setSelectedTextRange(<#T##textRange: NSTextRange##NSTextRange#>)
         //textView.setSelectedRange(NSRange())
-        //textView.selectedRange
 
         context.coordinator.isUpdating = true
         textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
@@ -110,23 +113,30 @@ private struct TextViewRepresentable: UIViewRepresentable {
 
 //        if textView.selectedRange() != selection, let selection {
 //            textView.setSelectedRange(selection)
+//            textView.setNeedsLayout()
 //        }
 
         if textView.isEditable != isEnabled {
             textView.isEditable = isEnabled
+            textView.setNeedsLayout()
         }
 
         if textView.isSelectable != isEnabled {
             textView.isSelectable = isEnabled
+            textView.setNeedsLayout()
         }
 
         if textView.font != font {
             textView.font = font
+            textView.setNeedsLayout()
         }
 
         if options.contains(.wrapLines) != textView.isHorizontallyResizable {
             textView.isHorizontallyResizable = !options.contains(.wrapLines)
+            textView.setNeedsLayout()
         }
+
+        textView.layoutIfNeeded()
     }
 
     func makeCoordinator() -> TextCoordinator {

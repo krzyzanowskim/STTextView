@@ -24,7 +24,7 @@ struct ContentView: View {
             TextView(
                 text: $text,
                 selection: $selection,
-                options: [.wrapLines, .highlightSelectedLine]
+                options: [.wrapLines, .highlightSelectedLine, .showLineNumbers]
             )
             .textViewFont(.preferredFont(forTextStyle: .body))
 

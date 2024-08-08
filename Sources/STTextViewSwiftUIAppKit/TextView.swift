@@ -22,6 +22,9 @@ public struct TextView: SwiftUI.View {
 
         /// Highlighted selected line
         public static let highlightSelectedLine = Options(rawValue: 1 << 1)
+
+        /// Enable to show line numbers in the gutter.
+        public static let showLineNumbers = Options(rawValue: 1 << 2)
     }
 
     @Environment(\.colorScheme) private var colorScheme
@@ -81,6 +84,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.textDelegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
+        textView.showLineNumbers = options.contains(.showLineNumbers)
         textView.setSelectedRange(NSRange())
 
         context.coordinator.isUpdating = true
@@ -110,22 +114,27 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
         if textView.selectedRange() != selection, let selection {
             textView.setSelectedRange(selection)
+            textView.needsLayout = true
         }
 
         if textView.isEditable != isEnabled {
             textView.isEditable = isEnabled
+            textView.needsLayout = true
         }
 
         if textView.isSelectable != isEnabled {
             textView.isSelectable = isEnabled
+            textView.needsLayout = true
         }
 
         if textView.font != font {
             textView.font = font
+            textView.needsLayout = true
         }
 
         if options.contains(.wrapLines) != textView.isHorizontallyResizable {
             textView.isHorizontallyResizable = !options.contains(.wrapLines)
+            textView.needsLayout = true
         }
     }
 
