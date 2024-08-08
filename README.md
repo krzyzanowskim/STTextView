@@ -1,6 +1,4 @@
-<p align="center">
-  <img width="64" src="https://user-images.githubusercontent.com/758033/235909140-3589bb7d-51a0-4df3-8d71-2dc30fcabc8c.png">
-</p>
+<img height="45" src="https://user-images.githubusercontent.com/758033/235909140-3589bb7d-51a0-4df3-8d71-2dc30fcabc8c.png">
 
 # STTextView
 
