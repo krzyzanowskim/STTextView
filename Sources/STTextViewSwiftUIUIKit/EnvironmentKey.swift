@@ -5,11 +5,11 @@ import Foundation
 import SwiftUI
 
 private struct FontEnvironmentKey: EnvironmentKey {
-    static var defaultValue: NSFont = .preferredFont(forTextStyle: .body)
+    static var defaultValue: UIFont = .preferredFont(forTextStyle: .body)
 }
 
 internal extension EnvironmentValues {
-    var font: NSFont {
+    var font: UIFont {
         get { self[FontEnvironmentKey.self] }
         set { self[FontEnvironmentKey.self] = newValue }
     }

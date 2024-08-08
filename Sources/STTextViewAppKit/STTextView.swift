@@ -625,6 +625,8 @@ import AVFoundation
 
         super.init(frame: frameRect)
 
+        typingAttributes = defaultTypingAttributes
+
         textLayoutManager.delegate = self
         textFinderClient.textView = self
         textCheckingController = NSTextCheckingController(client: self)

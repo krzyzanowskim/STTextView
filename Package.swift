@@ -52,11 +52,18 @@ let package = Package(
         .target(
             name: "STTextViewSwiftUI",
             dependencies: [
-                .target(name: "STTextViewSwiftUIAppKit", condition: .when(platforms: [.macOS]))
+                .target(name: "STTextViewSwiftUIAppKit", condition: .when(platforms: [.macOS])),
+                .target(name: "STTextViewSwiftUIUIKit", condition: .when(platforms: [.iOS, .macCatalyst]))
             ]
         ),
         .target(
             name: "STTextViewSwiftUIAppKit",
+            dependencies: [
+                .target(name: "STTextView")
+            ]
+        ),
+        .target(
+            name: "STTextViewSwiftUIUIKit",
             dependencies: [
                 .target(name: "STTextView")
             ]

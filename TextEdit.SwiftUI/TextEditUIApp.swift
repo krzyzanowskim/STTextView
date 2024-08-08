@@ -6,7 +6,7 @@ import SwiftUI
 @main
 struct TextEditUIApp: App {
     var body: some Scene {
-        Window("Text Editor (SwiftUI)", id: "main") {
+        WindowGroup("Text Editor (SwiftUI)", id: "main") {
             ContentView()
         }
     }

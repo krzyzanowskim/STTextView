@@ -426,6 +426,8 @@ import STTextViewCommon
 
         super.init(frame: frame)
 
+        typingAttributes = defaultTypingAttributes
+
         textLayoutManager.delegate = self
         textLayoutManager.textViewportLayoutController.delegate = self
 
@@ -486,7 +488,11 @@ import STTextViewCommon
         }
     }
 
-    public func setSelectedTextRange(_ textRange: NSTextRange, updateLayout: Bool = true) {
+    public func setSelectedTextRange(_ textRange: NSTextRange) {
+        setSelectedTextRange(textRange, updateLayout: true)
+    }
+
+    internal func setSelectedTextRange(_ textRange: NSTextRange, updateLayout: Bool) {
         guard isSelectable, textRange.endLocation <= textLayoutManager.documentRange.endLocation else {
             return
         }

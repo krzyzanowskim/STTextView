@@ -3,6 +3,7 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 import STTextView
 
 /// This SwiftUI view can be used to view and edit rich text.
@@ -58,7 +59,7 @@ public struct TextView: SwiftUI.View {
     }
 }
 
-private struct TextViewRepresentable: NSViewRepresentable {
+private struct TextViewRepresentable: UIViewRepresentable {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.font) private var font
     @Environment(\.lineSpacing) private var lineSpacing
@@ -75,29 +76,28 @@ private struct TextViewRepresentable: NSViewRepresentable {
         self.plugins = plugins
     }
 
-    func makeNSView(context: Context) -> NSScrollView {
-        let scrollView = STTextView.scrollableTextView()
-        let textView = scrollView.documentView as! STTextView
+    func makeUIView(context: Context) -> STTextView {
+        let textView = STTextView()
         textView.textDelegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
-        textView.setSelectedRange(NSRange())
+        // textView.setSelectedTextRange(<#T##textRange: NSTextRange##NSTextRange#>)
+        //textView.setSelectedRange(NSRange())
+        //textView.selectedRange
 
         context.coordinator.isUpdating = true
         textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
         context.coordinator.isUpdating = false
 
-        for plugin in plugins {
-            textView.addPlugin(plugin)
-        }
+        //for plugin in plugins {
+        //    textView.addPlugin(plugin)
+        //}
 
-        return scrollView
+        return textView
     }
 
-    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+    func updateUIView(_ textView: STTextView, context: Context) {
         context.coordinator.parent = self
-
-        let textView = scrollView.documentView as! STTextView
 
         do {
             context.coordinator.isUpdating = true
@@ -108,9 +108,9 @@ private struct TextViewRepresentable: NSViewRepresentable {
             context.coordinator.isDidChangeText = false
         }
 
-        if textView.selectedRange() != selection, let selection {
-            textView.setSelectedRange(selection)
-        }
+//        if textView.selectedRange() != selection, let selection {
+//            textView.setSelectedRange(selection)
+//        }
 
         if textView.isEditable != isEnabled {
             textView.isEditable = isEnabled
@@ -180,7 +180,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
             Task { @MainActor in
                 self.isDidChangeText = true
-                self.parent.selection = textView.selectedRange()
+                //self.parent.selection = textView.selectedRange()
             }
         }
 

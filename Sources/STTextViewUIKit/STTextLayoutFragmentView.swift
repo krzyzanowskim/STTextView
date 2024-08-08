@@ -4,7 +4,9 @@
 import UIKit
 import CoreGraphics
 import STTextKitPlus
+#if USE_LAYERS_FOR_GLYPHS
 import CoreTextSwift
+#endif
 
 final class STTextLayoutFragmentView: UIView {
     private let layoutFragment: NSTextLayoutFragment
