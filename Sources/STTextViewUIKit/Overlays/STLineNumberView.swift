@@ -81,6 +81,6 @@ func adjustFont(_ font: UIFont) -> UIFont {
         ]
     ]
 
-    let adjustedFont = UIFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: font.pointSize)
+    let adjustedFont = UIFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: max(font.pointSize * 0.9, UIFont.smallSystemFontSize))
     return adjustedFont
 }

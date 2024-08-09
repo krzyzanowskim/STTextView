@@ -387,6 +387,6 @@ private func adjustFont(_ font: NSFont) -> NSFont {
         ]
     ]
 
-    let adjustedFont = NSFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: 0)
+    let adjustedFont = NSFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: max(font.pointSize * 0.9, NSFont.smallSystemFontSize))
     return adjustedFont ?? font
 }
