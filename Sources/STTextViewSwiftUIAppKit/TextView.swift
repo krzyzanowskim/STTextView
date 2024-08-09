@@ -114,28 +114,26 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
         if textView.selectedRange() != selection, let selection {
             textView.setSelectedRange(selection)
-            textView.needsLayout = true
         }
 
         if textView.isEditable != isEnabled {
             textView.isEditable = isEnabled
-            textView.needsLayout = true
         }
 
         if textView.isSelectable != isEnabled {
             textView.isSelectable = isEnabled
-            textView.needsLayout = true
         }
 
         if textView.font != font {
             textView.font = font
-            textView.needsLayout = true
         }
 
         if options.contains(.wrapLines) != textView.isHorizontallyResizable {
             textView.isHorizontallyResizable = !options.contains(.wrapLines)
-            textView.needsLayout = true
         }
+
+        textView.needsLayout = true
+        textView.needsDisplay = true
     }
 
     func makeCoordinator() -> TextCoordinator {
