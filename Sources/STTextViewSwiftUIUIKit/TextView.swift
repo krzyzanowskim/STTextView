@@ -8,7 +8,7 @@ import STTextView
 
 /// This SwiftUI view can be used to view and edit rich text.
 @MainActor @preconcurrency
-public struct TextView: SwiftUI.View {
+public struct TextView: SwiftUI.View, TextViewModifier {
 
     @frozen
     public struct Options: OptionSet {

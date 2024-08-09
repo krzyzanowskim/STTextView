@@ -6,25 +6,32 @@ import SwiftUI
 
 public protocol TextViewModifier: SwiftUI.View { }
 
-extension STTextViewSwiftUIUIKit.TextView: TextViewModifier {
-
-    public struct EnvironmentModifier<Content: View, V>: View, TextViewModifier {
-        let content: Content
-        let keyPath: WritableKeyPath<EnvironmentValues, V>
-        let value: V
-
-        public var body: some View {
-            content
-                .environment(keyPath, value)
-        }
-    }
-
-}
-
 extension TextViewModifier {
 
     /// Sets the default font for text in this view.
-    public func textViewFont(_ font: UIFont) -> TextView.EnvironmentModifier<Self, UIFont> {
-        TextView.EnvironmentModifier(content: self, keyPath: \.font, value: font)
+    public func textViewFont(_ font: UIFont) -> TextViewEnvironmentModifier<Self, UIFont> {
+        TextViewEnvironmentModifier(content: self, keyPath: \.font, value: font)
+    }
+}
+
+public struct TextViewEnvironmentModifier<Content: View, V>: View, TextViewModifier {
+    let content: Content
+    let keyPath: WritableKeyPath<EnvironmentValues, V>
+    let value: V
+
+    public var body: some View {
+        content
+            .environment(keyPath, value)
+    }
+}
+
+private struct FontEnvironmentKey: EnvironmentKey {
+    static var defaultValue: UIFont = .preferredFont(forTextStyle: .body)
+}
+
+internal extension EnvironmentValues {
+    var font: UIFont {
+        get { self[FontEnvironmentKey.self] }
+        set { self[FontEnvironmentKey.self] = newValue }
     }
 }
