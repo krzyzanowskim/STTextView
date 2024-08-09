@@ -469,7 +469,7 @@ import STTextViewCommon
             if rulerView == nil, newValue == true {
                 rulerView = STRulerView()
                 if let font {
-                    rulerView?.font = font
+                    rulerView?.font = adjustFont(font)
                 }
                 rulerView?.frame.size.width = 40
                 if let textColor {
