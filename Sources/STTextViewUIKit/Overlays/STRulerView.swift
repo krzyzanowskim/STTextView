@@ -46,7 +46,7 @@ public final class STRulerView: UIView {
     ///
     /// Needs ``drawSeparator`` to be set to `true`.
     @Invalidating(.display)
-    public var separatorColor: UIColor = UIColor.separator
+    public var separatorColor: UIColor = UIColor.separator.withAlphaComponent(0.1)
 
     override init(frame: CGRect) {
         lineNumberViewContainer = STLineNumberViewContainer(frame: frame)
