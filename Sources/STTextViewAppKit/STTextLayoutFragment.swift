@@ -128,7 +128,6 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
 					let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width, height: segmentFrame.size.height))
 					
                     let charSize = symbolString.size(withAttributes: attributes)
-					print(frameRect, charSize)
 					let point = CGPoint(x: frameRect.origin.x, y: frameRect.height / 2 - charSize.height / 2)
                     
                     symbolString.draw(at: point, withAttributes: attributes)
