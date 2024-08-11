@@ -79,7 +79,7 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
         
         context.restoreGState()
     }
-
+  
     private func drawInvisibles(at point: CGPoint, in context: CGContext) {
         guard let textLayoutManager = textLayoutManager else {
             return
@@ -101,16 +101,61 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
                         // assertionFailure()
                         continue
                     }
-
-                    let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width, height: segmentFrame.size.height))
-                    context.setFillColor(NSColor.placeholderTextColor.cgColor)
-                    let rect = CGRect(x: frameRect.midX, y: frameRect.midY, width: frameRect.width / 4, height: frameRect.width / 4)
-                    context.addEllipse(in: rect)
-                    context.drawPath(using: .fill)
+                    
+                    if character.isLineBreak == true {
+                        drawNewLinePlaceholder(at: offset, segmentFrame: segmentFrame, context: context)
+                    } else  {
+                        drawPlaceholder(at: offset, segmentFrame: segmentFrame, context: context)
+                    }
                 }
             }
         }
 
         context.restoreGState()
+    }
+
+    private func drawPlaceholder(at offset: Int, segmentFrame: CGRect, context: CGContext) {
+        let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width, height: segmentFrame.size.height))
+        context.setFillColor(NSColor.placeholderTextColor.cgColor)
+        let rect = CGRect(x: frameRect.midX, y: frameRect.midY, width: frameRect.width / 4, height: frameRect.width / 4)
+        context.addEllipse(in: rect)
+        context.drawPath(using: .fill)
+    }
+
+    private func drawNewLinePlaceholder(at offset: Int, segmentFrame: CGRect, context: CGContext) {
+        let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: 20, height: segmentFrame.size.height))
+        context.setStrokeColor(NSColor.placeholderTextColor.cgColor)
+        let path = createNewLinePath(in: frameRect)
+        context.addPath(path)
+        context.drawPath(using: .fillStroke)
+    }
+
+    /// Create the path for the `¬` shape.
+    private func createNewLinePath(in rect: CGRect) -> CGPath {
+        let path = CGMutablePath()
+
+        let lineWidth: CGFloat = rect.width / 2
+        let lineHeight: CGFloat = rect.width / 4
+
+        // Horizontal line
+        path.move(to: CGPoint(x: rect.midX - lineWidth / 2, y: rect.midY - lineHeight/2))
+        path.addLine(to: CGPoint(x: rect.midX + lineWidth / 2, y: rect.midY - lineHeight/2))
+        
+        // Vertical line
+        path.move(to: CGPoint(x: rect.midX + lineWidth / 2, y: rect.midY - lineHeight/2))
+        path.addLine(to: CGPoint(x: rect.midX + lineWidth / 2, y: rect.midY + lineHeight/2))
+
+        return path
+    }
+
+
+}
+
+extension String.UTF16View.Element {
+    var isLineBreak: Bool {
+        return self == 0x000A || // Line Feed (LF, \n)
+               self == 0x000D || // Carriage Return (CR, \r)
+               self == 0x2028 || // Line Separator
+               self == 0x2029    // Paragraph Separator
     }
 }
