@@ -125,7 +125,7 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
                         .foregroundColor: NSColor.placeholderTextColor
                     ]
 					
-					let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width, height: segmentFrame.size.height))
+					let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: CGSize(width: segmentFrame.size.width, height: segmentFrame.size.height)).pixelAligned
 					
                     let charSize = symbolString.size(withAttributes: attributes)
 					let point = CGPoint(x: frameRect.origin.x, y: frameRect.height / 2 - charSize.height / 2)
