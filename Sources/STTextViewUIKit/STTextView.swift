@@ -176,9 +176,7 @@ import STTextViewCommon
     }
 
     /// Gutter view
-    public var gutterView: STRulerView? {
-        rulerView
-    }
+    public var gutterView: STRulerView?
 
     /// Installed plugins. events value is available after plugin is setup
     internal var plugins: [Plugin] = []
@@ -186,7 +184,6 @@ import STTextViewCommon
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
     internal let lineHighlightView: STLineHighlightView
-    internal var rulerView: STRulerView?
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
 
@@ -466,25 +463,25 @@ import STTextViewCommon
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
     public var isRulerVisible: Bool {
         set {
-            if rulerView == nil, newValue == true {
-                rulerView = STRulerView()
+            if gutterView == nil, newValue == true {
+                gutterView = STRulerView()
                 if let font {
-                    rulerView?.font = adjustFont(font)
+                    gutterView?.font = adjustFont(font)
                 }
-                rulerView?.frame.size.width = 40
+                gutterView?.frame.size.width = 40
                 if let textColor {
-                    rulerView?.selectedLineTextColor = textColor
+                    gutterView?.selectedLineTextColor = textColor
                 }
-                rulerView?.highlightSelectedLine = highlightSelectedLine
-                rulerView?.selectedLineHighlightColor = selectedLineHighlightColor
-                self.addSubview(rulerView!)
+                gutterView?.highlightSelectedLine = highlightSelectedLine
+                gutterView?.selectedLineHighlightColor = selectedLineHighlightColor
+                self.addSubview(gutterView!)
             } else if newValue == false {
-                rulerView?.removeFromSuperview()
-                rulerView = nil
+                gutterView?.removeFromSuperview()
+                gutterView = nil
             }
         }
         get {
-            rulerView != nil
+            gutterView != nil
         }
     }
 
@@ -617,8 +614,8 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
-        contentView.bounds.origin.x = -(rulerView?.frame.width ?? 0)
-        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width - (rulerView?.frame.width ?? 0))
+        contentView.bounds.origin.x = -(gutterView?.frame.width ?? 0)
+        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width - (gutterView?.frame.width ?? 0))
         contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, bounds.height)
         contentSize = contentView.frame.size
 
@@ -830,13 +827,13 @@ import STTextViewCommon
 
         layoutViewport()
         layoutLineHighlight()
-        layoutRuler()
+        layoutGutter()
         layoutLineNumbers()
     }
 
-    private func layoutRuler() {
-        rulerView?.frame.origin = contentOffset
-        rulerView?.frame.size.height = visibleSize.height
+    private func layoutGutter() {
+        gutterView?.frame.origin = contentOffset
+        gutterView?.frame.size.height = visibleSize.height
     }
 
     private func layoutViewport() {
@@ -951,11 +948,11 @@ import STTextViewCommon
     }
 
     private func layoutLineNumbers() {
-        guard let rulerView, let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
+        guard let gutterView, let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
             return
         }
 
-        rulerView.lineNumberViewContainer.subviews.forEach { v in
+        gutterView.lineNumberViewContainer.subviews.forEach { v in
             v.removeFromSuperview()
         }
 
@@ -967,12 +964,12 @@ import STTextViewCommon
         )
 
         let lineTextAttributes: [NSAttributedString.Key: Any] = [
-            .font: rulerView.font,
+            .font: gutterView.font,
             .foregroundColor: UIColor.secondaryLabel.cgColor
         ]
 
         let selectedLineTextAttributes: [NSAttributedString.Key: Any] = [
-            .foregroundColor: (rulerView.selectedLineTextColor ?? rulerView.textColor).cgColor
+            .foregroundColor: (gutterView.selectedLineTextColor ?? gutterView.textColor).cgColor
         ]
 
         let startLineIndex = textElements.count
@@ -1030,21 +1027,21 @@ import STTextViewCommon
                     number: lineNumber
                 )
 
-                numberView.insets = rulerView.rulerInsets
+                numberView.insets = gutterView.rulerInsets
 
-                if rulerView.highlightSelectedLine, isLineSelected, textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty, !textLayoutManager.insertionPointSelections.isEmpty {
-                    numberView.backgroundColor = rulerView.selectedLineHighlightColor
+                if gutterView.highlightSelectedLine, isLineSelected, textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty, !textLayoutManager.insertionPointSelections.isEmpty {
+                    numberView.backgroundColor = gutterView.selectedLineHighlightColor
                 }
 
                 numberView.frame = CGRect(
                     origin: lineFragmentFrame.origin,
                     size: CGSize(
-                        width: max(lineFragmentFrame.intersection(rulerView.lineNumberViewContainer.frame).width, rulerView.lineNumberViewContainer.frame.width),
+                        width: max(lineFragmentFrame.intersection(gutterView.lineNumberViewContainer.frame).width, gutterView.lineNumberViewContainer.frame.width),
                         height: lineFragmentFrame.size.height
                     )
                 )
 
-                rulerView.lineNumberViewContainer.addSubview(numberView)
+                gutterView.lineNumberViewContainer.addSubview(numberView)
                 linesCount += 1
             }
 

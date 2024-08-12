@@ -50,37 +50,3 @@ final class STLineNumberView: UIView {
         ctx.restoreGState()
     }
 }
-
-func adjustFont(_ font: UIFont) -> UIFont {
-    // https://useyourloaf.com/blog/ios-9-proportional-numbers/
-    // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html
-    let features: [[UIFontDescriptor.FeatureKey: Int]] = [
-        [
-            .type: kTextSpacingType,
-            .selector: kMonospacedTextSelector
-        ],
-        [
-            .type: kNumberSpacingType,
-            .selector: kMonospacedNumbersSelector
-        ],
-        [
-            .type: kNumberCaseType,
-            .selector: kUpperCaseNumbersSelector
-        ],
-        [
-            .type: kStylisticAlternativesType,
-            .selector: kStylisticAltOneOnSelector
-        ],
-        [
-            .type: kStylisticAlternativesType,
-            .selector: kStylisticAltTwoOnSelector
-        ],
-        [
-            .type: kTypographicExtrasType,
-            .selector: kSlashedZeroOnSelector
-        ]
-    ]
-
-    let adjustedFont = UIFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: max(font.pointSize * 0.9, UIFont.smallSystemFontSize))
-    return adjustedFont
-}

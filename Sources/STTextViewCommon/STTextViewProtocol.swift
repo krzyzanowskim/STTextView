@@ -10,7 +10,7 @@ import UIKit
 
 /// A common public interface for TextView
 package protocol STTextViewProtocol {
-    associatedtype RulerView
+    associatedtype GutterView
     associatedtype Color
     associatedtype Font
     associatedtype Delegate
@@ -37,7 +37,7 @@ package protocol STTextViewProtocol {
     var isSelectable: Bool { get set }
     var defaultParagraphStyle: NSParagraphStyle? { get set }
     var typingAttributes: [NSAttributedString.Key: Any] { get set }
-    var gutterView: RulerView? { get }
+    var gutterView: GutterView? { get }
     var allowsUndo: Bool { get set }
 
     var textDelegate: Delegate? { get set }
