@@ -967,7 +967,12 @@ import AVFoundation
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+        addAttributes(attrs, range: range, updateLayout: true)
+    }
+
+    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    private func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -976,8 +981,7 @@ import AVFoundation
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
-
+    internal func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
@@ -988,8 +992,12 @@ import AVFoundation
         }
     }
 
-    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+    /// Set attributes.
+    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+        setAttributes(attrs, range: range, updateLayout: true)
+    }
+
+    internal func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -998,7 +1006,7 @@ import AVFoundation
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+    internal func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
@@ -1012,7 +1020,12 @@ import AVFoundation
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
+    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange) {
+        removeAttribute(attribute, range: range, updateLayout: true)
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -1021,7 +1034,7 @@ import AVFoundation
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
+    internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
