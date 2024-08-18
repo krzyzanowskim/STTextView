@@ -84,7 +84,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
         textView.textDelegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
-        textView.showLineNumbers = options.contains(.showLineNumbers)
+        textView.showsLineNumbers = options.contains(.showLineNumbers)
 
         context.coordinator.isUpdating = true
         textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
@@ -188,7 +188,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
 
             Task { @MainActor in
                 self.isDidChangeText = true
-                //self.parent.selection = textView.selectedRange()
+                self.parent.selection = textView.textSelection
             }
         }
 

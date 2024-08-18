@@ -340,9 +340,9 @@ import AVFoundation
 
     /// Enable to show line numbers in the gutter.
     @Invalidating(.layout)
-    open var showLineNumbers: Bool = false {
+    open var showsLineNumbers: Bool = false {
         didSet {
-            isRulerVisible = showLineNumbers
+            isRulerVisible = showsLineNumbers
         }
     }
 
@@ -501,7 +501,7 @@ import AVFoundation
     @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
     /// A Boolean value that indicates whether to substitute visible glyphs for whitespace and other typically invisible characters.
-    open var showsInvisibleCharacters: Bool = false {
+    public var showsInvisibleCharacters: Bool = false {
         didSet {
             textLayoutManager.invalidateLayout(for: textLayoutManager.documentRange)
         }

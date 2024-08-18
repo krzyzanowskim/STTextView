@@ -32,7 +32,7 @@ final class ViewController: NSViewController {
         textView.isIncrementalSearchingEnabled = true
         textView.showsInvisibleCharacters = false
         textView.textDelegate = self
-        textView.showLineNumbers = true
+        textView.showsLineNumbers = true
         textView.gutterView?.drawSeparator = true
 
         // Plugins

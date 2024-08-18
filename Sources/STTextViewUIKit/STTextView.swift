@@ -121,9 +121,9 @@ import STTextViewCommon
 
     /// Enable to show line numbers in the gutter.
     @Invalidating(.layout)
-    open var showLineNumbers: Bool = false {
+    open var showsLineNumbers: Bool = false {
         didSet {
-            isRulerVisible = showLineNumbers
+            isRulerVisible = showsLineNumbers
         }
     }
 
@@ -438,7 +438,7 @@ import STTextViewCommon
         nonEditableTextInteraction.delegate = self
 
         updateEditableInteraction()
-        isRulerVisible = showLineNumbers
+        isRulerVisible = showsLineNumbers
 
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }

@@ -31,7 +31,7 @@ package protocol STTextViewProtocol {
     var highlightSelectedLine: Bool { get set }
     var selectedLineHighlightColor: Color { get set}
 
-    var showLineNumbers: Bool { get set }
+    var showsLineNumbers: Bool { get set }
 
     var font: Font? { get set }
     var textColor: Color? { get set }
