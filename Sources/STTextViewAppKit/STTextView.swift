@@ -817,7 +817,7 @@ import AVFoundation
 
     open override func prepareContent(in rect: NSRect) {
         super.prepareContent(in: rect.inset(dy: -visibleRect.height / 2))
-        needsLayout = true
+        layoutViewport()
     }
 
     /// The current selection range of the text view.
