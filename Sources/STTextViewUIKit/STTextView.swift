@@ -121,9 +121,16 @@ import STTextViewCommon
 
     /// Enable to show line numbers in the gutter.
     @Invalidating(.layout)
-    open var showsLineNumbers: Bool = false {
+    public var showsLineNumbers: Bool = false {
         didSet {
             isRulerVisible = showsLineNumbers
+        }
+    }
+
+    @Invalidating(.layout)
+    public var showsInvisibleCharacters: Bool = false {
+        didSet {
+            textLayoutManager.invalidateLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
         }
     }
 
