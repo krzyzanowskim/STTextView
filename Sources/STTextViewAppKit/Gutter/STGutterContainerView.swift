@@ -3,7 +3,7 @@
 
 import AppKit
 
-final class STLineNumberViewContainer: NSView {
+final class STGutterContainerView: NSView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)

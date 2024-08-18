@@ -6,7 +6,7 @@
 //      |---ContentView
 //              |---STLineHighlightView
 //              |---STTextLayoutFragmentView
-//      |---STRulerView
+//      |---STGutterView
 
 import UIKit
 import STTextKitPlus
@@ -183,7 +183,7 @@ import STTextViewCommon
     }
 
     /// Gutter view
-    public var gutterView: STRulerView?
+    public var gutterView: STGutterView?
 
     /// Installed plugins. events value is available after plugin is setup
     internal var plugins: [Plugin] = []
@@ -471,7 +471,7 @@ import STTextViewCommon
     public var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
-                gutterView = STRulerView()
+                gutterView = STGutterView()
                 if let font {
                     gutterView?.font = adjustFont(font)
                 }
@@ -991,7 +991,7 @@ import STTextViewCommon
             return
         }
 
-        gutterView.lineNumberViewContainer.subviews.forEach { v in
+        gutterView.containerView.subviews.forEach { v in
             v.removeFromSuperview()
         }
 
@@ -1060,27 +1060,27 @@ import STTextViewCommon
                     effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                 }
 
-                let numberView = STLineNumberView(
+                let numberCell = STGutterLineNumberCell(
                     firstBaseline: locationForFirstCharacter.y + baselineYOffset,
                     attributes: effectiveLineTextAttributes,
                     number: lineNumber
                 )
 
-                numberView.insets = gutterView.rulerInsets
+                numberCell.insets = gutterView.insets
 
                 if gutterView.highlightSelectedLine, isLineSelected, textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty, !textLayoutManager.insertionPointSelections.isEmpty {
-                    numberView.backgroundColor = gutterView.selectedLineHighlightColor
+                    numberCell.backgroundColor = gutterView.selectedLineHighlightColor
                 }
 
-                numberView.frame = CGRect(
+                numberCell.frame = CGRect(
                     origin: lineFragmentFrame.origin,
                     size: CGSize(
-                        width: max(lineFragmentFrame.intersection(gutterView.lineNumberViewContainer.frame).width, gutterView.lineNumberViewContainer.frame.width),
+                        width: max(lineFragmentFrame.intersection(gutterView.containerView.frame).width, gutterView.containerView.frame.width),
                         height: lineFragmentFrame.size.height
                     )
                 )
 
-                gutterView.lineNumberViewContainer.addSubview(numberView)
+                gutterView.containerView.addSubview(numberCell)
                 linesCount += 1
             }
 

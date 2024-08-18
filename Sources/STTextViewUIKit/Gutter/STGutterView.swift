@@ -1,11 +1,13 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
+
 import UIKit
 import STTextViewCommon
 
-public final class STRulerView: UIView {
-    internal let lineNumberViewContainer: STLineNumberViewContainer
+/// A gutter to the side of a scroll view’s document view.
+public final class STGutterView: UIView {
+    internal let containerView: UIView
 
     /// The font used to draw line numbers.
     ///
@@ -16,11 +18,11 @@ public final class STRulerView: UIView {
 
     /// The insets of the ruler view.
     @Invalidating(.display)
-    public var rulerInsets: STRulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
+    public var insets: STRulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
 
     /// The text color of the line numbers.
     @Invalidating(.display)
-    public var textColor: UIColor = .secondaryLabel
+    public var textColor = UIColor.secondaryLabel
 
     /// A Boolean indicating whether to draw a separator or not. Default true.
     @Invalidating(.display)
@@ -36,7 +38,7 @@ public final class STRulerView: UIView {
 
     /// The background color of the highlighted line.
     @Invalidating(.display)
-    public var selectedLineHighlightColor: UIColor = UIColor.tintColor.withAlphaComponent(0.15)
+    public var selectedLineHighlightColor: UIColor = .tintColor.withAlphaComponent(0.15)
 
     /// The text color of the highlighted line numbers.
     @Invalidating(.display)
@@ -46,17 +48,19 @@ public final class STRulerView: UIView {
     ///
     /// Needs ``drawSeparator`` to be set to `true`.
     @Invalidating(.display)
-    public var separatorColor: UIColor = UIColor.separator.withAlphaComponent(0.1)
+    public var separatorColor = UIColor.separator.withAlphaComponent(0.1)
 
     override init(frame: CGRect) {
-        lineNumberViewContainer = STLineNumberViewContainer(frame: frame)
-        lineNumberViewContainer.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        containerView = UIView(frame: frame)
+        containerView.clipsToBounds = true
+        containerView.isOpaque = true
+        containerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         super.init(frame: frame)
         isUserInteractionEnabled = false
         isOpaque = false
 
-        addSubview(lineNumberViewContainer)
+        addSubview(containerView)
     }
 
     @available(*, unavailable)

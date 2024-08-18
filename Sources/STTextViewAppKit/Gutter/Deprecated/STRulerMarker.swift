@@ -3,6 +3,7 @@
 
 import AppKit
 
+@available(*, deprecated, message: "NSRulerView subclass is deprecated")
 open class STRulerMarker: NSRulerMarker {
 
     open var size: CGSize = .zero {

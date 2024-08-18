@@ -6,6 +6,7 @@ import STTextKitPlus
 import STTextViewCommon
 
 /// A ruler view to display line numbers to the side of the text view.
+@available(*, deprecated, message: "NSRulerView subclass is deprecated")
 open class STLineNumberRulerView: NSRulerView {
 
     private var textView: STTextView? {
@@ -79,10 +80,10 @@ open class STLineNumberRulerView: NSRulerView {
         }
     }
 
-    private let lineNumberViewContainer: STLineNumberViewContainer
+    private let containerView: STGutterContainerView
 
     public required init(textView: STTextView, scrollView: NSScrollView? = nil) {
-        lineNumberViewContainer = STLineNumberViewContainer()
+        containerView = STGutterContainerView()
 
         super.init(scrollView: scrollView ?? textView.enclosingScrollView, orientation: .verticalRuler)
 
@@ -108,7 +109,7 @@ open class STLineNumberRulerView: NSRulerView {
             }
         }
 
-        addSubview(lineNumberViewContainer)
+        addSubview(containerView)
     }
 
     required public init(coder: NSCoder) {
@@ -126,7 +127,7 @@ open class STLineNumberRulerView: NSRulerView {
 
     open override func layout() {
         super.layout()
-        lineNumberViewContainer.frame = frame
+        containerView.frame = frame
         layoutLineNumbers()
     }
 
@@ -142,7 +143,7 @@ open class STLineNumberRulerView: NSRulerView {
         let rulerView = self
         let relativePoint = self.convert(NSZeroPoint, from: textView)
 
-        rulerView.lineNumberViewContainer.subviews.forEach { v in
+        rulerView.containerView.subviews.forEach { v in
             v.removeFromSuperviewWithoutNeedingDisplay()
         }
 
@@ -242,7 +243,7 @@ open class STLineNumberRulerView: NSRulerView {
                     effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                 }
 
-                let numberView = STLineNumberView(
+                let numberView = STGutterLineNumberView(
                     firstBaseline: glyphOriginY + baselineYOffset,
                     attributes: effectiveLineTextAttributes,
                     number: lineNumber
@@ -259,12 +260,12 @@ open class STLineNumberRulerView: NSRulerView {
                 numberView.frame = CGRect(
                     origin: lineFragmentFrame.origin.moved(dy: relativePoint.y),
                     size: CGSize(
-                        width: max(lineFragmentFrame.intersection(rulerView.lineNumberViewContainer.frame).width, rulerView.lineNumberViewContainer.frame.width),
+                        width: max(lineFragmentFrame.intersection(rulerView.containerView.frame).width, rulerView.containerView.frame.width),
                         height: lineFragmentFrame.size.height
                     )
                 ).pixelAligned
 
-                rulerView.lineNumberViewContainer.addSubview(numberView)
+                rulerView.containerView.addSubview(numberView)
                 linesCount += 1
             }
 
@@ -272,7 +273,7 @@ open class STLineNumberRulerView: NSRulerView {
         }
 
         // adjust ruleThickness to fit the text based on last numberView
-        if let lastNumberView = lineNumberViewContainer.subviews.last as? STLineNumberView {
+        if let lastNumberView = containerView.subviews.last as? STGutterLineNumberView {
             let prevThickness = self.ruleThickness
             let calculatedThickness = max(self.requiredThickness, lastNumberView.intrinsicContentSize.width + 8)
             let delta = prevThickness - calculatedThickness
