@@ -11,11 +11,13 @@ final class DecorationView: NSView {
         self.textLayoutManager = textLayoutManager
         super.init(frame: .zero)
         wantsLayer = true
+        clipsToBounds = true
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         wantsLayer = true
+        clipsToBounds = true
     }
 
     override var isFlipped: Bool {
