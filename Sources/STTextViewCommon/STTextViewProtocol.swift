@@ -50,8 +50,8 @@ package protocol STTextViewProtocol {
     var textDelegate: Delegate? { get set }
 
     var gutterView: GutterView? { get }
+    var isGutterVisible: Bool { get }
     func toggleRuler(_ sender: Any?)
-    var isRulerVisible: Bool { get set }
 
     var textSelection: NSRange? { get set }
 

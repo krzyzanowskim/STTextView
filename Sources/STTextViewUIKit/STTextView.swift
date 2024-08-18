@@ -123,7 +123,7 @@ import STTextViewCommon
     @Invalidating(.layout)
     public var showsLineNumbers: Bool = false {
         didSet {
-            isRulerVisible = showsLineNumbers
+            isGutterVisible = showsLineNumbers
         }
     }
 
@@ -445,7 +445,7 @@ import STTextViewCommon
         nonEditableTextInteraction.delegate = self
 
         updateEditableInteraction()
-        isRulerVisible = showsLineNumbers
+        isGutterVisible = showsLineNumbers
 
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
@@ -464,11 +464,11 @@ import STTextViewCommon
 
     /// This action method shows or hides the ruler, if the receiver is enclosed in a scroll view
     @objc public func toggleRuler(_ sender: Any?) {
-        isRulerVisible.toggle()
+        isGutterVisible.toggle()
     }
 
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    public var isRulerVisible: Bool {
+    public var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
                 gutterView = STRulerView()

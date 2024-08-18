@@ -342,7 +342,7 @@ import AVFoundation
     @Invalidating(.layout)
     open var showsLineNumbers: Bool = false {
         didSet {
-            isRulerVisible = showsLineNumbers
+            isGutterVisible = showsLineNumbers
         }
     }
 
