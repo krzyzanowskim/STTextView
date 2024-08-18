@@ -52,7 +52,7 @@ package protocol STTextViewProtocol {
     func toggleRuler(_ sender: Any?)
     var isRulerVisible: Bool { get set }
 
-    func setSelectedTextRange(_ textRange: NSTextRange)
+    var textSelection: NSRange? { get set }
 
     func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange)
     func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange)

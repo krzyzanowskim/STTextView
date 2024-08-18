@@ -85,8 +85,6 @@ private struct TextViewRepresentable: UIViewRepresentable {
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
         textView.showLineNumbers = options.contains(.showLineNumbers)
-        // textView.setSelectedTextRange(<#T##textRange: NSTextRange##NSTextRange#>)
-        //textView.setSelectedRange(NSRange())
 
         context.coordinator.isUpdating = true
         textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))

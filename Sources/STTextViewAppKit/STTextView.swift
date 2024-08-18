@@ -227,10 +227,10 @@ import AVFoundation
 
             if let prevLocation {
                 // restore selection location
-                setSelectedTextRange(NSTextRange(location: prevLocation))
+                setSelectedTextRange(NSTextRange(location: prevLocation), updateLayout: true)
             } else {
                 // or try to set at the begining of the document
-                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location), updateLayout: true)
             }
         }
         get {
@@ -249,10 +249,10 @@ import AVFoundation
 
             if let prevLocation {
                 // restore selection location
-                setSelectedTextRange(NSTextRange(location: prevLocation))
+                setSelectedTextRange(NSTextRange(location: prevLocation), updateLayout: true)
             } else {
                 // or try to set at the begining of the document
-                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location), updateLayout: true)
             }
         }
         get {
@@ -828,6 +828,21 @@ import AVFoundation
         needsLayout = true
     }
 
+    /// The current selection range of the text view.
+    ///
+    /// If the length of the selection range is 0, indicating that the selection is actually an insertion point
+    public var textSelection: NSRange? {
+        set {
+            if let newValue {
+                self.setSelectedRange(newValue)
+            }
+        }
+
+        get {
+            return self.selectedRange()
+        }
+    }
+
     open override func draw(_ dirtyRect: NSRect) {
         drawBackground(in: dirtyRect)
         super.draw(dirtyRect)
@@ -1339,7 +1354,7 @@ import AVFoundation
                 with: previousStringInRange,
                 allowsTypingCoalescing: false
             )
-            textView.setSelectedTextRange(textRange)
+            textView.setSelectedTextRange(textRange, updateLayout: true)
         }
         undoManager.endUndoGrouping()
     }

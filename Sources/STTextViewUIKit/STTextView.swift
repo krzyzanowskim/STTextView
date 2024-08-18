@@ -243,10 +243,10 @@ import STTextViewCommon
 
             if let prevLocation {
                 // restore selection location
-                setSelectedTextRange(NSTextRange(location: prevLocation))
+                setSelectedTextRange(NSTextRange(location: prevLocation), updateLayout: true)
             } else {
                 // or try to set at the begining of the document
-                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location), updateLayout: true)
             }
         }
 
@@ -266,10 +266,10 @@ import STTextViewCommon
 
             if let prevLocation {
                 // restore selection location
-                setSelectedTextRange(NSTextRange(location: prevLocation))
+                setSelectedTextRange(NSTextRange(location: prevLocation), updateLayout: true)
             } else {
                 // or try to set at the begining of the document
-                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location), updateLayout: true)
             }
         }
 
@@ -485,8 +485,25 @@ import STTextViewCommon
         }
     }
 
-    public func setSelectedTextRange(_ textRange: NSTextRange) {
-        setSelectedTextRange(textRange, updateLayout: true)
+    /// The current selection range of the text view.
+    ///
+    /// If the length of the selection range is 0, indicating that the selection is actually an insertion point
+    public var textSelection: NSRange? {
+        set {
+            if let newValue, let textRange = NSTextRange(newValue, in: textContentManager) {
+                setSelectedTextRange(textRange, updateLayout: true)
+            } else {
+                selectedTextRange = nil
+            }
+        }
+
+        get {
+            if let textRange = selectedTextRange?.nsTextRange {
+                return NSRange(textRange, in: textContentManager)
+            }
+
+            return nil
+        }
     }
 
     internal func setSelectedTextRange(_ textRange: NSTextRange, updateLayout: Bool) {
@@ -790,7 +807,7 @@ import STTextViewCommon
                 with: previousStringInRange,
                 allowsTypingCoalescing: false
             )
-            textView.setSelectedTextRange(textRange)
+            textView.setSelectedTextRange(textRange, updateLayout: true)
         }
         undoManager.endUndoGrouping()
     }
