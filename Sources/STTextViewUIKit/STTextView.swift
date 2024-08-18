@@ -473,7 +473,7 @@ import STTextViewCommon
             if gutterView == nil, newValue == true {
                 gutterView = STGutterView()
                 if let font {
-                    gutterView?.font = adjustFont(font)
+                    gutterView?.font = adjustGutterFont(font)
                 }
                 gutterView?.frame.size.width = 40
                 if let textColor {
@@ -866,11 +866,11 @@ import STTextViewCommon
 
         layoutViewport()
         layoutLineHighlight()
-        layoutGutter()
+        layoutGutterView()
         layoutLineNumbers()
     }
 
-    private func layoutGutter() {
+    private func layoutGutterView() {
         gutterView?.frame.origin = contentOffset
         gutterView?.frame.size.height = visibleSize.height
     }

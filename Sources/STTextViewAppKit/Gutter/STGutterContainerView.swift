@@ -15,6 +15,10 @@ final class STGutterContainerView: NSView {
         true
     }
 
+    override var isOpaque: Bool {
+        true
+    }
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

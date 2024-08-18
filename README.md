@@ -163,14 +163,9 @@ textView.isHorizontallyResizable = true
 textView.highlightSelectedLine = true
 ```
 
-Add line numbers using specialized `STLineNumberRulerView` (specialized subclass of `NSRulerView`)
+Add gutter with line numbers
 
 ```swift
-let textView = STTextView()
-let scrollView = NSScrollView()
-scrollView.documentView = textView
-
-// Line numbers
 textView.showLineNumbers = true
 textView.gutterView?.drawSeparator = true
 ```

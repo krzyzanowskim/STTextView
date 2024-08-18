@@ -88,7 +88,7 @@ open class STLineNumberRulerView: NSRulerView {
         super.init(scrollView: scrollView ?? textView.enclosingScrollView, orientation: .verticalRuler)
 
         if let textViewFont = textView.font {
-            font = adjustFont(textViewFont)
+            font = adjustGutterFont(textViewFont)
         }
 
         highlightSelectedLine = textView.highlightSelectedLine
@@ -358,7 +358,7 @@ open class STLineNumberRulerView: NSRulerView {
     
 }
 
-private func adjustFont(_ font: NSFont) -> NSFont {
+private func _adjustFont(_ font: NSFont) -> NSFont {
     // https://useyourloaf.com/blog/ios-9-proportional-numbers/
     // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html
     let features: [[NSFontDescriptor.FeatureKey: Int]] = [

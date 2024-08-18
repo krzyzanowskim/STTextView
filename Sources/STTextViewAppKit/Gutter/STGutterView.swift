@@ -1,20 +1,19 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-
-import UIKit
+import AppKit
 import STTextViewCommon
 
 /// A gutter to the side of a scroll view’s document view.
-public final class STGutterView: UIView {
-    internal let containerView: UIView
+public final class STGutterView: NSView {
+    internal let containerView: STGutterContainerView
 
     /// The font used to draw line numbers.
     ///
     /// Initialized with a textView font value and does not update automatically when
     /// text view font changes.
     @Invalidating(.display)
-    public var font: UIFont = adjustGutterFont(UIFont(descriptor: UIFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.traitCondensed)!, size: 0))
+    public var font: NSFont = adjustGutterFont(NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: 0)!)
 
     /// The insets of the ruler view.
     @Invalidating(.display)
@@ -22,7 +21,7 @@ public final class STGutterView: UIView {
 
     /// The text color of the line numbers.
     @Invalidating(.display)
-    public var textColor = UIColor.secondaryLabel
+    public var textColor = NSColor.secondaryLabelColor
 
     /// A Boolean indicating whether to draw a separator or not. Default true.
     @Invalidating(.display)
@@ -38,27 +37,30 @@ public final class STGutterView: UIView {
 
     /// The background color of the highlighted line.
     @Invalidating(.display)
-    public var selectedLineHighlightColor: UIColor = .tintColor.withAlphaComponent(0.15)
+    public var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
 
     /// The text color of the highlighted line numbers.
     @Invalidating(.display)
-    public var selectedLineTextColor: UIColor? = nil
+    public var selectedLineTextColor: NSColor? = nil
 
     /// The color of the separator.
     ///
     /// Needs ``drawSeparator`` to be set to `true`.
     @Invalidating(.display)
-    public var separatorColor = UIColor.separator.withAlphaComponent(0.1)
+    public var separatorColor = NSColor.separatorColor.withAlphaComponent(0.1)
+
+    public override var isOpaque: Bool {
+        false
+    }
 
     override init(frame: CGRect) {
-        containerView = UIView(frame: frame)
+        containerView = STGutterContainerView(frame: frame)
         containerView.clipsToBounds = true
-        containerView.isOpaque = true
-        containerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        containerView.autoresizingMask = [.width, .height]
 
         super.init(frame: frame)
-        isUserInteractionEnabled = false
-        isOpaque = false
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.red.cgColor
 
         addSubview(containerView)
     }
@@ -68,17 +70,18 @@ public final class STGutterView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
+
+    public override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
         if drawsBackground {
-            backgroundColor = UIColor.systemBackground.resolvedColor(with: traitCollection)
+            // self.updateSelectionHighlights()
         }
     }
 
     public override func draw(_ rect: CGRect) {
         super.draw(rect)
 
-        guard let context = UIGraphicsGetCurrentContext() else {
+        guard let context = NSGraphicsContext.current?.cgContext else {
             return
         }
 
@@ -91,36 +94,36 @@ public final class STGutterView: UIView {
     }
 }
 
-func adjustGutterFont(_ font: UIFont) -> UIFont {
+internal func adjustGutterFont(_ font: NSFont) -> NSFont {
     // https://useyourloaf.com/blog/ios-9-proportional-numbers/
     // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html
-    let features: [[UIFontDescriptor.FeatureKey: Int]] = [
+    let features: [[NSFontDescriptor.FeatureKey: Int]] = [
         [
-            .type: kTextSpacingType,
-            .selector: kMonospacedTextSelector
+            .typeIdentifier: kTextSpacingType,
+            .selectorIdentifier: kMonospacedTextSelector
         ],
         [
-            .type: kNumberSpacingType,
-            .selector: kMonospacedNumbersSelector
+            .typeIdentifier: kNumberSpacingType,
+            .selectorIdentifier: kMonospacedNumbersSelector
         ],
         [
-            .type: kNumberCaseType,
-            .selector: kUpperCaseNumbersSelector
+            .typeIdentifier: kNumberCaseType,
+            .selectorIdentifier: kUpperCaseNumbersSelector
         ],
         [
-            .type: kStylisticAlternativesType,
-            .selector: kStylisticAltOneOnSelector
+            .typeIdentifier: kStylisticAlternativesType,
+            .selectorIdentifier: kStylisticAltOneOnSelector
         ],
         [
-            .type: kStylisticAlternativesType,
-            .selector: kStylisticAltTwoOnSelector
+            .typeIdentifier: kStylisticAlternativesType,
+            .selectorIdentifier: kStylisticAltTwoOnSelector
         ],
         [
-            .type: kTypographicExtrasType,
-            .selector: kSlashedZeroOnSelector
+            .typeIdentifier: kTypographicExtrasType,
+            .selectorIdentifier: kSlashedZeroOnSelector
         ]
     ]
 
-    let adjustedFont = UIFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: max(font.pointSize * 0.9, UIFont.smallSystemFontSize))
-    return adjustedFont
+    let adjustedFont = NSFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: max(font.pointSize * 0.9, NSFont.smallSystemFontSize))
+    return adjustedFont ?? font
 }

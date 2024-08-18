@@ -13,17 +13,25 @@ extension STTextView {
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
     public var isGutterVisible: Bool {
         set {
-            if newValue {
-                let rulerView = STLineNumberRulerView(textView: self)
-                usesRuler = true
-                scrollView?.verticalRulerView = rulerView
-            } else {
-                scrollView?.verticalRulerView = nil
+            if gutterView == nil, newValue == true {
+                gutterView = STGutterView()
+                if let font {
+                    gutterView?.font = adjustGutterFont(font)
+                }
+                gutterView?.frame.size.width = 40
+                if let textColor {
+                    gutterView?.selectedLineTextColor = textColor
+                }
+                gutterView?.highlightSelectedLine = highlightSelectedLine
+                gutterView?.selectedLineHighlightColor = selectedLineHighlightColor
+                self.addSubview(gutterView!)
+            } else if newValue == false {
+                gutterView?.removeFromSuperview()
+                gutterView = nil
             }
-            scrollView?.rulersVisible = newValue
         }
         get {
-            usesRuler && scrollView?.rulersVisible ?? false
+            gutterView != nil
         }
     }
 
