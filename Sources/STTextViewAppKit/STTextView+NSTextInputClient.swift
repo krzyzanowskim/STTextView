@@ -178,7 +178,7 @@ extension STTextView: NSTextInputClient {
 
         var rect: CGRect = .zero
         textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: .rangeNotRequired) { _, textSegmentFrame, baselinePosition, textContainer in
-            rect = window!.convertToScreen(convert(textSegmentFrame, to: nil))
+            rect = window!.convertToScreen(contentView.convert(textSegmentFrame, to: nil))
             return false
         }
 
@@ -186,7 +186,7 @@ extension STTextView: NSTextInputClient {
     }
 
     @objc public func characterIndex(for point: CGPoint) -> Int {
-        let eventPoint = convert(window!.convertPoint(fromScreen: point), from: nil)
+        let eventPoint = contentView.convert(window!.convertPoint(fromScreen: point), from: nil)
         guard let location = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location) else {
             return NSNotFound
         }

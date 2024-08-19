@@ -8,6 +8,7 @@ final class ContentView: NSView {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
+        // layer?.backgroundColor = NSColor.yellow.withAlphaComponent(0.2).cgColor
         clipsToBounds = true
     }
 

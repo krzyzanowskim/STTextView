@@ -19,7 +19,7 @@ extension STTextView {
 
         switch event.clickCount {
         case 1:
-            let eventPoint = convert(event.locationInWindow, from: nil)
+            let eventPoint = contentView.convert(event.locationInWindow, from: nil)
 
             let holdsShift = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.shift)
             let holdsControl = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.control)
@@ -101,7 +101,7 @@ extension STTextView {
             return
         }
 
-        let eventPoint = convert(event.locationInWindow, from: nil)
+        let eventPoint = contentView.convert(event.locationInWindow, from: nil)
 
         if mouseDraggingSelectionAnchors == nil {
             mouseDraggingSelectionAnchors = textLayoutManager.textSelections
@@ -134,7 +134,7 @@ extension STTextView {
         if menu(for: event) != nil {
 
             if textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty {
-                let point = convert(event.locationInWindow, from: nil)
+                let point = contentView.convert(event.locationInWindow, from: nil)
                 updateTextSelection(
                     interactingAt: point,
                     inContainerAt: textLayoutManager.documentRange.location,
@@ -157,7 +157,7 @@ extension STTextView {
             return nil
         }
 
-        let point = convert(event.locationInWindow, from: nil)
+        let point = contentView.convert(event.locationInWindow, from: nil)
         if let proposedMenu = proposedMenu,
            let eventLocation = textLayoutManager.lineFragmentRange(for: point, inContainerAt: textLayoutManager.documentRange.location)?.location,
            let location = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point, inContainerAt: eventLocation, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.first?.location {

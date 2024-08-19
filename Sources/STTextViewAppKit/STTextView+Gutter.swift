@@ -26,10 +26,14 @@ extension STTextView {
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 if let scrollView = enclosingScrollView {
                     scrollView.addSubview(gutterView)
+                    needsLayout = true
                 }
                 self.gutterView = gutterView
             } else if newValue == false {
-                gutterView?.removeFromSuperview()
+                if let gutterView {
+                    gutterView.removeFromSuperview()
+                    needsLayout = true
+                }
                 gutterView = nil
             }
             layoutGutter()
@@ -42,10 +46,7 @@ extension STTextView {
     internal func layoutGutter() {
         if let gutterView {
             gutterView.frame.origin = frame.origin
-            gutterView.frame.size.height = frame.height
+            gutterView.frame.size.height = scrollView?.bounds.height ?? frame.height
         }
-        contentView.bounds.origin.x = -(gutterView?.frame.width ?? 0)
-        selectionView.bounds.origin.x = -(gutterView?.frame.width ?? 0)
-        decorationView.bounds.origin.x = -(gutterView?.frame.width ?? 0)
     }
 }

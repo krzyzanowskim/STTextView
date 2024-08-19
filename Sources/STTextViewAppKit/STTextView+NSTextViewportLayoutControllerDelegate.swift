@@ -42,16 +42,24 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
-        let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) ?? STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: textLayoutFragment.layoutFragmentFrame.pixelAligned)
+        if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment,
+           textLayoutFragment.showsInvisibleCharacters != showsInvisibleCharacters
+        {
+            textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
+        }
+
+        let fragmentView: STTextLayoutFragmentView
+        if let cachedFragmentView = fragmentViewMap.object(forKey: textLayoutFragment) {
+            cachedFragmentView.layoutFragment = textLayoutFragment
+            fragmentView = cachedFragmentView
+        } else {
+            fragmentView = STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: textLayoutFragment.layoutFragmentFrame.pixelAligned)
+        }
+
         // Adjust position
         if !fragmentView.frame.isAlmostEqual(to: textLayoutFragment.layoutFragmentFrame.pixelAligned)  {
             fragmentView.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
             fragmentView.needsLayout = true
-            fragmentView.needsDisplay = true
-        }
-
-        if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment {
-            textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
             fragmentView.needsDisplay = true
         }
 

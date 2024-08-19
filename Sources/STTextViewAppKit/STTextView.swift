@@ -595,7 +595,6 @@ import AVFoundation
 
         textContentManager = STTextContentStorage()
         textLayoutManager = STTextLayoutManager()
-        textLayoutManager.layoutQueue = OperationQueue()
         textLayoutManager.textContainer = STTextContainer()
         textLayoutManager.textContainer?.widthTracksTextView = false
         textLayoutManager.textContainer?.heightTracksTextView = true
@@ -603,11 +602,8 @@ import AVFoundation
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
         contentView = ContentView()
-        contentView.autoresizingMask = [.height, .width]
         selectionView = SelectionView()
-        selectionView.autoresizingMask = [.height, .width]
         decorationView = DecorationView(textLayoutManager: textLayoutManager)
-        decorationView.autoresizingMask = [.height, .width]
 
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
@@ -683,6 +679,8 @@ import AVFoundation
 
     open override func resetCursorRects() {
         super.resetCursorRects()
+
+        let visibleRect = contentView.convert(contentView.visibleRect, to: self)
         if isSelectable, visibleRect != .zero {
             addCursorRect(visibleRect, cursor: .iBeam)
 
@@ -701,7 +699,7 @@ import AVFoundation
                        let linkTextRange = NSTextRange(location: startLocation, end: endLocation),
                        let linkTypographicBounds = textLayoutManager.typographicBounds(in: linkTextRange)
                     {
-                        addCursorRect(linkTypographicBounds, cursor: .pointingHand)
+                        addCursorRect(contentView.convert(linkTypographicBounds, to: self), cursor: .pointingHand)
                     } else {
                         stop.pointee = true
                     }
@@ -717,7 +715,7 @@ import AVFoundation
                        let linkTextRange = NSTextRange(location: startLocation, end: endLocation),
                        let linkTypographicBounds = textLayoutManager.typographicBounds(in: linkTextRange)
                     {
-                        addCursorRect(linkTypographicBounds, cursor: cursorValue)
+                        addCursorRect(contentView.convert(linkTypographicBounds, to: self), cursor: cursorValue)
                     } else {
                         stop.pointee = true
                     }
@@ -1114,7 +1112,7 @@ import AVFoundation
         }
 
         if !isVerticallyResizable {
-            containerSize.height = contentView.bounds.maxY // - _textContainerInset.height * 2
+            containerSize.height = contentView.bounds.height // - _textContainerInset.height * 2
         }
 
         if !textContainer.size.isAlmostEqual(to: containerSize)  {
@@ -1145,6 +1143,17 @@ import AVFoundation
         super.layout()
 
         layoutViewport()
+
+        let gutterPadding = gutterView?.bounds.width ?? 0
+        contentView.frame = CGRect(
+            x: gutterPadding,
+            y: frame.origin.y,
+            width: frame.width - gutterPadding,
+            height: frame.height
+        )
+        selectionView.frame = contentView.frame
+        decorationView.frame = contentView.frame
+
 
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)
@@ -1224,7 +1233,7 @@ import AVFoundation
         }
     }
 
-    private func layoutViewport() {
+    internal func layoutViewport() {
         // layoutViewport does not handle properly layout range
         // for far jump it tries to layout everything starting at location 0
         // even though viewport range is properly calculated.

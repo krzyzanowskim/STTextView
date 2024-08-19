@@ -6,10 +6,11 @@ import AppKit
 extension STTextView: NSTextLayoutManagerDelegate {
 
     public func textLayoutManager(_ textLayoutManager: NSTextLayoutManager, textLayoutFragmentFor location: NSTextLocation, in textElement: NSTextElement) -> NSTextLayoutFragment {
-        STTextLayoutFragment(
+        let textLayoutFragment = STTextLayoutFragment(
             textElement: textElement,
             range: textElement.elementRange,
             paragraphStyle: typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? .default
         )
+        return textLayoutFragment
     }
 }
