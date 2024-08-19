@@ -732,11 +732,12 @@ import AVFoundation
     open override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
 
-        scrollViewFrameObserver = enclosingScrollView?.observe(\.frame, options: [.initial, .new]) { [weak self] scrollView, change in
-            if let newValue = change.newValue {
-                self?.enclosingScrollViewDidResize(newValue)
-            }
-        }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(enclosingClipViewBoundsDidChange(_:)),
+            name: NSClipView.boundsDidChangeNotification,
+            object: scrollView?.contentView
+        )
     }
 
     open override func viewDidMoveToWindow() {
@@ -1130,7 +1131,7 @@ import AVFoundation
         _configureTextContainerSize()
     }
 
-    internal func enclosingScrollViewDidResize(_ frame: CGRect) {
+    @objc internal func enclosingClipViewBoundsDidChange(_ notification: Notification) {
         layoutGutter()
     }
 
@@ -1142,8 +1143,6 @@ import AVFoundation
     open override func layout() {
         super.layout()
 
-        layoutViewport()
-
         let gutterPadding = gutterView?.bounds.width ?? 0
         contentView.frame = CGRect(
             x: gutterPadding,
@@ -1154,6 +1153,7 @@ import AVFoundation
         selectionView.frame = contentView.frame
         decorationView.frame = contentView.frame
 
+        layoutViewport()
 
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)

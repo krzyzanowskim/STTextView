@@ -4,7 +4,7 @@
 import AppKit
 import STTextViewCommon
 
-final class STGutterLineNumberView: NSView {
+final class STGutterLineNumberCell: NSView {
     private let number: Int
     private let firstBaseline: CGFloat
     private let ctLine: CTLine
