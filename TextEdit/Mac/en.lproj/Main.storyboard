@@ -2,7 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22689"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22690"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -705,11 +705,17 @@
                                         <action selector="toggleInvisibles:" target="Oky-zY-oP4" id="EgE-A0-grP"/>
                                     </connections>
                                 </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="324DCBA6-A541-4243-A2A4-FD4D326D1362" label="Line numbers" paletteLabel="Line numbers" tag="-1" image="list.number" catalog="system" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="hFT-ea-5XE">
+                                    <connections>
+                                        <action selector="toggleRuler:" target="Oky-zY-oP4" id="97l-Cs-WDw"/>
+                                    </connections>
+                                </toolbarItem>
                                 <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="CJB-Vc-Vlk"/>
                                 <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="yNL-fS-mZG"/>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
                                 <toolbarItem reference="yNL-fS-mZG"/>
+                                <toolbarItem reference="hFT-ea-5XE"/>
                                 <toolbarItem reference="1Pv-jL-YKX"/>
                                 <toolbarItem reference="JV6-de-LTW"/>
                             </defaultToolbarItems>
@@ -742,6 +748,7 @@
     </scenes>
     <resources>
         <image name="eye.slash" catalog="system" width="21" height="16"/>
+        <image name="list.number" catalog="system" width="16" height="13"/>
         <image name="text.justify" catalog="system" width="21" height="17"/>
     </resources>
 </document>
