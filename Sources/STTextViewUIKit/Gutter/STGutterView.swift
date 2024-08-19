@@ -20,6 +20,10 @@ public final class STGutterView: UIView {
     @Invalidating(.display)
     public var insets: STRulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
 
+    /// Minimum thickness.
+    @Invalidating(.layout)
+    public var minimumThickness: CGFloat = 40
+
     /// The text color of the line numbers.
     @Invalidating(.display)
     public var textColor = UIColor.secondaryLabel
