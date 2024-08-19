@@ -9,6 +9,7 @@ final class STTextLayoutFragmentView: NSView {
     var layoutFragment: NSTextLayoutFragment {
         didSet {
             needsDisplay = true
+            needsLayout = true
         }
     }
 
