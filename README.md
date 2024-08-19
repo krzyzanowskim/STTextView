@@ -17,8 +17,8 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 
 - macOS text system integration
 - Performant Text editing
-- Line numbers in a ruler view
-- Ruler Markers support
+- Display line numbers
+- Display invisible characters
 - Customization of colors and fonts
 - Toggle line wrapping on and off
 - Adjust the height of lines
