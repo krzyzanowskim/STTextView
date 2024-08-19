@@ -59,7 +59,7 @@ extension STTextView {
         }
 
         gutterView.containerView.subviews.forEach { v in
-            v.removeFromSuperview()
+            v.removeFromSuperviewWithoutNeedingDisplay()
         }
 
         let textElements = textContentManager.textElements(

@@ -625,7 +625,6 @@ import AVFoundation
         postsFrameChangedNotifications = true
 
         wantsLayer = true
-        canDrawSubviewsIntoLayer = true
         autoresizingMask = [.width, .height]
 
         textLayoutManager.textViewportLayoutController.delegate = self
