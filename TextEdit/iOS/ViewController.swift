@@ -23,7 +23,8 @@ class ViewController: UIViewController {
         textView.typingAttributes[.paragraphStyle] = paragraph
         textView.font = UIFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        textView.showLineNumbers = true
+        textView.showsLineNumbers = true
+        textView.showsInvisibleCharacters = true
         textView.gutterView?.drawSeparator = true
         view.addSubview(textView)
         self.textView = textView
@@ -64,6 +65,10 @@ class ViewController: UIViewController {
 
     @objc func toggleTextWrapMode(_ sender: Any?) {
         textView.widthTracksTextView.toggle()
+    }
+
+    @IBAction func toggleInvisibles(_ sender: Any?) {
+        textView.showsInvisibleCharacters.toggle()
     }
 
 }

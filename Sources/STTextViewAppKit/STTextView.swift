@@ -227,10 +227,10 @@ import AVFoundation
 
             if let prevLocation {
                 // restore selection location
-                setSelectedTextRange(NSTextRange(location: prevLocation))
+                setSelectedTextRange(NSTextRange(location: prevLocation), updateLayout: true)
             } else {
                 // or try to set at the begining of the document
-                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location), updateLayout: true)
             }
         }
         get {
@@ -249,10 +249,10 @@ import AVFoundation
 
             if let prevLocation {
                 // restore selection location
-                setSelectedTextRange(NSTextRange(location: prevLocation))
+                setSelectedTextRange(NSTextRange(location: prevLocation), updateLayout: true)
             } else {
                 // or try to set at the begining of the document
-                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location), updateLayout: true)
             }
         }
         get {
@@ -340,9 +340,9 @@ import AVFoundation
 
     /// Enable to show line numbers in the gutter.
     @Invalidating(.layout)
-    open var showLineNumbers: Bool = false {
+    open var showsLineNumbers: Bool = false {
         didSet {
-            isRulerVisible = showLineNumbers
+            isGutterVisible = showsLineNumbers
         }
     }
 
@@ -501,9 +501,10 @@ import AVFoundation
     @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
     /// A Boolean value that indicates whether to substitute visible glyphs for whitespace and other typically invisible characters.
-    open var showsInvisibleCharacters: Bool = false {
+    @Invalidating(.layout)
+    public var showsInvisibleCharacters: Bool = false {
         didSet {
-            textLayoutManager.invalidateLayout(for: textLayoutManager.documentRange)
+            textLayoutManager.invalidateLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
         }
     }
 
@@ -828,6 +829,21 @@ import AVFoundation
         needsLayout = true
     }
 
+    /// The current selection range of the text view.
+    ///
+    /// If the length of the selection range is 0, indicating that the selection is actually an insertion point
+    public var textSelection: NSRange? {
+        set {
+            if let newValue {
+                self.setSelectedRange(newValue)
+            }
+        }
+
+        get {
+            return self.selectedRange()
+        }
+    }
+
     open override func draw(_ dirtyRect: NSRect) {
         drawBackground(in: dirtyRect)
         super.draw(dirtyRect)
@@ -967,7 +983,12 @@ import AVFoundation
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+        addAttributes(attrs, range: range, updateLayout: true)
+    }
+
+    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    private func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -976,8 +997,7 @@ import AVFoundation
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
-
+    internal func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
@@ -988,8 +1008,12 @@ import AVFoundation
         }
     }
 
-    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+    /// Set attributes.
+    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+        setAttributes(attrs, range: range, updateLayout: true)
+    }
+
+    internal func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -998,7 +1022,7 @@ import AVFoundation
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+    internal func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
@@ -1012,7 +1036,12 @@ import AVFoundation
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
+    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange) {
+        removeAttribute(attribute, range: range, updateLayout: true)
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -1021,7 +1050,7 @@ import AVFoundation
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
+    internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
@@ -1326,7 +1355,7 @@ import AVFoundation
                 with: previousStringInRange,
                 allowsTypingCoalescing: false
             )
-            textView.setSelectedTextRange(textRange)
+            textView.setSelectedTextRange(textRange, updateLayout: true)
         }
         undoManager.endUndoGrouping()
     }

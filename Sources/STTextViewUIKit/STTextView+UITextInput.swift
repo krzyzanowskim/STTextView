@@ -5,6 +5,7 @@ import UIKit
 import STTextKitPlus
 import STTextViewCommon
 
+// TODO: hide UITextInput interface from STTextView public interface
 extension STTextView: UITextInput {
 
     /// Text may have a selection, either zero-length (a caret) or ranged.  Editing operations are

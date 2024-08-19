@@ -7,11 +7,11 @@ extension STTextView {
 
     /// This action method shows or hides the ruler, if the receiver is enclosed in a scroll view.
     @objc public func toggleRuler(_ sender: Any?) {
-        isRulerVisible.toggle()
+        isGutterVisible.toggle()
     }
 
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    public var isRulerVisible: Bool {
+    public var isGutterVisible: Bool {
         set {
             if newValue {
                 let rulerView = STLineNumberRulerView(textView: self)

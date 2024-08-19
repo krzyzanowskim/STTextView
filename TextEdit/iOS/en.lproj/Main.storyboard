@@ -36,11 +36,18 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" title="STTextView" id="h2q-vP-mby">
-                        <barButtonItem key="rightBarButtonItem" image="text.justify.left" catalog="system" id="WxB-Qp-s6N">
-                            <connections>
-                                <action selector="toggleTextWrapMode:" destination="BYZ-38-t0r" id="F5z-9D-Qis"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem image="text.justify.left" catalog="system" id="WxB-Qp-s6N">
+                                <connections>
+                                    <action selector="toggleTextWrapMode:" destination="BYZ-38-t0r" id="F5z-9D-Qis"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem image="eye.slash" catalog="system" id="nCC-0L-GuA">
+                                <connections>
+                                    <action selector="toggleInvisibles:" destination="BYZ-38-t0r" id="ToF-eU-fqn"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -49,6 +56,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="eye.slash" catalog="system" width="128" height="95"/>
         <image name="text.justify.left" catalog="system" width="128" height="99"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

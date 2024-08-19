@@ -121,9 +121,16 @@ import STTextViewCommon
 
     /// Enable to show line numbers in the gutter.
     @Invalidating(.layout)
-    open var showLineNumbers: Bool = false {
+    public var showsLineNumbers: Bool = false {
         didSet {
-            isRulerVisible = showLineNumbers
+            isGutterVisible = showsLineNumbers
+        }
+    }
+
+    @Invalidating(.layout)
+    public var showsInvisibleCharacters: Bool = false {
+        didSet {
+            textLayoutManager.invalidateLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
         }
     }
 
@@ -243,10 +250,10 @@ import STTextViewCommon
 
             if let prevLocation {
                 // restore selection location
-                setSelectedTextRange(NSTextRange(location: prevLocation))
+                setSelectedTextRange(NSTextRange(location: prevLocation), updateLayout: true)
             } else {
                 // or try to set at the begining of the document
-                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location), updateLayout: true)
             }
         }
 
@@ -266,10 +273,10 @@ import STTextViewCommon
 
             if let prevLocation {
                 // restore selection location
-                setSelectedTextRange(NSTextRange(location: prevLocation))
+                setSelectedTextRange(NSTextRange(location: prevLocation), updateLayout: true)
             } else {
                 // or try to set at the begining of the document
-                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location))
+                setSelectedTextRange(NSTextRange(location: textContentManager.documentRange.location), updateLayout: true)
             }
         }
 
@@ -438,7 +445,7 @@ import STTextViewCommon
         nonEditableTextInteraction.delegate = self
 
         updateEditableInteraction()
-        isRulerVisible = showLineNumbers
+        isGutterVisible = showsLineNumbers
 
         NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
@@ -457,11 +464,11 @@ import STTextViewCommon
 
     /// This action method shows or hides the ruler, if the receiver is enclosed in a scroll view
     @objc public func toggleRuler(_ sender: Any?) {
-        isRulerVisible.toggle()
+        isGutterVisible.toggle()
     }
 
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    public var isRulerVisible: Bool {
+    public var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
                 gutterView = STRulerView()
@@ -485,8 +492,25 @@ import STTextViewCommon
         }
     }
 
-    public func setSelectedTextRange(_ textRange: NSTextRange) {
-        setSelectedTextRange(textRange, updateLayout: true)
+    /// The current selection range of the text view.
+    ///
+    /// If the length of the selection range is 0, indicating that the selection is actually an insertion point
+    public var textSelection: NSRange? {
+        set {
+            if let newValue, let textRange = NSTextRange(newValue, in: textContentManager) {
+                setSelectedTextRange(textRange, updateLayout: true)
+            } else {
+                selectedTextRange = nil
+            }
+        }
+
+        get {
+            if let textRange = selectedTextRange?.nsTextRange {
+                return NSRange(textRange, in: textContentManager)
+            }
+
+            return nil
+        }
     }
 
     internal func setSelectedTextRange(_ textRange: NSTextRange, updateLayout: Bool) {
@@ -502,7 +526,12 @@ import STTextViewCommon
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+        addAttributes(attrs, range: range, updateLayout: true)
+    }
+
+    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    internal func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -511,7 +540,7 @@ import STTextViewCommon
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
-    open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+    internal func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
@@ -524,7 +553,12 @@ import STTextViewCommon
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool = true) {
+    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+        setAttributes(attrs, range: range, updateLayout: true)
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    internal func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -533,7 +567,7 @@ import STTextViewCommon
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
+    internal func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
@@ -547,7 +581,12 @@ import STTextViewCommon
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool = true) {
+    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange) {
+        removeAttribute(attribute, range: range, updateLayout: true)
+    }
+
+    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
         }
@@ -556,7 +595,7 @@ import STTextViewCommon
     }
 
     /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
-    open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
+    internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
@@ -775,7 +814,7 @@ import STTextViewCommon
                 with: previousStringInRange,
                 allowsTypingCoalescing: false
             )
-            textView.setSelectedTextRange(textRange)
+            textView.setSelectedTextRange(textRange, updateLayout: true)
         }
         undoManager.endUndoGrouping()
     }

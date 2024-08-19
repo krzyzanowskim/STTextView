@@ -26,6 +26,11 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             fragmentView.setNeedsDisplay()
         }
 
+        if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment {
+            textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
+            fragmentView.setNeedsDisplay()
+        }
+
         contentView.addSubview(fragmentView)
         fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
     }

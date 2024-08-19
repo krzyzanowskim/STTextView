@@ -7,7 +7,7 @@ import STObjCLandShim
 final class STTextLayoutFragment: NSTextLayoutFragment {
     private let paragraphStyle: NSParagraphStyle
     var showsInvisibleCharacters: Bool = false
-    
+
     init(textElement: NSTextElement, range rangeInElement: NSTextRange?, paragraphStyle: NSParagraphStyle) {
         self.paragraphStyle = paragraphStyle
         super.init(textElement: textElement, range: rangeInElement)
