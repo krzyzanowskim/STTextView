@@ -60,7 +60,7 @@ public final class STGutterView: NSView {
 
         super.init(frame: frame)
         wantsLayer = true
-        layer?.backgroundColor = NSColor.red.cgColor
+        clipsToBounds = true
 
         addSubview(containerView)
     }

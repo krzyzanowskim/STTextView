@@ -7,6 +7,7 @@
 //      |---contentView
 //              |---(STInsertionPointView | STTextLayoutFragmentView)
 //      |---decorationView
+//      |---gutterView
 //
 //
 // The default implementation of the NSView method inputContext manages
@@ -348,6 +349,7 @@ import AVFoundation
 
     /// Gutter view
     open var gutterView: STGutterView?
+    internal var scrollViewFrameObserver: NSKeyValueObservation?
 
     /// The highlight color of the selected line.
     ///
@@ -729,6 +731,16 @@ import AVFoundation
         self.updateSelectionHighlights()
     }
 
+    open override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+
+        scrollViewFrameObserver = enclosingScrollView?.observe(\.frame, options: [.initial, .new]) { [weak self] scrollView, change in
+            if let newValue = change.newValue {
+                self?.enclosingScrollViewDidResize(newValue)
+            }
+        }
+    }
+
     open override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
 
@@ -1098,11 +1110,11 @@ import AVFoundation
     private func _configureTextContainerSize() {
         var containerSize = textContainer.size
         if !isHorizontallyResizable {
-            containerSize.width = bounds.size.width // - _textContainerInset.width * 2
+            containerSize.width = contentView.bounds.maxX // - _textContainerInset.width * 2
         }
 
         if !isVerticallyResizable {
-            containerSize.height = bounds.size.height // - _textContainerInset.height * 2
+            containerSize.height = contentView.bounds.maxY // - _textContainerInset.height * 2
         }
 
         if !textContainer.size.isAlmostEqual(to: containerSize)  {
@@ -1118,6 +1130,10 @@ import AVFoundation
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         _configureTextContainerSize()
+    }
+
+    internal func enclosingScrollViewDidResize(_ frame: CGRect) {
+        layoutGutter()
     }
 
     open override func viewDidEndLiveResize() {
