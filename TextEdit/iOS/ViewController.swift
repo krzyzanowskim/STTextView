@@ -71,6 +71,10 @@ class ViewController: UIViewController {
         textView.showsInvisibleCharacters.toggle()
     }
 
+    @IBAction func toggleRuler(_ sender: Any?) {
+        textView.showsLineNumbers.toggle()
+    }
+
 }
 
 extension ViewController: STTextViewDelegate {

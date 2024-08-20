@@ -3,7 +3,7 @@
 
 import AppKit
 
-final class STLineNumberViewContainer: NSView {
+final class STGutterContainerView: NSView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -12,6 +12,10 @@ final class STLineNumberViewContainer: NSView {
     }
 
     override var isFlipped: Bool {
+        true
+    }
+
+    override var isOpaque: Bool {
         true
     }
 

@@ -17,8 +17,8 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 
 - macOS text system integration
 - Performant Text editing
-- Line numbers in a ruler view
-- Ruler Markers support
+- Display line numbers
+- Display invisible characters
 - Customization of colors and fonts
 - Toggle line wrapping on and off
 - Adjust the height of lines
@@ -27,7 +27,6 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 - Search/Replace the text
 - Spelling and Grammar
 - Dictation
-- Display Invisible Characters
 - Customizable Completion support
 - Smooth scrolling of long content
 - LTR (Left To Right) / RTL (Right To Left) layout
@@ -163,14 +162,9 @@ textView.isHorizontallyResizable = true
 textView.highlightSelectedLine = true
 ```
 
-Add line numbers using specialized `STLineNumberRulerView` (specialized subclass of `NSRulerView`)
+Add gutter with line numbers
 
 ```swift
-let textView = STTextView()
-let scrollView = NSScrollView()
-scrollView.documentView = textView
-
-// Line numbers
 textView.showLineNumbers = true
 textView.gutterView?.drawSeparator = true
 ```

@@ -46,7 +46,7 @@ extension STTextView: NSUserInterfaceValidations {
         case #selector(startSpeaking(_:)):
             return !textLayoutManager.documentRange.isEmpty
         case #selector(toggleRuler(_:)):
-            return usesRuler && scrollView?.hasHorizontalRuler == true || scrollView?.hasVerticalRuler == true
+            return true
         case #selector(toggleContinuousSpellChecking(_:)):
             (item as? NSMenuItem)?.state = spellCheckingType == .yes ? .on : .off
             return isEditable

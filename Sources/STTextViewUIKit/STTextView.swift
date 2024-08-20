@@ -6,7 +6,7 @@
 //      |---ContentView
 //              |---STLineHighlightView
 //              |---STTextLayoutFragmentView
-//      |---STRulerView
+//      |---STGutterView
 
 import UIKit
 import STTextKitPlus
@@ -183,7 +183,7 @@ import STTextViewCommon
     }
 
     /// Gutter view
-    public var gutterView: STRulerView?
+    public var gutterView: STGutterView?
 
     /// Installed plugins. events value is available after plugin is setup
     internal var plugins: [Plugin] = []
@@ -471,17 +471,18 @@ import STTextViewCommon
     public var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
-                gutterView = STRulerView()
+                let gutterView = STGutterView()
                 if let font {
-                    gutterView?.font = adjustFont(font)
+                    gutterView.font = adjustGutterFont(font)
                 }
-                gutterView?.frame.size.width = 40
+                gutterView.frame.size.width = gutterView.minimumThickness
                 if let textColor {
-                    gutterView?.selectedLineTextColor = textColor
+                    gutterView.selectedLineTextColor = textColor
                 }
-                gutterView?.highlightSelectedLine = highlightSelectedLine
-                gutterView?.selectedLineHighlightColor = selectedLineHighlightColor
-                self.addSubview(gutterView!)
+                gutterView.highlightSelectedLine = highlightSelectedLine
+                gutterView.selectedLineHighlightColor = selectedLineHighlightColor
+                self.addSubview(gutterView)
+                self.gutterView = gutterView
             } else if newValue == false {
                 gutterView?.removeFromSuperview()
                 gutterView = nil
@@ -867,12 +868,6 @@ import STTextViewCommon
         layoutViewport()
         layoutLineHighlight()
         layoutGutter()
-        layoutLineNumbers()
-    }
-
-    private func layoutGutter() {
-        gutterView?.frame.origin = contentOffset
-        gutterView?.frame.size.height = visibleSize.height
     }
 
     private func layoutViewport() {
@@ -985,106 +980,5 @@ import STTextViewCommon
         }
 
     }
-
-    private func layoutLineNumbers() {
-        guard let gutterView, let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
-            return
-        }
-
-        gutterView.lineNumberViewContainer.subviews.forEach { v in
-            v.removeFromSuperview()
-        }
-
-        let textElements = textContentManager.textElements(
-            for: NSTextRange(
-                location: textLayoutManager.documentRange.location,
-                end: viewportRange.location
-            )!
-        )
-
-        let lineTextAttributes: [NSAttributedString.Key: Any] = [
-            .font: gutterView.font,
-            .foregroundColor: UIColor.secondaryLabel.cgColor
-        ]
-
-        let selectedLineTextAttributes: [NSAttributedString.Key: Any] = [
-            .foregroundColor: (gutterView.selectedLineTextColor ?? gutterView.textColor).cgColor
-        ]
-
-        let startLineIndex = textElements.count
-        var linesCount = 0
-        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
-            let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
-
-            for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
-
-                func isLineSelected() -> Bool {
-                    textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
-                        var result = true
-                        if lineFragment.isExtraLineFragment {
-                            let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
-                            result = result && c1
-                        } else {
-                            let c1 = contentRangeInElement.contains(selectionTextRange)
-                            let c2 = contentRangeInElement.intersects(selectionTextRange)
-                            let c3 = selectionTextRange.contains(contentRangeInElement)
-                            let c4 = selectionTextRange.intersects(contentRangeInElement)
-                            let c5 = contentRangeInElement.endLocation == selectionTextRange.location
-                            result = result && (c1 || c2 || c3 || c4 || c5)
-                        }
-                        return partialResult && result
-                    }
-                }
-
-                let isLineSelected = isLineSelected()
-
-                var baselineYOffset: CGFloat = 0
-                if let paragraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                    baselineYOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
-                }
-
-                let lineNumber = startLineIndex + linesCount + 1
-                let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
-
-                var lineFragmentFrame = CGRect(origin: CGPoint(x: 0, y: layoutFragment.layoutFragmentFrame.origin.y - contentOffset.y), size: layoutFragment.layoutFragmentFrame.size)
-
-                lineFragmentFrame.origin.y += lineFragment.typographicBounds.origin.y
-                if lineFragment.isExtraLineFragment {
-                    lineFragmentFrame.size.height = lineFragment.typographicBounds.height
-                } else if !lineFragment.isExtraLineFragment, let extraLineFragment = layoutFragment.textLineFragments.first(where: { $0.isExtraLineFragment }) {
-                    lineFragmentFrame.size.height -= extraLineFragment.typographicBounds.height
-                }
-
-                var effectiveLineTextAttributes = lineTextAttributes
-                if highlightSelectedLine, isLineSelected, !selectedLineTextAttributes.isEmpty {
-                    effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
-                }
-
-                let numberView = STLineNumberView(
-                    firstBaseline: locationForFirstCharacter.y + baselineYOffset,
-                    attributes: effectiveLineTextAttributes,
-                    number: lineNumber
-                )
-
-                numberView.insets = gutterView.rulerInsets
-
-                if gutterView.highlightSelectedLine, isLineSelected, textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty, !textLayoutManager.insertionPointSelections.isEmpty {
-                    numberView.backgroundColor = gutterView.selectedLineHighlightColor
-                }
-
-                numberView.frame = CGRect(
-                    origin: lineFragmentFrame.origin,
-                    size: CGSize(
-                        width: max(lineFragmentFrame.intersection(gutterView.lineNumberViewContainer.frame).width, gutterView.lineNumberViewContainer.frame.width),
-                        height: lineFragmentFrame.size.height
-                    )
-                )
-
-                gutterView.lineNumberViewContainer.addSubview(numberView)
-                linesCount += 1
-            }
-
-            return true
-        }
-    }
+    
 }

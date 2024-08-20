@@ -15,11 +15,13 @@ final class HighlightView: NSView {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
+        clipsToBounds = true
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         wantsLayer = true
+        clipsToBounds = true
     }
     
     override func viewDidChangeEffectiveAppearance() {

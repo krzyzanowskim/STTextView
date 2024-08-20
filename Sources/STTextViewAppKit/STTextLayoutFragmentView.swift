@@ -6,7 +6,12 @@ import CoreGraphics
 import STTextKitPlus
 
 final class STTextLayoutFragmentView: NSView {
-    private let layoutFragment: NSTextLayoutFragment
+    var layoutFragment: NSTextLayoutFragment {
+        didSet {
+            needsDisplay = true
+            needsLayout = true
+        }
+    }
 
     override var isFlipped: Bool {
         #if os(macOS)
@@ -20,6 +25,9 @@ final class STTextLayoutFragmentView: NSView {
         self.layoutFragment = layoutFragment
         super.init(frame: frame)
         wantsLayer = true
+        clipsToBounds = true
+        // layer?.backgroundColor = NSColor.red.withAlphaComponent(0.2).cgColor
+
         needsDisplay = true
     }
 

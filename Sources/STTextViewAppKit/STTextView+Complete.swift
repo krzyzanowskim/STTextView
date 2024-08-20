@@ -40,7 +40,7 @@ extension STTextView {
         if completionItems.isEmpty {
             self.completionWindowController?.close()
         } else if let window = self.window {
-            let completionWindowOrigin = window.convertPoint(toScreen: convert(characterSegmentFrame.origin, to: nil))
+            let completionWindowOrigin = window.convertPoint(toScreen: contentView.convert(characterSegmentFrame.origin, to: nil))
             completionWindowController?.showWindow(at: completionWindowOrigin, items: completionItems, parent: window)
             completionWindowController?.delegate = self
         }

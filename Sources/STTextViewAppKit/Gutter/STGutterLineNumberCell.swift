@@ -1,15 +1,19 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-import UIKit
+import AppKit
 import STTextViewCommon
 
-final class STLineNumberView: UIView {
+final class STGutterLineNumberCell: NSView {
     private let number: Int
     private let firstBaseline: CGFloat
     private let ctLine: CTLine
     private let textWidth: CGFloat
     var insets: STRulerInsets = STRulerInsets()
+
+    override func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
+        nil
+    }
 
     init(firstBaseline: CGFloat, attributes: [NSAttributedString.Key: Any], number: Int) {
         self.number = number
@@ -20,9 +24,12 @@ final class STLineNumberView: UIView {
         self.textWidth = ceil(CTLineGetTypographicBounds(ctLine, nil, nil, nil))
 
         super.init(frame: .zero)
+        wantsLayer = true
         clipsToBounds = true
-        isOpaque = false
-        isUserInteractionEnabled = false
+    }
+
+    override var isFlipped: Bool {
+        true
     }
 
     @available(*, unavailable)
@@ -30,19 +37,19 @@ final class STLineNumberView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override var intrinsicContentSize: CGSize {
-        CGSize(width: textWidth + insets.trailing + insets.leading, height: 14)
+    override var intrinsicContentSize: NSSize {
+        NSSize(width: textWidth + insets.trailing + insets.leading, height: 14)
     }
 
     override func draw(_ rect: CGRect) {
         super.draw(rect)
 
-        guard let ctx = UIGraphicsGetCurrentContext() else {
+        guard let ctx = NSGraphicsContext.current?.cgContext else {
             return
         }
 
         ctx.saveGState()
-        ctx.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
+        ctx.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
         // align to right
         ctx.textPosition = CGPoint(x: frame.width - (textWidth + insets.trailing), y: firstBaseline)
