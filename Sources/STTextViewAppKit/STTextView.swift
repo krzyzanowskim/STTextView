@@ -452,7 +452,7 @@ import AVFoundation
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
 
-    /// Selection highlight
+    /// Selection highlight content view.
     internal let selectionView: SelectionView
 
     /// Layout fragments decoration, custom rendering attributes
@@ -1101,6 +1101,9 @@ import AVFoundation
                 return true // keep going
             }
         }
+
+        // Update gutter selection
+        layoutGutter()
     }
 
     // Update textContainer width to match textview width if track textview width
@@ -1153,7 +1156,6 @@ import AVFoundation
         decorationView.frame = contentView.frame
 
         layoutViewport()
-        layoutGutter()
 
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)
