@@ -34,9 +34,9 @@ package protocol STTextViewProtocol {
     var showsLineNumbers: Bool { get set }
     var showsInvisibleCharacters: Bool { get set }
 
-    var font: Font? { get set }
-    var textColor: Color? { get set }
-    var defaultParagraphStyle: NSParagraphStyle? { get set }
+    var font: Font { get set }
+    var textColor: Color { get set }
+    var defaultParagraphStyle: NSParagraphStyle { get set }
 
     var typingAttributes: [NSAttributedString.Key: Any] { get set }
 

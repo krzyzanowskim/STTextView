@@ -23,7 +23,7 @@ final class ViewController: NSViewController {
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.2
-        textView.typingAttributes[.paragraphStyle] = paragraph
+        textView.defaultParagraphStyle = paragraph
 
         textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)

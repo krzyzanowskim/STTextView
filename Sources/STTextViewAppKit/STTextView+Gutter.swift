@@ -16,13 +16,9 @@ extension STTextView {
         set {
             if gutterView == nil, newValue == true {
                 let gutterView = STGutterView()
-                if let font {
-                    gutterView.font = adjustGutterFont(font)
-                }
+                gutterView.font = adjustGutterFont(font)
                 gutterView.frame.size.width = gutterView.minimumThickness
-                if let textColor {
-                    gutterView.selectedLineTextColor = textColor
-                }
+                gutterView.selectedLineTextColor = textColor
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 if let scrollView = enclosingScrollView {
