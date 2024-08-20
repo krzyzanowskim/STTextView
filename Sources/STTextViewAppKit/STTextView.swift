@@ -1153,6 +1153,7 @@ import AVFoundation
         decorationView.frame = contentView.frame
 
         layoutViewport()
+        layoutGutter()
 
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)
