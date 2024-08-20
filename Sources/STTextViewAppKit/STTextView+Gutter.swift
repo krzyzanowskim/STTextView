@@ -12,7 +12,7 @@ extension STTextView {
     }
 
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    public var isGutterVisible: Bool {
+    internal var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
                 let gutterView = STGutterView()
