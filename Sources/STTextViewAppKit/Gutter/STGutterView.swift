@@ -37,7 +37,14 @@ public final class STGutterView: NSView {
 
     /// A Boolean value that indicates whether the receiver draws its background. Default true.
     @Invalidating(.display)
-    public var drawsBackground: Bool = true
+    public var drawsBackground: Bool = true {
+        didSet {
+            updateBackgrundColor()
+        }
+    }
+
+    @Invalidating(.display)
+    internal var backgroundColor: NSColor = NSColor.controlBackgroundColor
 
     /// The background color of the highlighted line.
     @Invalidating(.display)
@@ -59,14 +66,14 @@ public final class STGutterView: NSView {
 
     override init(frame: CGRect) {
         containerView = STGutterContainerView(frame: frame)
-        containerView.clipsToBounds = true
         containerView.autoresizingMask = [.width, .height]
 
         super.init(frame: frame)
         wantsLayer = true
         clipsToBounds = true
-
         addSubview(containerView)
+
+        updateBackgrundColor()
     }
 
     @available(*, unavailable)
@@ -74,11 +81,19 @@ public final class STGutterView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-
     public override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
+        effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
+            guard let self else { return }
+            updateBackgrundColor()
+        }
+    }
+
+    private func updateBackgrundColor() {
         if drawsBackground {
-            // self.updateSelectionHighlights()
+            layer?.backgroundColor = backgroundColor.cgColor
+        } else {
+            layer?.backgroundColor = nil
         }
     }
 

@@ -3,7 +3,7 @@
 
 import AppKit
 
-final class HighlightView: NSView {
+final class SelectionHighlightView: NSView {
     override var isFlipped: Bool {
 #if os(macOS)
         true
@@ -16,18 +16,19 @@ final class HighlightView: NSView {
         super.init(frame: frameRect)
         wantsLayer = true
         clipsToBounds = true
+        layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        wantsLayer = true
-        clipsToBounds = true
+        fatalError()
     }
     
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
-            self?.layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
+            guard let self else { return }
+            layer?.backgroundColor = layer?.backgroundColor
         }
     }
 }

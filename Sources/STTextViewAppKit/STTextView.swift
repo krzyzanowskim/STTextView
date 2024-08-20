@@ -1081,14 +1081,14 @@ import AVFoundation
             //       Clamp enumerated range to viewport range
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
 
-                let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
-                guard !highlightFrame.isNull else {
+                let selectionFrame = textSegmentFrame.intersection(frame).pixelAligned
+                guard !selectionFrame.isNull else {
                     return true
                 }
 
-                if !highlightFrame.size.width.isZero {
-                    let highlightView = HighlightView(frame: highlightFrame)
-                    selectionView.addSubview(highlightView)
+                if !selectionFrame.size.width.isZero {
+                    let selectionHighlightView = SelectionHighlightView(frame: selectionFrame)
+                    selectionView.addSubview(selectionHighlightView)
 
                     // Remove insertion point when selection
                     removeInsertionPointView()
