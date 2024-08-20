@@ -316,7 +316,7 @@ import STTextViewCommon
     ///
     /// This dictionary contains the attribute keys (and corresponding values) to apply to newly typed text.
     /// When the text view’s selection changes, the contents of the dictionary are reset automatically.
-    @objc public var typingAttributes: [NSAttributedString.Key: Any] {
+    @objc public internal(set) var typingAttributes: [NSAttributedString.Key: Any] {
         get {
             _typingAttributes.merging(_defaultTypingAttributes) { (current, _) in current }
         }
@@ -327,7 +327,7 @@ import STTextViewCommon
         }
     }
 
-    private var _typingAttributes: [NSAttributedString.Key: Any] = [:]
+    private var _typingAttributes: [NSAttributedString.Key: Any]
 
     internal func updateTypingAttributes(at location: NSTextLocation? = nil) {
         if let location {

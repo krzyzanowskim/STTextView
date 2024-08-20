@@ -38,7 +38,7 @@ package protocol STTextViewProtocol {
     var textColor: Color { get set }
     var defaultParagraphStyle: NSParagraphStyle { get set }
 
-    var typingAttributes: [NSAttributedString.Key: Any] { get set }
+    var typingAttributes: [NSAttributedString.Key: Any] { get }
 
     var text: String? { get set }
     var attributedText: NSAttributedString? { get set }
