@@ -462,28 +462,6 @@ import STTextViewCommon
         isGutterVisible.toggle()
     }
 
-    /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    internal var isGutterVisible: Bool {
-        set {
-            if gutterView == nil, newValue == true {
-                let gutterView = STGutterView()
-                gutterView.font = adjustGutterFont(font)
-                gutterView.frame.size.width = gutterView.minimumThickness
-                gutterView.selectedLineTextColor = textColor
-                gutterView.highlightSelectedLine = highlightSelectedLine
-                gutterView.selectedLineHighlightColor = selectedLineHighlightColor
-                self.addSubview(gutterView)
-                self.gutterView = gutterView
-            } else if newValue == false {
-                gutterView?.removeFromSuperview()
-                gutterView = nil
-            }
-        }
-        get {
-            gutterView != nil
-        }
-    }
-
     /// The current selection range of the text view.
     ///
     /// If the length of the selection range is 0, indicating that the selection is actually an insertion point
@@ -857,8 +835,6 @@ import STTextViewCommon
         super.layoutSubviews()
 
         layoutViewport()
-        layoutLineHighlight()
-        layoutGutter()
     }
 
     private func layoutViewport() {
@@ -869,7 +845,7 @@ import STTextViewCommon
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
-    private func layoutLineHighlight() {
+    internal func updateSelectionHighlights() {
         guard highlightSelectedLine,
               textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty,
               !textLayoutManager.insertionPointSelections.isEmpty
@@ -970,6 +946,8 @@ import STTextViewCommon
             lineHighlightView.frame = combinedFragmentsRect.pixelAligned
         }
 
+        // Update gutter selection
+        layoutGutter()
     }
     
 }

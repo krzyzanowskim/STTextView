@@ -28,7 +28,7 @@ extension STTextView: UITextInput {
             } else {
                 textLayoutManager.textSelections = []
             }
-
+            updateSelectionHighlights()
             inputDelegate?.selectionDidChange(self)
 
             if let newValue, var rect = self.selectionRects(for: newValue).last?.rect {
