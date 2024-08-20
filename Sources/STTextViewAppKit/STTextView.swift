@@ -883,11 +883,11 @@ import AVFoundation
                 drawHighlight(
                     in: CGRect(
                         origin: CGPoint(
-                            x: bounds.minX,
+                            x: convert(contentView.bounds, from: contentView).minX,
                             y: selectionFrame.origin.y
                         ),
                         size: CGSize(
-                            width: max(scrollView?.contentSize.width ?? 0, bounds.width),
+                            width: max(scrollView?.contentSize.width ?? 0, contentView.bounds.width),
                             height: typingLineHeight
                         )
                     )
@@ -941,11 +941,11 @@ import AVFoundation
 
                     let r = CGRect(
                         origin: CGPoint(
-                            x: bounds.minX,
+                            x: convert(contentView.bounds, from: contentView).minX,
                             y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
                         ),
                         size: CGSize(
-                            width: max(scrollView?.contentSize.width ?? 0, bounds.width),
+                            width: max(scrollView?.contentSize.width ?? 0, contentView.bounds.width),
                             height: lineFragmentFrame.height
                         )
                     )

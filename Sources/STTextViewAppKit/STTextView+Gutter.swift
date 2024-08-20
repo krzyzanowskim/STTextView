@@ -124,7 +124,7 @@ extension STTextView {
                 }
 
                 var effectiveLineTextAttributes = lineTextAttributes
-                if highlightSelectedLine, isLineSelected, !selectedLineTextAttributes.isEmpty {
+                if gutterView.highlightSelectedLine, isLineSelected, !selectedLineTextAttributes.isEmpty {
                     effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                 }
 
@@ -141,12 +141,15 @@ extension STTextView {
                 }
 
                 numberCell.frame = CGRect(
-                    origin: lineFragmentFrame.origin,
+                    origin: CGPoint(
+                        x: bounds.minX,
+                        y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
+                    ),
                     size: CGSize(
                         width: max(lineFragmentFrame.intersection(gutterView.containerView.frame).width, gutterView.containerView.frame.width),
                         height: lineFragmentFrame.size.height
                     )
-                )
+                ).pixelAligned
 
                 gutterView.containerView.addSubview(numberCell)
                 requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)
