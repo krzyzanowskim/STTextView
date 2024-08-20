@@ -27,7 +27,6 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 - Search/Replace the text
 - Spelling and Grammar
 - Dictation
-- Display Invisible Characters
 - Customizable Completion support
 - Smooth scrolling of long content
 - LTR (Left To Right) / RTL (Right To Left) layout
