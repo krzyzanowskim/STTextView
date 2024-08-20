@@ -19,8 +19,8 @@ class ViewController: UIViewController {
 
         let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraph.lineHeightMultiple = 1.2
+        textView.defaultParagraphStyle = paragraph
 
-        textView.typingAttributes[.paragraphStyle] = paragraph
         textView.font = UIFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.showsLineNumbers = true

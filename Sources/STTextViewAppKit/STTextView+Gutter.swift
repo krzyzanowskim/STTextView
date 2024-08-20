@@ -12,17 +12,13 @@ extension STTextView {
     }
 
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    public var isGutterVisible: Bool {
+    internal var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
                 let gutterView = STGutterView()
-                if let font {
-                    gutterView.font = adjustGutterFont(font)
-                }
+                gutterView.font = adjustGutterFont(font)
                 gutterView.frame.size.width = gutterView.minimumThickness
-                if let textColor {
-                    gutterView.selectedLineTextColor = textColor
-                }
+                gutterView.selectedLineTextColor = textColor
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 if let scrollView = enclosingScrollView {
@@ -74,11 +70,38 @@ extension STTextView {
             .foregroundColor: NSColor.secondaryLabelColor
         ]
 
+        let selectedLineTextAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: (gutterView.selectedLineTextColor ?? gutterView.textColor).cgColor
+        ]
+
         var requiredWidthFitText = gutterView.minimumThickness
         let startLineIndex = textElements.count
         var linesCount = 0
         textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
+            let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
+
             for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
+
+                func isLineSelected() -> Bool {
+                    textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
+                        var result = true
+                        if lineFragment.isExtraLineFragment {
+                            let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
+                            result = result && c1
+                        } else {
+                            let c1 = contentRangeInElement.contains(selectionTextRange)
+                            let c2 = contentRangeInElement.intersects(selectionTextRange)
+                            let c3 = selectionTextRange.contains(contentRangeInElement)
+                            let c4 = selectionTextRange.intersects(contentRangeInElement)
+                            let c5 = contentRangeInElement.endLocation == selectionTextRange.location
+                            result = result && (c1 || c2 || c3 || c4 || c5)
+                        }
+                        return partialResult && result
+                    }
+                }
+
+                let isLineSelected = isLineSelected()
+
                 var baselineYOffset: CGFloat = 0
                 if let paragraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
                     baselineYOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
@@ -96,7 +119,11 @@ extension STTextView {
                     lineFragmentFrame.size.height -= extraLineFragment.typographicBounds.height
                 }
 
-                let effectiveLineTextAttributes = lineTextAttributes
+                var effectiveLineTextAttributes = lineTextAttributes
+                if gutterView.highlightSelectedLine, isLineSelected, !selectedLineTextAttributes.isEmpty {
+                    effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
+                }
+
                 let numberCell = STGutterLineNumberCell(
                     firstBaseline: locationForFirstCharacter.y + baselineYOffset,
                     attributes: effectiveLineTextAttributes,
@@ -105,13 +132,20 @@ extension STTextView {
 
                 numberCell.insets = gutterView.insets
 
+                if gutterView.highlightSelectedLine, isLineSelected, textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty, !textLayoutManager.insertionPointSelections.isEmpty {
+                    numberCell.layer?.backgroundColor = gutterView.selectedLineHighlightColor.cgColor
+                }
+
                 numberCell.frame = CGRect(
-                    origin: lineFragmentFrame.origin,
+                    origin: CGPoint(
+                        x: bounds.minX,
+                        y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
+                    ),
                     size: CGSize(
                         width: max(lineFragmentFrame.intersection(gutterView.containerView.frame).width, gutterView.containerView.frame.width),
                         height: lineFragmentFrame.size.height
                     )
-                )
+                ).pixelAligned
 
                 gutterView.containerView.addSubview(numberCell)
                 requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)

@@ -6,6 +6,29 @@ import STTextKitPlus
 
 extension STTextView {
 
+    /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
+    internal var isGutterVisible: Bool {
+        set {
+            if gutterView == nil, newValue == true {
+                let gutterView = STGutterView()
+                gutterView.font = adjustGutterFont(font)
+                gutterView.frame.size.width = gutterView.minimumThickness
+                gutterView.selectedLineTextColor = textColor
+                gutterView.highlightSelectedLine = highlightSelectedLine
+                gutterView.selectedLineHighlightColor = selectedLineHighlightColor
+                self.addSubview(gutterView)
+                self.gutterView = gutterView
+            } else if newValue == false {
+                gutterView?.removeFromSuperview()
+                gutterView = nil
+            }
+            layoutGutter()
+        }
+        get {
+            gutterView != nil
+        }
+    }
+
     internal func layoutGutter() {
         if let gutterView {
             gutterView.frame.origin = contentOffset

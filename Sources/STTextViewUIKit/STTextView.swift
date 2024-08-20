@@ -140,45 +140,35 @@ import STTextViewCommon
     @Invalidating(.display)
     @objc dynamic open var selectedLineHighlightColor: UIColor = UIColor.tintColor.withAlphaComponent(0.15)
 
-    /// The font of the text.
+    /// The font of the text. Default font.
     ///
-    /// This property applies to the entire text string.
     /// Assigning a new value to this property causes the new font to be applied to the entire contents of the text view.
-    @objc dynamic open var font: UIFont? {
+    /// If you want to apply the font to only a portion of the text, you must create a new attributed string with the desired style information and assign it
+    @objc public var font: UIFont {
         get {
-            // if not empty, return a font at location 0
-            if !textLayoutManager.documentRange.isEmpty {
-                let location = textLayoutManager.documentRange.location
-                let endLocation = textLayoutManager.location(location, offsetBy: 1)
-                return textLayoutManager.textContentManager?.attributedString(in: NSTextRange(location: location, end: endLocation))?.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
-            }
-
-            // otherwise return current typing attribute
-            return typingAttributes[.font] as? UIFont
+            _defaultTypingAttributes[.font] as! UIFont
         }
 
         set {
-            guard let newValue else {
-                NSException(name: .invalidArgumentException, reason: "nil UIFont given").raise()
-                return
-            }
+            _defaultTypingAttributes[.font] = newValue
 
+            // apply to the document
             if !textLayoutManager.documentRange.isEmpty {
                 addAttributes([.font: newValue], range: textLayoutManager.documentRange)
             }
-
-            typingAttributes[.font] = newValue
         }
     }
 
     /// The text color of the text view.
-    @objc dynamic open var textColor: UIColor? {
+    ///
+    /// Default text color.
+    @objc public var textColor: UIColor {
         get {
-            typingAttributes[.foregroundColor] as? UIColor
+            _defaultTypingAttributes[.foregroundColor] as! UIColor
         }
 
         set {
-            typingAttributes[.foregroundColor] = newValue
+            _defaultTypingAttributes[.foregroundColor] = newValue
         }
     }
 
@@ -310,24 +300,34 @@ import STTextViewCommon
     }
 
     /// The receiver’s default paragraph style.
-    @NSCopying @objc dynamic public var defaultParagraphStyle: NSParagraphStyle? {
-        didSet {
-            typingAttributes[.paragraphStyle] = defaultParagraphStyle ?? .default
+    @objc public var defaultParagraphStyle: NSParagraphStyle {
+        set {
+            _defaultTypingAttributes[.paragraphStyle] = newValue
+        }
+        get {
+            _defaultTypingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
         }
     }
+
+    /// Default typing attributes used in place of missing attributes of font, color and paragraph
+    private var _defaultTypingAttributes: [NSAttributedString.Key: Any]
 
     /// The attributes to apply to new text that the user enters.
     ///
     /// This dictionary contains the attribute keys (and corresponding values) to apply to newly typed text.
     /// When the text view’s selection changes, the contents of the dictionary are reset automatically.
-    @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
-        didSet {
-            typingAttributes.merge(defaultTypingAttributes) { (current, _) in current }
-            setNeedsLayout()
+    @objc public internal(set) var typingAttributes: [NSAttributedString.Key: Any] {
+        get {
+            _typingAttributes.merging(_defaultTypingAttributes) { (current, _) in current }
+        }
+
+        set {
+            _typingAttributes = newValue
             setNeedsDisplay()
         }
     }
-    
+
+    private var _typingAttributes: [NSAttributedString.Key: Any]
 
     internal func updateTypingAttributes(at location: NSTextLocation? = nil) {
         if let location {
@@ -347,7 +347,7 @@ import STTextViewCommon
             return typingAttributes
         }
 
-        var attrs: [NSAttributedString.Key: Any] = [:]
+        var typingAttrs: [NSAttributedString.Key: Any] = [:]
         // The attribute is derived from the previous (upstream) location,
         // except for the beginning of the document where it from whatever is at location 0
         let options: NSTextContentManager.EnumerationOptions = startLocation == textLayoutManager.documentRange.location ? [] : [.reverse]
@@ -360,29 +360,20 @@ import STTextViewCommon
             {
                 let offset = textContentManager.offset(from: elementRange.location, to: startLocation)
                 assert(offset != NSNotFound, "Unexpected location")
-                attrs = attributedTextElement.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
+                typingAttrs = attributedTextElement.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
             }
 
             return false
         }
 
         // fill in with missing typing attributes if needed
-        attrs.merge(defaultTypingAttributes, uniquingKeysWith: { current, _ in current})
-        return attrs
-    }
-
-    private var defaultTypingAttributes: [NSAttributedString.Key: Any] {
-        [
-            .paragraphStyle: self.defaultParagraphStyle ?? NSParagraphStyle.default,
-            .font: UIFont.preferredFont(forTextStyle: .body),
-            .foregroundColor: UIColor.label
-        ]
+        return typingAttrs.merging(_defaultTypingAttributes, uniquingKeysWith: { current, _ in current})
     }
 
     // line height based on current typing font and current typing paragraph
     internal var typingLineHeight: CGFloat {
-        let font = typingAttributes[.font] as? UIFont ?? self.defaultTypingAttributes[.font] as! UIFont
-        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? self.defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
+        let font = typingAttributes[.font] as? UIFont ?? _defaultTypingAttributes[.font] as! UIFont
+        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? _defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
         let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
         return calculateDefaultLineHeight(for: font) * lineHeightMultiple
     }
@@ -426,11 +417,15 @@ import STTextViewCommon
         lineHighlightView = STLineHighlightView()
         lineHighlightView.isHidden = true
 
-        typingAttributes = [:]
+        _defaultTypingAttributes = [
+            .paragraphStyle: NSParagraphStyle.default,
+            .font: UIFont.preferredFont(forTextStyle: .body),
+            .foregroundColor: UIColor.label
+        ]
+
+        _typingAttributes = [:]
 
         super.init(frame: frame)
-
-        typingAttributes = defaultTypingAttributes
 
         textLayoutManager.delegate = self
         textLayoutManager.textViewportLayoutController.delegate = self
@@ -465,32 +460,6 @@ import STTextViewCommon
     /// This action method shows or hides the ruler, if the receiver is enclosed in a scroll view
     @objc public func toggleRuler(_ sender: Any?) {
         isGutterVisible.toggle()
-    }
-
-    /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    public var isGutterVisible: Bool {
-        set {
-            if gutterView == nil, newValue == true {
-                let gutterView = STGutterView()
-                if let font {
-                    gutterView.font = adjustGutterFont(font)
-                }
-                gutterView.frame.size.width = gutterView.minimumThickness
-                if let textColor {
-                    gutterView.selectedLineTextColor = textColor
-                }
-                gutterView.highlightSelectedLine = highlightSelectedLine
-                gutterView.selectedLineHighlightColor = selectedLineHighlightColor
-                self.addSubview(gutterView)
-                self.gutterView = gutterView
-            } else if newValue == false {
-                gutterView?.removeFromSuperview()
-                gutterView = nil
-            }
-        }
-        get {
-            gutterView != nil
-        }
     }
 
     /// The current selection range of the text view.
@@ -866,8 +835,6 @@ import STTextViewCommon
         super.layoutSubviews()
 
         layoutViewport()
-        layoutLineHighlight()
-        layoutGutter()
     }
 
     private func layoutViewport() {
@@ -878,7 +845,7 @@ import STTextViewCommon
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
-    private func layoutLineHighlight() {
+    internal func updateSelectionHighlights() {
         guard highlightSelectedLine,
               textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty,
               !textLayoutManager.insertionPointSelections.isEmpty
@@ -979,6 +946,8 @@ import STTextViewCommon
             lineHighlightView.frame = combinedFragmentsRect.pixelAligned
         }
 
+        // Update gutter selection
+        layoutGutter()
     }
     
 }

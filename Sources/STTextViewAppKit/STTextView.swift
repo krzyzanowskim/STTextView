@@ -84,87 +84,67 @@ import AVFoundation
     @Invalidating(.display, .insertionPoint)
     @objc dynamic open var insertionPointColor: NSColor = .defaultTextInsertionPoint
 
-    /// The font of the text.
+    /// The font of the text. Default font.
     ///
-    /// This property applies to the entire text string.
     /// Assigning a new value to this property causes the new font to be applied to the entire contents of the text view.
-    @objc dynamic open var font: NSFont? {
+    /// If you want to apply the font to only a portion of the text, you must create a new attributed string with the desired style information and assign it
+    @objc public var font: NSFont {
         get {
-            // if not empty, return a font at location 0
-            if !textLayoutManager.documentRange.isEmpty {
-                let location = textLayoutManager.documentRange.location
-                let endLocation = textLayoutManager.location(location, offsetBy: 1)
-                return textLayoutManager.textContentManager?.attributedString(in: NSTextRange(location: location, end: endLocation))?.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
-            }
-
-            // otherwise return current typing attribute
-            return typingAttributes[.font] as? NSFont
+            _defaultTypingAttributes[.font] as! NSFont
         }
 
         set {
-            guard let newValue else {
-                NSException(name: .invalidArgumentException, reason: "nil NSFont given").raise()
-                return
-            }
+            _defaultTypingAttributes[.font] = newValue
 
+            // apply to the document
             if !textLayoutManager.documentRange.isEmpty {
                 addAttributes([.font: newValue], range: textLayoutManager.documentRange)
             }
-
-            typingAttributes[.font] = newValue
         }
-    }
-
-    open func setFont(_ font: NSFont, range: NSRange) {
-        addAttributes([.font: font], range: range)
     }
 
     /// The text color of the text view.
-    @objc dynamic open var textColor: NSColor? {
+    ///
+    /// Default text color.
+    @objc public var textColor: NSColor {
         get {
-            typingAttributes[.foregroundColor] as? NSColor
+            _defaultTypingAttributes[.foregroundColor] as! NSColor
         }
 
         set {
-            typingAttributes[.foregroundColor] = newValue
+            _defaultTypingAttributes[.foregroundColor] = newValue
         }
     }
 
-    /// Sets the text color of characters within the specified range to the specified color.
-    open func setTextColor(_ color: NSColor?, range: NSRange) {
-        if let color {
-            addAttributes([.foregroundColor: color], range: range)
-        } else {
-            removeAttribute(.foregroundColor, range: range)
+    /// Default paragraph style.
+    @objc public var defaultParagraphStyle: NSParagraphStyle {
+        set {
+            _defaultTypingAttributes[.paragraphStyle] = newValue
+        }
+        get {
+            _defaultTypingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
         }
     }
 
-    /// The receiver’s default paragraph style.
-    @NSCopying @objc dynamic public var defaultParagraphStyle: NSParagraphStyle? {
-        didSet {
-            typingAttributes[.paragraphStyle] = defaultParagraphStyle ?? .default
-        }
-    }
-
-    private var defaultTypingAttributes: [NSAttributedString.Key: Any] {
-        [
-            .paragraphStyle: self.defaultParagraphStyle ?? NSParagraphStyle.default,
-            .font: NSFont.userFont(ofSize: 0) ?? .preferredFont(forTextStyle: .body),
-            .foregroundColor: NSColor.textColor
-        ]
-    }
+    /// Default typing attributes used in place of missing attributes of font, color and paragraph
+    private var _defaultTypingAttributes: [NSAttributedString.Key: Any]
 
     /// The attributes to apply to new text that the user enters.
     ///
     /// This dictionary contains the attribute keys (and corresponding values) to apply to newly typed text.
     /// When the text view’s selection changes, the contents of the dictionary are reset automatically.
-    @objc dynamic public var typingAttributes: [NSAttributedString.Key: Any] {
-        didSet {
-            typingAttributes.merge(defaultTypingAttributes) { (current, _) in current }
-            needsLayout = true
+    @objc public internal(set) var typingAttributes: [NSAttributedString.Key: Any] {
+        get {
+            _typingAttributes.merging(_defaultTypingAttributes) { (current, _) in current }
+        }
+
+        set {
+            _typingAttributes = newValue
             needsDisplay = true
         }
     }
+
+    private var _typingAttributes: [NSAttributedString.Key: Any]
 
     internal func updateTypingAttributes(at location: NSTextLocation? = nil) {
         if let location {
@@ -184,7 +164,7 @@ import AVFoundation
             return typingAttributes
         }
 
-        var attrs: [NSAttributedString.Key: Any] = [:]
+        var typingAttrs: [NSAttributedString.Key: Any] = [:]
         // The attribute is derived from the previous (upstream) location,
         // except for the beginning of the document where it from whatever is at location 0
         let options: NSTextContentManager.EnumerationOptions = startLocation == textLayoutManager.documentRange.location ? [] : [.reverse]
@@ -197,21 +177,20 @@ import AVFoundation
             {
                 let offset = textContentManager.offset(from: elementRange.location, to: startLocation)
                 assert(offset != NSNotFound, "Unexpected location")
-                attrs = attributedTextElement.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
+                typingAttrs = attributedTextElement.attributedString.attributes(at: offset + offsetDiff, effectiveRange: nil)
             }
 
             return false
         }
 
         // fill in with missing typing attributes if needed
-        attrs.merge(defaultTypingAttributes, uniquingKeysWith: { current, _ in current})
-        return attrs
+        return typingAttrs.merging(_defaultTypingAttributes, uniquingKeysWith: { current, _ in current})
     }
 
     // line height based on current typing font and current typing paragraph
     internal var typingLineHeight: CGFloat {
-        let font = typingAttributes[.font] as? NSFont ?? self.defaultTypingAttributes[.font] as! NSFont
-        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? self.defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
+        let font = typingAttributes[.font] as? NSFont ?? _defaultTypingAttributes[.font] as! NSFont
+        let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? self._defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
         let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
         return calculateDefaultLineHeight(for: font) * lineHeightMultiple
     }
@@ -348,7 +327,7 @@ import AVFoundation
     }
 
     /// Gutter view
-    open var gutterView: STGutterView?
+    public var gutterView: STGutterView?
     internal var scrollViewFrameObserver: NSKeyValueObservation?
 
     /// The highlight color of the selected line.
@@ -452,7 +431,7 @@ import AVFoundation
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
 
-    /// Selection highlight
+    /// Selection highlight content view.
     internal let selectionView: SelectionView
 
     /// Layout fragments decoration, custom rendering attributes
@@ -611,11 +590,15 @@ import AVFoundation
         textFinder = NSTextFinder()
         textFinderClient = STTextFinderClient()
 
-        typingAttributes = [:]
+        _defaultTypingAttributes = [
+            .paragraphStyle: NSParagraphStyle.default,
+            .font: NSFont.preferredFont(forTextStyle: .body),
+            .foregroundColor: NSColor.textColor
+        ]
+
+        _typingAttributes = [:]
 
         super.init(frame: frameRect)
-
-        typingAttributes = defaultTypingAttributes
 
         textLayoutManager.delegate = self
         textFinderClient.textView = self
@@ -883,11 +866,11 @@ import AVFoundation
                 drawHighlight(
                     in: CGRect(
                         origin: CGPoint(
-                            x: bounds.minX,
+                            x: convert(contentView.bounds, from: contentView).minX,
                             y: selectionFrame.origin.y
                         ),
                         size: CGSize(
-                            width: max(scrollView?.contentSize.width ?? 0, bounds.width),
+                            width: max(scrollView?.contentSize.width ?? 0, contentView.bounds.width),
                             height: typingLineHeight
                         )
                     )
@@ -941,11 +924,11 @@ import AVFoundation
 
                     let r = CGRect(
                         origin: CGPoint(
-                            x: bounds.minX,
+                            x: convert(contentView.bounds, from: contentView).minX,
                             y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
                         ),
                         size: CGSize(
-                            width: max(scrollView?.contentSize.width ?? 0, bounds.width),
+                            width: max(scrollView?.contentSize.width ?? 0, contentView.bounds.width),
                             height: lineFragmentFrame.height
                         )
                     )
@@ -1081,14 +1064,14 @@ import AVFoundation
             //       Clamp enumerated range to viewport range
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
 
-                let highlightFrame = textSegmentFrame.intersection(frame).pixelAligned
-                guard !highlightFrame.isNull else {
+                let selectionFrame = textSegmentFrame.intersection(frame).pixelAligned
+                guard !selectionFrame.isNull else {
                     return true
                 }
 
-                if !highlightFrame.size.width.isZero {
-                    let highlightView = HighlightView(frame: highlightFrame)
-                    selectionView.addSubview(highlightView)
+                if !selectionFrame.size.width.isZero {
+                    let selectionHighlightView = SelectionHighlightView(frame: selectionFrame)
+                    selectionView.addSubview(selectionHighlightView)
 
                     // Remove insertion point when selection
                     removeInsertionPointView()
@@ -1101,6 +1084,9 @@ import AVFoundation
                 return true // keep going
             }
         }
+
+        // Update gutter selection
+        layoutGutter()
     }
 
     // Update textContainer width to match textview width if track textview width

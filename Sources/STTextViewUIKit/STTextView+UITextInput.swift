@@ -28,8 +28,9 @@ extension STTextView: UITextInput {
             } else {
                 textLayoutManager.textSelections = []
             }
-
             inputDelegate?.selectionDidChange(self)
+            updateSelectionHighlights()
+            layoutGutter()
 
             if let newValue, var rect = self.selectionRects(for: newValue).last?.rect {
                 rect.size.height = max(rect.size.height, contentScaleFactor)

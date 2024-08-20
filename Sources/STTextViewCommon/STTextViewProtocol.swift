@@ -34,11 +34,11 @@ package protocol STTextViewProtocol {
     var showsLineNumbers: Bool { get set }
     var showsInvisibleCharacters: Bool { get set }
 
-    var font: Font? { get set }
-    var textColor: Color? { get set }
-    var defaultParagraphStyle: NSParagraphStyle? { get set }
+    var font: Font { get set }
+    var textColor: Color { get set }
+    var defaultParagraphStyle: NSParagraphStyle { get set }
 
-    var typingAttributes: [NSAttributedString.Key: Any] { get set }
+    var typingAttributes: [NSAttributedString.Key: Any] { get }
 
     var text: String? { get set }
     var attributedText: NSAttributedString? { get set }
@@ -50,7 +50,6 @@ package protocol STTextViewProtocol {
     var textDelegate: Delegate? { get set }
 
     var gutterView: GutterView? { get }
-    var isGutterVisible: Bool { get }
     func toggleRuler(_ sender: Any?)
 
     var textSelection: NSRange? { get set }
