@@ -5,16 +5,16 @@ import AppKit
 import STObjCLandShim
 
 final class STTextLayoutFragment: NSTextLayoutFragment {
-    private let paragraphStyle: NSParagraphStyle
+    private let defaultParagraphStyle: NSParagraphStyle
     var showsInvisibleCharacters: Bool = false
 
     init(textElement: NSTextElement, range rangeInElement: NSTextRange?, paragraphStyle: NSParagraphStyle) {
-        self.paragraphStyle = paragraphStyle
+        self.defaultParagraphStyle = paragraphStyle
         super.init(textElement: textElement, range: rangeInElement)
     }
     
     required init?(coder: NSCoder) {
-        self.paragraphStyle = NSParagraphStyle.default
+        self.defaultParagraphStyle = NSParagraphStyle.default
         self.showsInvisibleCharacters = false
         super.init(coder: coder)
     }
@@ -63,7 +63,7 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
             {
                 paragraphStyle = lineParagraphStyle
             } else {
-                paragraphStyle = self.paragraphStyle
+                paragraphStyle = self.defaultParagraphStyle
             }
             
             if !paragraphStyle.lineHeightMultiple.isAlmostZero() {

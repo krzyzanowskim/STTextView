@@ -128,7 +128,7 @@ import AVFoundation
     }
 
     /// Default typing attributes used in place of missing attributes of font, color and paragraph
-    private var _defaultTypingAttributes: [NSAttributedString.Key: Any]
+    internal var _defaultTypingAttributes: [NSAttributedString.Key: Any]
 
     /// The attributes to apply to new text that the user enters.
     ///

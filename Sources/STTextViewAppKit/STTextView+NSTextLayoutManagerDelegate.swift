@@ -9,7 +9,7 @@ extension STTextView: NSTextLayoutManagerDelegate {
         let textLayoutFragment = STTextLayoutFragment(
             textElement: textElement,
             range: textElement.elementRange,
-            paragraphStyle: typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? .default
+            paragraphStyle: _defaultTypingAttributes[.paragraphStyle] as? NSParagraphStyle ?? .default
         )
         return textLayoutFragment
     }
