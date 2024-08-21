@@ -1140,6 +1140,8 @@ import AVFoundation
             contentView.frame = newContentFrame
             selectionView.frame = newContentFrame
             decorationView.frame = newContentFrame
+
+            _configureTextContainerSize()
         }
 
         layoutViewport()

@@ -13,6 +13,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         let minX: CGFloat
         let maxX: CGFloat
 
+        // FIXME: take gutter into account
         let visibleRect = scrollView?.documentVisibleRect ?? contentView.visibleRect
 
         if !overdrawRect.isEmpty, overdrawRect.intersects(visibleRect) {

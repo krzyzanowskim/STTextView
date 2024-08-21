@@ -25,14 +25,15 @@ extension STTextView {
                     scrollView.addSubview(gutterView)
                 }
                 self.gutterView = gutterView
+                needsLayout = true
             } else if newValue == false {
                 if let gutterView {
                     gutterView.removeFromSuperview()
                     self.gutterView = nil
+                    needsLayout = true
                 }
             }
             layoutGutter()
-            needsLayout = true
         }
         get {
             gutterView != nil
