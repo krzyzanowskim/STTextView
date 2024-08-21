@@ -1128,17 +1128,22 @@ import AVFoundation
     open override func layout() {
         super.layout()
 
+        layoutViewport()
+
         let gutterPadding = gutterView?.bounds.width ?? 0
-        contentView.frame = CGRect(
+        let newContentFrame = CGRect(
             x: gutterPadding,
             y: frame.origin.y,
+            // FIXME: something is wrong when this changes. Possible race with layoutViewport
             width: frame.width - gutterPadding,
             height: frame.height
         )
-        selectionView.frame = contentView.frame
-        decorationView.frame = contentView.frame
 
-        layoutViewport()
+        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
+            contentView.frame = newContentFrame
+            selectionView.frame = newContentFrame
+            decorationView.frame = newContentFrame
+        }
 
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)

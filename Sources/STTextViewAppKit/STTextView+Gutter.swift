@@ -23,17 +23,16 @@ extension STTextView {
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 if let scrollView = enclosingScrollView {
                     scrollView.addSubview(gutterView)
-                    needsLayout = true
                 }
                 self.gutterView = gutterView
             } else if newValue == false {
                 if let gutterView {
                     gutterView.removeFromSuperview()
-                    needsLayout = true
+                    self.gutterView = nil
                 }
-                gutterView = nil
             }
             layoutGutter()
+            needsLayout = true
         }
         get {
             gutterView != nil
@@ -44,9 +43,8 @@ extension STTextView {
         if let gutterView {
             gutterView.frame.origin = frame.origin
             gutterView.frame.size.height = scrollView?.bounds.height ?? frame.height
+            layoutGutterLineNumbers()
         }
-
-        layoutGutterLineNumbers()
     }
 
     private func layoutGutterLineNumbers() {
@@ -77,7 +75,7 @@ extension STTextView {
         var requiredWidthFitText = gutterView.minimumThickness
         let startLineIndex = textElements.count
         var linesCount = 0
-        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
+        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange, options: .ensuresLayout) { layoutFragment in
             let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
             for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {

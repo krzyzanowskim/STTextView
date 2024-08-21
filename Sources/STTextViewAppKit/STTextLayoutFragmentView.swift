@@ -37,8 +37,10 @@ final class STTextLayoutFragmentView: NSView {
 
     override func draw(_ dirtyRect: CGRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
+        context.saveGState()
         layoutFragment.draw(at: .zero, in: context)
         drawSpellCheckerAttributes(dirtyRect, in: context)
+        context.restoreGState()
     }
 
     override func layout() {
