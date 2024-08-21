@@ -253,11 +253,7 @@ import AVFoundation
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
                 textContainer.size = NSTextContainer().size
-                if let clipView = scrollView?.contentView as? NSClipView {
-                    frame.size.width = clipView.bounds.size.width - clipView.contentInsets.horizontalInsets
-                }
                 needsLayout = true
-                needsDisplay = true
             }
         }
 
@@ -288,14 +284,8 @@ import AVFoundation
         set {
             if textContainer.heightTracksTextView != newValue {
                 textContainer.heightTracksTextView = newValue
-
                 textContainer.size = NSTextContainer().size
-                if let clipView = scrollView?.contentView as? NSClipView {
-                    frame.size.height = clipView.bounds.size.height - clipView.contentInsets.verticalInsets
-                }
-
                 needsLayout = true
-                needsDisplay = true
             }
         }
 
@@ -1084,15 +1074,17 @@ import AVFoundation
     private func _configureTextContainerSize() {
         var containerSize = textContainer.size
         if !isHorizontallyResizable {
-            containerSize.width = contentView.bounds.maxX // - _textContainerInset.width * 2
+            containerSize.width = contentView.frame.width - contentView.frame.origin.x // - _textContainerInset.width * 2
         }
 
         if !isVerticallyResizable {
-            containerSize.height = contentView.bounds.height // - _textContainerInset.height * 2
+            containerSize.height = contentView.frame.height - contentView.frame.origin.y // - _textContainerInset.height * 2
         }
 
         if !textContainer.size.isAlmostEqual(to: containerSize)  {
             textContainer.size = containerSize
+            logger.debug("textContainer.size (\(self.textContainer.size.width), \(self.textContainer.size.width)) \(#function)")
+            layoutViewport()
         }
     }
 
@@ -1107,22 +1099,6 @@ import AVFoundation
 
     open override func layout() {
         super.layout()
-
-        let gutterPadding = gutterView?.bounds.width ?? 0
-        let newContentFrame = CGRect(
-            x: gutterPadding,
-            y: frame.origin.y,
-            width: frame.width - gutterPadding,
-            height: frame.height
-        )
-
-        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
-            contentView.frame = newContentFrame
-            selectionView.frame = newContentFrame
-            decorationView.frame = newContentFrame
-
-            _configureTextContainerSize()
-        }
 
         layoutViewport()
 
@@ -1169,22 +1145,16 @@ import AVFoundation
             verticalInsets = clipView.contentInsets.verticalInsets
         }
 
-        if isHorizontallyResizable {
-            size.width = max(frame.size.width - horizontalInsets, size.width)
-        } else {
-            size.width = frame.size.width - horizontalInsets
-        }
-
-        if isVerticallyResizable {
-            // we should at least be the visible size if we're not in a clip view
-            // however the `size` may be bananas (estimated) and enlarge too much
-            // that going never going to shrink later.
-            // It is expected that vertically height going to grow and shring (that does not apply to horizontally)
-            //
-            // size.height = max(frame.size.height - verticalInsets, size.height)
-        } else {
-            size.height = frame.size.height - verticalInsets
-        }
+        // if isVerticallyResizable {
+        //     // we should at least be the visible size if we're not in a clip view
+        //     // however the `size` may be bananas (estimated) and enlarge too much
+        //     // that going never going to shrink later.
+        //     // It is expected that vertically height going to grow and shring (that does not apply to horizontally)
+        //     //
+        //     // size.height = max(frame.size.height - verticalInsets, size.height)
+        // } else {
+        //     size.height = frame.size.height - verticalInsets
+        // }
 
         // if we're in a clip view we should at be at least as big as the clip view
         if let clipView = scrollView?.contentView as? NSClipView {
@@ -1199,8 +1169,28 @@ import AVFoundation
 
         }
 
+        let gutterPadding = gutterView?.bounds.width ?? 0
+        size.width += gutterPadding
+
+        logger.debug("proposed size (\(size.width), \(size.height)) \(#function)")
+
         if !frame.size.isAlmostEqual(to: size) {
             self.setFrameSize(size)
+        }
+
+        let newContentFrame = CGRect(
+            x: gutterPadding,
+            y: frame.origin.y,
+            width: frame.width - gutterPadding,
+            height: frame.height
+        )
+
+        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
+            contentView.frame = newContentFrame
+            selectionView.frame = newContentFrame
+            decorationView.frame = newContentFrame
+
+            _configureTextContainerSize()
         }
     }
 
