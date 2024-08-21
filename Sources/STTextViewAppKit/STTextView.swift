@@ -469,10 +469,12 @@ import AVFoundation
     @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
     /// A Boolean value that indicates whether to substitute visible glyphs for whitespace and other typically invisible characters.
-    @Invalidating(.layout)
+    @Invalidating(.layout, .display)
     public var showsInvisibleCharacters: Bool = false {
-        didSet {
+        willSet {
             textLayoutManager.invalidateLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
+            textLayoutManager.ensureLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
+            needsLayout = true
         }
     }
 
