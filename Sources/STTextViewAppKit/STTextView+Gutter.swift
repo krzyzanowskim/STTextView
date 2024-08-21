@@ -75,7 +75,7 @@ extension STTextView {
         var requiredWidthFitText = gutterView.minimumThickness
         let startLineIndex = textElements.count
         var linesCount = 0
-        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
+        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange, options: .ensuresLayout) { layoutFragment in
             let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
             for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
