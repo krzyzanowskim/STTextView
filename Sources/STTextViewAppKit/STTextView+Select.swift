@@ -44,7 +44,8 @@ extension STTextView {
         ]
 
         updateTypingAttributes()
-        updateSelectionHighlights()
+        updateSelectedRangeHighlight()
+        updateSelectedLineHighlight()
     }
 
     open override func selectLine(_ sender: Any?) {
@@ -496,7 +497,8 @@ extension STTextView {
         }
 
         updateTypingAttributes()
-        updateSelectionHighlights()
+        updateSelectedRangeHighlight()
+        updateSelectedLineHighlight()
         needsDisplay = true
     }
 
