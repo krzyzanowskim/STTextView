@@ -23,17 +23,16 @@ extension STTextView {
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 if let scrollView = enclosingScrollView {
                     scrollView.addSubview(gutterView)
-                    needsLayout = true
                 }
                 self.gutterView = gutterView
             } else if newValue == false {
                 if let gutterView {
-                    gutterView.removeFromSuperview()
-                    needsLayout = true
+                    gutterView.removeFromSuperviewWithoutNeedingDisplay()
+                    self.gutterView = nil
                 }
-                gutterView = nil
             }
             layoutGutter()
+            needsLayout = true
         }
         get {
             gutterView != nil
