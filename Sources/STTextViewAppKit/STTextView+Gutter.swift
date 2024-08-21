@@ -27,7 +27,7 @@ extension STTextView {
                 self.gutterView = gutterView
             } else if newValue == false {
                 if let gutterView {
-                    gutterView.removeFromSuperviewWithoutNeedingDisplay()
+                    gutterView.removeFromSuperview()
                     self.gutterView = nil
                 }
             }
@@ -43,9 +43,8 @@ extension STTextView {
         if let gutterView {
             gutterView.frame.origin = frame.origin
             gutterView.frame.size.height = scrollView?.bounds.height ?? frame.height
+            layoutGutterLineNumbers()
         }
-
-        layoutGutterLineNumbers()
     }
 
     private func layoutGutterLineNumbers() {
