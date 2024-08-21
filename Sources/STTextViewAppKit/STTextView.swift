@@ -1125,8 +1125,8 @@ import AVFoundation
         layoutViewport()
     }
 
-    open override func layout() {
-        super.layout()
+    open override func resizeSubviews(withOldSize oldSize: NSSize) {
+        super.resizeSubviews(withOldSize: oldSize)
 
         let gutterPadding = gutterView?.bounds.width ?? 0
         contentView.frame = CGRect(
@@ -1137,6 +1137,10 @@ import AVFoundation
         )
         selectionView.frame = contentView.frame
         decorationView.frame = contentView.frame
+    }
+
+    open override func layout() {
+        super.layout()
 
         layoutViewport()
 
