@@ -89,7 +89,7 @@ extension STTextView {
             let characterHeight = NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes)
                 .boundingRect(
                     with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude),
-                    options: [.usesLineFragmentOrigin, .usesFontLeading],
+                    options: [.usesDeviceMetrics],
                     context: nil
                 ).height
 
