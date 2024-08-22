@@ -73,20 +73,17 @@ extension STTextView {
             .foregroundColor: (gutterView.selectedLineTextColor ?? gutterView.textColor).cgColor
         ]
         
-        if viewportRange.isEmpty {
+        if textLayoutManager.documentRange.isEmpty {
             let lineNumber = 1
             
-            var lineTextAttributes: [NSAttributedString.Key: Any] = [
-                .font: gutterView.font,
-                .foregroundColor: NSColor.secondaryLabelColor
-            ]
+            var effectiveLineTextAttributes = lineTextAttributes
             
             let isLineSelected = gutterView.highlightSelectedLine && !selectedLineTextAttributes.isEmpty
             if isLineSelected {
-                lineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { _, new in new })
+                effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { _, new in new })
             }
     
-            let characterHeight = NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes)
+            let characterHeight = NSAttributedString(string: "\(lineNumber)", attributes: effectiveLineTextAttributes)
                 .boundingRect(
                     with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude),
                     options: [.usesDeviceMetrics],
@@ -95,7 +92,7 @@ extension STTextView {
 
             let numberCell = STGutterLineNumberCell(
                 firstBaseline: (typingLineHeight + characterHeight) / 2,
-                attributes: lineTextAttributes,
+                attributes: effectiveLineTextAttributes,
                 number: lineNumber
             )
             
