@@ -180,6 +180,8 @@ import STTextViewCommon
 
     /// Content view. Layout fragments content.
     internal let contentView: ContentView
+
+    /// Line highlight view.
     internal let lineHighlightView: STLineHighlightView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
@@ -310,7 +312,7 @@ import STTextViewCommon
     }
 
     /// Default typing attributes used in place of missing attributes of font, color and paragraph
-    private var _defaultTypingAttributes: [NSAttributedString.Key: Any]
+    internal var _defaultTypingAttributes: [NSAttributedString.Key: Any]
 
     /// The attributes to apply to new text that the user enters.
     ///
@@ -411,11 +413,11 @@ import STTextViewCommon
 
         contentView = ContentView()
 
-        allowsUndo = true
-        _undoManager = CoalescingUndoManager()
-
         lineHighlightView = STLineHighlightView()
         lineHighlightView.isHidden = true
+
+        allowsUndo = true
+        _undoManager = CoalescingUndoManager()
 
         _defaultTypingAttributes = [
             .paragraphStyle: NSParagraphStyle.default,
@@ -845,7 +847,8 @@ import STTextViewCommon
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
-    internal func updateSelectionHighlights() {
+    // Update selected line highlight layer
+    internal func updateSelectedLineHighlight() {
         guard highlightSelectedLine,
               textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty,
               !textLayoutManager.insertionPointSelections.isEmpty

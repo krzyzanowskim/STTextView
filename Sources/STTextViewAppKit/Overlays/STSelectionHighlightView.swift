@@ -3,7 +3,7 @@
 
 import AppKit
 
-final class SelectionHighlightView: NSView {
+final class STSelectionHighlightView: NSView {
     override var isFlipped: Bool {
 #if os(macOS)
         true

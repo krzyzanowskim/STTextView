@@ -4,6 +4,7 @@
 //
 //  STTextView
 //      |---selectionView
+//              |---(STLineHighlightView | SelectionHighlightView)
 //      |---contentView
 //              |---(STInsertionPointView | STTextLayoutFragmentView)
 //      |---decorationView
@@ -127,7 +128,7 @@ import AVFoundation
     }
 
     /// Default typing attributes used in place of missing attributes of font, color and paragraph
-    private var _defaultTypingAttributes: [NSAttributedString.Key: Any]
+    internal var _defaultTypingAttributes: [NSAttributedString.Key: Any]
 
     /// The attributes to apply to new text that the user enters.
     ///
@@ -252,11 +253,7 @@ import AVFoundation
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
                 textContainer.size = NSTextContainer().size
-                if let clipView = scrollView?.contentView as? NSClipView {
-                    frame.size.width = clipView.bounds.size.width - clipView.contentInsets.horizontalInsets
-                }
                 needsLayout = true
-                needsDisplay = true
             }
         }
 
@@ -287,14 +284,8 @@ import AVFoundation
         set {
             if textContainer.heightTracksTextView != newValue {
                 textContainer.heightTracksTextView = newValue
-
                 textContainer.size = NSTextContainer().size
-                if let clipView = scrollView?.contentView as? NSClipView {
-                    frame.size.height = clipView.bounds.size.height - clipView.contentInsets.verticalInsets
-                }
-
                 needsLayout = true
-                needsDisplay = true
             }
         }
 
@@ -315,7 +306,7 @@ import AVFoundation
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
-    @Invalidating(.display)
+    @Invalidating(.layout)
     @objc dynamic open var highlightSelectedLine: Bool = false
 
     /// Enable to show line numbers in the gutter.
@@ -478,10 +469,12 @@ import AVFoundation
     @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
     /// A Boolean value that indicates whether to substitute visible glyphs for whitespace and other typically invisible characters.
-    @Invalidating(.layout)
+    @Invalidating(.layout, .display)
     public var showsInvisibleCharacters: Bool = false {
-        didSet {
+        willSet {
             textLayoutManager.invalidateLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
+            textLayoutManager.ensureLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
+            needsLayout = true
         }
     }
 
@@ -586,6 +579,7 @@ import AVFoundation
 
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
+
 
         textFinder = NSTextFinder()
         textFinderClient = STTextFinderClient()
@@ -708,7 +702,8 @@ import AVFoundation
 
     open override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
-        self.updateSelectionHighlights()
+        self.updateSelectedRangeHighlight()
+        self.updateSelectedLineHighlight()
     }
 
     open override func viewDidMoveToSuperview() {
@@ -828,126 +823,6 @@ import AVFoundation
         }
     }
 
-    open override func draw(_ dirtyRect: NSRect) {
-        drawBackground(in: dirtyRect)
-        super.draw(dirtyRect)
-    }
-
-    /// Draws the background of the text view.
-    open func drawBackground(in rect: NSRect) {
-        guard highlightSelectedLine,
-              textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty,
-              !textLayoutManager.insertionPointSelections.isEmpty
-        else {
-            // don't highlight when there's selection
-            return
-        }
-
-        drawHighlightedLine(in: rect)
-    }
-
-    private func drawHighlightedLine(in rect: NSRect) {
-
-        func drawHighlight(in fillRect: CGRect) {
-            guard let context = NSGraphicsContext.current?.cgContext else {
-                return
-            }
-
-            context.saveGState()
-            context.setFillColor(selectedLineHighlightColor.cgColor)
-            context.fill(fillRect)
-            context.restoreGState()
-        }
-
-        if textLayoutManager.documentRange.isEmpty {
-            // - empty document has no layout fragments, nothing, it's empty and has to be handled explicitly.
-            // - there's no layout fragment at the document endLocation (technically it's out of bounds), has to be handled explicitly.
-            if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
-                drawHighlight(
-                    in: CGRect(
-                        origin: CGPoint(
-                            x: convert(contentView.bounds, from: contentView).minX,
-                            y: selectionFrame.origin.y
-                        ),
-                        size: CGSize(
-                            width: max(scrollView?.contentSize.width ?? 0, contentView.bounds.width),
-                            height: typingLineHeight
-                        )
-                    )
-                )
-            }
-            return
-        }
-
-        guard let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
-            return
-        }
-
-        // build the rectangle out of fragments rectangles
-        var combinedFragmentsRect: CGRect?
-
-        // TODO some beutiful day:
-        // Don't rely on NSTextParagraph.paragraphContentRange, but that
-        // makes tricky to get all the conditions right (especially for last line)
-        // Problem is that NSTextParagraph.rangeInElement span across two lines (eg. "abc\n" are two lines) while
-        // paragraphContentRange is just one ("abc")
-        //
-        // Another idea here is to use `textLayoutManager.textLayoutFragment(for: selectionTextRange.location)`
-        // to find the layout fragment and us its frame as highlight area. It has its issue when it comes to the
-        // extra line fragment area (sic).
-        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
-            let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
-            for lineFragment in layoutFragment.textLineFragments {
-
-                func isLineSelected() -> Bool {
-                    textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
-                        var result = true
-                        if lineFragment.isExtraLineFragment {
-                            let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
-                            result = result && c1
-                        } else {
-                            let c1 = contentRangeInElement.contains(selectionTextRange)
-                            let c2 = contentRangeInElement.intersects(selectionTextRange)
-                            let c3 = selectionTextRange.contains(contentRangeInElement)
-                            let c4 = selectionTextRange.intersects(contentRangeInElement)
-                            let c5 = contentRangeInElement.endLocation == selectionTextRange.location
-                            result = result && (c1 || c2 || c3 || c4 || c5)
-                        }
-                        return partialResult && result
-                    }
-                }
-
-                if isLineSelected() {
-                    var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                    lineFragmentFrame.size.height = lineFragment.typographicBounds.height
-
-
-                    let r = CGRect(
-                        origin: CGPoint(
-                            x: convert(contentView.bounds, from: contentView).minX,
-                            y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
-                        ),
-                        size: CGSize(
-                            width: max(scrollView?.contentSize.width ?? 0, contentView.bounds.width),
-                            height: lineFragmentFrame.height
-                        )
-                    )
-
-                    if let rect = combinedFragmentsRect {
-                        combinedFragmentsRect = rect.union(r)
-                    } else {
-                        combinedFragmentsRect = r
-                    }
-                }
-            }
-            return true
-        }
-
-        if let combinedFragmentsRect {
-            drawHighlight(in: combinedFragmentsRect.pixelAligned)
-        }
-    }
-
     internal func setString(_ string: Any?) {
         undoManager?.disableUndoRegistration()
         defer {
@@ -1047,11 +922,118 @@ import AVFoundation
         }
     }
 
-    internal func updateSelectionHighlights() {
+    // Update selected line highlight layer
+    internal func updateSelectedLineHighlight() {
+        guard highlightSelectedLine,
+              textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty,
+              !textLayoutManager.insertionPointSelections.isEmpty
+        else {
+            // don't highlight when there's selection
+            return
+        }
+
+        func layoutHighlightView(in frameRect: CGRect) {
+            let highlightView = STLineHighlightView(frame: frameRect)
+            highlightView.layer?.backgroundColor = selectedLineHighlightColor.cgColor
+            selectionView.addSubview(highlightView)
+        }
+
+        if textLayoutManager.documentRange.isEmpty {
+            // - empty document has no layout fragments, nothing, it's empty and has to be handled explicitly.
+            // - there's no layout fragment at the document endLocation (technically it's out of bounds), has to be handled explicitly.
+            if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
+                layoutHighlightView(
+                    in: CGRect(
+                        origin: CGPoint(
+                            x: selectionView.bounds.minX,
+                            y: selectionFrame.origin.y
+                        ),
+                        size: CGSize(
+                            width: selectionView.bounds.width,
+                            height: typingLineHeight
+                        )
+                    )
+                )
+            }
+            return
+        }
+
+        guard let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
+            return
+        }
+
+        // build the rectangle out of fragments rectangles
+        var combinedFragmentsRect: CGRect?
+
+        // TODO some beutiful day:
+        // Don't rely on NSTextParagraph.paragraphContentRange, but that
+        // makes tricky to get all the conditions right (especially for last line)
+        // Problem is that NSTextParagraph.rangeInElement span across two lines (eg. "abc\n" are two lines) while
+        // paragraphContentRange is just one ("abc")
+        //
+        // Another idea here is to use `textLayoutManager.textLayoutFragment(for: selectionTextRange.location)`
+        // to find the layout fragment and us its frame as highlight area. It has its issue when it comes to the
+        // extra line fragment area (sic).
+        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
+            let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
+            for lineFragment in layoutFragment.textLineFragments {
+
+                func isLineSelected() -> Bool {
+                    textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
+                        var result = true
+                        if lineFragment.isExtraLineFragment {
+                            let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
+                            result = result && c1
+                        } else {
+                            let c1 = contentRangeInElement.contains(selectionTextRange)
+                            let c2 = contentRangeInElement.intersects(selectionTextRange)
+                            let c3 = selectionTextRange.contains(contentRangeInElement)
+                            let c4 = selectionTextRange.intersects(contentRangeInElement)
+                            let c5 = contentRangeInElement.endLocation == selectionTextRange.location
+                            result = result && (c1 || c2 || c3 || c4 || c5)
+                        }
+                        return partialResult && result
+                    }
+                }
+
+                if isLineSelected() {
+                    var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                    lineFragmentFrame.size.height = lineFragment.typographicBounds.height
+
+
+                    let r = CGRect(
+                        origin: CGPoint(
+                            x: selectionView.bounds.minX,
+                            y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
+                        ),
+                        size: CGSize(
+                            width: selectionView.bounds.width,
+                            height: lineFragmentFrame.height
+                        )
+                    )
+
+                    if let rect = combinedFragmentsRect {
+                        combinedFragmentsRect = rect.union(r)
+                    } else {
+                        combinedFragmentsRect = r
+                    }
+                }
+            }
+            return true
+        }
+
+        if let combinedFragmentsRect {
+            layoutHighlightView(in: combinedFragmentsRect.pixelAligned)
+        }
+    }
+
+    // Update selection range highlight (on selectionView)
+    internal func updateSelectedRangeHighlight() {
         guard !textLayoutManager.textSelections.isEmpty,
             let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange
         else {
             selectionView.subviews.removeAll()
+            // don't highlight when there's selection
             return
         }
 
@@ -1070,7 +1052,7 @@ import AVFoundation
                 }
 
                 if !selectionFrame.size.width.isZero {
-                    let selectionHighlightView = SelectionHighlightView(frame: selectionFrame)
+                    let selectionHighlightView = STSelectionHighlightView(frame: selectionFrame)
                     selectionView.addSubview(selectionHighlightView)
 
                     // Remove insertion point when selection
@@ -1094,26 +1076,18 @@ import AVFoundation
     private func _configureTextContainerSize() {
         var containerSize = textContainer.size
         if !isHorizontallyResizable {
-            containerSize.width = contentView.bounds.maxX // - _textContainerInset.width * 2
+            containerSize.width = contentView.frame.width - contentView.frame.origin.x // - _textContainerInset.width * 2
         }
 
         if !isVerticallyResizable {
-            containerSize.height = contentView.bounds.height // - _textContainerInset.height * 2
+            containerSize.height = contentView.frame.height - contentView.frame.origin.y // - _textContainerInset.height * 2
         }
 
         if !textContainer.size.isAlmostEqual(to: containerSize)  {
             textContainer.size = containerSize
+            logger.debug("textContainer.size (\(self.textContainer.size.width), \(self.textContainer.size.width)) \(#function)")
+            layoutViewport()
         }
-    }
-
-    open override func setFrameOrigin(_ newOrigin: NSPoint) {
-        super.setFrameOrigin(newOrigin)
-        _configureTextContainerSize()
-    }
-
-    open override func setFrameSize(_ newSize: NSSize) {
-        super.setFrameSize(newSize)
-        _configureTextContainerSize()
     }
 
     @objc internal func enclosingClipViewBoundsDidChange(_ notification: Notification) {
@@ -1127,22 +1101,6 @@ import AVFoundation
 
     open override func layout() {
         super.layout()
-
-        let gutterPadding = gutterView?.bounds.width ?? 0
-        let newContentFrame = CGRect(
-            x: gutterPadding,
-            y: frame.origin.y,
-            width: frame.width - gutterPadding,
-            height: frame.height
-        )
-
-        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
-            contentView.frame = newContentFrame
-            selectionView.frame = newContentFrame
-            decorationView.frame = newContentFrame
-
-            _configureTextContainerSize()
-        }
 
         layoutViewport()
 
@@ -1189,22 +1147,16 @@ import AVFoundation
             verticalInsets = clipView.contentInsets.verticalInsets
         }
 
-        if isHorizontallyResizable {
-            size.width = max(frame.size.width - horizontalInsets, size.width)
-        } else {
-            size.width = frame.size.width - horizontalInsets
-        }
-
-        if isVerticallyResizable {
-            // we should at least be the visible size if we're not in a clip view
-            // however the `size` may be bananas (estimated) and enlarge too much
-            // that going never going to shrink later.
-            // It is expected that vertically height going to grow and shring (that does not apply to horizontally)
-            //
-            // size.height = max(frame.size.height - verticalInsets, size.height)
-        } else {
-            size.height = frame.size.height - verticalInsets
-        }
+        // if isVerticallyResizable {
+        //     // we should at least be the visible size if we're not in a clip view
+        //     // however the `size` may be bananas (estimated) and enlarge too much
+        //     // that going never going to shrink later.
+        //     // It is expected that vertically height going to grow and shring (that does not apply to horizontally)
+        //     //
+        //     // size.height = max(frame.size.height - verticalInsets, size.height)
+        // } else {
+        //     size.height = frame.size.height - verticalInsets
+        // }
 
         // if we're in a clip view we should at be at least as big as the clip view
         if let clipView = scrollView?.contentView as? NSClipView {
@@ -1219,8 +1171,28 @@ import AVFoundation
 
         }
 
+        let gutterPadding = gutterView?.bounds.width ?? 0
+        size.width += gutterPadding
+
+        logger.debug("proposed size (\(size.width), \(size.height)) \(#function)")
+
         if !frame.size.isAlmostEqual(to: size) {
             self.setFrameSize(size)
+        }
+
+        let newContentFrame = CGRect(
+            x: gutterPadding,
+            y: frame.origin.y,
+            width: frame.width - gutterPadding,
+            height: frame.height
+        )
+
+        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
+            contentView.frame = newContentFrame
+            selectionView.frame = newContentFrame
+            decorationView.frame = newContentFrame
+
+            _configureTextContainerSize()
         }
     }
 

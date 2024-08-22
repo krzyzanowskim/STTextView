@@ -37,7 +37,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         sizeToFit()
-        updateSelectionHighlights()
+        updateSelectedLineHighlight()
         // adjustViewportOffsetIfNeeded()
 
         if let viewportRange = textViewportLayoutController.viewportRange {
