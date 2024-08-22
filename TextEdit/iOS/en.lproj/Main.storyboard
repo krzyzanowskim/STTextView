@@ -25,7 +25,7 @@
             </objects>
             <point key="canvasLocation" x="-992" y="-673"/>
         </scene>
-        <!--STTextView-->
+        <!--Notes-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="TextEdit" customModuleProvider="target" sceneMemberID="viewController">
@@ -35,21 +35,21 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
-                    <navigationItem key="navigationItem" title="STTextView" id="h2q-vP-mby">
+                    <navigationItem key="navigationItem" title="Notes" style="editor" id="h2q-vP-mby">
+                        <barButtonItem key="leftBarButtonItem" title="Gutter" image="list.number" catalog="system" id="U1X-Au-yZx">
+                            <connections>
+                                <action selector="toggleRuler:" destination="BYZ-38-t0r" id="oEQ-Aa-oxn"/>
+                            </connections>
+                        </barButtonItem>
                         <rightBarButtonItems>
-                            <barButtonItem image="text.justify.left" catalog="system" id="WxB-Qp-s6N">
+                            <barButtonItem title="Wrap" image="text.justify.leading" catalog="system" id="WxB-Qp-s6N">
                                 <connections>
                                     <action selector="toggleTextWrapMode:" destination="BYZ-38-t0r" id="F5z-9D-Qis"/>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem image="eye.slash" catalog="system" id="nCC-0L-GuA">
+                            <barButtonItem title="Invisibles" image="dot.viewfinder" catalog="system" id="nCC-0L-GuA">
                                 <connections>
                                     <action selector="toggleInvisibles:" destination="BYZ-38-t0r" id="ToF-eU-fqn"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem image="list.number" catalog="system" id="U1X-Au-yZx">
-                                <connections>
-                                    <action selector="toggleRuler:" destination="BYZ-38-t0r" id="oEQ-Aa-oxn"/>
                                 </connections>
                             </barButtonItem>
                         </rightBarButtonItems>
@@ -61,9 +61,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="eye.slash" catalog="system" width="128" height="95"/>
+        <image name="dot.viewfinder" catalog="system" width="128" height="115"/>
         <image name="list.number" catalog="system" width="128" height="97"/>
-        <image name="text.justify.left" catalog="system" width="128" height="99"/>
+        <image name="text.justify.leading" catalog="system" width="128" height="99"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

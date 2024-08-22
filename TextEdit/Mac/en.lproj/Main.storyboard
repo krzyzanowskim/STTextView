@@ -686,7 +686,7 @@
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController showSeguePresentationStyle="single" id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="Text Editor" subtitle="Demo" separatorStyle="shadow" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" visibleAtLaunch="NO" animationBehavior="default" tabbingMode="disallowed" toolbarStyle="compact" id="IQv-IB-iLA">
+                    <window key="window" title="Notepad.exe" subtitle="Rich Text" separatorStyle="shadow" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" visibleAtLaunch="NO" animationBehavior="default" tabbingMode="disallowed" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowCollectionBehavior key="collectionBehavior" fullScreenNone="YES"/>
                         <rect key="contentRect" x="420" y="310" width="500" height="400"/>
@@ -694,18 +694,18 @@
                         <value key="minSize" type="size" width="300" height="100"/>
                         <toolbar key="toolbar" implicitIdentifier="89706A1F-B72A-4D45-A19B-48D631BA931E" autosavesConfiguration="NO" allowsUserCustomization="NO" displayMode="iconAndLabel" sizeMode="regular" id="9Cr-vI-QW0">
                             <allowedToolbarItems>
-                                <toolbarItem implicitItemIdentifier="DE34C9A7-73A8-4FB0-804F-36AE4CFD0527" label="Text Wrapping" paletteLabel="Text Wrapping" tag="-1" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="JV6-de-LTW">
-                                    <imageReference key="image" image="text.justify" catalog="system" symbolScale="large"/>
+                                <toolbarItem implicitItemIdentifier="DE34C9A7-73A8-4FB0-804F-36AE4CFD0527" label="Wrap" paletteLabel="Text Wrapping" tag="-1" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="JV6-de-LTW">
+                                    <imageReference key="image" image="text.justify.leading" catalog="system" symbolScale="large"/>
                                     <connections>
                                         <action selector="toggleTextWrapMode:" target="Oky-zY-oP4" id="0jK-vv-upN"/>
                                     </connections>
                                 </toolbarItem>
-                                <toolbarItem implicitItemIdentifier="69692D5E-37C8-42F9-B8FE-8F5988211D84" label="Invisibles" paletteLabel="Invisibles" tag="-1" image="eye.slash" catalog="system" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="1Pv-jL-YKX">
+                                <toolbarItem implicitItemIdentifier="69692D5E-37C8-42F9-B8FE-8F5988211D84" label="Invisibles" paletteLabel="Invisible Characters" tag="-1" image="dot.viewfinder" catalog="system" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="1Pv-jL-YKX">
                                     <connections>
                                         <action selector="toggleInvisibles:" target="Oky-zY-oP4" id="EgE-A0-grP"/>
                                     </connections>
                                 </toolbarItem>
-                                <toolbarItem implicitItemIdentifier="324DCBA6-A541-4243-A2A4-FD4D326D1362" label="Line numbers" paletteLabel="Line numbers" tag="-1" image="list.number" catalog="system" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="hFT-ea-5XE">
+                                <toolbarItem implicitItemIdentifier="324DCBA6-A541-4243-A2A4-FD4D326D1362" label="Gutter" paletteLabel="Line numbers" tag="-1" image="list.number" catalog="system" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="hFT-ea-5XE">
                                     <connections>
                                         <action selector="toggleRuler:" target="Oky-zY-oP4" id="97l-Cs-WDw"/>
                                     </connections>
@@ -747,8 +747,8 @@
         </scene>
     </scenes>
     <resources>
-        <image name="eye.slash" catalog="system" width="21" height="16"/>
+        <image name="dot.viewfinder" catalog="system" width="16" height="15"/>
         <image name="list.number" catalog="system" width="16" height="13"/>
-        <image name="text.justify" catalog="system" width="21" height="17"/>
+        <image name="text.justify.leading" catalog="system" width="21" height="17"/>
     </resources>
 </document>
