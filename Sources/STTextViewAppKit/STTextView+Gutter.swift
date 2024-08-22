@@ -72,7 +72,49 @@ extension STTextView {
         let selectedLineTextAttributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: (gutterView.selectedLineTextColor ?? gutterView.textColor).cgColor
         ]
+        
+        if viewportRange.isEmpty {
+            let lineNumber = 1
+            
+            var lineTextAttributes: [NSAttributedString.Key: Any] = [
+                .font: gutterView.font,
+                .foregroundColor: NSColor.secondaryLabelColor
+            ]
+            
+            let isLineSelected = gutterView.highlightSelectedLine && !selectedLineTextAttributes.isEmpty
+            if isLineSelected {
+                lineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { _, new in new })
+            }
+    
+            let characterHeight = NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes)
+                .boundingRect(
+                    with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude),
+                    options: [.usesLineFragmentOrigin, .usesFontLeading],
+                    context: nil
+                ).height
 
+            let numberCell = STGutterLineNumberCell(
+                firstBaseline: (typingLineHeight + characterHeight) / 2,
+                attributes: lineTextAttributes,
+                number: lineNumber
+            )
+            
+            numberCell.insets = gutterView.insets
+            
+            if isLineSelected {
+                numberCell.layer?.backgroundColor = gutterView.selectedLineHighlightColor.cgColor
+            }
+            
+            numberCell.frame = CGRect(
+                origin: .zero,
+                size: CGSize(width: gutterView.frame.width, height: typingLineHeight)
+            ).pixelAligned
+          
+            gutterView.containerView.addSubview(numberCell)
+            
+            return
+        }
+        
         var requiredWidthFitText = gutterView.minimumThickness
         let startLineIndex = textElements.count
         var linesCount = 0
