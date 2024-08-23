@@ -475,7 +475,6 @@ import AVFoundation
     public var showsInvisibleCharacters: Bool = false {
         willSet {
             textLayoutManager.invalidateLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
-            textLayoutManager.ensureLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
             needsLayout = true
         }
     }
