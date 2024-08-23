@@ -5,10 +5,6 @@ import UIKit
 
 final class STLineHighlightView: UIView {
 
-    override class var layerClass: AnyClass {
-        CATiledLayer.self
-    }
-
     override init(frame: CGRect) {
         super.init(frame: frame)
         clipsToBounds = true
