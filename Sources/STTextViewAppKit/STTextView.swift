@@ -953,7 +953,7 @@ import AVFoundation
                             width: selectionView.bounds.width,
                             height: typingLineHeight
                         )
-                    )
+                    ).pixelAligned
                 )
             }
         } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {

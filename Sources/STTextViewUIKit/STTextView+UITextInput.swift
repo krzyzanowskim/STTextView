@@ -241,13 +241,13 @@ extension STTextView: UITextInput {
                 y: 0,
                 width: 2,
                 height: typingLineHeight
-            ).moved(dx: -contentView.bounds.origin.x)
+            ).moved(dx: -contentView.bounds.origin.x).pixelAligned
         } else {
             let segmentFrame = textLayoutManager.textSegmentFrame(at: textLocation.location, type: .selection) ?? .zero
             var rect = segmentFrame
             rect.origin.x -= 1
             rect.size.width = 2
-            return segmentFrame.moved(dx: -contentView.bounds.origin.x)
+            return segmentFrame.moved(dx: -contentView.bounds.origin.x).pixelAligned
         }
     }
 
