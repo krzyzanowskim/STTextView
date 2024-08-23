@@ -25,7 +25,8 @@ final class ViewController: NSViewController {
         paragraph.lineHeightMultiple = 1.2
         textView.defaultParagraphStyle = paragraph
 
-        textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
+
+        textView.font = NSFont.monospacedSystemFont(ofSize: 0, weight: .regular)
         textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.isHorizontallyResizable = false // wrap
         textView.highlightSelectedLine = true

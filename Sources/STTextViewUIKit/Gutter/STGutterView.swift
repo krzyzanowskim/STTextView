@@ -14,7 +14,7 @@ public final class STGutterView: UIView {
     /// Initialized with a textView font value and does not update automatically when
     /// text view font changes.
     @Invalidating(.display)
-    public var font: UIFont = adjustGutterFont(UIFont(descriptor: UIFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.traitCondensed)!, size: 0))
+    public var font = adjustGutterFont(UIFont(descriptor: UIFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.traitCondensed)!, size: 0))
 
     /// The insets of the ruler view.
     @Invalidating(.display)
@@ -95,7 +95,7 @@ public final class STGutterView: UIView {
     }
 }
 
-func adjustGutterFont(_ font: UIFont) -> UIFont {
+private func adjustGutterFont(_ font: UIFont) -> UIFont {
     // https://useyourloaf.com/blog/ios-9-proportional-numbers/
     // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html
     let features: [[UIFontDescriptor.FeatureKey: Int]] = [
@@ -125,6 +125,5 @@ func adjustGutterFont(_ font: UIFont) -> UIFont {
         ]
     ]
 
-    let adjustedFont = UIFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: max(font.pointSize * 0.9, UIFont.smallSystemFontSize))
-    return adjustedFont
+    return UIFont(descriptor: font.fontDescriptor.addingAttributes([.featureSettings: features]), size: 0)
 }
