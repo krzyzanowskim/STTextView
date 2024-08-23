@@ -34,7 +34,8 @@ let package = Package(
             dependencies: [
                 .target(name: "STTextViewCommon"),
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.macOS])),
-                .product(name: "STTextKitPlus", package: "STTextKitPlus")
+                .product(name: "STTextKitPlus", package: "STTextKitPlus"),
+                .product(name: "CoreTextSwift", package: "CoreTextSwift")
             ]
         ),
         .target(

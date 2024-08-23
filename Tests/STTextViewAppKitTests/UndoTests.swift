@@ -9,22 +9,22 @@ final class UndoTests: XCTestCase {
         textView.insertText("b")
 
         textView.undo(nil)
-        XCTAssertEqual(textView.string, "a")
+        XCTAssertEqual(textView.text!, "a")
         XCTAssertEqual(textView.selectedRange(), NSRange(location: 1, length: 0))
     }
     
     func testPasteLongerThanCurrentContentUndo() {
         let textView = STTextView()
-        textView.string = "first line\nsecond line"
+        textView.text! = "first line\nsecond line"
         textView.setSelectedRange(NSRange(location: 11, length: 11))
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString("new second line\nthird line", forType: .string)
 
         textView.paste(nil)
-        XCTAssertEqual(textView.string, "first line\nnew second line\nthird line")
+        XCTAssertEqual(textView.text!, "first line\nnew second line\nthird line")
 
         textView.undo(nil)
-        XCTAssertEqual(textView.string, "first line\nsecond line")
+        XCTAssertEqual(textView.text!, "first line\nsecond line")
         textView.setSelectedRange(NSRange(location: 11, length: 11))
     }
     
@@ -34,11 +34,11 @@ final class UndoTests: XCTestCase {
         textView.setSelectedRange(NSRange(location: 3, length: 3))
 
         textView.insertText("a")
-        XCTAssertEqual(textView.string, "123a789")
+        XCTAssertEqual(textView.text!, "123a789")
 
         textView.undo(nil)
         XCTAssertEqual(textView.selectedRange(), NSRange(location: 3, length: 3))
-        XCTAssertEqual(textView.string, "123456789")
+        XCTAssertEqual(textView.text!, "123456789")
     }
 
     func testTypingCoalescing() throws {
@@ -48,16 +48,16 @@ final class UndoTests: XCTestCase {
         textView.keyDown(with: try .create(key: .return))
         textView.keyDown(with: try .create(characters: "c"))
         textView.keyDown(with: try .create(characters: "d"))
-        XCTAssertEqual(textView.string, "ab\ncd")
+        XCTAssertEqual(textView.text!, "ab\ncd")
 
         textView.undo(nil)
-        XCTAssertEqual(textView.string, "ab\n")
+        XCTAssertEqual(textView.text!, "ab\n")
 
         textView.undo(nil)
-        XCTAssertEqual(textView.string, "ab")
+        XCTAssertEqual(textView.text!, "ab")
 
         textView.undo(nil)
-        XCTAssertEqual(textView.string, "")
+        XCTAssertEqual(textView.text!, "")
     }
 
     func testRedo() {
@@ -66,19 +66,19 @@ final class UndoTests: XCTestCase {
         textView.setSelectedRange(NSRange(location: 3, length: 3))
 
         textView.insertText("a")
-        XCTAssertEqual(textView.string, "123a789")
+        XCTAssertEqual(textView.text!, "123a789")
 
         textView.undo(nil)
-        XCTAssertEqual(textView.string, "123456789")
+        XCTAssertEqual(textView.text!, "123456789")
 
         textView.undo(nil)
-        XCTAssertEqual(textView.string, "")
+        XCTAssertEqual(textView.text!, "")
 
         textView.redo(nil)
-        XCTAssertEqual(textView.string, "123456789")
+        XCTAssertEqual(textView.text!, "123456789")
 
         textView.redo(nil)
-        XCTAssertEqual(textView.string, "123a789")
+        XCTAssertEqual(textView.text!, "123a789")
     }
 }
 #endif

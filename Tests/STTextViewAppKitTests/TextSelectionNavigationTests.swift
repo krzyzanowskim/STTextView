@@ -5,7 +5,7 @@ import XCTest
 final class TextSelectionNavigationTests: XCTestCase {
     func testMoveLeft() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveLeft(nil)
@@ -16,7 +16,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveLeftAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveLeftAndModifySelection(nil)
@@ -27,7 +27,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveRight() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 1, length: 0))
 
         textView.moveRight(nil)
@@ -38,7 +38,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveRightAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 1, length: 0))
 
         textView.moveRightAndModifySelection(nil)
@@ -51,7 +51,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveUp() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 9, length: 0))
 
         textView.moveUp(nil)
@@ -62,7 +62,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveUpAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 9, length: 0))
 
         textView.moveUpAndModifySelection(nil)
@@ -71,7 +71,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveDown() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 1, length: 0))
 
         textView.moveDown(nil)
@@ -80,7 +80,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveDownAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 1, length: 0))
 
         textView.moveDownAndModifySelection(nil)
@@ -89,7 +89,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveForward() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 1, length: 0))
 
         textView.moveForward(nil)
@@ -102,7 +102,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveForwardAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 1, length: 0))
 
         textView.moveForwardAndModifySelection(nil)
@@ -115,7 +115,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveBackward() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveBackward(nil)
@@ -128,7 +128,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveBackwardAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 4, length: 0))
 
         textView.moveBackwardAndModifySelection(nil)
@@ -141,7 +141,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveWordLeft() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 0, length: 0))
 
         textView.moveWordLeft(nil)
@@ -150,7 +150,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveWordLeftAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 0, length: 0))
 
         textView.moveWordLeftAndModifySelection(nil)
@@ -159,7 +159,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveWordRight() {
         let textView = STTextView()
-        textView.setAttributedString(.init("Hello world\nSecond Line"))
+        textView.attributedText = .init("Hello world\nSecond Line")
         textView.setSelectedRange(NSRange(location: 0, length: 0))
 
         textView.moveWordRight(nil)
@@ -172,7 +172,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveWordRightAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("Hello world\nSecond Line"))
+        textView.attributedText = .init("Hello world\nSecond Line")
         textView.setSelectedRange(NSRange(location: 0, length: 0))
 
         textView.moveWordRightAndModifySelection(nil)
@@ -185,7 +185,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveWordForward() {
         let textView = STTextView()
-        textView.setAttributedString(.init("Hello world\nSecond Line"))
+        textView.attributedText = .init("Hello world\nSecond Line")
         textView.setSelectedRange(NSRange(location: 0, length: 0))
 
         textView.moveWordForward(nil)
@@ -198,7 +198,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveWordForwardAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("Hello world\nSecond Line"))
+        textView.attributedText = .init("Hello world\nSecond Line")
         textView.setSelectedRange(NSRange(location: 0, length: 0))
 
         textView.moveWordForwardAndModifySelection(nil)
@@ -211,7 +211,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveWordBackward() {
         let textView = STTextView()
-        textView.setAttributedString(.init("Hello world\nSecond Line"))
+        textView.attributedText = .init("Hello world\nSecond Line")
         textView.setSelectedRange(NSRange(location: 12, length: 0))
 
         textView.moveWordBackward(nil)
@@ -222,7 +222,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveWordBackwardAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("Hello world\nSecond Line"))
+        textView.attributedText = .init("Hello world\nSecond Line")
         textView.setSelectedRange(NSRange(location: 12, length: 0))
 
         textView.moveWordBackwardAndModifySelection(nil)
@@ -233,7 +233,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToBeginningOfLine() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToBeginningOfLine(nil)
@@ -244,7 +244,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToBeginningOfLineAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToBeginningOfLineAndModifySelection(nil)
@@ -255,7 +255,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToLeftEndOfLine() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToLeftEndOfLine(nil)
@@ -266,7 +266,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToLeftEndOfLineAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToLeftEndOfLineAndModifySelection(nil)
@@ -277,7 +277,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToEndOfLine() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToEndOfLine(nil)
@@ -288,7 +288,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToEndOfLineAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToEndOfLineAndModifySelection(nil)
@@ -299,7 +299,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToRightEndOfLine() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToRightEndOfLine(nil)
@@ -310,7 +310,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToRightEndOfLineAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToRightEndOfLineAndModifySelection(nil)
@@ -321,7 +321,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveParagraphForwardAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveParagraphForwardAndModifySelection(nil)
@@ -332,7 +332,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveParagraphBackwardAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveParagraphBackwardAndModifySelection(nil)
@@ -343,7 +343,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToBeginningOfParagraph() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToBeginningOfParagraph(nil)
@@ -354,7 +354,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToBeginningOfParagraphAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToBeginningOfParagraphAndModifySelection(nil)
@@ -365,7 +365,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToEndOfParagraph() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToEndOfParagraph(nil)
@@ -376,7 +376,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToEndOfParagraphAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToEndOfParagraphAndModifySelection(nil)
@@ -387,7 +387,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToBeginningOfDocument() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToBeginningOfDocument(nil)
@@ -398,7 +398,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToBeginningOfDocumentAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToBeginningOfDocumentAndModifySelection(nil)
@@ -409,7 +409,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToEndOfDocument() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToEndOfDocument(nil)
@@ -420,7 +420,7 @@ final class TextSelectionNavigationTests: XCTestCase {
 
     func testMoveToEndOfDocumentAndModifySelection() {
         let textView = STTextView()
-        textView.setAttributedString(.init("012\n456\n89"))
+        textView.attributedText = .init("012\n456\n89")
         textView.setSelectedRange(NSRange(location: 5, length: 0))
 
         textView.moveToEndOfDocumentAndModifySelection(nil)
