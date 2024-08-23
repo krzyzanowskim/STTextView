@@ -91,7 +91,7 @@ extension STTextView {
                 numberCell.frame = CGRect(
                     origin: CGPoint(
                         x: bounds.minX,
-                        y: selectionFrame.origin.y
+                        y: selectionFrame.origin.y - contentOffset.y
                     ),
                     size: CGSize(
                         width: gutterView.containerView.frame.width,
