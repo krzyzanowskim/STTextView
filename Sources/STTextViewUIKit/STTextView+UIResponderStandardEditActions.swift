@@ -115,7 +115,8 @@ extension STTextView {
 
         updateTypingAttributes()
         updateSelectedLineHighlight()
-        
+        layoutGutter()
+
         setNeedsLayout()
         inputDelegate?.selectionDidChange(self)
     }

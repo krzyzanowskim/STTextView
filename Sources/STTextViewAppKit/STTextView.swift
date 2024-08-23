@@ -703,6 +703,7 @@ import AVFoundation
     open override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         self.updateSelectedRangeHighlight()
+        self.layoutGutter()
         self.updateSelectedLineHighlight()
     }
 
@@ -955,75 +956,70 @@ import AVFoundation
                     )
                 )
             }
-            return
-        }
-
-        guard let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
-            return
-        }
-
-        // build the rectangle out of fragments rectangles
-        var combinedFragmentsRect: CGRect?
-
-        // TODO some beutiful day:
-        // Don't rely on NSTextParagraph.paragraphContentRange, but that
-        // makes tricky to get all the conditions right (especially for last line)
-        // Problem is that NSTextParagraph.rangeInElement span across two lines (eg. "abc\n" are two lines) while
-        // paragraphContentRange is just one ("abc")
-        //
-        // Another idea here is to use `textLayoutManager.textLayoutFragment(for: selectionTextRange.location)`
-        // to find the layout fragment and us its frame as highlight area. It has its issue when it comes to the
-        // extra line fragment area (sic).
-        textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
-            let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
-            for lineFragment in layoutFragment.textLineFragments {
-
-                func isLineSelected() -> Bool {
-                    textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
-                        var result = true
-                        if lineFragment.isExtraLineFragment {
-                            let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
-                            result = result && c1
-                        } else {
-                            let c1 = contentRangeInElement.contains(selectionTextRange)
-                            let c2 = contentRangeInElement.intersects(selectionTextRange)
-                            let c3 = selectionTextRange.contains(contentRangeInElement)
-                            let c4 = selectionTextRange.intersects(contentRangeInElement)
-                            let c5 = contentRangeInElement.endLocation == selectionTextRange.location
-                            result = result && (c1 || c2 || c3 || c4 || c5)
+        } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
+            // build the rectangle out of fragments rectangles
+            var combinedFragmentsRect: CGRect?
+            
+            // TODO some beutiful day:
+            // Don't rely on NSTextParagraph.paragraphContentRange, but that
+            // makes tricky to get all the conditions right (especially for last line)
+            // Problem is that NSTextParagraph.rangeInElement span across two lines (eg. "abc\n" are two lines) while
+            // paragraphContentRange is just one ("abc")
+            //
+            // Another idea here is to use `textLayoutManager.textLayoutFragment(for: selectionTextRange.location)`
+            // to find the layout fragment and us its frame as highlight area. It has its issue when it comes to the
+            // extra line fragment area (sic).
+            textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
+                let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
+                for lineFragment in layoutFragment.textLineFragments {
+                    
+                    func isLineSelected() -> Bool {
+                        textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
+                            var result = true
+                            if lineFragment.isExtraLineFragment {
+                                let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
+                                result = result && c1
+                            } else {
+                                let c1 = contentRangeInElement.contains(selectionTextRange)
+                                let c2 = contentRangeInElement.intersects(selectionTextRange)
+                                let c3 = selectionTextRange.contains(contentRangeInElement)
+                                let c4 = selectionTextRange.intersects(contentRangeInElement)
+                                let c5 = contentRangeInElement.endLocation == selectionTextRange.location
+                                result = result && (c1 || c2 || c3 || c4 || c5)
+                            }
+                            return partialResult && result
                         }
-                        return partialResult && result
                     }
-                }
-
-                if isLineSelected() {
-                    var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                    lineFragmentFrame.size.height = lineFragment.typographicBounds.height
-
-
-                    let r = CGRect(
-                        origin: CGPoint(
-                            x: selectionView.bounds.minX,
-                            y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
-                        ),
-                        size: CGSize(
-                            width: selectionView.bounds.width,
-                            height: lineFragmentFrame.height
+                    
+                    if isLineSelected() {
+                        var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                        lineFragmentFrame.size.height = lineFragment.typographicBounds.height
+                        
+                        
+                        let r = CGRect(
+                            origin: CGPoint(
+                                x: selectionView.bounds.minX,
+                                y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
+                            ),
+                            size: CGSize(
+                                width: selectionView.bounds.width,
+                                height: lineFragmentFrame.height
+                            )
                         )
-                    )
-
-                    if let rect = combinedFragmentsRect {
-                        combinedFragmentsRect = rect.union(r)
-                    } else {
-                        combinedFragmentsRect = r
+                        
+                        if let rect = combinedFragmentsRect {
+                            combinedFragmentsRect = rect.union(r)
+                        } else {
+                            combinedFragmentsRect = r
+                        }
                     }
                 }
+                return true
             }
-            return true
-        }
-
-        if let combinedFragmentsRect {
-            layoutHighlightView(in: combinedFragmentsRect.pixelAligned)
+            
+            if let combinedFragmentsRect {
+                layoutHighlightView(in: combinedFragmentsRect.pixelAligned)
+            }
         }
     }
 
@@ -1066,9 +1062,6 @@ import AVFoundation
                 return true // keep going
             }
         }
-
-        // Update gutter selection
-        layoutGutter()
     }
 
     // Update textContainer width to match textview width if track textview width

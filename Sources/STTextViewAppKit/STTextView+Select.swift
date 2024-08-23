@@ -45,6 +45,7 @@ extension STTextView {
 
         updateTypingAttributes()
         updateSelectedRangeHighlight()
+        layoutGutter()
         updateSelectedLineHighlight()
     }
 
@@ -498,6 +499,7 @@ extension STTextView {
 
         updateTypingAttributes()
         updateSelectedRangeHighlight()
+        layoutGutter()
         updateSelectedLineHighlight()
         needsDisplay = true
     }

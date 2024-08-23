@@ -234,10 +234,21 @@ extension STTextView: UITextInput {
             return .zero
         }
 
-        var rect = textLayoutManager.textSegmentFrame(at: textLocation.location, type: .selection) ?? .zero
-        rect.origin.x -= 1
-        rect.size.width = 2
-        return rect.moved(dx: -contentView.bounds.origin.x)
+        if textLayoutManager.documentRange.isEmpty {
+            let segmentFrame = textLayoutManager.textSegmentFrame(at: textLocation.location, type: .selection) ?? .zero
+            return CGRect(
+                x: segmentFrame.origin.x - 1,
+                y: 0,
+                width: 2,
+                height: typingLineHeight
+            ).moved(dx: -contentView.bounds.origin.x)
+        } else {
+            let segmentFrame = textLayoutManager.textSegmentFrame(at: textLocation.location, type: .selection) ?? .zero
+            var rect = segmentFrame
+            rect.origin.x -= 1
+            rect.size.width = 2
+            return segmentFrame.moved(dx: -contentView.bounds.origin.x)
+        }
     }
 
     /// Returns an array of selection rects corresponding to the range of text.
