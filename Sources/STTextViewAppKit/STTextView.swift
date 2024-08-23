@@ -101,6 +101,8 @@ import AVFoundation
             if !textLayoutManager.documentRange.isEmpty {
                 addAttributes([.font: newValue], range: textLayoutManager.documentRange)
             }
+
+            updateTypingAttributes()
         }
     }
 
@@ -161,8 +163,8 @@ import AVFoundation
     }
 
     internal func typingAttributes(at startLocation: NSTextLocation) -> [NSAttributedString.Key : Any] {
-        guard !textLayoutManager.documentRange.isEmpty else {
-            return typingAttributes
+        if textLayoutManager.documentRange.isEmpty {
+            return _defaultTypingAttributes
         }
 
         var typingAttrs: [NSAttributedString.Key: Any] = [:]
@@ -594,6 +596,8 @@ import AVFoundation
 
         super.init(frame: frameRect)
 
+        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
+
         textLayoutManager.delegate = self
         textFinderClient.textView = self
         textCheckingController = NSTextCheckingController(client: self)
@@ -812,15 +816,13 @@ import AVFoundation
     /// The current selection range of the text view.
     ///
     /// If the length of the selection range is 0, indicating that the selection is actually an insertion point
-    public var textSelection: NSRange? {
+    public var textSelection: NSRange {
         set {
-            if let newValue {
-                self.setSelectedRange(newValue)
-            }
+            setSelectedRange(newValue)
         }
 
         get {
-            return self.selectedRange()
+            selectedRange()
         }
     }
 

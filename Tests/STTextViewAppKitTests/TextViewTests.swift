@@ -4,9 +4,11 @@ import XCTest
 
 class TextViewTests : XCTestCase {
 
-    func testNoInitialSelection() {
-        let textView = STTextView()
-        XCTAssertNil(textView.selectedTextRange())
+    func testInitialSelection() {
+        let nstv = NSTextView()
+        let sttv = STTextView()
+
+        XCTAssertEqual(nstv.selectedRange(), sttv.textSelection)
     }
 
 }

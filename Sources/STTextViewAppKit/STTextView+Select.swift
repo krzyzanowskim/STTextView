@@ -6,10 +6,6 @@ import STTextKitPlus
 
 extension STTextView {
 
-    internal func selectedTextRange() -> NSTextRange? {
-        textLayoutManager.textSelections.last?.textRanges.last
-    }
-
     internal func setSelectedTextRange(_ textRange: NSTextRange, updateLayout: Bool) {
         guard isSelectable, textRange.endLocation <= textLayoutManager.documentRange.endLocation else {
             return

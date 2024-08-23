@@ -52,7 +52,7 @@ package protocol STTextViewProtocol {
     var gutterView: GutterView? { get }
     func toggleRuler(_ sender: Any?)
 
-    var textSelection: NSRange? { get set }
+    var textSelection: NSRange { get set }
 
     func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange)
     func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange)

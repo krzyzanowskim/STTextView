@@ -156,6 +156,8 @@ import STTextViewCommon
             if !textLayoutManager.documentRange.isEmpty {
                 addAttributes([.font: newValue], range: textLayoutManager.documentRange)
             }
+
+            updateTypingAttributes()
         }
     }
 
@@ -345,8 +347,8 @@ import STTextViewCommon
     }
 
     internal func typingAttributes(at startLocation: NSTextLocation) -> [NSAttributedString.Key : Any] {
-        guard !textLayoutManager.documentRange.isEmpty else {
-            return typingAttributes
+        if textLayoutManager.documentRange.isEmpty {
+            return _defaultTypingAttributes
         }
 
         var typingAttrs: [NSAttributedString.Key: Any] = [:]
@@ -429,6 +431,8 @@ import STTextViewCommon
 
         super.init(frame: frame)
 
+        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
+
         textLayoutManager.delegate = self
         textLayoutManager.textViewportLayoutController.delegate = self
 
@@ -467,21 +471,17 @@ import STTextViewCommon
     /// The current selection range of the text view.
     ///
     /// If the length of the selection range is 0, indicating that the selection is actually an insertion point
-    public var textSelection: NSRange? {
+    public var textSelection: NSRange {
         set {
-            if let newValue, let textRange = NSTextRange(newValue, in: textContentManager) {
-                setSelectedTextRange(textRange, updateLayout: true)
-            } else {
-                selectedTextRange = nil
-            }
+            setSelectedRange(newValue)
         }
 
         get {
-            if let textRange = selectedTextRange?.nsTextRange {
-                return NSRange(textRange, in: textContentManager)
+            if let selectionTextRange = textLayoutManager.textSelections.last?.textRanges.last {
+                return NSRange(selectionTextRange, in: textContentManager)
             }
 
-            return nil
+            return .notFound
         }
     }
 
@@ -490,11 +490,18 @@ import STTextViewCommon
             return
         }
 
-        selectedTextRange = textRange.uiTextRange
+        self.selectedTextRange = textRange.uiTextRange
 
         if updateLayout {
             setNeedsLayout()
         }
+    }
+
+    internal func setSelectedRange(_ range: NSRange) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            preconditionFailure("Invalid range \(range)")
+        }
+        setSelectedTextRange(textRange, updateLayout: true)
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.

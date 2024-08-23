@@ -201,6 +201,7 @@ extension STTextView: NSTextInputClient {
 
         if replacementRange == .notFound {
             textRanges = textLayoutManager.textSelections.flatMap(\.textRanges)
+            assert(!textRanges.isEmpty, "Unknown selection range to insert")
         }
 
         let replacementTextRange = NSTextRange(replacementRange, in: textContentManager)
