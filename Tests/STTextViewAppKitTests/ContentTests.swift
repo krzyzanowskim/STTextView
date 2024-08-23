@@ -53,7 +53,6 @@ class ContentTests : XCTestCase {
         XCTAssertEqual(textView.font, NSFont.systemFont(ofSize: 96))
         XCTAssertEqual(textView.typingAttributes[.font] as! NSFont, NSFont.systemFont(ofSize: 96))
 
-        XCTExpectFailure("nil NSFont given")
         XCTAssertNotNil(textView.font)
         XCTAssertNotNil(textView.typingAttributes[.font])
     }

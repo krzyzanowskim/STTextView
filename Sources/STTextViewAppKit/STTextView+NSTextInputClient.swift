@@ -212,10 +212,12 @@ extension STTextView: NSTextInputClient {
         case let string as String:
             if shouldChangeText(in: textRanges, replacementString: string) {
                 replaceCharacters(in: textRanges, with: string, useTypingAttributes: true, allowsTypingCoalescing: true)
+                updateTypingAttributes()
             }
         case let attributedString as NSAttributedString:
             if shouldChangeText(in: textRanges, replacementString: attributedString.string) {
                 replaceCharacters(in: textRanges, with: attributedString, allowsTypingCoalescing: true)
+                updateTypingAttributes()
             }
         default:
             assertionFailure()

@@ -39,14 +39,13 @@ class TypingAttributesTests : XCTestCase {
         // I don't understand what it does to the font attribute but it's wrong.
         // nstv.insertText(attributedString, replacementRange: NSRange(location: 0, length: 0))
         let attributedString = NSAttributedString(string: "0123456789", attributes: [.font: NSFont.systemFont(ofSize: 44)])
-
         nstv.textStorage?.insert(attributedString, at: 0)
         XCTAssertTrue(nstv.string.utf16.count == 10)
 
         sttv.insertText(attributedString, replacementRange: NSRange(location: 0, length: 0))
         XCTAssertEqual(nstv.string.utf16.count, sttv.text!.utf16.count)
 
-        XCTAssertEqual(nstv.font, sttv.font)
+        XCTAssertEqual(nstv.typingAttributes[.font] as? NSFont, sttv.typingAttributes[.font] as? NSFont)
         XCTAssertEqual(nstv.selectedRange(), sttv.selectedRange())
     }
 
