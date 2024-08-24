@@ -1080,7 +1080,6 @@ import AVFoundation
         if !textContainer.size.isAlmostEqual(to: containerSize)  {
             textContainer.size = containerSize
             logger.debug("textContainer.size (\(self.textContainer.size.width), \(self.textContainer.size.width)) \(#function)")
-            layoutViewport()
         }
     }
 
