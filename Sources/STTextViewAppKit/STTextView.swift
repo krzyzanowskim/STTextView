@@ -636,7 +636,7 @@ import AVFoundation
         }
 
 
-        usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] textLayoutManager, change in
+        usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] _, _ in
             // FB13291926: this notification no longer works
             self?.needsUpdateConstraints = true
         }
