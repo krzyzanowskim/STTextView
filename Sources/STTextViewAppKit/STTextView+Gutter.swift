@@ -108,7 +108,7 @@ extension STTextView {
 
                 gutterView.containerView.addSubview(numberCell)
             }
-        } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
+        } else if let scrollView, let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
 
             let textElements = textContentManager.textElements(
                 for: NSTextRange(
@@ -154,7 +154,7 @@ extension STTextView {
                     let lineNumber = startLineIndex + linesCount + 1
                     let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
 
-                    var lineFragmentFrame = CGRect(origin: CGPoint(x: 0, y: layoutFragment.layoutFragmentFrame.origin.y - scrollView!.contentView.bounds.minY/*contentOffset.y*/), size: layoutFragment.layoutFragmentFrame.size)
+                    var lineFragmentFrame = CGRect(origin: CGPoint(x: 0, y: layoutFragment.layoutFragmentFrame.origin.y - scrollView.contentView.bounds.minY/*contentOffset.y*/), size: layoutFragment.layoutFragmentFrame.size)
 
                     lineFragmentFrame.origin.y += lineFragment.typographicBounds.origin.y
                     if lineFragment.isExtraLineFragment {

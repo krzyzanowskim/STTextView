@@ -89,6 +89,7 @@ import AVFoundation
     ///
     /// Assigning a new value to this property causes the new font to be applied to the entire contents of the text view.
     /// If you want to apply the font to only a portion of the text, you must create a new attributed string with the desired style information and assign it
+    @MainActor
     @objc public var font: NSFont {
         get {
             _defaultTypingAttributes[.font] as! NSFont
@@ -100,6 +101,8 @@ import AVFoundation
             // apply to the document
             if !textLayoutManager.documentRange.isEmpty {
                 addAttributes([.font: newValue], range: textLayoutManager.documentRange)
+                needsLayout = true
+                needsDisplay = true
             }
 
             updateTypingAttributes()
@@ -109,6 +112,7 @@ import AVFoundation
     /// The text color of the text view.
     ///
     /// Default text color.
+    @MainActor
     @objc public var textColor: NSColor {
         get {
             _defaultTypingAttributes[.foregroundColor] as! NSColor
@@ -120,6 +124,7 @@ import AVFoundation
     }
 
     /// Default paragraph style.
+    @MainActor
     @objc public var defaultParagraphStyle: NSParagraphStyle {
         set {
             _defaultTypingAttributes[.paragraphStyle] = newValue
@@ -1381,6 +1386,7 @@ import AVFoundation
         }
     }
 
+    @MainActor
     private func setUp(instance: some STPlugin) -> STPluginEvents {
         // unwrap any STPluginProtocol
         let events = STPluginEvents()
