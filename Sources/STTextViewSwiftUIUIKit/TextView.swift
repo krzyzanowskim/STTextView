@@ -90,9 +90,9 @@ private struct TextViewRepresentable: UIViewRepresentable {
         textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
         context.coordinator.isUpdating = false
 
-        //for plugin in plugins {
-        //    textView.addPlugin(plugin)
-        //}
+        for plugin in plugins {
+            textView.addPlugin(plugin)
+        }
 
         return textView
     }

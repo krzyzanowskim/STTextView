@@ -955,4 +955,32 @@ import STTextViewCommon
         }
     }
     
+    open func addPlugin(_ instance: any STPlugin) {
+        let plugin = Plugin(instance: instance)
+        plugins.append(plugin)
+        setupPlugins()
+    }
+
+    private func setupPlugins() {
+        for (offset, plugin) in plugins.enumerated() where plugin.events == nil {
+            // set events handler
+            var plugin = plugin
+            plugin.events = setUp(instance: plugin.instance)
+            plugins[offset] = plugin
+        }
+    }
+
+    @MainActor
+    private func setUp(instance: some STPlugin) -> STPluginEvents {
+        // unwrap any STPluginProtocol
+        let events = STPluginEvents()
+        instance.setUp(
+            context: STPluginContext(
+                coordinator: instance.makeCoordinator(context: .init(textView: self)),
+                textView: self,
+                events: events
+            )
+        )
+        return events
+    }
 }
