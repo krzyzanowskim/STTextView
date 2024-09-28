@@ -26,7 +26,12 @@ final class STTextLayoutFragmentView: NSView {
         super.init(frame: frame)
         wantsLayer = true
         clipsToBounds = false // allow overdraw invisible characters
-        // layer?.backgroundColor = NSColor.red.withAlphaComponent(0.2).cgColor
+
+        if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
+            layer?.backgroundColor = NSColor.systemOrange.withAlphaComponent(0.05).cgColor
+            layer?.borderColor = NSColor.systemOrange.cgColor
+            layer?.borderWidth = 0.5
+        }
 
         needsDisplay = true
     }

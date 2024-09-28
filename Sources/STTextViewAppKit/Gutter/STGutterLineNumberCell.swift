@@ -26,6 +26,12 @@ final class STGutterLineNumberCell: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         clipsToBounds = true
+
+        if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
+            layer?.backgroundColor = NSColor.systemOrange.withAlphaComponent(0.05).cgColor
+            layer?.borderColor = NSColor.systemOrange.cgColor
+            layer?.borderWidth = 0.5
+        }
     }
 
     override var isFlipped: Bool {
