@@ -3,6 +3,7 @@
 
 import Foundation
 import AppKit
+import STTextKitPlus
 
 extension STTextView {
 
@@ -15,28 +16,83 @@ extension STTextView {
                 return
             }
 
-            let textSelectionFrames = insertionPointsRanges.compactMap { textRange -> CGRect? in
+            // rewrite it to lines
+            var textSelectionFrames: [CGRect] = []
+            for selectionTextRange in insertionPointsRanges {
+                textLayoutManager.enumerateTextSegments(in: selectionTextRange, type: .standard) { textSegmentRange, textSegmentFrame, baselinePosition, textContainer in
+                    if let textSegmentRange {
+                        let documentRange = textLayoutManager.documentRange
+                        guard !documentRange.isEmpty else {
+                            // empty document
+                            textSelectionFrames.append(
+                                CGRect(
+                                    origin: CGPoint(
+                                        x: textSegmentFrame.origin.x,
+                                        y: textSegmentFrame.origin.y
+                                    ),
+                                    size: CGSize(
+                                        width: textSegmentFrame.width,
+                                        height: typingLineHeight
+                                    )
+                                )
+                            )
+                            return false
+                        }
 
-                guard let textSegmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .selection, options: .rangeNotRequired) else {
-                    return nil
+                        let isAtEndLocation = textSegmentRange.location == documentRange.endLocation
+                        guard !isAtEndLocation else {
+                            // At the end of non-empty document
+
+                            // FB15131180: extra line fragment frame is not correct hence workaround location and height at extra line
+                            if let layoutFragment = textLayoutManager.extraLineTextLayoutFragment() {
+                                // at least 2 lines guaranteed at this point
+                                let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
+                                textSelectionFrames.append(
+                                    CGRect(
+                                        origin: CGPoint(
+                                            x: textSegmentFrame.origin.x,
+                                            y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
+                                        ),
+                                        size: CGSize(
+                                            width: textSegmentFrame.width,
+                                            height: prevTextLineFragment.typographicBounds.height
+                                        )
+                                    )
+                                )
+                            } else if let prevLocation = textLayoutManager.location(textSegmentRange.endLocation, offsetBy: -1),
+                                      let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation)
+                            {
+                                // Get insertion point height from the last-to-end (last) line fragment location
+                                // since we're at the end location at this point.
+                                textSelectionFrames.append(
+                                    CGRect(
+                                        origin: CGPoint(
+                                            x: textSegmentFrame.origin.x,
+                                            y: textSegmentFrame.origin.y
+                                        ),
+                                        size: CGSize(
+                                            width: textSegmentFrame.width,
+                                            height: prevTextLineFragment.typographicBounds.height
+                                        )
+                                    )
+                                )
+                            }
+                            return false
+                        }
+
+                        // Regular where segment frame is correct
+                        textSelectionFrames.append(
+                            textSegmentFrame
+                        )
+                    }
+                    return true
                 }
-                
-                let selectionFrame = textSegmentFrame.intersection(frame)
-
-                // because `textLayoutManager.enumerateTextLayoutFragments(from: nil, options: [.ensuresExtraLineFragment, .ensuresLayout, .estimatesSize])`
-                // returns unexpected value for extra line fragment height (return 14) that is not correct in the context,
-                // therefore for empty override height with value manually calculated from font + paragraph style
-                if textRange == textLayoutManager.documentRange, textRange.isEmpty {
-                    return CGRect(origin: selectionFrame.origin, size: CGSize(width: selectionFrame.width, height: typingLineHeight)).pixelAligned
-                }
-
-                return selectionFrame
             }
 
             removeInsertionPointView()
 
             for selectionFrame in textSelectionFrames where !selectionFrame.isNull && !selectionFrame.isInfinite {
-                let insertionViewFrame = CGRect(origin: selectionFrame.origin, size: CGSize(width: max(2, selectionFrame.width), height: selectionFrame.height))
+                let insertionViewFrame = CGRect(origin: selectionFrame.origin, size: CGSize(width: max(2, selectionFrame.width), height: selectionFrame.height)).pixelAligned
 
                 var textInsertionIndicator: any STInsertionPointIndicatorProtocol
                 if let customTextInsertionIndicator = self.delegateProxy.textViewInsertionPointView(self, frame: CGRect(origin: .zero, size: insertionViewFrame.size)) {

@@ -115,12 +115,12 @@ extension STTextView {
             textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
-                for lineFragment in layoutFragment.textLineFragments where (lineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == lineFragment) {
+                for textLineFragment in layoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == textLineFragment) {
 
                     func isLineSelected() -> Bool {
                         textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
                             var result = true
-                            if lineFragment.isExtraLineFragment {
+                            if textLineFragment.isExtraLineFragment {
                                 let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
                                 result = result && c1
                             } else {
@@ -137,21 +137,73 @@ extension STTextView {
 
                     let isLineSelected = isLineSelected()
 
-                    var baselineYOffset: CGFloat = 0
-                    if let paragraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                        baselineYOffset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
-                    }
-
                     let lineNumber = startLineIndex + linesCount + 1
-                    let locationForFirstCharacter = lineFragment.locationForCharacter(at: 0)
 
-                    var lineFragmentFrame = CGRect(origin: CGPoint(x: 0, y: layoutFragment.layoutFragmentFrame.origin.y - contentOffset.y), size: layoutFragment.layoutFragmentFrame.size)
+                    // calculated values depends on the "isExtraLineFragment" condition
+                    var baselineYOffset: CGFloat = 0
+                    let locationForFirstCharacter: CGPoint
+                    let lineFragmentFrame: CGRect
 
-                    lineFragmentFrame.origin.y += lineFragment.typographicBounds.origin.y
-                    if lineFragment.isExtraLineFragment {
-                        lineFragmentFrame.size.height = lineFragment.typographicBounds.height
-                    } else if !lineFragment.isExtraLineFragment, let extraLineFragment = layoutFragment.textLineFragments.first(where: { $0.isExtraLineFragment }) {
-                        lineFragmentFrame.size.height -= extraLineFragment.typographicBounds.height
+                    // The logic for extra line handling would use some cleanup
+                    // It apply workaround for FB15131180 invalid frame being reported
+                    // for the extra line fragment. The workaround is to calculate (adjust)
+                    // extra line fragment frame based on previous text line (from the same layout fragment)
+                    if layoutFragment.isExtraLineFragment {
+                        if !textLineFragment.isExtraLineFragment {
+                            locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
+
+                            if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                                baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                            }
+
+                            lineFragmentFrame = CGRect(
+                                origin: CGPoint(
+                                    x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
+                                ),
+                                size: CGSize(
+                                    width: textLineFragment.typographicBounds.width,
+                                    height: textLineFragment.typographicBounds.height
+                                )
+                            )
+                        } else {
+                            // Use values from the same layoutFragment but previous line, that is not extra line fragment.
+                            // Since this is extra line fragment, it is guaranteed that there is at least 2 line fragments in the layout fragment
+                            let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
+                            locationForFirstCharacter = prevTextLineFragment.locationForCharacter(at: 0)
+
+                            if let paragraphStyle = prevTextLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                                baselineYOffset = -(prevTextLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                            }
+
+                            lineFragmentFrame = CGRect(
+                                origin: CGPoint(
+                                    x: layoutFragment.layoutFragmentFrame.origin.x + prevTextLineFragment.typographicBounds.origin.x,
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY - contentOffset.y
+                                ),
+                                size: CGSize(
+                                    width: textLineFragment.typographicBounds.width,
+                                    height: prevTextLineFragment.typographicBounds.height
+                                )
+                            )
+                        }
+                    } else {
+                        locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
+
+                        if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
+                            baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                        }
+
+                        lineFragmentFrame = CGRect(
+                            origin: CGPoint(
+                                x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                                y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
+                            ),
+                            size: CGSize(
+                                width: layoutFragment.layoutFragmentFrame.width, // extend width to he fragment layout for the convenience of gutter
+                                height: layoutFragment.layoutFragmentFrame.height
+                            )
+                        )
                     }
 
                     var effectiveLineTextAttributes = lineTextAttributes

@@ -977,12 +977,12 @@ import AVFoundation
             // extra line fragment area (sic).
             textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
-                for lineFragment in layoutFragment.textLineFragments {
-                    
+                for textLineFragment in layoutFragment.textLineFragments {
+
                     func isLineSelected() -> Bool {
                         textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
                             var result = true
-                            if lineFragment.isExtraLineFragment {
+                            if textLineFragment.isExtraLineFragment {
                                 let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
                                 result = result && c1
                             } else {
@@ -996,27 +996,48 @@ import AVFoundation
                             return partialResult && result
                         }
                     }
-                    
-                    if isLineSelected() {
-                        var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                        lineFragmentFrame.size.height = lineFragment.typographicBounds.height
-                        
-                        
-                        let r = CGRect(
-                            origin: CGPoint(
-                                x: selectionView.bounds.minX,
-                                y: lineFragmentFrame.origin.y + lineFragment.typographicBounds.minY
-                            ),
-                            size: CGSize(
-                                width: selectionView.bounds.width,
-                                height: lineFragmentFrame.height
+
+                    let isLineSelected = isLineSelected()
+
+                    if isLineSelected {
+                        let lineSelectionRectangle: CGRect
+
+                        if !textLineFragment.isExtraLineFragment {
+                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                            lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
+
+                            lineSelectionRectangle = CGRect(
+                                origin: CGPoint(
+                                    x: selectionView.bounds.minX,
+                                    y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
+                                ),
+                                size: CGSize(
+                                    width: selectionView.bounds.width,
+                                    height: lineFragmentFrame.height
+                                )
                             )
-                        )
-                        
-                        if let rect = combinedFragmentsRect {
-                            combinedFragmentsRect = rect.union(r)
                         } else {
-                            combinedFragmentsRect = r
+                            // Workaround for FB15131180
+                            let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
+                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                            lineFragmentFrame.size.height = prevTextLineFragment.typographicBounds.height
+
+                            lineSelectionRectangle = CGRect(
+                                origin: CGPoint(
+                                    x: selectionView.bounds.minX,
+                                    y: lineFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
+                                ),
+                                size: CGSize(
+                                    width: selectionView.bounds.width,
+                                    height: lineFragmentFrame.height
+                                )
+                            )
+                        }
+
+                        if let rect = combinedFragmentsRect {
+                            combinedFragmentsRect = rect.union(lineSelectionRectangle)
+                        } else {
+                            combinedFragmentsRect = lineSelectionRectangle
                         }
                     }
                 }

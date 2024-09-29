@@ -226,7 +226,7 @@ extension STTextView: UITextInput {
     /* Geometry used to provide, for example, a correction rect. */
 
     public func firstRect(for range: UITextRange) -> CGRect {
-        textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .selection)?.moved(dx: -contentView.bounds.origin.x) ?? .zero
+        textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .standard)?.moved(dx: -contentView.bounds.origin.x) ?? .zero
     }
 
     public func caretRect(for position: UITextPosition) -> CGRect {
@@ -234,21 +234,87 @@ extension STTextView: UITextInput {
             return .zero
         }
 
-        if textLayoutManager.documentRange.isEmpty {
-            let segmentFrame = textLayoutManager.textSegmentFrame(at: textLocation.location, type: .selection) ?? .zero
+        // rewrite it to lines
+        var textSelectionFrames: [CGRect] = []
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: textLocation.location), type: .standard) { textSegmentRange, textSegmentFrame, baselinePosition, textContainer in
+            if let textSegmentRange {
+                let documentRange = textLayoutManager.documentRange
+                guard !documentRange.isEmpty else {
+                    // empty document
+                    textSelectionFrames.append(
+                        CGRect(
+                            origin: CGPoint(
+                                x: textSegmentFrame.origin.x,
+                                y: textSegmentFrame.origin.y
+                            ),
+                            size: CGSize(
+                                width: textSegmentFrame.width,
+                                height: typingLineHeight
+                            )
+                        )
+                    )
+                    return false
+                }
+
+                let isAtEndLocation = textSegmentRange.location == documentRange.endLocation
+                guard !isAtEndLocation else {
+                    // At the end of non-empty document
+
+                    // FB15131180: extra line fragment frame is not correct hence workaround location and height at extra line
+                    if let layoutFragment = textLayoutManager.extraLineTextLayoutFragment() {
+                        // at least 2 lines guaranteed at this point
+                        let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
+                        textSelectionFrames.append(
+                            CGRect(
+                                origin: CGPoint(
+                                    x: textSegmentFrame.origin.x,
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
+                                ),
+                                size: CGSize(
+                                    width: textSegmentFrame.width,
+                                    height: prevTextLineFragment.typographicBounds.height
+                                )
+                            )
+                        )
+                    } else if let prevLocation = textLayoutManager.location(textSegmentRange.endLocation, offsetBy: -1),
+                              let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation)
+                    {
+                        // Get insertion point height from the last-to-end (last) line fragment location
+                        // since we're at the end location at this point.
+                        textSelectionFrames.append(
+                            CGRect(
+                                origin: CGPoint(
+                                    x: textSegmentFrame.origin.x,
+                                    y: textSegmentFrame.origin.y
+                                ),
+                                size: CGSize(
+                                    width: textSegmentFrame.width,
+                                    height: prevTextLineFragment.typographicBounds.height
+                                )
+                            )
+                        )
+                    }
+                    return false
+                }
+
+                // Regular where segment frame is correct
+                textSelectionFrames.append(
+                    textSegmentFrame
+                )
+            }
+            return true
+        }
+
+        if let selectionFrame = textSelectionFrames.first {
             return CGRect(
-                x: segmentFrame.origin.x - 1,
-                y: 0,
-                width: 2,
+                x: selectionFrame.origin.x - 1,
+                y: selectionFrame.origin.y,
+                width: max(2, selectionFrame.width),
                 height: typingLineHeight
             ).moved(dx: -contentView.bounds.origin.x).pixelAligned
-        } else {
-            let segmentFrame = textLayoutManager.textSegmentFrame(at: textLocation.location, type: .selection) ?? .zero
-            var rect = segmentFrame
-            rect.origin.x -= 1
-            rect.size.width = 2
-            return segmentFrame.moved(dx: -contentView.bounds.origin.x).pixelAligned
         }
+
+        return .zero
     }
 
     /// Returns an array of selection rects corresponding to the range of text.
