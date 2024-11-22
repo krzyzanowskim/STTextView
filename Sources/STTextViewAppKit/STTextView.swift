@@ -535,6 +535,7 @@ import AVFoundation
         guard let result = enclosingScrollView, result.documentView == self else {
             return nil
         }
+        result.automaticallyAdjustsContentInsets = false
         return result
     }
 
@@ -1199,17 +1200,20 @@ import AVFoundation
             self.setFrameSize(size)
         }
 
-        let newContentFrame = CGRect(
-            x: gutterPadding,
-            y: frame.origin.y,
-            width: frame.width - gutterPadding,
-            height: frame.height
-        )
+        if scrollView?.contentInsets.left != gutterPadding {
+            let newContentFrame = CGRect(
+                x: 0,
+                y: frame.origin.y,
+                width: frame.width - gutterPadding,
+                height: frame.height
+            )
 
-        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
             contentView.frame = newContentFrame
             selectionView.frame = newContentFrame
             decorationView.frame = newContentFrame
+
+            scrollView?.contentInsets.left = gutterPadding
+            scrollView?.contentView.contentInsets.left = gutterPadding
 
             _configureTextContainerSize()
         }
