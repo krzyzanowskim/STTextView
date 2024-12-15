@@ -1190,15 +1190,13 @@ import AVFoundation
 
         }
 
-        let gutterPadding = gutterView?.bounds.width ?? 0
-        size.width += gutterPadding
-
         logger.debug("proposed size (\(size.width), \(size.height)) \(#function)")
 
         if !frame.size.isAlmostEqual(to: size) {
             self.setFrameSize(size)
         }
 
+        let gutterPadding = gutterView?.bounds.width ?? 0
         let newContentFrame = CGRect(
             x: gutterPadding,
             y: frame.origin.y,
