@@ -430,6 +430,11 @@ import AVFoundation
     /// Content view. Layout fragments content.
     internal let contentView: STContentView
 
+    /// Content frame. Layout fragments content frame.
+    public var contentFrame: CGRect {
+        contentView.frame
+    }
+
     /// Selection highlight content view.
     internal let selectionView: STSelectionView
 

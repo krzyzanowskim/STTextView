@@ -183,6 +183,11 @@ import STTextViewCommon
     /// Content view. Layout fragments content.
     internal let contentView: STContentView
 
+    /// Content frame. Layout fragments content frame.
+    public var contentFrame: CGRect {
+        contentView.frame
+    }
+
     /// Line highlight view.
     internal let lineHighlightView: STLineHighlightView
 
