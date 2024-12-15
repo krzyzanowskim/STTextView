@@ -637,9 +637,10 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
-        contentView.bounds.origin.x = -(gutterView?.frame.width ?? 0)
-        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, bounds.width - (gutterView?.frame.width ?? 0))
-        contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, bounds.height)
+        let gutterWidth = gutterView?.frame.width ?? 0
+        contentView.frame.origin.x = gutterWidth
+        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, frame.width - gutterWidth)
+        contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, frame.height)
         contentSize = contentView.frame.size
 
         super.sizeToFit()
@@ -882,7 +883,7 @@ import STTextViewCommon
             if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
                 lineHighlightView.frame = CGRect(
                     origin: CGPoint(
-                        x: contentView.frame.origin.x,
+                        x: 0,
                         y: selectionFrame.origin.y
                     ),
                     size: CGSize(
@@ -937,11 +938,11 @@ import STTextViewCommon
 
                             lineSelectionRectangle = CGRect(
                                 origin: CGPoint(
-                                    x: contentView.frame.origin.x,
+                                    x: 0,
                                     y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
                                 ),
                                 size: CGSize(
-                                    width: contentView.frame.size.width,
+                                    width: contentView.bounds.size.width,
                                     height: lineFragmentFrame.height
                                 )
                             )
@@ -953,7 +954,7 @@ import STTextViewCommon
 
                             lineSelectionRectangle = CGRect(
                                 origin: CGPoint(
-                                    x: contentView.bounds.minX,
+                                    x: 0,
                                     y: lineFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
                                 ),
                                 size: CGSize(
