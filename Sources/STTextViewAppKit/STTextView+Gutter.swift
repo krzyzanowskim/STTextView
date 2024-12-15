@@ -22,7 +22,7 @@ extension STTextView {
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 if let scrollView = enclosingScrollView {
-                    scrollView.addSubview(gutterView)
+                    scrollView.addSubview(gutterView, positioned: .below, relativeTo: scrollView.findBarView)
                 }
                 self.gutterView = gutterView
                 needsLayout = true
