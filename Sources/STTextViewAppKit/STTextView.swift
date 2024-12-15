@@ -457,6 +457,8 @@ import AVFoundation
     /// NSTextFinderClient
     internal let textFinderClient: STTextFinderClient
 
+    internal let textFinderBarContainer: STTextFinderBarContainer
+
     internal var textCheckingController: NSTextCheckingController!
 
     /// A Boolean value that indicates whether the receiver has continuous spell checking enabled.
@@ -592,9 +594,10 @@ import AVFoundation
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
 
-
-        textFinder = NSTextFinder()
         textFinderClient = STTextFinderClient()
+        textFinderBarContainer = STTextFinderBarContainer()
+        textFinder = NSTextFinder()
+        textFinder.client = textFinderClient
 
         _defaultTypingAttributes = [
             .paragraphStyle: NSParagraphStyle.default,
@@ -605,6 +608,9 @@ import AVFoundation
         _typingAttributes = [:]
 
         super.init(frame: frameRect)
+
+        textFinderBarContainer.client = self
+        textFinder.findBarContainer = textFinderBarContainer
 
         setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
 
@@ -724,25 +730,23 @@ import AVFoundation
     open override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
 
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(enclosingClipViewBoundsDidChange(_:)),
-            name: NSClipView.boundsDidChangeNotification,
-            object: scrollView?.contentView
-        )
+        if let scrollView {
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(enclosingClipViewBoundsDidChange(_:)),
+                name: NSClipView.boundsDidChangeNotification,
+                object: scrollView.contentView
+            )
+        }
     }
 
     open override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
 
         if self.window != nil {
-            textFinder.client = textFinderClient
-            textFinder.findBarContainer = enclosingScrollView
-
             // setup registerd plugins
             setupPlugins()
         }
-
     }
 
     open override func hitTest(_ point: NSPoint) -> NSView? {
