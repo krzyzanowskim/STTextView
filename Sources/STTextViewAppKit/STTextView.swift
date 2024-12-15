@@ -2,12 +2,13 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 //
 //
-//  STTextView
-//      |---selectionView
-//              |---(STLineHighlightView | SelectionHighlightView)
-//      |---contentView
-//              |---(STInsertionPointView | STTextLayoutFragmentView)
-//      |---decorationView
+//  NSScrollView
+//      |---STTextView
+//          |---selectionView
+//                  |---(STLineHighlightView | SelectionHighlightView)
+//          |---contentView
+//                  |---(STInsertionPointView | STTextLayoutFragmentView)
+//          |---decorationView
 //      |---gutterView
 //
 //
@@ -427,13 +428,13 @@ import AVFoundation
     }
 
     /// Content view. Layout fragments content.
-    internal let contentView: ContentView
+    internal let contentView: STContentView
 
     /// Selection highlight content view.
-    internal let selectionView: SelectionView
+    internal let selectionView: STSelectionView
 
     /// Layout fragments decoration, custom rendering attributes
-    internal let decorationView: DecorationView
+    internal let decorationView: STDecorationView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
@@ -579,9 +580,9 @@ import AVFoundation
         textContentManager.addTextLayoutManager(textLayoutManager)
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
-        contentView = ContentView()
-        selectionView = SelectionView()
-        decorationView = DecorationView(textLayoutManager: textLayoutManager)
+        contentView = STContentView()
+        selectionView = STSelectionView()
+        decorationView = STDecorationView(textLayoutManager: textLayoutManager)
 
         allowsUndo = true
         _undoManager = CoalescingUndoManager()

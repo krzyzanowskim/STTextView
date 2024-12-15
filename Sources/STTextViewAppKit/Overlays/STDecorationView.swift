@@ -4,7 +4,7 @@
 import AppKit
 
 /// Custom rendering attributes
-final class DecorationView: NSView {
+final class STDecorationView: NSView {
     weak var textLayoutManager: NSTextLayoutManager?
 
     init(textLayoutManager: NSTextLayoutManager) {

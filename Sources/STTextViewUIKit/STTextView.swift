@@ -3,10 +3,10 @@
 //
 //
 //  STTextView
-//      |---ContentView
+//      |---conventView
 //              |---STLineHighlightView
 //              |---STTextLayoutFragmentView
-//      |---STGutterView
+//      |---gutterView
 
 import UIKit
 import STTextKitPlus
@@ -181,7 +181,7 @@ import STTextViewCommon
     internal var plugins: [Plugin] = []
 
     /// Content view. Layout fragments content.
-    internal let contentView: ContentView
+    internal let contentView: STContentView
 
     /// Line highlight view.
     internal let lineHighlightView: STLineHighlightView
@@ -413,7 +413,7 @@ import STTextViewCommon
         isSelectable = true
         isEditable = true
 
-        contentView = ContentView()
+        contentView = STContentView()
 
         lineHighlightView = STLineHighlightView()
         lineHighlightView.isHidden = true

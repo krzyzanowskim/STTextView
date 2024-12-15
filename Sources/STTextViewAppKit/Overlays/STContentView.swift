@@ -3,7 +3,7 @@
 
 import AppKit
 
-final class SelectionView: NSView {
+final class STContentView: NSView {
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)

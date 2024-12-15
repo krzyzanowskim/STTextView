@@ -110,6 +110,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         }
     }
 
+    /// Scrolls the specified range such that it is visible
     func scrollRangeToVisible(_ range: NSRange) {
         guard let textView = textView,
               let textContentManager = textView.textLayoutManager.textContentManager,
@@ -121,6 +122,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         textView.scrollToVisible(textRange, type: .standard)
     }
 
+    /// An array of visible character ranges.
     var visibleCharacterRanges: [NSValue] {
         guard let textLayoutManager = textView?.textLayoutManager,
               let viewportTextRange = textLayoutManager.textViewportLayoutController.viewportRange,
@@ -157,11 +159,12 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         }
 
         outRange.pointee = NSRange(textContentManager.documentRange, in: textContentManager)
-        return textView
+        return textView.contentView
+
     }
 
     func drawCharacters(in range: NSRange, forContentView view: NSView) {
-        guard let textView = view as? STTextView, textView == self.textView,
+        guard let textView = view.superview as? STTextView, textView == self.textView,
               let textContentManager = textView.textLayoutManager.textContentManager,
               let textRange = NSTextRange(range, in: textContentManager),
               let context = NSGraphicsContext.current?.cgContext
