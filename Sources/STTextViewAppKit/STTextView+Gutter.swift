@@ -49,7 +49,7 @@ extension STTextView {
     }
 
     private func layoutGutterLineNumbers() {
-        guard let gutterView else {
+        guard let gutterView, let scrollView else {
             return
         }
 
@@ -98,7 +98,7 @@ extension STTextView {
                 numberCell.frame = CGRect(
                     origin: CGPoint(
                         x: bounds.minX,
-                        y: selectionFrame.origin.y - scrollView!.contentView.bounds.minY
+                        y: selectionFrame.origin.y - scrollView.contentView.bounds.minY
                     ),
                     size: CGSize(
                         width: gutterView.containerView.frame.width,
@@ -108,7 +108,7 @@ extension STTextView {
 
                 gutterView.containerView.addSubview(numberCell)
             }
-        } else if let scrollView, let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
+        } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
 
             let textElements = textContentManager.textElements(
                 for: NSTextRange(
