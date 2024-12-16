@@ -60,7 +60,7 @@ STTextView is already well-suited as a text editor component. However, it still 
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "0.9.6")
+        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "1.0.0")
     ]
 )
 ```
