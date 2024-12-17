@@ -335,10 +335,6 @@ import AVFoundation
     @Invalidating(.display)
     @objc dynamic open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
 
-    /// The background color of a text selection.
-    @Invalidating(.display)
-    @objc dynamic open var selectionBackgroundColor: NSColor = NSColor.selectedTextBackgroundColor
-
     /// The text view's background color
     @Invalidating(.display)
     @objc dynamic open var backgroundColor: NSColor? = nil {
