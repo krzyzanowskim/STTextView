@@ -5,6 +5,12 @@ import AppKit
 
 final class STLineHighlightView: NSView {
 
+    var backgroundColor: NSColor? {
+        didSet {
+            layer?.backgroundColor = backgroundColor?.cgColor
+        }
+    }
+
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
@@ -23,5 +29,13 @@ final class STLineHighlightView: NSView {
 #else
         false
 #endif
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
+            guard let self else { return }
+            self.backgroundColor = self.backgroundColor
+        }
     }
 }

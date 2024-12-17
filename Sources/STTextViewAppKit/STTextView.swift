@@ -718,6 +718,12 @@ import AVFoundation
 
     open override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
+
+        effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
+            guard let self else { return }
+            self.backgroundColor = self.backgroundColor
+        }
+
         self.updateSelectedRangeHighlight()
         self.layoutGutter()
         self.updateSelectedLineHighlight()
@@ -947,7 +953,7 @@ import AVFoundation
 
         func layoutHighlightView(in frameRect: CGRect) {
             let highlightView = STLineHighlightView(frame: frameRect)
-            highlightView.layer?.backgroundColor = selectedLineHighlightColor.cgColor
+            highlightView.backgroundColor = selectedLineHighlightColor
             selectionView.addSubview(highlightView)
         }
 

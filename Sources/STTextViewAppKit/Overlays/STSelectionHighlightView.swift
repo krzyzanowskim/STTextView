@@ -4,6 +4,13 @@
 import AppKit
 
 final class STSelectionHighlightView: NSView {
+
+    var backgroundColor: NSColor? = .selectedTextBackgroundColor {
+        didSet {
+            layer?.backgroundColor = backgroundColor?.cgColor
+        }
+    }
+
     override var isFlipped: Bool {
 #if os(macOS)
         true
@@ -16,7 +23,7 @@ final class STSelectionHighlightView: NSView {
         super.init(frame: frameRect)
         wantsLayer = true
         clipsToBounds = true
-        layer?.backgroundColor = NSColor.selectedTextBackgroundColor.cgColor
+        layer?.backgroundColor = backgroundColor?.cgColor
     }
     
     @available(*, unavailable)
@@ -28,7 +35,7 @@ final class STSelectionHighlightView: NSView {
         super.viewDidChangeEffectiveAppearance()
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
             guard let self else { return }
-            layer?.backgroundColor = layer?.backgroundColor
+            self.backgroundColor = self.backgroundColor
         }
     }
 }

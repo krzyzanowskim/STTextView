@@ -168,7 +168,7 @@ private class STTextInsertionIndicatorNew: NSTextInsertionIndicator, STInsertion
 private class STTextInsertionIndicatorOld: NSView, STInsertionPointIndicatorProtocol {
     private var timer: Timer?
 
-    var insertionPointColor: NSColor = .defaultTextInsertionPoint {
+    var insertionPointColor: NSColor = .defaultTextInsertionPoint.withAlphaComponent(0.9) {
         didSet {
             layer?.backgroundColor = insertionPointColor.cgColor
         }
@@ -178,7 +178,7 @@ private class STTextInsertionIndicatorOld: NSView, STInsertionPointIndicatorProt
         super.init(frame: frameRect)
 
         wantsLayer = true
-        layer?.backgroundColor = insertionPointColor.withAlphaComponent(0.9).cgColor
+        layer?.backgroundColor = insertionPointColor.cgColor
         layer?.cornerRadius = 1
     }
 
@@ -205,6 +205,14 @@ private class STTextInsertionIndicatorOld: NSView, STInsertionPointIndicatorProt
 
     open override var isFlipped: Bool {
         true
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
+            guard let self else { return }
+            self.insertionPointColor = self.insertionPointColor
+        }
     }
 }
 
