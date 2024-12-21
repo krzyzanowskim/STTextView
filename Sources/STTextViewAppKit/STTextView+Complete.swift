@@ -8,19 +8,27 @@ extension STTextView {
 
     /// Supporting Autocomplete
     ///
-    /// see NSStandardKeyBindingResponding
+    /// see ``NSStandardKeyBindingResponding``
     @MainActor
     open override func complete(_ sender: Any?) {
-        if let completionWindowController, completionWindowController.isVisible {
-            completionWindowController.close()
-        } else {
-            performCompletion()
-        }
+        performCompletion()
+    }
+
+    /// Close completion window
+    ///
+    /// see ``complete(_:)``
+    @MainActor
+    public func cancelComplete(_ sender: Any?) {
+        completionWindowController?.close()
     }
 
     @MainActor
     open override func cancelOperation(_ sender: Any?) {
-        self.complete(sender)
+        if let completionWindowController, completionWindowController.isVisible {
+            completionWindowController.close()
+        } else {
+            self.complete(sender)
+        }
     }
 
     @MainActor
@@ -29,12 +37,13 @@ extension STTextView {
 
         guard let insertionPointLocation = textLayoutManager.insertionPointLocations.first,
               let textCharacterSegmentRect = textLayoutManager.textSegmentFrame(at: insertionPointLocation, type: .standard),
-              let completionItems = delegateProxy.textView(self, completionItemsAtLocation: insertionPointLocation),
-              completionItems.isEmpty == false
+              let completionItems = delegateProxy.textView(self, completionItemsAtLocation: insertionPointLocation)
         else {
-            if let completionWindowController, completionWindowController.isVisible {
-                self.completionWindowController?.close()
-            }
+            return
+        }
+
+        if completionItems.isEmpty {
+            completionWindowController?.close()
             return
         }
 

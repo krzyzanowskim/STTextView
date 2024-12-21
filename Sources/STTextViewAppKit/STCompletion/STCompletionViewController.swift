@@ -111,7 +111,8 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
                         self.tableView.keyDown(with: event)
                         return nil
                     default:
-                        self.cancelOperation(self)
+                        // Ignore other event
+                        break
                     }
                 }
             }

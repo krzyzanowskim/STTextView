@@ -66,7 +66,7 @@ public protocol STTextViewDelegate: AnyObject {
     /// Insert completion item
     func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem)
 
-    /// Asks the delegate for a view to display content of completion window.
+    /// Asks the delegate for a view to display content of completion window. Optional.
     ///
     /// Uses `textView(_:completionItemsAtLocation:)` to populate `STCompletionViewControllerProtocol.items`
     func textViewCompletionViewController(_ textView: STTextView) -> any STCompletionViewControllerProtocol
