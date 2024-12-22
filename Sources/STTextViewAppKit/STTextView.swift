@@ -447,6 +447,11 @@ import AVFoundation
         return STCompletionWindowController(viewController)
     }()
 
+    /// Completion window is presented currently
+    open var isCompletionActive: Bool {
+        completionWindowController?.isVisible == true
+    }
+
     /// Search-and-replace find interface inside a view.
     open private(set) var textFinder: NSTextFinder
 

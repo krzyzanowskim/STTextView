@@ -19,7 +19,7 @@ extension STTextView {
             return
         }
 
-        let rangeView = TextLayoutRangeView(textLayoutManager: textLayoutManager, textRange: textRange)
+        let rangeView = STTextLayoutRangeView(textLayoutManager: textLayoutManager, textRange: textRange)
         let imageRep = bitmapImageRepForCachingDisplay(in: rangeView.bounds)!
         rangeView.cacheDisplay(in: rangeView.bounds, to: imageRep)
 

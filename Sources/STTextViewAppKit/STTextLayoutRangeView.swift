@@ -6,11 +6,11 @@ import CoreGraphics
 
 /// A view with content of range.
 /// Used to provide image of a text eg. for dragging
-final class TextLayoutRangeView: NSView {
+open class STTextLayoutRangeView: NSView {
     private let textLayoutManager: NSTextLayoutManager
     private let textRange: NSTextRange
 
-    override var isFlipped: Bool {
+    public override var isFlipped: Bool {
 #if os(macOS)
         true
 #else
@@ -18,11 +18,11 @@ final class TextLayoutRangeView: NSView {
 #endif
     }
 
-    override var intrinsicContentSize: NSSize {
-        frame.size
+    open override var intrinsicContentSize: NSSize {
+        bounds.size
     }
 
-    init(textLayoutManager: NSTextLayoutManager, textRange: NSTextRange) {
+    public init(textLayoutManager: NSTextLayoutManager, textRange: NSTextRange) {
         self.textLayoutManager = textLayoutManager
         self.textRange = textRange
 
@@ -42,11 +42,18 @@ final class TextLayoutRangeView: NSView {
         wantsLayer = true
     }
 
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func draw(_ dirtyRect: NSRect) {
+    open func image() -> NSImage {
+        let imageRep = bitmapImageRepForCachingDisplay(in: bounds)!
+        cacheDisplay(in: bounds, to: imageRep)
+
+        return NSImage(cgImage: imageRep.cgImage!, size: bounds.size)
+    }
+
+    open override func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
 
         var origin: CGPoint = .zero
