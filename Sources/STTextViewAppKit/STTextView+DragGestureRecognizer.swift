@@ -20,10 +20,7 @@ extension STTextView {
         }
 
         let rangeView = STTextLayoutRangeView(textLayoutManager: textLayoutManager, textRange: textRange)
-        let imageRep = bitmapImageRepForCachingDisplay(in: rangeView.bounds)!
-        rangeView.cacheDisplay(in: rangeView.bounds, to: imageRep)
-
-        let draggingImage = NSImage(cgImage: imageRep.cgImage!, size: rangeView.bounds.size)
+        let draggingImage = rangeView.image()
 
         let draggingItem = NSDraggingItem(pasteboardWriter: selectionsAttributedString)
         draggingItem.setDraggingFrame(rangeView.frame, contents: draggingImage)
