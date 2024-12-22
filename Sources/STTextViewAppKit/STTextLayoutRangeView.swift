@@ -30,10 +30,10 @@ open class STTextLayoutRangeView: NSView {
         var frame: CGRect = textLayoutManager.textSegmentFrame(in: self.textRange, type: .standard)!
         textLayoutManager.enumerateTextLayoutFragments(in: self.textRange) { textLayoutFragment in
             frame = CGRect(
-                x: min(frame.origin.x, textLayoutFragment.layoutFragmentFrame.origin.x),
-                y: frame.origin.y,
-                width: max(frame.size.width, textLayoutFragment.renderingSurfaceBounds.width),
-                height: max(frame.size.height, textLayoutFragment.renderingSurfaceBounds.height)
+                x: min(frame.origin.x, textLayoutFragment.layoutFragmentFrame.minX),
+                y: min(frame.origin.y, textLayoutFragment.layoutFragmentFrame.minY),
+                width: max(frame.size.width, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding),
+                height: max(frame.size.height, textLayoutFragment.layoutFragmentFrame.maxY + textLayoutFragment.topMargin + textLayoutFragment.bottomMargin)
             )
             return true
         }
@@ -47,26 +47,17 @@ open class STTextLayoutRangeView: NSView {
     }
 
     open func image() -> NSImage? {
-        guard let imageRep = bitmapImageRepForCachingDisplay(in: bounds) else {
-            return nil
-        }
-        cacheDisplay(in: bounds, to: imageRep)
-
-        guard let cgImage = imageRep.cgImage else {
-            return nil
-        }
-
-        return NSImage(cgImage: cgImage, size: bounds.size)
+        stImage()
     }
 
     open override func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
 
-        var origin: CGPoint = .zero
         textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
             // at what location start draw the line. the first character is at textRange.location
             // I want to draw just a part of the line fragment, however I can only draw the whole line
             // so remove/delete unnecessary part of the line
+            var origin = textLayoutFragment.layoutFragmentFrame.origin
             for textLineFragment in textLayoutFragment.textLineFragments {
                 guard let textLineFragmentRange = textLineFragment.textRange(in: textLayoutFragment) else {
                     continue
