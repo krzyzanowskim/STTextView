@@ -22,13 +22,13 @@ open class STTextLayoutRangeView: NSView {
         bounds.size
     }
 
-    public init(textLayoutManager: NSTextLayoutManager, textRange: NSTextRange) {
+    public init(textLayoutManager: NSTextLayoutManager, textRange: NSTextRange?) {
         self.textLayoutManager = textLayoutManager
-        self.textRange = textRange
+        self.textRange = textRange ?? textLayoutManager.documentRange
 
         // Calculate frame. Expand to the size of layout fragments in the asked range
-        var frame: CGRect = textLayoutManager.textSegmentFrame(in: textRange, type: .standard)!
-        textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
+        var frame: CGRect = textLayoutManager.textSegmentFrame(in: self.textRange, type: .standard)!
+        textLayoutManager.enumerateTextLayoutFragments(in: self.textRange) { textLayoutFragment in
             frame = CGRect(
                 x: min(frame.origin.x, textLayoutFragment.layoutFragmentFrame.origin.x),
                 y: frame.origin.y,
@@ -46,11 +46,17 @@ open class STTextLayoutRangeView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    open func image() -> NSImage {
-        let imageRep = bitmapImageRepForCachingDisplay(in: bounds)!
+    open func image() -> NSImage? {
+        guard let imageRep = bitmapImageRepForCachingDisplay(in: bounds) else {
+            return nil
+        }
         cacheDisplay(in: bounds, to: imageRep)
 
-        return NSImage(cgImage: imageRep.cgImage!, size: bounds.size)
+        guard let cgImage = imageRep.cgImage else {
+            return nil
+        }
+
+        return NSImage(cgImage: cgImage, size: bounds.size)
     }
 
     open override func draw(_ dirtyRect: NSRect) {
