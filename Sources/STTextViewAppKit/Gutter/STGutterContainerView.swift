@@ -3,6 +3,7 @@
 
 import AppKit
 
+// Gutter line number cells container
 final class STGutterContainerView: NSView {
 
     override init(frame: CGRect) {

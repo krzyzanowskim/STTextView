@@ -1,5 +1,10 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
+//
+//  STGutterView
+//      |- STGutterContainerView
+//           |-STGutterLineNumberCell
+//
 
 import AppKit
 import STTextViewCommon
