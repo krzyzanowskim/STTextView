@@ -34,6 +34,7 @@ final class ViewController: NSViewController {
         textView.showsInvisibleCharacters = false
         textView.textDelegate = self
         textView.showsLineNumbers = true
+        textView.gutterView?.areMarkersEnabled = true
         textView.gutterView?.drawSeparator = true
 
         // Plugins

@@ -520,11 +520,7 @@ import AVFoundation
     }
 
     open override var isFlipped: Bool {
-        #if os(macOS)
         true
-        #else
-        false
-        #endif
     }
 
     /// Generates and returns a scroll view with a STTextView set as its document view.
@@ -1439,19 +1435,19 @@ import AVFoundation
 
 // MARK: - NSViewInvalidating
 
-private extension NSViewInvalidating where Self == NSView.Invalidations.InsertionPoint {
-    static var insertionPoint: NSView.Invalidations.InsertionPoint {
-        NSView.Invalidations.InsertionPoint()
+private extension NSViewInvalidating where Self == STTextView.Invalidations.InsertionPoint {
+    static var insertionPoint: STTextView.Invalidations.InsertionPoint {
+        STTextView.Invalidations.InsertionPoint()
     }
 }
 
-private extension NSViewInvalidating where Self == NSView.Invalidations.CursorRects {
-    static var cursorRects: NSView.Invalidations.CursorRects {
-        NSView.Invalidations.CursorRects()
+private extension NSViewInvalidating where Self == STTextView.Invalidations.CursorRects {
+    static var cursorRects: STTextView.Invalidations.CursorRects {
+        STTextView.Invalidations.CursorRects()
     }
 }
 
-private extension NSView.Invalidations {
+private extension STTextView.Invalidations {
 
     struct InsertionPoint: NSViewInvalidating {
 

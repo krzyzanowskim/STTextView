@@ -5,14 +5,19 @@ import UIKit
 import STTextViewCommon
 
 final class STGutterLineNumberCell: UIView {
-    private let number: Int
+    /// Line number
+    let lineNumber: Int
     private let firstBaseline: CGFloat
     private let ctLine: CTLine
     private let textWidth: CGFloat
     var insets: STRulerInsets = STRulerInsets()
 
+    override var debugDescription: String {
+        "\(super.debugDescription) (number: \(lineNumber))"
+    }
+
     init(firstBaseline: CGFloat, attributes: [NSAttributedString.Key: Any], number: Int) {
-        self.number = number
+        self.lineNumber = number
         self.firstBaseline = firstBaseline
 
         let attributedString = NSAttributedString(string: "\(number)", attributes: attributes)

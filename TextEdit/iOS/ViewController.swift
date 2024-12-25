@@ -25,6 +25,7 @@ class ViewController: UIViewController {
         textView.text = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
         textView.showsLineNumbers = true
         textView.showsInvisibleCharacters = false
+        textView.gutterView?.areMarkersEnabled = true
         textView.gutterView?.drawSeparator = true
         view.addSubview(textView)
         self.textView = textView

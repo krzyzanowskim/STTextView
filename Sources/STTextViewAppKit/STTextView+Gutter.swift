@@ -45,6 +45,7 @@ extension STTextView {
             gutterView.frame.origin = frame.origin
             gutterView.frame.size.height = scrollView?.bounds.height ?? frame.height
             layoutGutterLineNumbers()
+            layoutGutterMarkers()
         }
     }
 
@@ -53,8 +54,10 @@ extension STTextView {
             return
         }
 
-        gutterView.containerView.subviews.forEach { v in
-            v.removeFromSuperviewWithoutNeedingDisplay()
+        gutterView.containerView.subviews.compactMap {
+            $0 as? STGutterLineNumberCell
+        }.forEach {
+            $0.removeFromSuperviewWithoutNeedingDisplay()
         }
 
         let lineTextAttributes: [NSAttributedString.Key: Any] = [
@@ -74,7 +77,7 @@ extension STTextView {
                 // Use typingAttributes because there's no content so we made up "1" with typing attributes
                 // that allow us to calculate baseline position.
                 // Calculations in sync with position used by STTextLayoutFragment
-                let ctNumberLine = CTLineCreateWithAttributedString(NSAttributedString(string: "\(lineNumber)", attributes: typingAttributes))
+                let ctNumberLine = CTLineCreateWithAttributedString(NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes))
                 let baselineParagraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? defaultParagraphStyle
                 let baselineOffset = -(ctNumberLine.typographicHeight() * (baselineParagraphStyle.lineHeightMultiple - 1.0) / 2)
 
@@ -255,5 +258,13 @@ extension STTextView {
                 gutterView.frame.size.width = newGutterWidth
             }
         }
+    }
+
+    private func layoutGutterMarkers() {
+        guard let gutterView else {
+            return
+        }
+
+        gutterView.layoutMarkers()
     }
 }
