@@ -10,7 +10,7 @@ import AppKit
 import STTextViewCommon
 
 /// A gutter to the side of a scroll view’s document view.
-public final class STGutterView: NSView {
+open class STGutterView: NSView {
     internal let containerView: STGutterContainerView
 
     /// The font used to draw line numbers.
@@ -18,31 +18,31 @@ public final class STGutterView: NSView {
     /// Initialized with a textView font value and does not update automatically when
     /// text view font changes.
     @Invalidating(.display)
-    public var font = adjustGutterFont(NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: 0)!)
+    open var font = adjustGutterFont(NSFont(descriptor: NSFont.monospacedDigitSystemFont(ofSize: 0, weight: .regular).fontDescriptor.withSymbolicTraits(.condensed), size: 0)!)
 
     /// The insets of the ruler view.
     @Invalidating(.display)
-    public var insets: STRulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
+    open var insets: STRulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
 
     /// Minimum thickness.
     @Invalidating(.layout)
-    public var minimumThickness: CGFloat = 40
+    open var minimumThickness: CGFloat = 40
 
     /// The text color of the line numbers.
     @Invalidating(.display)
-    public var textColor = NSColor.secondaryLabelColor
+    open var textColor = NSColor.secondaryLabelColor
 
     /// A Boolean indicating whether to draw a separator or not. Default true.
     @Invalidating(.display)
-    public var drawSeparator: Bool = true
+    open var drawSeparator: Bool = true
 
     /// A Boolean that controls whether the text view highlights the currently selected line. Default false.
     @Invalidating(.display)
-    public var highlightSelectedLine: Bool = false
+    open var highlightSelectedLine: Bool = false
 
     /// A Boolean value that indicates whether the receiver draws its background. Default true.
     @Invalidating(.display)
-    public var drawsBackground: Bool = true {
+    open var drawsBackground: Bool = true {
         didSet {
             updateBackgrundColor()
         }
@@ -53,17 +53,17 @@ public final class STGutterView: NSView {
 
     /// The background color of the highlighted line.
     @Invalidating(.display)
-    public var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
+    open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
 
     /// The text color of the highlighted line numbers.
     @Invalidating(.display)
-    public var selectedLineTextColor: NSColor? = nil
+    open var selectedLineTextColor: NSColor? = nil
 
     /// The color of the separator.
     ///
     /// Needs ``drawSeparator`` to be set to `true`.
     @Invalidating(.display)
-    public var separatorColor = NSColor.separatorColor.withAlphaComponent(0.1)
+    open var separatorColor = NSColor.separatorColor.withAlphaComponent(0.1)
 
     public override var isOpaque: Bool {
         false
@@ -82,11 +82,11 @@ public final class STGutterView: NSView {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override func viewDidChangeEffectiveAppearance() {
+    open override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
             guard let self else { return }
@@ -102,7 +102,7 @@ public final class STGutterView: NSView {
         }
     }
 
-    public override func draw(_ rect: CGRect) {
+    open override func draw(_ rect: CGRect) {
         super.draw(rect)
 
         guard let context = NSGraphicsContext.current?.cgContext else {
