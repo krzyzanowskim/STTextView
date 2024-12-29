@@ -1,3 +1,7 @@
+This License from Marcin Krzyżanowski governs your use of the accompanying Software. By using the Software, you accept the terms of this License. The STTextView software is copyrighted by Marcin Krzyżanowski.
+
+If use of the software under the GPL v3.0 does not satisfy your organization’s legal department, commercial licenses are available. Feel free to contact for more details.
+
 ### Commercial license
 If you want to use STTextView to develop non open sourced product, and applications, the Commercial license is the appropriate license. With this option, your source code is kept proprietary. Which means, you won't have to change your whole application source code to an open source license. [Purchase a STTextView Commercial License](https://krzyzanowskim.gumroad.com/l/sttextview)
 
