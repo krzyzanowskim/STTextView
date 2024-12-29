@@ -1134,13 +1134,26 @@ import AVFoundation
     open override func layout() {
         super.layout()
 
-        layoutViewport()
+        if inLiveResize {
+            throttle(0.05, identifier: "layoutViewport", option: .ensureLast) { [weak self] in
+                guard let self else { return }
+                self.layoutViewport()
 
-        if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
-            scrollToVisible(textRange, type: .standard)
+                if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
+                    scrollToVisible(textRange, type: .standard)
+                }
+
+                needsScrollToSelection = false
+            }
+        } else {
+            layoutViewport()
+
+            if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
+                scrollToVisible(textRange, type: .standard)
+            }
+
+            needsScrollToSelection = false
         }
-        
-        needsScrollToSelection = false
     }
 
     /// Resizes the receiver to fit its text.
