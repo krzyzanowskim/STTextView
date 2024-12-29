@@ -33,7 +33,7 @@ import Foundation
     ```
  */
 
-public func delay(
+package func delay(
     _ duration: TimeInterval = 1.0,
     by `actor`: ActorType = .mainActor,
     operation: @escaping () -> Void

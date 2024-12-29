@@ -49,7 +49,7 @@ import Foundation
     - DebounceOptions: Enum that defines various options for controlling debounce behavior.
 */
 
-public func debounce(
+package func debounce(
     _ duration: TimeInterval = 1.0,
     identifier: String = "\(Thread.callStackSymbols)",
     by `actor`: ActorType = .mainActor,

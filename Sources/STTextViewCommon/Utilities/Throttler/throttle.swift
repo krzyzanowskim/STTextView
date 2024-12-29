@@ -50,7 +50,7 @@ import Foundation
  
  */
 
-public func throttle(
+package func throttle(
     _ duration: TimeInterval = 1.0,
     identifier: String = "\(Thread.callStackSymbols)",
     by `actor`: ActorType = .mainActor,

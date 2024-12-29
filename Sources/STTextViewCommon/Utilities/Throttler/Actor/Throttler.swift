@@ -8,7 +8,7 @@
 import Foundation
 
 /// Options for debouncing an operation.
-public enum DebounceOptions {
+package enum DebounceOptions {
     /// The default debounce behavior.
     case `default`
     /// Run the operation immediately and debounce subsequent calls.
@@ -16,14 +16,14 @@ public enum DebounceOptions {
 }
 
 /// Options for throttling an operation.
-public enum ThrottleOptions {
+package enum ThrottleOptions {
     /// The default throttle behavior.
     case `default`
     /// Guarantee that the last call is executed even if it's after the throttle time.
     case ensureLast
 }
 
-public enum ActorType {
+package enum ActorType {
     case currentActor
     case mainActor
     
