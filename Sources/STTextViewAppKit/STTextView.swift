@@ -1109,11 +1109,11 @@ import AVFoundation
     private func _configureTextContainerSize() {
         var containerSize = textContainer.size
         if !isHorizontallyResizable {
-            containerSize.width = contentView.frame.width - contentView.frame.origin.x // - _textContainerInset.width * 2
+            containerSize.width = contentView.frame.width // - _textContainerInset.width * 2
         }
 
         if !isVerticallyResizable {
-            containerSize.height = contentView.frame.height - contentView.frame.origin.y // - _textContainerInset.height * 2
+            containerSize.height = contentView.frame.height // - _textContainerInset.height * 2
         }
 
         if !textContainer.size.isAlmostEqual(to: containerSize)  {
