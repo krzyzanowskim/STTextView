@@ -43,7 +43,7 @@ extension STTextView {
     internal func layoutGutter() {
         if let gutterView {
             gutterView.frame.origin = frame.origin
-            gutterView.frame.size.height = scrollView?.bounds.height ?? frame.height
+            gutterView.frame.size.height = contentView.visibleRect.height
             layoutGutterLineNumbers()
             layoutGutterMarkers()
         }
