@@ -156,14 +156,6 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         self.insertCompletion(movement: .return)
     }
 
-    open override func deleteBackward(_ sender: Any?) {
-        view.window?.windowController?.close()
-    }
-
-    open override func deleteForward(_ sender: Any?) {
-        view.window?.windowController?.close()
-    }
-
     open override func cancelOperation(_ sender: Any?) {
         view.window?.windowController?.close()
     }
