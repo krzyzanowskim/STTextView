@@ -116,7 +116,7 @@ The `STTextView` is an `NSView` subclass and can be initialized like any other v
 import STTextView
 
 let textView = STTextView()
-view.addSubView(textView)
+view.addSubview(textView)
 ```
 
 (macOS) add to scroll view

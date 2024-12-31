@@ -1267,7 +1267,11 @@ import AVFoundation
             rect = rect.inset(by: .init(top: 0, left: -textContainer.lineFragmentPadding, bottom: 0, right: -textContainer.lineFragmentPadding))
         }
 
-        return scrollToVisible(rect)
+        // scroll to visible IN clip view (ignoring gutter view overlay)
+        // adjust rect to mimick it's size to include gutter overlay
+        rect.origin.x -= gutterView?.frame.width ?? 0
+        rect.size.width += gutterView?.frame.width ?? 0
+        return contentView.scrollToVisible(rect)
     }
 
     open func scrollRangeToVisible(_ range: NSRange) {
