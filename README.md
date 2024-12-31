@@ -219,6 +219,4 @@ If you are creating an open-source application under a license compatible with t
 
 ### Commercial license
 
-Get one [starting from €5](https://krzyzanowskim.gumroad.com/l/sttextview).
-
 If you want to use STTextView to develop non-open-sourced products and applications, the Commercial license is appropriate. With this option, your source code is kept proprietary. You won't have to change your whole application source code to an open-source license. [Purchase a STTextView Commercial License](https://krzyzanowskim.gumroad.com/l/sttextview)
