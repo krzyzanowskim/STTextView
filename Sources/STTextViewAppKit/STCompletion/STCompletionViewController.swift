@@ -100,7 +100,6 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
                     case "\u{001B}", // esc
                          "\u{0009}", // NSTabCharacter
                          "\u{0008}", // NSBackspaceCharacter
-                         "\u{007F}", // NSDeleteCharacter
                          "\u{000A}", // NSNewlineCharacter
                          "\u{000D}", // NSCarriageReturnCharacter
                          "\u{0003}": // NSEnterCharacter
