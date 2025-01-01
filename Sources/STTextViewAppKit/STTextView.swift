@@ -756,6 +756,10 @@ import AVFoundation
         if let view = result, view != self,
            (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView))
         {
+            // FIXME: NSTextAttachment view
+            // attachment view is a child of STTextLayoutFragmentView
+            // that itself is child of contentView.
+            // The text attachment view should not proxy interaction to the contentView
             return self
         }
         return result
