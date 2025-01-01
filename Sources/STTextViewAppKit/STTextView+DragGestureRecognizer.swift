@@ -22,8 +22,10 @@ extension STTextView {
         let rangeView = STTextLayoutRangeView(textLayoutManager: textLayoutManager, textRange: textRange)
         let draggingImage = rangeView.image()
 
+        let draggingFrame = gestureRecognizer.view?.convert(rangeView.frame, from: contentView) ?? rangeView.frame
+
         let draggingItem = NSDraggingItem(pasteboardWriter: selectionsAttributedString)
-        draggingItem.setDraggingFrame(rangeView.frame, contents: draggingImage)
+        draggingItem.setDraggingFrame(draggingFrame, contents: draggingImage)
 
         draggingSession = beginDraggingSession(with: [draggingItem], event: NSApp.currentEvent!, source: self)
     }

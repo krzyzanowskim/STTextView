@@ -30,8 +30,8 @@ open class STTextLayoutRangeView: NSView {
         var frame: CGRect = textLayoutManager.textSegmentFrame(in: self.textRange, type: .standard)!
         textLayoutManager.enumerateTextLayoutFragments(in: self.textRange) { textLayoutFragment in
             frame = CGRect(
-                x: min(frame.origin.x, textLayoutFragment.layoutFragmentFrame.minX),
-                y: min(frame.origin.y, textLayoutFragment.layoutFragmentFrame.minY),
+                x: 0,
+                y: 0,
                 width: max(frame.size.width, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding),
                 height: max(frame.size.height, textLayoutFragment.layoutFragmentFrame.maxY + textLayoutFragment.topMargin + textLayoutFragment.bottomMargin)
             )
