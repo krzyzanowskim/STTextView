@@ -8,7 +8,6 @@
 //                  |---(STLineHighlightView | SelectionHighlightView)
 //          |---contentView
 //                  |---(STInsertionPointView | STTextLayoutFragmentView)
-//          |---decorationView
 //      |---gutterView
 //
 //
@@ -434,9 +433,6 @@ import AVFoundation
     /// Selection highlight content view.
     internal let selectionView: STSelectionView
 
-    /// Layout fragments decoration, custom rendering attributes
-    internal let decorationView: STDecorationView
-
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
@@ -586,7 +582,6 @@ import AVFoundation
 
         contentView = STContentView()
         selectionView = STSelectionView()
-        decorationView = STDecorationView(textLayoutManager: textLayoutManager)
 
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
@@ -625,7 +620,6 @@ import AVFoundation
 
         addSubview(selectionView)
         addSubview(contentView)
-        addSubview(decorationView)
 
         do {
             let recognizer = DragSelectedTextGestureRecognizer(target: self, action: #selector(_dragSelectedTextGestureRecognizer(gestureRecognizer:)))
@@ -760,7 +754,7 @@ import AVFoundation
         // and ignore utility subviews that should remain transparent
         // for interaction.
         if let view = result, view != self,
-           (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView) || view.isDescendant(of: decorationView))
+           (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView))
         {
             return self
         }
@@ -1211,7 +1205,6 @@ import AVFoundation
         if !contentFrame.isAlmostEqual(to: contentView.frame) {
             contentView.frame = contentFrame
             selectionView.frame = contentFrame
-            decorationView.frame = contentFrame
         }
         
         _configureTextContainerSize()
