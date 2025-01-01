@@ -824,7 +824,9 @@ import AVFoundation
     }
 
     open override func prepareContent(in rect: NSRect) {
-        super.prepareContent(in: rect.inset(dy: -visibleRect.height / 2))
+        var insetRect = rect.inset(dy: -visibleRect.height / 2)
+        insetRect.origin = CGPoint(x: max(0, insetRect.origin.x), y: max(insetRect.origin.y, 0))
+        super.prepareContent(in: insetRect)
         layoutViewport()
     }
 
