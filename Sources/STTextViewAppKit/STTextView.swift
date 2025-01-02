@@ -1179,6 +1179,7 @@ import AVFoundation
         // Estimated text container size to layout document
         textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
         let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
+        logger.debug("usageBoundsForTextContainer \(usageBoundsForTextContainer.debugDescription) \(#function)")
 
         let gutterWidth = gutterView?.frame.width ?? 0
         let frameSize: CGSize
@@ -1197,7 +1198,7 @@ import AVFoundation
         }
 
         if !frame.size.isAlmostEqual(to: frameSize) {
-            logger.debug("main frame size (\(frameSize.width), \(frameSize.height)) \(#function)")
+            logger.debug("setFrameSize (\(frameSize.width), \(frameSize.height)) \(#function)")
             self.setFrameSize(frameSize)
         }
 
