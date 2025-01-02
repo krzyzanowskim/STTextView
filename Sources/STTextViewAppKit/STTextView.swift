@@ -1181,18 +1181,19 @@ import AVFoundation
         let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
 
         let gutterWidth = gutterView?.frame.width ?? 0
+        let topScrollInset = scrollView?.contentInsets.top ?? 0
         let frameSize: CGSize
         if isHorizontallyResizable {
             // no-wrapping
             frameSize = CGSize(
                 width: max(usageBoundsForTextContainer.size.width + gutterWidth, visibleRect.width),
-                height: max(usageBoundsForTextContainer.size.height, visibleRect.height)
+                height: max(usageBoundsForTextContainer.size.height, visibleRect.height - topScrollInset)
             )
         } else {
             // wrapping
             frameSize = CGSize(
                 width: visibleRect.width,
-                height: max(usageBoundsForTextContainer.size.height, visibleRect.height)
+                height: max(usageBoundsForTextContainer.size.height, visibleRect.height - topScrollInset)
             )
         }
 
