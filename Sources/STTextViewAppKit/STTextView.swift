@@ -8,7 +8,6 @@
 //                  |---(STLineHighlightView | SelectionHighlightView)
 //          |---contentView
 //                  |---(STInsertionPointView | STTextLayoutFragmentView)
-//          |---decorationView
 //      |---gutterView
 //
 //
@@ -434,9 +433,6 @@ import AVFoundation
     /// Selection highlight content view.
     internal let selectionView: STSelectionView
 
-    /// Layout fragments decoration, custom rendering attributes
-    internal let decorationView: STDecorationView
-
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
@@ -586,7 +582,6 @@ import AVFoundation
 
         contentView = STContentView()
         selectionView = STSelectionView()
-        decorationView = STDecorationView(textLayoutManager: textLayoutManager)
 
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
@@ -625,7 +620,6 @@ import AVFoundation
 
         addSubview(selectionView)
         addSubview(contentView)
-        addSubview(decorationView)
 
         do {
             let recognizer = DragSelectedTextGestureRecognizer(target: self, action: #selector(_dragSelectedTextGestureRecognizer(gestureRecognizer:)))
@@ -760,8 +754,12 @@ import AVFoundation
         // and ignore utility subviews that should remain transparent
         // for interaction.
         if let view = result, view != self,
-           (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView) || view.isDescendant(of: decorationView))
+           (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView))
         {
+            // FIXME: NSTextAttachment view
+            // attachment view is a child of STTextLayoutFragmentView
+            // that itself is child of contentView.
+            // The text attachment view should not proxy interaction to the contentView
             return self
         }
         return result
@@ -826,7 +824,9 @@ import AVFoundation
     }
 
     open override func prepareContent(in rect: NSRect) {
-        super.prepareContent(in: rect.inset(dy: -visibleRect.height / 2))
+        var insetRect = rect.inset(dy: -visibleRect.height / 4)
+        insetRect.origin = CGPoint(x: max(0, insetRect.origin.x), y: max(insetRect.origin.y, 0))
+        super.prepareContent(in: insetRect)
         layoutViewport()
     }
 
@@ -1179,6 +1179,7 @@ import AVFoundation
         // Estimated text container size to layout document
         textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
         let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
+        logger.debug("usageBoundsForTextContainer \(usageBoundsForTextContainer.debugDescription) \(#function)")
 
         let gutterWidth = gutterView?.frame.width ?? 0
         let topScrollInset = scrollView?.contentInsets.top ?? 0
@@ -1198,7 +1199,7 @@ import AVFoundation
         }
 
         if !frame.size.isAlmostEqual(to: frameSize) {
-            logger.debug("main frame size (\(frameSize.width), \(frameSize.height)) \(#function)")
+            logger.debug("setFrameSize (\(frameSize.width), \(frameSize.height)) \(#function)")
             self.setFrameSize(frameSize)
         }
 
@@ -1212,7 +1213,6 @@ import AVFoundation
         if !contentFrame.isAlmostEqual(to: contentView.frame) {
             contentView.frame = contentFrame
             selectionView.frame = contentFrame
-            decorationView.frame = contentFrame
         }
         
         _configureTextContainerSize()

@@ -31,7 +31,9 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             maxY = visibleRect.maxY
         }
 
-        return CGRect(x: minX, y: minY, width: maxX, height: maxY - minY)
+        let rect = CGRect(x: minX, y: minY, width: maxX, height: maxY - minY)
+        logger.debug("viewportBounds \(rect.debugDescription)")
+        return rect
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
@@ -40,6 +42,8 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         contentView.subviews.removeAll {
             type(of: $0) != STInsertionPointView.self
         }
+
+        sizeToFit()
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
@@ -57,7 +61,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             fragmentView = STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: textLayoutFragment.layoutFragmentFrame.pixelAligned)
         }
 
-        // Adjust position
+        // Adjust fragment view frame
         if !fragmentView.frame.isAlmostEqual(to: textLayoutFragment.layoutFragmentFrame.pixelAligned)  {
             fragmentView.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
             fragmentView.needsLayout = true
@@ -69,7 +73,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        sizeToFit()
         updateSelectedRangeHighlight()
         layoutGutter()
         updateSelectedLineHighlight()
