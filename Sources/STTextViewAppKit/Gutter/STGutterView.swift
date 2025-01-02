@@ -164,9 +164,10 @@ open class STGutterView: NSView, NSDraggingSource {
                 }
 
             if let cellView {
-                markerContainerView.addSubview(marker.view)
-                marker.view.frame.size = cellView.frame.size
                 marker.view.frame.origin = cellView.frame.origin
+                marker.view.frame.size = cellView.frame.size
+                marker.view.frame.size.height = min(cellView.textSize.height + cellView.firstBaselineOffsetFromTop, cellView.frame.size.height)
+                markerContainerView.addSubview(marker.view)
             }
         }
     }

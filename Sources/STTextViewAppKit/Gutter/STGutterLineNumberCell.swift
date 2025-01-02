@@ -9,7 +9,7 @@ final class STGutterLineNumberCell: NSView {
     let lineNumber: Int
     private let firstBaseline: CGFloat
     private let ctLine: CTLine
-    private let textWidth: CGFloat
+    let textSize: CGSize
     var insets: STRulerInsets = STRulerInsets()
 
     override func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
@@ -20,13 +20,17 @@ final class STGutterLineNumberCell: NSView {
         "\(super.debugDescription) (number: \(lineNumber))"
     }
 
+    override var firstBaselineOffsetFromTop: CGFloat {
+        firstBaseline
+    }
+
     init(firstBaseline: CGFloat, attributes: [NSAttributedString.Key: Any], number: Int) {
         self.lineNumber = number
         self.firstBaseline = firstBaseline
 
         let attributedString = NSAttributedString(string: "\(number)", attributes: attributes)
         self.ctLine = CTLineCreateWithAttributedString(attributedString)
-        self.textWidth = ceil(CTLineGetTypographicBounds(ctLine, nil, nil, nil))
+        self.textSize = CGSize(width: ceil(CTLineGetTypographicBounds(ctLine, nil, nil, nil)), height: ctLine.height())
 
         super.init(frame: .zero)
         wantsLayer = true
@@ -49,7 +53,7 @@ final class STGutterLineNumberCell: NSView {
     }
 
     override var intrinsicContentSize: NSSize {
-        NSSize(width: textWidth + insets.trailing + insets.leading, height: 14)
+        NSSize(width: textSize.width + insets.trailing + insets.leading, height: textSize.height)
     }
 
     override func draw(_ rect: CGRect) {
@@ -63,7 +67,7 @@ final class STGutterLineNumberCell: NSView {
         ctx.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
         // align to right
-        ctx.textPosition = CGPoint(x: frame.width - (textWidth + insets.trailing), y: firstBaseline)
+        ctx.textPosition = CGPoint(x: frame.width - (textSize.width + insets.trailing), y: firstBaseline)
         CTLineDraw(ctLine, ctx)
         ctx.restoreGState()
     }
