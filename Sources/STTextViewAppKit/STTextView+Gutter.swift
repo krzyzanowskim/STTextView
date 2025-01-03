@@ -45,7 +45,7 @@ extension STTextView {
             var origin = frame.origin
             var height = contentView.visibleRect.height
             if let scrollView {
-                origin.y = scrollView.contentInsets.top
+                origin.y = origin.y + scrollView.contentInsets.top
                 height = scrollView.documentVisibleRect.height - scrollView.contentInsets.top
             }
             gutterView.frame.origin = origin
