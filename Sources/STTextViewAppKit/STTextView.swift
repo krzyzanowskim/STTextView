@@ -1182,18 +1182,19 @@ import AVFoundation
         logger.debug("usageBoundsForTextContainer \(usageBoundsForTextContainer.debugDescription) \(#function)")
 
         let gutterWidth = gutterView?.frame.width ?? 0
+        let verticalScrollInset = scrollView?.contentInsets.verticalInsets ?? 0
         let frameSize: CGSize
         if isHorizontallyResizable {
             // no-wrapping
             frameSize = CGSize(
                 width: max(usageBoundsForTextContainer.size.width + gutterWidth, visibleRect.width),
-                height: max(usageBoundsForTextContainer.size.height, visibleRect.height)
+                height: max(usageBoundsForTextContainer.size.height, visibleRect.height - verticalScrollInset)
             )
         } else {
             // wrapping
             frameSize = CGSize(
                 width: visibleRect.width,
-                height: max(usageBoundsForTextContainer.size.height, visibleRect.height)
+                height: max(usageBoundsForTextContainer.size.height, visibleRect.height - verticalScrollInset)
             )
         }
 

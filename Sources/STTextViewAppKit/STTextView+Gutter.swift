@@ -42,8 +42,14 @@ extension STTextView {
 
     internal func layoutGutter() {
         if let gutterView {
-            gutterView.frame.origin = frame.origin
-            gutterView.frame.size.height = contentView.visibleRect.height
+            var origin = frame.origin
+            var height = contentView.visibleRect.height
+            if let scrollView {
+                origin.y = origin.y + scrollView.contentInsets.top
+                height = scrollView.documentVisibleRect.height - scrollView.contentInsets.top
+            }
+            gutterView.frame.origin = origin
+            gutterView.frame.size.height = height
             layoutGutterLineNumbers()
             layoutGutterMarkers()
         }
@@ -101,7 +107,7 @@ extension STTextView {
                 numberCell.frame = CGRect(
                     origin: CGPoint(
                         x: bounds.minX,
-                        y: selectionFrame.origin.y - scrollView.contentView.bounds.minY
+                        y: selectionFrame.origin.y - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
                     ),
                     size: CGSize(
                         width: gutterView.containerView.frame.width,
@@ -169,7 +175,7 @@ extension STTextView {
                             lineFragmentFrame = CGRect(
                                 origin: CGPoint(
                                     x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - scrollView.contentView.bounds.minY/*contentOffset.y*/
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
                                 ),
                                 size: CGSize(
                                     width: textLineFragment.typographicBounds.width,
@@ -189,7 +195,7 @@ extension STTextView {
                             lineFragmentFrame = CGRect(
                                 origin: CGPoint(
                                     x: layoutFragment.layoutFragmentFrame.origin.x + prevTextLineFragment.typographicBounds.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY - scrollView.contentView.bounds.minY/*contentOffset.y*/
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
                                 ),
                                 size: CGSize(
                                     width: textLineFragment.typographicBounds.width,
@@ -207,7 +213,7 @@ extension STTextView {
                         lineFragmentFrame = CGRect(
                             origin: CGPoint(
                                 x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - scrollView.contentView.bounds.minY/*contentOffset.y*/
+                                y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
                             ),
                             size: CGSize(
                                 width: layoutFragment.layoutFragmentFrame.width, // extend width to he fragment layout for the convenience of gutter
