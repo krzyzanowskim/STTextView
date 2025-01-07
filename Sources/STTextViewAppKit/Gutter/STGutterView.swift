@@ -28,7 +28,7 @@ public extension STGutterViewDelegate {
 /// A gutter to the side of a scroll view’s document view.
 open class STGutterView: NSView, NSDraggingSource {
     internal let containerView: STGutterContainerView
-    internal let markerContainerView: STGutterContainerView
+    internal let markerContainerView: STGutterMarkerContainerView
 
     /// Delegate
     weak var delegate: (any STGutterViewDelegate)?
@@ -64,8 +64,20 @@ open class STGutterView: NSView, NSDraggingSource {
     internal var backgroundColor: NSColor? = nil {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
+            if backgroundColor == nil, _backgroundEffectView == nil {
+                let backgroundEffect = NSVisualEffectView(frame: bounds)
+                backgroundEffect.autoresizingMask = [.width, .height]
+                backgroundEffect.blendingMode = .withinWindow
+                backgroundEffect.material = .contentBackground
+                backgroundEffect.state = .followsWindowActiveState
+                addSubview(backgroundEffect, positioned: .below, relativeTo: self)
+                self._backgroundEffectView = backgroundEffect
+            } else if backgroundColor != nil, _backgroundEffectView != nil {
+                _backgroundEffectView?.removeFromSuperview()
+            }
         }
     }
+    private var _backgroundEffectView: NSVisualEffectView?
 
     /// The background color of the highlighted line.
     @Invalidating(.display)
@@ -96,16 +108,21 @@ open class STGutterView: NSView, NSDraggingSource {
         true
     }
 
+    open override var allowsVibrancy: Bool {
+        true
+    }
+
     override init(frame: CGRect) {
         containerView = STGutterContainerView(frame: frame)
         containerView.autoresizingMask = [.width, .height]
 
-        markerContainerView = STGutterContainerView(frame: frame)
+        markerContainerView = STGutterMarkerContainerView(frame: frame)
         markerContainerView.autoresizingMask = [.width, .height]
 
         super.init(frame: frame)
         wantsLayer = true
         clipsToBounds = true
+
         addSubview(containerView)
         addSubview(markerContainerView)
 

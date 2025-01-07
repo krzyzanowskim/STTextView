@@ -4,7 +4,7 @@
 import AppKit
 
 // Gutter line number cells container
-final class STGutterContainerView: NSView {
+final class STGutterMarkerContainerView: NSView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
