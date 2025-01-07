@@ -717,11 +717,11 @@ import AVFoundation
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
             guard let self else { return }
             self.backgroundColor = self.backgroundColor
-        }
 
-        self.updateSelectedRangeHighlight()
-        self.layoutGutter()
-        self.updateSelectedLineHighlight()
+            self.updateSelectedRangeHighlight()
+            self.layoutGutter()
+            self.updateSelectedLineHighlight()
+        }
     }
 
     open override func viewDidMoveToSuperview() {

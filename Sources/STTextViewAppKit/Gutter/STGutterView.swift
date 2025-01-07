@@ -60,12 +60,12 @@ open class STGutterView: NSView, NSDraggingSource {
     @Invalidating(.display)
     open var highlightSelectedLine: Bool = false
 
-    /// A Boolean value that indicates whether the receiver draws its background. Default true.
     @Invalidating(.display, .background)
-    open var drawsBackground: Bool = true
-
-    @Invalidating(.display)
-    internal var backgroundColor: NSColor = NSColor.controlBackgroundColor
+    internal var backgroundColor: NSColor = NSColor.controlBackgroundColor {
+        didSet {
+            layer?.backgroundColor = backgroundColor.cgColor
+        }
+    }
 
     /// The background color of the highlighted line.
     @Invalidating(.display)
@@ -126,11 +126,7 @@ open class STGutterView: NSView, NSDraggingSource {
     }
 
     fileprivate func updateBackgroundColor() {
-        if drawsBackground {
-            layer?.backgroundColor = backgroundColor.cgColor
-        } else {
-            layer?.backgroundColor = nil
-        }
+        self.backgroundColor = backgroundColor
     }
 
     public func addMarker(_ marker: STGutterMarker) {
