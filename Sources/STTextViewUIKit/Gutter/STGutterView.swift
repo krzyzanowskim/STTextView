@@ -54,10 +54,6 @@ open class STGutterView: UIView {
     @Invalidating(.display)
     open var highlightSelectedLine: Bool = false
 
-    /// A Boolean value that indicates whether the receiver draws its background. Default true.
-    @Invalidating(.display)
-    open var drawsBackground: Bool = true
-
     /// The background color of the highlighted line.
     @Invalidating(.display)
     open var selectedLineHighlightColor: UIColor = .tintColor.withAlphaComponent(0.15)
@@ -116,9 +112,7 @@ open class STGutterView: UIView {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        if drawsBackground {
-            backgroundColor = UIColor.systemBackground.resolvedColor(with: traitCollection)
-        }
+        backgroundColor = self.backgroundColor?.resolvedColor(with: traitCollection) ?? UIColor.systemBackground.resolvedColor(with: traitCollection)
     }
 
     open override func draw(_ rect: CGRect) {
