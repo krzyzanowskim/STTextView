@@ -61,9 +61,9 @@ open class STGutterView: NSView, NSDraggingSource {
     open var highlightSelectedLine: Bool = false
 
     @Invalidating(.display, .background)
-    internal var backgroundColor: NSColor = NSColor.controlBackgroundColor {
+    internal var backgroundColor: NSColor? = nil {
         didSet {
-            layer?.backgroundColor = backgroundColor.cgColor
+            layer?.backgroundColor = backgroundColor?.cgColor
         }
     }
 
