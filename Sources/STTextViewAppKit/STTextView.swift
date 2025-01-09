@@ -1323,6 +1323,10 @@ import AVFoundation
         textFinderClient.replaceCharacters(in: range, with: string)
     }
 
+    public func replaceCharacters(in range: NSRange, with string: NSAttributedString) {
+        textFinderClient.replaceCharacters(in: range, with: string)
+    }
+
     public func replaceCharacters(in range: NSTextRange, with string: String) {
         replaceCharacters(in: range, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
     }

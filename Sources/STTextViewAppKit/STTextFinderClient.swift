@@ -45,6 +45,21 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         return result
     }
 
+    func replaceCharacters(in range: NSRange, with string: NSAttributedString) {
+        guard let textContentManager = textView?.textLayoutManager.textContentManager,
+              let textRange = NSTextRange(range, in: textContentManager),
+              let textView = textView
+        else {
+            return
+        }
+
+        if textView.shouldChangeText(in: textRange, replacementString: string.string) {
+            // let typingAttributes = textView.typingAttributes(at: textRange.location)
+            let attributedString = NSAttributedString(attributedString: string)
+            textView.replaceCharacters(in: textRange, with: attributedString, allowsTypingCoalescing: false)
+        }
+    }
+
     func replaceCharacters(in range: NSRange, with string: String) {
         guard let textContentManager = textView?.textLayoutManager.textContentManager,
               let textRange = NSTextRange(range, in: textContentManager),
