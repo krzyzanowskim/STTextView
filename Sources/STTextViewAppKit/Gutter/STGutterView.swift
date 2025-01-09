@@ -2,7 +2,9 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 //
 //  STGutterView
+//      |- NSVisualEffectView
 //      |- STGutterContainerView
+//      |- STGutterSeparatorView
 //          |-STGutterLineNumberCell
 //      |- STGutterMarkerContainerView
 //          |-STGutterMarker.view
@@ -27,6 +29,7 @@ public extension STGutterViewDelegate {
 
 /// A gutter to the side of a scroll view’s document view.
 open class STGutterView: NSView, NSDraggingSource {
+    internal let separatorView: STGutterSeparatorView
     internal let containerView: STGutterContainerView
     internal let markerContainerView: STGutterMarkerContainerView
 
@@ -53,8 +56,14 @@ open class STGutterView: NSView, NSDraggingSource {
     open var textColor = NSColor.secondaryLabelColor
 
     /// A Boolean indicating whether to draw a separator or not. Default true.
-    @Invalidating(.display)
-    open var drawSeparator: Bool = true
+    open var drawSeparator: Bool {
+        get {
+            separatorView.drawSeparator
+        }
+        set {
+            separatorView.drawSeparator = newValue
+        }
+    }
 
     /// A Boolean that controls whether the text view highlights the currently selected line. Default false.
     @Invalidating(.display)
@@ -70,7 +79,8 @@ open class STGutterView: NSView, NSDraggingSource {
                 backgroundEffect.blendingMode = .withinWindow
                 backgroundEffect.material = .contentBackground
                 backgroundEffect.state = .followsWindowActiveState
-                addSubview(backgroundEffect, positioned: .below, relativeTo: self)
+                // insert subview to `self`. below other subviews.
+                self.subviews.insert(backgroundEffect, at: 0)
                 self._backgroundEffectView = backgroundEffect
             } else if backgroundColor != nil, _backgroundEffectView != nil {
                 _backgroundEffectView?.removeFromSuperview()
@@ -90,8 +100,14 @@ open class STGutterView: NSView, NSDraggingSource {
     /// The color of the separator.
     ///
     /// Needs ``drawSeparator`` to be set to `true`.
-    @Invalidating(.display)
-    open var separatorColor = NSColor.separatorColor.withAlphaComponent(0.1)
+    open var separatorColor: NSColor {
+        get {
+            separatorView.separatorColor
+        }
+        set {
+            separatorView.separatorColor = newValue
+        }
+    }
 
     /// The receiver’s gutter markers to markers, removing any existing ruler markers and not consulting with the client view about the new markers.
     @Invalidating(.markers)
@@ -113,6 +129,9 @@ open class STGutterView: NSView, NSDraggingSource {
     }
 
     override init(frame: CGRect) {
+        separatorView = STGutterSeparatorView(frame: frame)
+        separatorView.autoresizingMask = [.width, .height]
+
         containerView = STGutterContainerView(frame: frame)
         containerView.autoresizingMask = [.width, .height]
 
@@ -123,6 +142,7 @@ open class STGutterView: NSView, NSDraggingSource {
         wantsLayer = true
         clipsToBounds = true
 
+        addSubview(separatorView)
         addSubview(containerView)
         addSubview(markerContainerView)
 
@@ -182,21 +202,6 @@ open class STGutterView: NSView, NSDraggingSource {
                 marker.view.frame.size.height = min(cellView.textSize.height + cellView.firstBaselineOffsetFromTop, cellView.frame.size.height)
                 markerContainerView.addSubview(marker.view)
             }
-        }
-    }
-
-    open override func draw(_ rect: CGRect) {
-        super.draw(rect)
-
-        guard let context = NSGraphicsContext.current?.cgContext else {
-            return
-        }
-
-        if drawSeparator {
-            context.setLineWidth(1)
-            context.setStrokeColor(separatorColor.cgColor)
-            context.addLines(between: [CGPoint(x: frame.width - 0.5, y: 0), CGPoint(x: frame.width - 0.5, y: bounds.maxY) ])
-            context.strokePath()
         }
     }
 
