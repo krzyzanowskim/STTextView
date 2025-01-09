@@ -42,8 +42,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         contentView.subviews.removeAll {
             type(of: $0) != STInsertionPointView.self
         }
-
-        sizeToFit()
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
@@ -73,6 +71,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
+        sizeToFit()
         updateSelectedRangeHighlight()
         layoutGutter()
         updateSelectedLineHighlight()
