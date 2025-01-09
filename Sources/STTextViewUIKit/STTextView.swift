@@ -639,7 +639,7 @@ import STTextViewCommon
     open override func sizeToFit() {
         let gutterWidth = gutterView?.frame.width ?? 0
         contentView.frame.origin.x = gutterWidth
-        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width, frame.width - gutterWidth)
+        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width + textContainer.lineFragmentPadding, frame.width - gutterWidth)
         contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, frame.height)
         contentSize = contentView.frame.size
 

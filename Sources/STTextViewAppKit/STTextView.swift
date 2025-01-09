@@ -1187,7 +1187,7 @@ import AVFoundation
         if isHorizontallyResizable {
             // no-wrapping
             frameSize = CGSize(
-                width: max(usageBoundsForTextContainer.size.width + gutterWidth, visibleRect.width),
+                width: max(usageBoundsForTextContainer.size.width + gutterWidth + textContainer.lineFragmentPadding, visibleRect.width),
                 height: max(usageBoundsForTextContainer.size.height, visibleRect.height - verticalScrollInset)
             )
         } else {
