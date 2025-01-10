@@ -43,9 +43,13 @@ extension STTextView {
     }
 
     open override func insertNewline(_ sender: Any?) {
+        guard let scalar = Unicode.Scalar(NSNewlineCharacter) else {
+            assertionFailure()
+            return
+        }
         // insert newline with current typing attributes
         breakUndoCoalescing()
-        insertText("\n")
+        insertText(String(Character(scalar)))
         breakUndoCoalescing()
     }
 

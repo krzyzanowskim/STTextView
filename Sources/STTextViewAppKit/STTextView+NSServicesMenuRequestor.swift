@@ -9,6 +9,7 @@
 
 import AppKit
 import UniformTypeIdentifiers
+import STTextViewCommon
 
 extension STTextView: NSServicesMenuRequestor {
 
@@ -62,8 +63,40 @@ extension STTextView: NSServicesMenuRequestor {
             return false
         }
 
-        guard let attributedString = textLayoutManager.textSelectionsAttributedString() else {
+        guard let attributedString = textLayoutManager.textSelectionsAttributedString()?.mutableCopy() as? NSMutableAttributedString else {
             return false
+        }
+
+        // If attachment content is plaintext, inline its `contents` in the output
+        if attributedString.containsAttachments {
+            attributedString.enumerateAttribute(.attachment, in: attributedString.range, options: .reverse) { value, range, stop in
+                guard let attachment = value as? NSTextAttachment else {
+                    return
+                }
+
+                if attachment.image == nil,
+                   let contents = attachment.contents,
+                   let fileType = attachment.fileType,
+                   let uti = UTType(fileType), uti.isSubtype(of: .plainText)
+                {
+                    var string: String? {
+                        switch uti {
+                        case .utf8PlainText:
+                            String(data: contents, encoding: .utf8)
+                        case .utf16PlainText:
+                            String(data: contents, encoding: .utf16)
+                        default:
+                            String(data: contents, encoding: .utf16)
+                        }
+                    }
+
+                    if let string {
+                        // replace attachment with string
+                        attributedString.replaceCharacters(in: range, with: string)
+                    }
+                }
+
+            }
         }
 
         let actions = types.map { type -> () -> Bool in
