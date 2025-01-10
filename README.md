@@ -213,10 +213,5 @@ I'd love to hear from you! Get in touch via X/Twitter [@krzyzanowskim](https://x
 
 ## License
 
-### Open Source license
-
-If you are creating an open-source application under a license compatible with the [GNU GPL license v3](https://www.gnu.org/licenses/gpl-3.0.html), you may use STTextView under the terms of the GPLv3.
-
-### Commercial license
-
-If you want to use STTextView to develop non-open-sourced products and applications, the Commercial license is appropriate. With this option, your source code is kept proprietary. You won't have to change your whole application source code to an open-source license. [Purchase a STTextView Commercial License](https://krzyzanowskim.gumroad.com/l/sttextview)
+By using the Software, you accept the terms of the [License](LICENSE.md). The STTextView software is copyrighted by Marcin Krzyżanowski.
+If use of the software under the [GPL v3.0](https://www.gnu.org/licenses/gpl-3.0.html) does not satisfy your organization’s legal department, [commercial licenses are available](https://krzyzanowskim.gumroad.com/l/sttextview). Feel free to contact for more details.
