@@ -881,8 +881,9 @@ import AVFoundation
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
 
+        updateTypingAttributes()
+
         if updateLayout {
-            updateTypingAttributes()
             needsLayout = true
         }
     }
@@ -907,9 +908,9 @@ import AVFoundation
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
 
+        updateTypingAttributes()
 
         if updateLayout {
-            updateTypingAttributes()
             needsLayout = true
         }
     }
