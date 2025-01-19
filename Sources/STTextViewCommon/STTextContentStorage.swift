@@ -41,6 +41,9 @@ package final class STTextContentStorage: NSTextContentStorage {
             in: NSRange(range, in: self),
             with: replacementString
         )
+
+        // endEditing updates `NSTextLayoutManager.textSelections` value
+        // that behavior may be undesired in certain scenarios where change suppose to keep the selection intact (at least adjusted)
         textStorage.endEditing()
 
         fix_fixSelectionAfterChangeInCharacterRange()
