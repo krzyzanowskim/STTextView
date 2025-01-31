@@ -23,14 +23,22 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         view = NSView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.wantsLayer = true
-        view.layer?.cornerRadius = 5
-        view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+        view.layer?.cornerRadius = 8
+        view.layer?.cornerCurve = .continuous
 
         NSLayoutConstraint.activate(
             [
                 view.widthAnchor.constraint(greaterThanOrEqualToConstant: 320)
             ]
         )
+
+        let backgroundEffect = NSVisualEffectView(frame: view.bounds)
+        backgroundEffect.autoresizingMask = [.width, .height]
+        backgroundEffect.blendingMode = .withinWindow
+        backgroundEffect.material = .windowBackground
+        backgroundEffect.state = .followsWindowActiveState
+        backgroundEffect.wantsLayer = true
+        view.addSubview(backgroundEffect)
 
         tableView.style = .plain
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -61,7 +69,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         let scrollView = NSScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.automaticallyAdjustsContentInsets = false
-        scrollView.contentInsets = NSEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
+        scrollView.contentInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
         scrollView.drawsBackground = false
         scrollView.backgroundColor = .clear
         scrollView.borderType = .noBorder
@@ -179,7 +187,7 @@ extension STCompletionViewController: NSTableViewDelegate {
     }
 
     open func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
-        STTableRowView()
+        STTableRowView(parentCornerRadius: view.layer!.cornerRadius, inset: tableView.enclosingScrollView?.contentInsets.top ?? 0)
     }
 
 }
@@ -192,13 +200,31 @@ extension STCompletionViewController: NSTableViewDataSource {
 
 private class STTableRowView: NSTableRowView {
 
+    private let parentCornerRadius: CGFloat
+    private let inset: CGFloat
+
+    init(parentCornerRadius: CGFloat, inset: CGFloat) {
+        self.parentCornerRadius = parentCornerRadius * 2
+        self.inset = inset
+        super.init(frame: .zero)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func drawSelection(in dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
-        context.saveGState()
-        let path = NSBezierPath(roundedRect: dirtyRect, xRadius: 4, yRadius: 4)
-        context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(0.7).cgColor)
-        path.fill()
-        context.restoreGState()
+        if isSelected {
+            context.saveGState()
+            let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+
+            let radius = (parentCornerRadius - inset) / 2
+            let path = NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius)
+            context.setFillColor(NSColor.white.withAlphaComponent(isDark ? 0.2 : 1).cgColor)
+            path.fill()
+            context.restoreGState()
+        }
     }
 }
 
