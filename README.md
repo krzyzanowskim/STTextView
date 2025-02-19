@@ -45,13 +45,7 @@ The financial sustainability of the project is possible thanks to the ongoing co
 
 ## 🗓️ Roadmap
 
-STTextView is already well-suited as a text editor component. However, it still needs improvements before the release of v1.0
-
 **Suggest** or **vote** for new features: [Feature Requests](https://github.com/krzyzanowskim/STTextView/discussions/14)
-
-#### Known issues
-
-- text dragging (partially implemented)
 
 ## 🚀 Getting Started
 
@@ -60,7 +54,7 @@ STTextView is already well-suited as a text editor component. However, it still 
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "1.0.0")
+        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "2.0.0")
     ]
 )
 ```
