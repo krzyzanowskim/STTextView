@@ -11,7 +11,20 @@ extension STTextView {
     /// see ``NSStandardKeyBindingResponding``
     @MainActor
     open override func complete(_ sender: Any?) {
-        performCompletion()
+        let didPerformCompletion = performSyncCompletion()
+        if !didPerformCompletion {
+            _completionTask?.cancel()
+            _completionTask = Task { [weak self] in
+                guard let self else { return }
+                if Task.isCancelled {
+                    return
+                }
+                let sessionId = UUID().uuidString
+                logger.debug("async completion: \(sessionId)")
+                let result = await performAsyncCompletion()
+                logger.debug("async completion result: \(result) \(sessionId), cancelled: \(Task.isCancelled)")
+            }
+        }
     }
 
     /// Close completion window
@@ -31,20 +44,21 @@ extension STTextView {
         }
     }
 
-    @MainActor
-    private func performCompletion() {
+
+    @MainActor @_unavailableFromAsync
+    private func performSyncCompletion() -> Bool {
         dispatchPrecondition(condition: .onQueue(.main))
 
         guard let insertionPointLocation = textLayoutManager.insertionPointLocations.first,
               let textCharacterSegmentRect = textLayoutManager.textSegmentFrame(at: insertionPointLocation, type: .standard),
               let completionItems = delegateProxy.textView(self, completionItemsAtLocation: insertionPointLocation)
         else {
-            return
+            return false
         }
 
         if completionItems.isEmpty {
             completionWindowController?.close()
-            return
+            return false
         }
 
         if let window = self.window {
@@ -54,6 +68,50 @@ extension STTextView {
             completionWindowController?.showWindow(at: completionWindowOrigin, items: completionItems, parent: window)
             completionWindowController?.delegate = self
         }
+
+        return true
+    }
+
+    @MainActor @discardableResult
+    private func performAsyncCompletion() async -> Bool {
+        guard !Task.isCancelled,
+              let insertionPointLocation = textLayoutManager.insertionPointLocations.first,
+              let textCharacterSegmentRect = textLayoutManager.textSegmentFrame(at: insertionPointLocation, type: .standard)
+        else {
+            return false
+        }
+
+        if Task.isCancelled {
+            return false
+        }
+
+        guard let completionItems = await delegateProxy.textView(self, completionItemsAtLocation: insertionPointLocation) else {
+            return false
+        }
+
+
+        if Task.isCancelled {
+            return false
+        }
+
+        if completionItems.isEmpty {
+            completionWindowController?.close()
+            return false
+        }
+
+        if Task.isCancelled {
+            return false
+        }
+
+        if let window = self.window {
+            // move left by arbitrary 14px
+            let characterSegmentFrame = textCharacterSegmentRect.moved(dx: -14, dy: textCharacterSegmentRect.height)
+            let completionWindowOrigin = window.convertPoint(toScreen: contentView.convert(characterSegmentFrame.origin, to: nil))
+            completionWindowController?.showWindow(at: completionWindowOrigin, items: completionItems, parent: window)
+            completionWindowController?.delegate = self
+        }
+
+        return true
     }
 }
 

@@ -61,7 +61,11 @@ public protocol STTextViewDelegate: AnyObject {
     // MARK: Completion
 
     /// Completion items
+    @_unavailableFromAsync
     func textView(_ textView: STTextView, completionItemsAtLocation location: any NSTextLocation) -> [any STCompletionItem]?
+
+    /// Completion items. Asynchronous.
+    func textView(_ textView: STTextView, completionItemsAtLocation location: any NSTextLocation) async -> [any STCompletionItem]?
 
     /// Insert completion item
     func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem)
@@ -109,6 +113,10 @@ public extension STTextViewDelegate {
     }
 
     func textView(_ textView: STTextView, completionItemsAtLocation location: any NSTextLocation) -> [any STCompletionItem]? {
+        nil
+    }
+
+    func textView(_ textView: STTextView, completionItemsAtLocation location: any NSTextLocation) async -> [any STCompletionItem]? {
         nil
     }
 

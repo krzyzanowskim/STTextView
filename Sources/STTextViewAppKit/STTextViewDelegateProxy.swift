@@ -80,8 +80,13 @@ class STTextViewDelegateProxy: STTextViewDelegate {
         return effectiveMenu
     }
 
+    @_unavailableFromAsync
     func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) -> [any STCompletionItem]? {
         source?.textView(textView, completionItemsAtLocation: location)
+    }
+
+    func textView(_ textView: STTextView, completionItemsAtLocation location: any NSTextLocation) async -> [any STCompletionItem]? {
+        await source?.textView(textView, completionItemsAtLocation: location)
     }
 
     func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem) {

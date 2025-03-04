@@ -448,6 +448,8 @@ import AVFoundation
         completionWindowController?.isVisible == true
     }
 
+    internal var _completionTask: Task<Void, any Error>?
+
     /// Search-and-replace find interface inside a view.
     open private(set) var textFinder: NSTextFinder
 
