@@ -14,7 +14,7 @@ extension STTextView {
         let didPerformCompletion = performSyncCompletion()
         if !didPerformCompletion {
             _completionTask?.cancel()
-            _completionTask = Task { [weak self] in
+            _completionTask = Task(priority: .userInitiated) { [weak self] in
                 guard let self else { return }
                 if Task.isCancelled {
                     return
