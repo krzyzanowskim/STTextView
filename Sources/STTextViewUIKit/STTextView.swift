@@ -34,7 +34,13 @@ import STTextViewCommon
     open var returnKeyType: UIReturnKeyType = .default
 
     /// The manager that lays out text for the text view's text container.
-    @objc open private(set) var textLayoutManager: NSTextLayoutManager
+    @objc open var textLayoutManager: NSTextLayoutManager {
+        didSet {
+            textContentManager.removeTextLayoutManager(oldValue)
+            textContentManager.addTextLayoutManager(textLayoutManager)
+            textContentManager.primaryTextLayoutManager = textLayoutManager
+        }
+    }
 
     /// The text view's text storage object.
     @objc open private(set) var textContentManager: NSTextContentManager

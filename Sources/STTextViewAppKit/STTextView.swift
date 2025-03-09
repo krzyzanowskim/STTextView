@@ -401,7 +401,13 @@ import AVFoundation
     internal let delegateProxy = STTextViewDelegateProxy(source: nil)
 
     /// The manager that lays out text for the text view's text container.
-    @objc open private(set) var textLayoutManager: NSTextLayoutManager
+    @objc open var textLayoutManager: NSTextLayoutManager {
+        didSet {
+            textContentManager.removeTextLayoutManager(oldValue)
+            textContentManager.addTextLayoutManager(textLayoutManager)
+            textContentManager.primaryTextLayoutManager = textLayoutManager
+        }
+    }
 
     @available(*, deprecated, renamed: "textContentManager")
     open var textContentStorage: NSTextContentStorage {
