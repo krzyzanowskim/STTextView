@@ -674,17 +674,18 @@ import STTextViewCommon
     // Update textContainer width to match textview width if track textview width
     // widthTracksTextView = true
     private func _configureTextContainerSize() {
-        var containerSize = textContainer.size
+        var proposedSize = textContainer.size
         if !isHorizontallyResizable {
-            containerSize.width = contentSize.width // - _textContainerInset.width * 2
+            proposedSize.width = contentSize.width // - _textContainerInset.width * 2
         }
 
         if !isVerticallyResizable {
-            containerSize.height = contentSize.height // - _textContainerInset.height * 2
+            proposedSize.height = contentSize.height // - _textContainerInset.height * 2
         }
 
-        if !textContainer.size.isAlmostEqual(to: containerSize)  {
-            textContainer.size = containerSize
+        if !textContainer.size.isAlmostEqual(to: proposedSize)  {
+            textContainer.size = proposedSize
+            logger.debug("textContainer.size (\(self.textContainer.size.width), \(self.textContainer.size.width)) \(#function)")
         }
     }
 
