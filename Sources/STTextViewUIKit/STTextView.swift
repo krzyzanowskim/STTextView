@@ -34,11 +34,14 @@ import STTextViewCommon
     open var returnKeyType: UIReturnKeyType = .default
 
     /// The manager that lays out text for the text view's text container.
-    @objc open var textLayoutManager: NSTextLayoutManager {
+    @objc dynamic open var textLayoutManager: NSTextLayoutManager {
+        willSet {
+            textContentManager.removeTextLayoutManager(newValue)
+        }
         didSet {
-            textContentManager.removeTextLayoutManager(oldValue)
             textContentManager.addTextLayoutManager(textLayoutManager)
             textContentManager.primaryTextLayoutManager = textLayoutManager
+            setupTextLayoutManager(textLayoutManager)
         }
     }
 
@@ -441,13 +444,12 @@ import STTextViewCommon
 
         super.init(frame: frame)
 
+        setupTextLayoutManager(textLayoutManager)
+
         contentView.clipsToBounds = clipsToBounds
         lineHighlightView.clipsToBounds = clipsToBounds
 
         setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
-
-        textLayoutManager.delegate = self
-        textLayoutManager.textViewportLayoutController.delegate = self
 
         addSubview(contentView)
         contentView.addSubview(lineHighlightView)
@@ -460,8 +462,23 @@ import STTextViewCommon
 
         updateEditableInteraction()
         isGutterVisible = showsLineNumbers
+    }
 
-        NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
+    @available(*, unavailable)
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private var didChangeSelectionNotificationObserver: NSObjectProtocol?
+    private func setupTextLayoutManager(_ textLayoutManager: NSTextLayoutManager) {
+        textLayoutManager.delegate = self
+        textLayoutManager.textViewportLayoutController.delegate = self
+
+        // Forward didChangeSelectionNotification from STTextLayoutManager
+        if let didChangeSelectionNotificationObserver {
+            NotificationCenter.default.removeObserver(didChangeSelectionNotificationObserver)
+        }
+        didChangeSelectionNotificationObserver = NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
             guard let self = self else { return }
             let textViewNotification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
 
@@ -469,11 +486,6 @@ import STTextViewCommon
             self.delegateProxy.textViewDidChangeSelection(textViewNotification)
             // NSAccessibility.post(element: self, notification: .selectedTextChanged)
         }
-    }
-
-    @available(*, unavailable)
-    required public init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 
     /// This action method shows or hides the ruler, if the receiver is enclosed in a scroll view
