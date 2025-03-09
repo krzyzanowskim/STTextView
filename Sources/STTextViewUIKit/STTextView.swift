@@ -3,7 +3,7 @@
 //
 //
 //  STTextView
-//      |---conventView
+//      |---contentView
 //              |---STLineHighlightView
 //              |---STTextLayoutFragmentView
 //      |---gutterView
@@ -435,6 +435,9 @@ import STTextViewCommon
         _typingAttributes = [:]
 
         super.init(frame: frame)
+
+        contentView.clipsToBounds = clipsToBounds
+        lineHighlightView.clipsToBounds = clipsToBounds
 
         setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
 
