@@ -35,7 +35,10 @@ extension STTextView {
 
     internal func layoutGutter() {
         if let gutterView {
-            gutterView.frame.origin = contentOffset
+            // gutter view floats on the edge
+            // the contentOffset is the adjustment to make it visible
+            gutterView.frame.origin.x = contentOffset.x
+            gutterView.frame.origin.y = contentOffset.y
             gutterView.frame.size.height = visibleSize.height
             layoutGutterLineNumbers()
         }
@@ -90,7 +93,7 @@ extension STTextView {
 
                 numberCell.frame = CGRect(
                     origin: CGPoint(
-                        x: bounds.minX,
+                        x: frame.minX,
                         y: selectionFrame.origin.y - contentOffset.y
                     ),
                     size: CGSize(
@@ -225,7 +228,7 @@ extension STTextView {
 
                     numberCell.frame = CGRect(
                         origin: CGPoint(
-                            x: bounds.minX,
+                            x: frame.minX,
                             y: lineFragmentFrame.origin.y
                         ),
                         size: CGSize(

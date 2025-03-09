@@ -92,6 +92,7 @@ open class STGutterView: UIView {
         markerContainerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         super.init(frame: frame)
+        clipsToBounds = true
         isUserInteractionEnabled = true
         isOpaque = false
 
