@@ -1220,36 +1220,6 @@ import AVFoundation
         }
         
         _configureTextContainerSize()
-
-        // add textContainerInset at some point
-        // size.width += textContainerInset.width * 2;
-        // size.height += textContainerInset.height * 2;
-
-        // if isVerticallyResizable {
-        //     // we should at least be the visible size if we're not in a clip view
-        //     // however the `size` may be bananas (estimated) and enlarge too much
-        //     // that going never going to shrink later.
-        //     // It is expected that vertically height going to grow and shring (that does not apply to horizontally)
-        //     //
-        //     // size.height = max(frame.size.height - verticalInsets, size.height)
-        // } else {
-        //     size.height = frame.size.height - verticalInsets
-        // }
-
-        // if we're in a clip view we should at be at least as big as the clip view
-        // if let clipView = scrollView?.contentView as? NSClipView {
-        //     let horizontalInsets = clipView.contentInsets.horizontalInsets
-        //     let verticalInsets = clipView.contentInsets.verticalInsets
-        //
-        //     if size.width < clipView.bounds.size.width - horizontalInsets {
-        //         size.width = clipView.bounds.size.width - horizontalInsets
-        //     }
-        //
-        //     if size.height < clipView.bounds.size.height - verticalInsets {
-        //         size.height = clipView.bounds.size.height - verticalInsets
-        //     }
-        //
-        // }
     }
 
     internal func layoutViewport() {

@@ -640,16 +640,6 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
-        let gutterWidth = gutterView?.frame.width ?? 0
-        contentView.frame.origin.x = gutterWidth
-        contentView.frame.size.width = max(textLayoutManager.usageBoundsForTextContainer.size.width + textContainer.lineFragmentPadding, frame.width - gutterWidth)
-        contentView.frame.size.height = max(textLayoutManager.usageBoundsForTextContainer.size.height, frame.height)
-        contentSize = contentView.frame.size
-
-        super.sizeToFit()
-
-        _configureTextContainerSize()
-
         // Estimate `usageBoundsForTextContainer` size is based on performed layout.
         // If layout didn't happen for the whole document, it only cover
         // the fragment that is known. And even after ensureLayout for the whole document
@@ -668,7 +658,41 @@ import STTextViewCommon
         // Asking for the end location result in estimated `usageBoundsForTextContainer`
         // that eventually get right as more and more layout happen (when scrolling)
 
+        // Estimated text container size to layout document
         textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
+
+        super.sizeToFit()
+
+        let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
+        logger.debug("usageBoundsForTextContainer \(usageBoundsForTextContainer.debugDescription) \(#function)")
+
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let verticalScrollInset = contentInset.top + contentInset.bottom
+        let visibleRectSize = self.bounds.size
+
+        let frameSize: CGSize
+        if isHorizontallyResizable {
+            // no-wrapping
+            frameSize = CGSize(
+                width: max(usageBoundsForTextContainer.size.width + gutterWidth + textContainer.lineFragmentPadding, visibleRectSize.width),
+                height: max(usageBoundsForTextContainer.size.height, visibleRectSize.height - verticalScrollInset)
+            )
+        } else {
+            // wrapping
+            frameSize = CGSize(
+                width: visibleRectSize.width - gutterWidth,
+                height: max(usageBoundsForTextContainer.size.height, visibleRectSize.height - verticalScrollInset)
+            )
+        }
+
+        if !frame.size.isAlmostEqual(to: frameSize) {
+            logger.debug("contentView.frame.size (\(frameSize.width), \(frameSize.height)) \(#function)")
+            self.contentView.frame.origin.x = gutterWidth
+            self.contentView.frame.size = frameSize
+            self.contentSize = frameSize
+        }
+
+        _configureTextContainerSize()
     }
 
     // Update textContainer width to match textview width if track textview width
