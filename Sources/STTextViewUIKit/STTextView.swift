@@ -288,13 +288,10 @@ import STTextViewCommon
     // @Invalidating(.insertionPoint, .cursorRects)
     @objc dynamic open var isEditable: Bool {
         didSet {
-            isSelectable = isEditable
-
-            if !isEditable, isEditable != oldValue {
-                _ = resignFirstResponder()
+            if isEditable != oldValue && !isEditable {
+                resignFirstResponder()
                 updateEditableInteraction()
             }
-
         }
     }
 
@@ -302,10 +299,12 @@ import STTextViewCommon
     // @Invalidating(.insertionPoint, .cursorRects)
     @objc dynamic open var isSelectable: Bool {
         didSet {
-            if !isSelectable {
-                isEditable = false
+            if isSelectable != oldValue, !isSelectable {
+                resignFirstResponder()
+                updateEditableInteraction()
             }
         }
+
     }
 
     /// The receiver’s default paragraph style.
@@ -611,10 +610,17 @@ import STTextViewCommon
             }
         }
 
+        func setupNoInteraction() {
+            removeInteraction(editableTextInteraction)
+            removeInteraction(nonEditableTextInteraction)
+        }
+
         if isEditable {
             setupEditableInteraction()
-        } else {
+        } else if isSelectable {
             setupNonEditableInteraction()
+        } else {
+            setupNoInteraction()
         }
     }
 
