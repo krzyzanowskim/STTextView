@@ -401,11 +401,14 @@ import AVFoundation
     internal let delegateProxy = STTextViewDelegateProxy(source: nil)
 
     /// The manager that lays out text for the text view's text container.
-    @objc open var textLayoutManager: NSTextLayoutManager {
+    @objc dynamic open var textLayoutManager: NSTextLayoutManager {
+        willSet {
+            textContentManager.removeTextLayoutManager(newValue)
+        }
         didSet {
-            textContentManager.removeTextLayoutManager(oldValue)
             textContentManager.addTextLayoutManager(textLayoutManager)
             textContentManager.primaryTextLayoutManager = textLayoutManager
+            setupTextLayoutManager(textLayoutManager)
         }
     }
 
@@ -609,12 +612,11 @@ import AVFoundation
 
         super.init(frame: frameRect)
 
+        setupTextLayoutManager(textLayoutManager)
+
         textFinderBarContainer.client = self
         textFinder.findBarContainer = textFinderBarContainer
 
-        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
-
-        textLayoutManager.delegate = self
         textFinderClient.textView = self
         textCheckingController = NSTextCheckingController(client: self)
 
@@ -623,8 +625,6 @@ import AVFoundation
 
         wantsLayer = true
         autoresizingMask = [.width, .height]
-
-        textLayoutManager.textViewportLayoutController.delegate = self
 
         addSubview(selectionView)
         addSubview(contentView)
@@ -636,26 +636,7 @@ import AVFoundation
             addGestureRecognizer(recognizer)
         }
 
-        // Forward didChangeSelectionNotification from STTextLayoutManager
-        NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
-            guard let self = self else { return }
-
-            _yankingManager.selectionChanged()
-
-            let textViewNotification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
-
-            NotificationCenter.default.post(textViewNotification)
-            self.delegateProxy.textViewDidChangeSelection(textViewNotification)
-
-            NSAccessibility.post(element: self, notification: .selectedTextChanged)
-            // textCheckingController.didChangeSelectedRange()
-        }
-
-
-        usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] _, _ in
-            // FB13291926: this notification no longer works
-            self?.needsUpdateConstraints = true
-        }
+        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
     }
 
     @available(*, unavailable)
@@ -669,6 +650,36 @@ import AVFoundation
             plugins.forEach { plugin in
                 plugin.instance.tearDown()
             }
+        }
+    }
+
+    private var didChangeSelectionNotificationObserver: NSObjectProtocol?
+    private func setupTextLayoutManager(_ textLayoutManager: NSTextLayoutManager) {
+        textLayoutManager.delegate = self
+        textLayoutManager.textViewportLayoutController.delegate = self
+
+        // Forward didChangeSelectionNotification from STTextLayoutManager
+        if let didChangeSelectionNotificationObserver {
+            NotificationCenter.default.removeObserver(didChangeSelectionNotificationObserver)
+        }
+        didChangeSelectionNotificationObserver = NotificationCenter.default.addObserver(forName: STTextLayoutManager.didChangeSelectionNotification, object: textLayoutManager, queue: .main) { [weak self] notification in
+            guard let self = self else { return }
+
+            _yankingManager.selectionChanged()
+
+            let textViewNotification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: notification.userInfo)
+
+            NotificationCenter.default.post(textViewNotification)
+            self.delegateProxy.textViewDidChangeSelection(textViewNotification)
+
+            NSAccessibility.post(element: self, notification: .selectedTextChanged)
+            // textCheckingController.didChangeSelectedRange()
+        }
+
+        usageBoundsForTextContainerObserver = nil
+        usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] _, _ in
+            // FB13291926: this notification no longer works
+            self?.needsUpdateConstraints = true
         }
     }
 

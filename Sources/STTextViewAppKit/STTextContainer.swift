@@ -1,5 +1,5 @@
 import AppKit
 
-final class STTextContainer: NSTextContainer {
+open class STTextContainer: NSTextContainer {
     //
 }

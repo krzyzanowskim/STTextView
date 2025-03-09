@@ -22,7 +22,7 @@ open class STTextLayoutManager: NSTextLayoutManager {
 
     private static let needsBoundsWorkaround = testIfNeedsBoundsWorkaround()
 
-    open override var textSelections: [NSTextSelection] {
+    public override var textSelections: [NSTextSelection] {
         didSet {
             let notification = Notification(name: Self.didChangeSelectionNotification, object: self, userInfo: nil)
             NotificationCenter.default.post(notification)
