@@ -403,12 +403,14 @@ import AVFoundation
     /// The manager that lays out text for the text view's text container.
     @objc dynamic open var textLayoutManager: NSTextLayoutManager {
         willSet {
+            textContentManager.primaryTextLayoutManager = nil
             textContentManager.removeTextLayoutManager(newValue)
         }
         didSet {
             textContentManager.addTextLayoutManager(textLayoutManager)
             textContentManager.primaryTextLayoutManager = textLayoutManager
             setupTextLayoutManager(textLayoutManager)
+            self.text = text
         }
     }
 
@@ -612,8 +614,6 @@ import AVFoundation
 
         super.init(frame: frameRect)
 
-        setupTextLayoutManager(textLayoutManager)
-
         textFinderBarContainer.client = self
         textFinder.findBarContainer = textFinderBarContainer
 
@@ -636,6 +636,7 @@ import AVFoundation
             addGestureRecognizer(recognizer)
         }
 
+        setupTextLayoutManager(textLayoutManager)
         setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
     }
 

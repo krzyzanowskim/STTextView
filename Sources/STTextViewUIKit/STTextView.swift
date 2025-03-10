@@ -36,12 +36,14 @@ import STTextViewCommon
     /// The manager that lays out text for the text view's text container.
     @objc dynamic open var textLayoutManager: NSTextLayoutManager {
         willSet {
+            textContentManager.primaryTextLayoutManager = nil
             textContentManager.removeTextLayoutManager(newValue)
         }
         didSet {
             textContentManager.addTextLayoutManager(textLayoutManager)
             textContentManager.primaryTextLayoutManager = textLayoutManager
             setupTextLayoutManager(textLayoutManager)
+            self.text = text
         }
     }
 
@@ -444,12 +446,8 @@ import STTextViewCommon
 
         super.init(frame: frame)
 
-        setupTextLayoutManager(textLayoutManager)
-
         contentView.clipsToBounds = clipsToBounds
         lineHighlightView.clipsToBounds = clipsToBounds
-
-        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
 
         addSubview(contentView)
         contentView.addSubview(lineHighlightView)
@@ -462,6 +460,9 @@ import STTextViewCommon
 
         updateEditableInteraction()
         isGutterVisible = showsLineNumbers
+
+        setupTextLayoutManager(textLayoutManager)
+        setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
     }
 
     @available(*, unavailable)
