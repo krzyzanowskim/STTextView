@@ -99,10 +99,17 @@ extension STTextView  {
     }
 
     open override func accessibilityRange(forLine line: Int) -> NSRange {
-        guard let location = textContentManager.location(line: line),
-              let textElement = textContentManager.textElements(for: NSTextRange(location: location)).first,
-              let textElementRange = textElement.elementRange
-        else {
+        guard let location = textContentManager.location(line: line) else {
+            return .notFound
+        }
+
+        var textElement: NSTextElement?
+        textContentManager.enumerateTextElements(from: location) { element in
+            textElement = element
+            return false
+        }
+
+        guard let textElement, let textElementRange = textElement.elementRange else {
             return .notFound
         }
 
