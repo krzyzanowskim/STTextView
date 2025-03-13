@@ -2,7 +2,9 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import AppKit
+import STTextKitPlus
 
+/// NSAccessibilityProtocol
 extension STTextView  {
 
     open override func isAccessibilityElement() -> Bool {
@@ -25,34 +27,6 @@ extension STTextView  {
         NSLocalizedString("Text Editor", comment: "")
     }
 
-    open override func accessibilityValue() -> Any? {
-        text
-    }
-
-    open override func setAccessibilityValue(_ accessibilityValue: Any?) {
-        guard let string = accessibilityValue as? String else {
-            return
-        }
-
-        self.text = string
-    }
-
-    open override func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
-        attributedSubstring(forProposedRange: range, actualRange: nil)
-    }
-
-    open override func accessibilityVisibleCharacterRange() -> NSRange {
-        if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
-            return NSRange(viewportRange, in: textContentManager)
-        }
-
-        return NSRange()
-    }
-
-    open override func accessibilityString(for range: NSRange) -> String? {
-        attributedSubstring(forProposedRange: range, actualRange: nil)?.string
-    }
-
     open override func accessibilityNumberOfCharacters() -> Int {
         text?.count ?? 0
     }
@@ -65,11 +39,78 @@ extension STTextView  {
         selectedRange()
     }
 
-    open override func setAccessibilitySelectedTextRange(_ accessibilitySelectedTextRange: NSRange) {
-        if let textRange = NSTextRange(accessibilitySelectedTextRange, in: textContentManager) {
-            setSelectedTextRange(textRange, updateLayout: true)
-        } else {
-            assertionFailure()
-        }
+    open override func isAccessibilityFocused() -> Bool {
+        isFirstResponder && isSelectable
     }
+}
+
+extension STTextView  {
+
+    // NSAccessibilityStaticText
+
+    open override func accessibilityVisibleCharacterRange() -> NSRange {
+        if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
+            return NSRange(viewportRange, in: textContentManager)
+        }
+
+        return NSRange()
+    }
+
+    open override func setAccessibilitySelectedTextRange(_ accessibilitySelectedTextRange: NSRange) {
+        guard let textRange = NSTextRange(accessibilitySelectedTextRange, in: textContentManager) else {
+            assertionFailure()
+            return
+        }
+        setSelectedTextRange(textRange, updateLayout: true)
+    }
+
+    open override func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
+        attributedSubstring(forProposedRange: range, actualRange: nil)
+    }
+
+    open override func accessibilityValue() -> Any? {
+        text
+    }
+
+    open override func setAccessibilityValue(_ accessibilityValue: Any?) {
+        guard let string = accessibilityValue as? String else {
+            return
+        }
+
+        self.text = string
+    }
+
+    // NSAccessibilityNavigableStaticText
+
+    open override func accessibilityFrame(for range: NSRange) -> NSRect {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            return .zero
+        }
+        return textLayoutManager.textSegmentFrame(in: textRange, type: .standard) ?? .zero
+    }
+
+    open override func accessibilityLine(for index: Int) -> Int {
+        guard let location = textContentManager.location(at: index),
+              let position = textContentManager.position(location)
+        else {
+            return 0
+        }
+        return position.row
+    }
+
+    open override func accessibilityRange(forLine line: Int) -> NSRange {
+        guard let location = textContentManager.location(line: line),
+              let textElement = textContentManager.textElements(for: NSTextRange(location: location)).first,
+              let textElementRange = textElement.elementRange
+        else {
+            return .notFound
+        }
+
+        return NSRange(textElementRange, in: textContentManager)
+    }
+
+    open override func accessibilityString(for range: NSRange) -> String? {
+        attributedSubstring(forProposedRange: range, actualRange: nil)?.string
+    }
+
 }
