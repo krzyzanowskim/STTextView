@@ -83,10 +83,12 @@ extension STTextView  {
     // NSAccessibilityNavigableStaticText
 
     open override func accessibilityFrame(for range: NSRange) -> NSRect {
-        guard let textRange = NSTextRange(range, in: textContentManager) else {
+        guard let textRange = NSTextRange(range, in: textContentManager),
+              let segmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard)
+        else {
             return .zero
         }
-        return textLayoutManager.textSegmentFrame(in: textRange, type: .standard) ?? .zero
+        return window?.convertToScreen(contentView.convert(segmentFrame, to: nil)) ?? .zero
     }
 
     open override func accessibilityLine(for index: Int) -> Int {
