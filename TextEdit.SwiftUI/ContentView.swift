@@ -58,7 +58,7 @@ struct ContentView: View {
 
     private func loadContent() {
         let string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        self.text = AttributedString(string, attributes: AttributeContainer().foregroundColor(Color(SwiftUI.Color.primary)))
+        self.text = AttributedString(string.prefix(4096), attributes: AttributeContainer().foregroundColor(Color(SwiftUI.Color.primary)))
     }
 }
 
