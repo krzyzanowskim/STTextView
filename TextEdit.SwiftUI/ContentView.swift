@@ -7,16 +7,19 @@ import STTextViewSwiftUI
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
 typealias Font = NSFont
 typealias Color = NSColor
+let textColor = Color.textColor
 #endif
 #if canImport(UIKit)
 typealias Font = UIFont
 typealias Color = UIColor
+let textColor = Color.label
 #endif
 
 struct ContentView: View {
     @State private var text: AttributedString = ""
     @State private var selection: NSRange?
     @State private var counter = 0
+    @State private var font = Font.monospacedSystemFont(ofSize: 0, weight: .medium)
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,7 +29,7 @@ struct ContentView: View {
                 selection: $selection,
                 options: [.wrapLines, .highlightSelectedLine, .showLineNumbers]
             )
-            .textViewFont(.preferredFont(forTextStyle: .body))
+            .textViewFont(font)
 
             // Button("Modify") {
             //     text.insert(AttributedString("\(counter)\n"), at: text.startIndex)
@@ -58,7 +61,10 @@ struct ContentView: View {
 
     private func loadContent() {
         let string = try! String(contentsOf: Bundle.main.url(forResource: "content", withExtension: "txt")!)
-        self.text = AttributedString(string.prefix(4096), attributes: AttributeContainer().foregroundColor(Color(SwiftUI.Color.primary)))
+        self.text = AttributedString(
+            string.prefix(4096),
+            attributes: AttributeContainer([.foregroundColor: textColor, .font: font])
+        )
     }
 }
 
