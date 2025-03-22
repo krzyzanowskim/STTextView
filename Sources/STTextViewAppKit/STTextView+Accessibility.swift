@@ -44,12 +44,30 @@ extension STTextView  {
         textLayoutManager.textSelectionsString()
     }
 
+    open override func setAccessibilitySelectedText(_ accessibilitySelectedText: String?) {
+        self.replaceCharacters(in: selectedRange(), with: accessibilitySelectedText ?? "")
+    }
+
     open override func accessibilitySelectedTextRange() -> NSRange {
         selectedRange()
     }
 
+    open override func setAccessibilitySelectedTextRanges(_ accessibilitySelectedTextRanges: [NSValue]?) {
+        for range in accessibilitySelectedTextRanges?.map(\.rangeValue) ?? [] {
+            self.setSelectedRange(range)
+        }
+    }
+
     open override func isAccessibilityFocused() -> Bool {
         isFirstResponder && isSelectable
+    }
+
+    open override func setAccessibilityFocused(_ accessibilityFocused: Bool) {
+        if !accessibilityFocused, isFirstResponder {
+            window?.makeFirstResponder(nil)
+        } else if accessibilityFocused {
+            window?.makeFirstResponder(self)
+        }
     }
 }
 
@@ -130,5 +148,4 @@ extension STTextView  {
     open override func accessibilityString(for range: NSRange) -> String? {
         attributedSubstring(forProposedRange: range, actualRange: nil)?.string
     }
-
 }
