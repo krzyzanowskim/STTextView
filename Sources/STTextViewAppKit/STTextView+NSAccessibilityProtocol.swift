@@ -4,6 +4,15 @@
 import AppKit
 import STTextKitPlus
 
+
+/// NSAccessibility
+extension STTextView {
+    open override func accessibilitySharedCharacterRange() -> NSRange {
+        NSRange(textContentManager.documentRange, in: textContentManager)
+    }
+}
+
+
 /// NSAccessibilityProtocol
 extension STTextView  {
 
