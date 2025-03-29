@@ -1320,15 +1320,15 @@ import AVFoundation
         needsDisplay = true
     }
 
-    public func replaceCharacters(in range: NSRange, with string: String) {
+    open func replaceCharacters(in range: NSRange, with string: String) {
         textFinderClient.replaceCharacters(in: range, with: string)
     }
 
-    public func replaceCharacters(in range: NSRange, with string: NSAttributedString) {
+    open func replaceCharacters(in range: NSRange, with string: NSAttributedString) {
         textFinderClient.replaceCharacters(in: range, with: string)
     }
 
-    public func replaceCharacters(in range: NSTextRange, with string: String) {
+    open func replaceCharacters(in range: NSTextRange, with string: String) {
         replaceCharacters(in: range, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
     }
 
