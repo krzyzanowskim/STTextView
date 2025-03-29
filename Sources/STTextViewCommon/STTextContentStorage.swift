@@ -10,9 +10,9 @@ import UIKit
 
 import STTextKitPlus
 
-package final class STTextContentStorage: NSTextContentStorage {
+open class STTextContentStorage: NSTextContentStorage {
 
-    package override func replaceContents(in range: NSTextRange, with textElements: [NSTextElement]?) {
+    open override func replaceContents(in range: NSTextRange, with textElements: [NSTextElement]?) {
         assert(hasEditingTransaction, "Not called inside performEditingTransaction")
 
         guard let textStorage = textStorage,

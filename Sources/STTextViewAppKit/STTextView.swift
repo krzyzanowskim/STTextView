@@ -420,7 +420,16 @@ import AVFoundation
     }
 
     /// The text view's text storage object.
-    @objc open private(set) var textContentManager: NSTextContentManager
+    @objc dynamic open var textContentManager: NSTextContentManager {
+        willSet {
+            textContentManager.primaryTextLayoutManager = nil
+        }
+        didSet {
+            textContentManager.addTextLayoutManager(textLayoutManager)
+            textContentManager.primaryTextLayoutManager = textLayoutManager
+            self.text = text
+        }
+    }
 
     /// The text view's text container
     public var textContainer: NSTextContainer {
