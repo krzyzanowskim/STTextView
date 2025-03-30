@@ -329,7 +329,11 @@ import STTextViewCommon
     }
 
     /// Default typing attributes used in place of missing attributes of font, color and paragraph
-    internal var _defaultTypingAttributes: [NSAttributedString.Key: Any]
+    internal var _defaultTypingAttributes: [NSAttributedString.Key: Any] = [
+        .paragraphStyle: NSParagraphStyle.default,
+        .font: UIFont.preferredFont(forTextStyle: .body),
+        .foregroundColor: UIColor.label
+    ]
 
     /// The attributes to apply to new text that the user enters.
     ///
@@ -341,12 +345,33 @@ import STTextViewCommon
         }
 
         set {
-            _typingAttributes = newValue
+            _typingAttributes = newValue.filter {
+                _allowedTypingAttributes.contains($0.key)
+            }
             setNeedsDisplay()
         }
     }
 
     private var _typingAttributes: [NSAttributedString.Key: Any]
+    private var _allowedTypingAttributes: [NSAttributedString.Key] = [
+        .paragraphStyle,
+        .font,
+        .foregroundColor,
+        .baselineOffset,
+        .kern,
+        .ligature,
+        .shadow,
+        .strikethroughColor,
+        .strikethroughStyle,
+        .languageIdentifier,
+        .tracking,
+        .writingDirection,
+        .textEffect,
+        .backgroundColor,
+        .baselineOffset,
+        .underlineColor,
+        .underlineStyle
+    ]
 
     internal func updateTypingAttributes(at location: NSTextLocation? = nil) {
         if let location {
@@ -435,12 +460,6 @@ import STTextViewCommon
 
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
-
-        _defaultTypingAttributes = [
-            .paragraphStyle: NSParagraphStyle.default,
-            .font: UIFont.preferredFont(forTextStyle: .body),
-            .foregroundColor: UIColor.label
-        ]
 
         _typingAttributes = [:]
 

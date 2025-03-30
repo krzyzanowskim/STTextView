@@ -135,7 +135,11 @@ import AVFoundation
     }
 
     /// Default typing attributes used in place of missing attributes of font, color and paragraph
-    internal var _defaultTypingAttributes: [NSAttributedString.Key: Any]
+    internal var _defaultTypingAttributes: [NSAttributedString.Key: Any] = [
+        .paragraphStyle: NSParagraphStyle.default,
+        .font: NSFont.preferredFont(forTextStyle: .body),
+        .foregroundColor: NSColor.textColor
+    ]
 
     /// The attributes to apply to new text that the user enters.
     ///
@@ -147,12 +151,38 @@ import AVFoundation
         }
 
         set {
-            _typingAttributes = newValue
+            _typingAttributes = newValue.filter {
+                _allowedTypingAttributes.contains($0.key)
+            }
             needsDisplay = true
         }
     }
 
     private var _typingAttributes: [NSAttributedString.Key: Any]
+    private var _allowedTypingAttributes: [NSAttributedString.Key] = [
+        .paragraphStyle,
+        .font,
+        .foregroundColor,
+        .baselineOffset,
+        .kern,
+        .ligature,
+        .shadow,
+        .strikethroughColor,
+        .strikethroughStyle,
+        .superscript,
+        .languageIdentifier,
+        .tracking,
+        .writingDirection,
+        .textEffect,
+        .accessibilityFont,
+        .accessibilityForegroundColor,
+        .backgroundColor,
+        .baselineOffset,
+        .underlineColor,
+        .underlineStyle,
+        .accessibilityUnderline,
+        .accessibilityUnderlineColor
+    ]
 
     internal func updateTypingAttributes(at location: NSTextLocation? = nil) {
         if let location {
@@ -612,12 +642,6 @@ import AVFoundation
         textFinderBarContainer = STTextFinderBarContainer()
         textFinder = NSTextFinder()
         textFinder.client = textFinderClient
-
-        _defaultTypingAttributes = [
-            .paragraphStyle: NSParagraphStyle.default,
-            .font: NSFont.preferredFont(forTextStyle: .body),
-            .foregroundColor: NSColor.textColor
-        ]
 
         _typingAttributes = [:]
 
