@@ -1,0 +1,3 @@
+[tools]
+"cargo:git-cliff" = "latest"
+"cargo:typos-cli" = "latest"
