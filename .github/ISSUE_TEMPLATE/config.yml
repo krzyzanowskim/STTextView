@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Features, Bug Reports, Questions
+    url: https://github.com/krzyzanowskim/STTextView/discussions/new?category=general
+    about: Our preferred starting point if you have any questions or suggestions about configuration, features or behavior.
