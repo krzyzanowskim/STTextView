@@ -112,6 +112,7 @@ public extension STTextViewDelegate {
         menu
     }
 
+    @_unavailableFromAsync
     func textView(_ textView: STTextView, completionItemsAtLocation location: any NSTextLocation) -> [any STCompletionItem]? {
         nil
     }

@@ -497,6 +497,11 @@ import AVFoundation
         completionWindowController?.isVisible == true
     }
 
+    /// Cancel completion task on selection change automatically. Default `true`.
+    ///
+    /// Automatically call ``cancelComplete(_:)`` when `true`.
+    open var shouldDimissCompletionOnSelectionChange: Bool = true
+
     internal var _completionTask: Task<Void, any Error>?
 
     /// Search-and-replace find interface inside a view.
@@ -706,6 +711,18 @@ import AVFoundation
             self.delegateProxy.textViewDidChangeSelection(textViewNotification)
 
             NSAccessibility.post(element: self, notification: .selectedTextChanged)
+
+            // Cancel completinon on selection change
+            if self.shouldDimissCompletionOnSelectionChange {
+                if NSApp.currentEvent == nil ||
+                    (NSApp.currentEvent?.type != .keyDown && NSApp.currentEvent?.type != .keyUp) ||
+                    NSApp.currentEvent?.characters == nil ||
+                    !(NSApp.currentEvent?.characters?.contains(where: \.isLetter) ?? false)
+                {
+                    self.cancelComplete(textViewNotification.object)
+                }
+            }
+
             // textCheckingController.didChangeSelectedRange()
         }
 

@@ -30,8 +30,8 @@ extension STTextView {
     /// Close completion window
     ///
     /// see ``complete(_:)``
-    @MainActor
-    public func cancelComplete(_ sender: Any?) {
+    @preconcurrency @MainActor
+    @objc open func cancelComplete(_ sender: Any?) {
         _completionTask?.cancel()
         completionWindowController?.close()
     }
