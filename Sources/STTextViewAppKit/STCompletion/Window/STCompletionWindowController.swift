@@ -19,6 +19,8 @@ open class STCompletionWindowController: NSWindowController {
         let contentViewController = viewController
 
         let window = STCompletionWindow(contentViewController: contentViewController)
+        window.setContentSize(CGSize(width: 450, height: 22 * 6.5))
+        window.contentMinSize = CGSize(width: 300, height: 50)
         window.styleMask = [.resizable, .fullSizeContentView]
         window.autorecalculatesKeyViewLoop = true
         window.level = .popUpMenu
