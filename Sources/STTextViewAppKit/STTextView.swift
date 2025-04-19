@@ -1178,6 +1178,7 @@ import AVFoundation
 
     @objc internal func enclosingClipViewBoundsDidChange(_ notification: Notification) {
         layoutGutter()
+        cancelComplete(notification.object)
     }
 
     open override func viewDidEndLiveResize() {
