@@ -40,6 +40,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
 
         let scrollView = NSScrollView(frame: view.frame)
         scrollView.autoresizingMask = [.width, .height]
+        scrollView.documentView = tableView
         view.addSubview(scrollView)
         self.scrollView = scrollView
     }
@@ -53,7 +54,6 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         scrollView.borderType = .noBorder
         scrollView.hasVerticalScroller = true
         scrollView.verticalScroller = NoKnobScroller()
-        scrollView.documentView = tableView
 
         tableView.style = .plain
         tableView.usesAlternatingRowBackgroundColors = false
