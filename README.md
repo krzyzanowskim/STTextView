@@ -132,8 +132,8 @@ The text view can be customized in a variety of ways.
 
 ```swift
 let paragraph = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-// Set the line-height to 110%
-paragraph.lineHeightMultiple = 1.1
+// Set the line-height to 120%
+paragraph.lineHeightMultiple = 1.2
 paragraph.defaultTabInterval = 28
 
 // Default Paragraph style

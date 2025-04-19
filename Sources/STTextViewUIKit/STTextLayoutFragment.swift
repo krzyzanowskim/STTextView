@@ -67,12 +67,8 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
                 paragraphStyle = self.defaultParagraphStyle
             }
 
-            if !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                let offset = -(lineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
-                lineFragment.draw(at: point.moved(dx: lineFragment.typographicBounds.origin.x, dy: lineFragment.typographicBounds.origin.y + offset), in: context)
-            } else {
-                lineFragment.draw(at: lineFragment.typographicBounds.origin, in: context)
-            }
+            let offset = -(lineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
+            lineFragment.draw(at: point.moved(dx: lineFragment.typographicBounds.origin.x, dy: lineFragment.typographicBounds.origin.y + offset), in: context)
         }
 
 #if USE_FONT_SMOOTHING_STYLE

@@ -418,8 +418,7 @@ import STTextViewCommon
     internal var typingLineHeight: CGFloat {
         let font = typingAttributes[.font] as? UIFont ?? _defaultTypingAttributes[.font] as! UIFont
         let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? _defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
-        let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
-        return calculateDefaultLineHeight(for: font) * lineHeightMultiple
+        return calculateDefaultLineHeight(for: font) * paragraphStyle.stLineHeightMultiple
     }
 
     private let editableTextInteraction = UITextInteraction(for: .editable)

@@ -72,7 +72,7 @@ extension STTextView {
                 // Calculations in sync with position used by STTextLayoutFragment
                 let ctNumberLine = CTLineCreateWithAttributedString(NSAttributedString(string: "\(lineNumber)", attributes: typingAttributes))
                 let baselineParagraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? defaultParagraphStyle
-                let baselineOffset = -(ctNumberLine.typographicHeight() * (baselineParagraphStyle.lineHeightMultiple - 1.0) / 2)
+                let baselineOffset = -(ctNumberLine.typographicHeight() * (baselineParagraphStyle.stLineHeightMultiple - 1.0) / 2)
 
                 var effectiveLineTextAttributes = lineTextAttributes
                 if gutterView.highlightSelectedLine, !selectedLineTextAttributes.isEmpty {
@@ -155,8 +155,8 @@ extension STTextView {
                         if !textLineFragment.isExtraLineFragment {
                             locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
 
-                            if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                                baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                            if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                                baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
                             }
 
                             lineFragmentFrame = CGRect(
@@ -175,8 +175,8 @@ extension STTextView {
                             let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
                             locationForFirstCharacter = prevTextLineFragment.locationForCharacter(at: 0)
 
-                            if let paragraphStyle = prevTextLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                                baselineYOffset = -(prevTextLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                            if let paragraphStyle = prevTextLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                                baselineYOffset = -(prevTextLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
                             }
 
                             lineFragmentFrame = CGRect(
@@ -193,8 +193,8 @@ extension STTextView {
                     } else {
                         locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
 
-                        if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle, !paragraphStyle.lineHeightMultiple.isAlmostZero() {
-                            baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.lineHeightMultiple - 1.0) / 2)
+                        if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                            baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
                         }
 
                         lineFragmentFrame = CGRect(
@@ -235,7 +235,7 @@ extension STTextView {
                             width: max(lineFragmentFrame.intersection(gutterView.containerView.frame).width, gutterView.containerView.frame.width),
                             height: lineFragmentFrame.size.height
                         )
-                    )
+                    ).pixelAligned
 
                     gutterView.containerView.addSubview(numberCell)
                     requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)

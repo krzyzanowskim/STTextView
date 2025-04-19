@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.5] - 2025-04-19
+
+### Changed
+- Normalize lineHeightMultiple handling via stLineHeightMultiple helper method
+- Improve scroll view styling and visibility in STCompletionViewController
+- Make STCompletionViewController layout resizable and set default window size
+- Add GitHub issue template configuration to disable blank issues
+- Add Makefile with targets for changelog generation and help message
+- Update changelog for versions 2.0.3 and 2.0.4, adjust git-cliff config and add mise setup
+
 ## [2.0.4] - 2025-03-30
 
 ### Changed

@@ -229,8 +229,7 @@ import AVFoundation
     internal var typingLineHeight: CGFloat {
         let font = typingAttributes[.font] as? NSFont ?? _defaultTypingAttributes[.font] as! NSFont
         let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? self._defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
-        let lineHeightMultiple = paragraphStyle.lineHeightMultiple.isAlmostZero() ? 1.0 : paragraphStyle.lineHeightMultiple
-        return calculateDefaultLineHeight(for: font) * lineHeightMultiple
+        return calculateDefaultLineHeight(for: font) * paragraphStyle.stLineHeightMultiple
     }
 
     /// The characters of the receiver’s text.
