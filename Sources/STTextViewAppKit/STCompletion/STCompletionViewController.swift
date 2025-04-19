@@ -8,6 +8,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
 
     public weak var delegate: STCompletionViewControllerDelegate?
     public var tableView: NSTableView!
+    private var scrollView: NSScrollView!
 
     open var items: [any STCompletionItem] = [] {
         didSet {
@@ -39,18 +40,20 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
 
         let scrollView = NSScrollView(frame: view.frame)
         scrollView.autoresizingMask = [.width, .height]
+        view.addSubview(scrollView)
+        self.scrollView = scrollView
+    }
+
+    open override func viewDidLoad() {
+        super.viewDidLoad()
         scrollView.automaticallyAdjustsContentInsets = false
         scrollView.contentInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
         scrollView.drawsBackground = false
         scrollView.backgroundColor = .clear
         scrollView.borderType = .noBorder
         scrollView.hasVerticalScroller = true
+        scrollView.verticalScroller = NoKnobScroller()
         scrollView.documentView = tableView
-        view.addSubview(scrollView)
-    }
-
-    open override func viewDidLoad() {
-        super.viewDidLoad()
 
         tableView.style = .plain
         tableView.usesAlternatingRowBackgroundColors = false
@@ -71,9 +74,9 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         tableView.delegate = self
 
         do {
-            let nameColumn = NSTableColumn(identifier: .labelColumn)
-            nameColumn.resizingMask = .autoresizingMask
-            tableView.addTableColumn(nameColumn)
+            let labelColumn = NSTableColumn(identifier: .labelColumn)
+            labelColumn.resizingMask = .autoresizingMask
+            tableView.addTableColumn(labelColumn)
         }
 
     }
@@ -203,4 +206,14 @@ private class STTableRowView: NSTableRowView {
 
 private extension NSUserInterfaceItemIdentifier {
     static let labelColumn = NSUserInterfaceItemIdentifier("LabelColumn")
+}
+
+private final class NoKnobScroller: NSScroller {
+    override func drawKnobSlot(in slotRect: NSRect, highlight flag: Bool) {
+
+    }
+
+    override class var isCompatibleWithOverlayScrollers: Bool {
+        true
+    }
 }
