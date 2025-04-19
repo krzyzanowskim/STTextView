@@ -32,13 +32,14 @@ extension STTextView {
     /// see ``complete(_:)``
     @MainActor
     public func cancelComplete(_ sender: Any?) {
+        _completionTask?.cancel()
         completionWindowController?.close()
     }
 
     @MainActor
     open override func cancelOperation(_ sender: Any?) {
         if let completionWindowController, completionWindowController.isVisible {
-            completionWindowController.close()
+            cancelComplete(sender)
         } else {
             self.complete(sender)
         }
@@ -57,7 +58,7 @@ extension STTextView {
         }
 
         if completionItems.isEmpty {
-            completionWindowController?.close()
+            cancelComplete(self)
             return false
         }
 
@@ -89,13 +90,12 @@ extension STTextView {
             return false
         }
 
-
         if Task.isCancelled {
             return false
         }
 
         if completionItems.isEmpty {
-            completionWindowController?.close()
+            cancelComplete(self)
             return false
         }
 
