@@ -10,7 +10,7 @@ import AppKit
 ///      |---textInsertionIndicator (STInsertionPointIndicatorProtocol)
 ///
 internal class STInsertionPointView: NSView {
-    private var textInsertionIndicator: any STInsertionPointIndicatorProtocol
+    private let textInsertionIndicator: any STInsertionPointIndicatorProtocol
 
     override var isFlipped: Bool {
         true
@@ -35,6 +35,13 @@ internal class STInsertionPointView: NSView {
         super.init(frame: frameRect)
 
         addSubview(textInsertionIndicator)
+    }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        // Manually reset size because `NSTextInsertionIndicator`
+        // does not react to its autoresizingMask
+        textInsertionIndicator.frame.size = newSize
     }
 
     func blinkStart() {

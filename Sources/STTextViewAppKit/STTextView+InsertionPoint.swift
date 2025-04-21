@@ -89,34 +89,50 @@ extension STTextView {
                 }
             }
 
-            removeInsertionPointView()
+            var existingViews = contentView.subviews.filter { view in
+                type(of: view) == STInsertionPointView.self
+            }
 
             for selectionFrame in textSelectionFrames where !selectionFrame.isNull && !selectionFrame.isInfinite {
                 let insertionViewFrame = CGRect(origin: selectionFrame.origin, size: CGSize(width: max(2, selectionFrame.width), height: selectionFrame.height)).pixelAligned
-
-                var textInsertionIndicator: any STInsertionPointIndicatorProtocol
-                if let customTextInsertionIndicator = self.delegateProxy.textViewInsertionPointView(self, frame: CGRect(origin: .zero, size: insertionViewFrame.size)) {
-                    textInsertionIndicator = customTextInsertionIndicator
+                let insertionView: STInsertionPointView
+                // re-use existing insertion views
+                if !existingViews.isEmpty {
+                    // reuse existing insertion view
+                    insertionView = existingViews.removeFirst() as! STInsertionPointView
+                    insertionView.frame = insertionViewFrame
                 } else {
-                    if #available(macOS 14, *) {
-                        textInsertionIndicator = STTextInsertionIndicatorNew(frame: CGRect(origin: .zero, size: insertionViewFrame.size))
+                    // add new views that exedes existing views
+                    var textInsertionIndicator: any STInsertionPointIndicatorProtocol
+                    if let customTextInsertionIndicator = self.delegateProxy.textViewInsertionPointView(self, frame: CGRect(origin: .zero, size: insertionViewFrame.size)) {
+                        textInsertionIndicator = customTextInsertionIndicator
                     } else {
-                        textInsertionIndicator = STTextInsertionIndicatorOld(frame: CGRect(origin: .zero, size: insertionViewFrame.size))
+                        if #available(macOS 14, *) {
+                            textInsertionIndicator = STTextInsertionIndicatorNew(frame: CGRect(origin: .zero, size: insertionViewFrame.size))
+                        } else {
+                            textInsertionIndicator = STTextInsertionIndicatorOld(frame: CGRect(origin: .zero, size: insertionViewFrame.size))
+                        }
                     }
-                }
 
-                let insertionView = STInsertionPointView(frame: insertionViewFrame, textInsertionIndicator: textInsertionIndicator)
-                insertionView.clipsToBounds = false
-                insertionView.insertionPointColor = insertionPointColor
+                    insertionView = STInsertionPointView(frame: insertionViewFrame, textInsertionIndicator: textInsertionIndicator)
+                    insertionView.clipsToBounds = false
+                    insertionView.insertionPointColor = insertionPointColor
+                    contentView.addSubview(insertionView)
+                }
 
                 if isFirstResponder {
                     insertionView.blinkStart()
                 } else {
                     insertionView.blinkStop()
                 }
-
-                contentView.addSubview(insertionView)
             }
+
+            // remove unused insertion points (unused)
+            for v in existingViews {
+                v.removeFromSuperview()
+            }
+            existingViews.removeAll()
+
         } else if !shouldDrawInsertionPoint {
             removeInsertionPointView()
         }
@@ -132,9 +148,12 @@ extension STTextView {
 
 @available(macOS 14.0, *)
 private class STTextInsertionIndicatorNew: NSTextInsertionIndicator, STInsertionPointIndicatorProtocol {
+    // NSTextInsertionIndicator start as visible (blinking)
+    private var _isVisible: Bool = true
 
     override init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
+        autoresizingMask = [.width, .height]
     }
 
     @available(*, unavailable)
@@ -153,11 +172,17 @@ private class STTextInsertionIndicatorNew: NSTextInsertionIndicator, STInsertion
     }
 
     func blinkStart() {
-        displayMode = .automatic
+        if !_isVisible {
+            _isVisible = true
+            displayMode = .automatic
+        }
     }
 
     func blinkStop() {
-        displayMode = .hidden
+        if _isVisible {
+            _isVisible = false
+            displayMode = .hidden
+        }
     }
 
     open override var isFlipped: Bool {
@@ -180,6 +205,7 @@ private class STTextInsertionIndicatorOld: NSView, STInsertionPointIndicatorProt
         wantsLayer = true
         layer?.backgroundColor = insertionPointColor.cgColor
         layer?.cornerRadius = 1
+        autoresizingMask = [.width, .height]
     }
 
     @available(*, unavailable)
