@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.6] - 2025-04-21
+
+### Changed
+- Optimize insertion point rendering by reusing views and fixing layout issues
+- Add support for canceling completions on selection change in STTextView
+- Cancel autocompletion when clip view bounds change
+- Improve completion cancellation logic by calling cancelComplete in more cases
+- Move scrollView.documentView assignment earlier during scroll view setup
+
 ## [2.0.5] - 2025-04-19
 
 ### Changed
