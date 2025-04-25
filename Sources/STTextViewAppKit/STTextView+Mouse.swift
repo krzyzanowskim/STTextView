@@ -80,6 +80,7 @@ extension STTextView {
         }
 
         if !handled {
+            // The default implementation simply passes this message to the next responder.
             super.mouseDown(with: event)
         }
     }
