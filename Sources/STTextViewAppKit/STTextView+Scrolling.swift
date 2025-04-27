@@ -7,12 +7,24 @@ import AppKit
 extension STTextView {
 
     open override func centerSelectionInVisibleArea(_ sender: Any?) {
-        guard let textRange = textLayoutManager.textSelections.last?.textRanges.last else {
+        guard let selectionTextRange = textLayoutManager.textSelections.last?.textRanges.last,
+              var rect = textLayoutManager.textSegmentFrame(in: selectionTextRange, type: .selection) else {
             return
         }
 
-        scrollToVisible(textRange, type: .standard)
-        needsDisplay = true
+        if rect.width.isZero {
+            // add padding around the point to ensure the visibility the segment
+            // since the width of the segment is 0 for a selection
+            rect = rect.inset(by: .init(top: 0, left: -textContainer.lineFragmentPadding, bottom: 0, right: -textContainer.lineFragmentPadding))
+        }
+
+        // scroll to visible IN clip view (ignoring gutter view overlay)
+        // adjust rect to mimick it's size to include gutter overlay
+        rect.origin.x -= gutterView?.frame.width ?? 0
+        rect.size.width += gutterView?.frame.width ?? 0
+
+        // put rect origin in the center
+        contentView.scroll(rect.origin.applying(.init(translationX: 0, y: -visibleRect.height / 2)))
     }
 
     open override func pageUp(_ sender: Any?) {
