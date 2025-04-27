@@ -1298,6 +1298,10 @@ import AVFoundation
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
+    open override func scroll(_ point: NSPoint) {
+        contentView.scroll(point)
+    }
+
     @discardableResult
     internal func scrollToVisible(_ selectionTextRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
         guard var rect = textLayoutManager.textSegmentFrame(in: selectionTextRange, type: type) else {
