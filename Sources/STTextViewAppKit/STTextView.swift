@@ -1299,29 +1299,6 @@ import AVFoundation
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
-    open override func scroll(_ point: NSPoint) {
-        contentView.scroll(point)
-    }
-
-    @discardableResult
-    internal func scrollToVisible(_ selectionTextRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
-        guard var rect = textLayoutManager.textSegmentFrame(in: selectionTextRange, type: type) else {
-            return false
-        }
-
-        if rect.width.isZero {
-            // add padding around the point to ensure the visibility the segment
-            // since the width of the segment is 0 for a selection
-            rect = rect.inset(by: .init(top: 0, left: -textContainer.lineFragmentPadding, bottom: 0, right: -textContainer.lineFragmentPadding))
-        }
-
-        // scroll to visible IN clip view (ignoring gutter view overlay)
-        // adjust rect to mimick it's size to include gutter overlay
-        rect.origin.x -= gutterView?.frame.width ?? 0
-        rect.size.width += gutterView?.frame.width ?? 0
-        return contentView.scrollToVisible(rect)
-    }
-
     open func scrollRangeToVisible(_ range: NSRange) {
         textFinderClient.scrollRangeToVisible(range)
     }
