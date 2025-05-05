@@ -175,8 +175,23 @@ extension STTextView: UITextInput {
 
     /// Returns the text position that is at the farthest extent in a specified layout direction within a range of text.
     public func position(within range: UITextRange, farthestIn direction: UITextLayoutDirection) -> UITextPosition? {
-        assertionFailure("Not Implemented")
-        return nil
+        guard let range = range as? STTextLocationRange else {
+            return nil
+        }
+        
+        let textRange = range.textRange
+        
+        // Return the appropriate position based on the direction
+        switch direction {
+        case .left, .up:
+            // For left and up directions, return the start of the range
+            return textRange.location.uiTextPosition
+        case .right, .down:
+            // For right and down directions, return the end of the range
+            return textRange.endLocation.uiTextPosition
+        @unknown default:
+            return nil
+        }
     }
 
 //    public func characterOffset(of position: UITextPosition, within range: UITextRange) -> Int {
@@ -192,7 +207,30 @@ extension STTextView: UITextInput {
 //    }
 
     public func characterRange(byExtending position: UITextPosition, in direction: UITextLayoutDirection) -> UITextRange? {
-        assertionFailure("Not Implemented")
+        guard let textLocation = position as? STTextLocation else {
+            return nil
+        }
+        
+        let location = textLocation.location
+        
+        // Find the other endpoint based on direction
+        switch direction {
+        case .left, .up:
+            // For left or up, extend backwards one character if possible
+            if let prevLocation = textLayoutManager.location(location, offsetBy: -1) {
+                // Ensuring the start is before the end
+                return NSTextRange(location: prevLocation, end: location)?.uiTextRange
+            }
+        case .right, .down:
+            // For right or down, extend forward one character if possible
+            if let nextLocation = textLayoutManager.location(location, offsetBy: 1) {
+                // Ensuring the start is before the end
+                return NSTextRange(location: location, end: nextLocation)?.uiTextRange
+            }
+        @unknown default:
+            return nil
+        }
+        
         return nil
     }
 
@@ -357,14 +395,73 @@ extension STTextView: UITextInput {
     }
 
     public func closestPosition(to point: CGPoint, within range: UITextRange) -> UITextPosition? {
-        assertionFailure("Not Implemented")
-        return nil
+        guard let range = range as? STTextLocationRange else {
+            return nil
+        }
+        
+        // Convert point to account for content view offset
+        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x)
+        
+        // Attempt to find the location interacting at the point, constrained to the given range
+        let candidateLocation = textLayoutManager.location(
+            interactingAt: adjustedPoint,
+            inContainerAt: range.textRange.location
+        )
+        
+        guard let candidateLocation else {
+            return nil
+        }
+        
+        // If the location is within the range, return it
+        if range.textRange.contains(candidateLocation) {
+            return candidateLocation.uiTextPosition
+        }
+        
+        // If not within range, return the closest endpoint of the range
+        let startLocation = range.textRange.location
+        let endLocation = range.textRange.endLocation
+        
+        // Calculate distance to start and end of range
+        let distanceToStart = textContentManager.offset(from: candidateLocation, to: startLocation)
+        let distanceToEnd = textContentManager.offset(from: candidateLocation, to: endLocation)
+        
+        // Return the closest endpoint
+        return abs(distanceToStart) < abs(distanceToEnd) 
+            ? startLocation.uiTextPosition
+            : endLocation.uiTextPosition
     }
 
     /// Returns the character or range of characters that is at a specified point in a document.
     public func characterRange(at point: CGPoint) -> UITextRange? {
-        assertionFailure("Not Implemented")
+        // Convert point to account for content view offset
+        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x)
         
-        return nil
+        // Get location at the point
+        guard let location = textLayoutManager.location(
+            interactingAt: adjustedPoint,
+            inContainerAt: textLayoutManager.documentRange.location
+        ) else {
+            return nil
+        }
+        
+        // Check if we can get a text layout fragment at this location
+        guard let fragment = textLayoutManager.textLayoutFragment(for: location) else {
+            return nil
+        }
+        
+        // Get the element range that contains this location
+        guard let elementRange = fragment.textElement?.elementRange else {
+            // Fallback to extending the position by one character
+            return characterRange(byExtending: location.uiTextPosition, in: .right)
+        }
+        
+        // Get the range for the character at the location
+        if let nextLocation = textLayoutManager.location(location, offsetBy: 1),
+           nextLocation <= elementRange.endLocation {
+            return NSTextRange(location: location, end: nextLocation)?.uiTextRange
+        } else {
+            // Fallback to returning a single-position range
+            return NSTextRange(location: location, end: location)?.uiTextRange
+        }
     }
 }
