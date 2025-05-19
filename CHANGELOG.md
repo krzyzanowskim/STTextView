@@ -1,8 +1,20 @@
 # Changelog
 
+## [2.0.7] - 2025-05-19
+
+### Changed
+- Annotate invalidating properties with @MainActor to ensure main-thread execution
+- Implement UITextInput methods for position and range queries in STTextView
+- Move scroll handling and scrollToVisible logic from STTextView.swift to STTextView+Scrolling.swift
+- Improve prepareContent to preload more vertical content for smoother scrolling
+- Add override for scroll(_:) to scroll contentView directly
+- Improve centerSelectionInVisibleArea to better center zero-width selections
+- Minor comment
+
 ## [2.0.6] - 2025-04-21
 
 ### Changed
+- Update CHANGELOG
 - Optimize insertion point rendering by reusing views and fixing layout issues
 - Add support for canceling completions on selection change in STTextView
 - Cancel autocompletion when clip view bounds change
