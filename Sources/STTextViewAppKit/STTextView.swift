@@ -342,11 +342,11 @@ import AVFoundation
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
-    @Invalidating(.layout)
+    @MainActor @Invalidating(.layout)
     @objc dynamic open var highlightSelectedLine: Bool = false
 
     /// Enable to show line numbers in the gutter.
-    @Invalidating(.layout)
+    @MainActor @Invalidating(.layout)
     open var showsLineNumbers: Bool = false {
         didSet {
             isGutterVisible = showsLineNumbers

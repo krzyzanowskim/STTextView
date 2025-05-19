@@ -86,6 +86,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
         return NSRange(firstTextSelectionRange, in: textContentManager)
     }
 
+    @MainActor
     var selectedRanges: [NSValue] {
         set {
             guard let textLayoutManager = textView?.textLayoutManager,

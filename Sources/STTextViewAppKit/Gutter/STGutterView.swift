@@ -66,7 +66,7 @@ open class STGutterView: NSView, NSDraggingSource {
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line. Default false.
-    @Invalidating(.display)
+    @MainActor @Invalidating(.display)
     open var highlightSelectedLine: Bool = false
 
     @Invalidating(.display, .background)
