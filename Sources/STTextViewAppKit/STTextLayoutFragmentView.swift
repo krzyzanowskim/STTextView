@@ -55,7 +55,8 @@ final class STTextLayoutFragmentView: NSView {
 
     private func layoutAttachmentView() {
         for attachmentViewProvider in layoutFragment.textAttachmentViewProviders {
-            guard let attachmentView = attachmentViewProvider.view else {
+            guard let attachmentView = attachmentViewProvider.view,
+                  let textAttachment = attachmentViewProvider.textAttachment else {
                 continue
             }
 
@@ -63,8 +64,54 @@ final class STTextLayoutFragmentView: NSView {
             attachmentView.frame.origin = viewOrig
             if attachmentView.superview == nil {
                 addSubview(attachmentView)
+                
+                // Configure accessibility for attachment views
+                configureAccessibilityForAttachmentView(attachmentView, provider: attachmentViewProvider)
+                
+                // Set up attachment interaction bridge
+                if let textView = findParentTextView() {
+                    attachmentView.setupAttachmentInteraction(
+                        textView: textView,
+                        attachment: textAttachment,
+                        location: attachmentViewProvider.location
+                    )
+                }
             }
         }
+    }
+    
+    private func findParentTextView() -> STTextView? {
+        var currentView: NSView? = self
+        while let parentView = currentView?.superview {
+            if let textView = parentView as? STTextView {
+                return textView
+            }
+            currentView = parentView
+        }
+        return nil
+    }
+    
+    private func configureAccessibilityForAttachmentView(_ attachmentView: NSView, provider: NSTextAttachmentViewProvider) {
+        // Set up basic accessibility properties if not already configured
+        if attachmentView.accessibilityRole() == nil {
+            attachmentView.setAccessibilityRole(.image) // Default role, can be overridden
+        }
+        
+        if attachmentView.accessibilityLabel() == nil {
+            // Try to get a meaningful label from the attachment
+            if let textAttachment = provider.textAttachment {
+                if let contents = textAttachment.contents,
+                   let fileType = textAttachment.fileType,
+                   let fileName = textAttachment.fileWrapper?.filename {
+                    attachmentView.setAccessibilityLabel("Attachment: \(fileName)")
+                } else {
+                    attachmentView.setAccessibilityLabel("Text attachment")
+                }
+            }
+        }
+        
+        // Ensure the view participates in accessibility
+        attachmentView.setAccessibilityElement(true)
     }
 
     private func drawSpellCheckerAttributes(_ dirtyRect: CGRect, in context: CGContext) {

@@ -825,13 +825,35 @@ import AVFoundation
         if let view = result, view != self,
            (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView))
         {
-            // FIXME: NSTextAttachment view
-            // attachment view is a child of STTextLayoutFragmentView
-            // that itself is child of contentView.
-            // The text attachment view should not proxy interaction to the contentView
+            // Check if this is an attachment view - allow it to handle its own events
+            if isTextAttachmentView(view) {
+                return view
+            }
+            
+            // For non-attachment views, proxy to text view
             return self
         }
         return result
+    }
+    
+    private func isTextAttachmentView(_ view: NSView) -> Bool {
+        // Walk up the view hierarchy to find if this view is part of an attachment
+        var currentView: NSView? = view
+        while let parentView = currentView?.superview {
+            if let fragmentView = parentView as? STTextLayoutFragmentView {
+                // Check if view is an attachment view
+                for provider in fragmentView.layoutFragment.textAttachmentViewProviders {
+                    if let attachmentView = provider.view {
+                        if attachmentView == view || view.isDescendant(of: attachmentView) {
+                            return true
+                        }
+                    }
+                }
+                break
+            }
+            currentView = parentView
+        }
+        return false
     }
 
     open override var canBecomeKeyView: Bool {

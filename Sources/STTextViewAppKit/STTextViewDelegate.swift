@@ -52,6 +52,22 @@ public protocol STTextViewDelegate: AnyObject {
     ///   - location: The location where the click occurred.
     /// - Returns: true if the click was handled; otherwise, false to allow the next responder to handle it.
     func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool
+    
+    /// Sent after the user clicks on a text attachment.
+    /// - Parameters:
+    ///   - textView: The text view sending the message.
+    ///   - attachment: The text attachment that was clicked.
+    ///   - location: The location where the click occurred.
+    /// - Returns: true if the click was handled; otherwise, false to allow default handling.
+    func textView(_ textView: STTextView, clickedOnAttachment attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool
+    
+    /// Determines whether the text view should allow interaction with a text attachment.
+    /// - Parameters:
+    ///   - textView: The text view sending the message.
+    ///   - attachment: The text attachment in question.
+    ///   - location: The location of the attachment.
+    /// - Returns: true if interaction should be allowed; otherwise, false.
+    func textView(_ textView: STTextView, shouldAllowInteractionWith attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool
 
     // MARK: custom insertion point
 
@@ -147,6 +163,14 @@ public extension STTextViewDelegate {
         //    NSWorkspace.shared.open(linkURL)
         // }
         false
+    }
+    
+    func textView(_ textView: STTextView, clickedOnAttachment attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
+        false
+    }
+    
+    func textView(_ textView: STTextView, shouldAllowInteractionWith attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
+        true
     }
 
 }

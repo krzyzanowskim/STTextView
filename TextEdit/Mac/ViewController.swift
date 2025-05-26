@@ -86,6 +86,13 @@ final class ViewController: NSViewController {
             let attachmentString = NSAttributedString(attachment: attachment)
             textView.insertText(attachmentString, replacementRange: NSRange(location: 30, length: 0))
         }
+        
+        // Insert interactive button attachment
+        do {
+            let buttonAttachment = InteractiveButtonAttachment()
+            let attachmentString = NSAttributedString(attachment: buttonAttachment)
+            textView.insertText(attachmentString, replacementRange: NSRange(location: 60, length: 0))
+        }
 
 
         // Emphasize first line
@@ -157,6 +164,32 @@ extension ViewController: STTextViewDelegate {
     func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
         // Continous completion update disabled due to bad performance for large strings
         // updateCompletionsInBackground()
+    }
+    
+    func textView(_ textView: STTextView, clickedOnAttachment attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
+        print("Clicked on attachment: \(attachment)")
+        print("Selected range: \(textView.selectedRange())")
+        
+        if attachment is InteractiveButtonAttachment {
+            // Handle button click - this now works for both text-based and view-based clicks
+            let alert = NSAlert()
+            alert.messageText = "Button Clicked!"
+            alert.informativeText = "The interactive button attachment was clicked and selected.\nThis works for both clicking the attachment character in text and clicking the button view directly!"
+            alert.runModal()
+            return true
+        } else if attachment is MyTextAttachment {
+            let alert = NSAlert()
+            alert.messageText = "Image Attachment Clicked!"
+            alert.informativeText = "You clicked on the walking figure attachment and it's now selected."
+            alert.runModal()
+            return true
+        }
+        return false
+    }
+    
+    func textView(_ textView: STTextView, shouldAllowInteractionWith attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
+        // Allow interaction with all attachments
+        return true
     }
 
     // Completion
@@ -238,6 +271,45 @@ private class MyTextAttachment: NSTextAttachment {
         textContainer: NSTextContainer?
     ) -> NSTextAttachmentViewProvider? {
         let viewProvider = MyTextAttachmentViewProvider(
+            textAttachment: self,
+            parentView: parentView,
+            textLayoutManager: textContainer?.textLayoutManager,
+            location: location
+        )
+        viewProvider.tracksTextAttachmentViewBounds = true
+        return viewProvider
+    }
+}
+
+// MARK: Interactive Button Attachment
+
+private class InteractiveButtonAttachmentViewProvider: NSTextAttachmentViewProvider {
+    override func loadView() {
+        let button = NSButton(title: "Click Me!", target: nil, action: nil)
+        button.bezelStyle = .rounded
+        button.setButtonType(.momentaryPushIn)
+        // Note: Target and action will be set automatically by the attachment interaction bridge
+        self.view = button
+    }
+
+    override func attachmentBounds(
+        for attributes: [NSAttributedString.Key : Any],
+        location: any NSTextLocation,
+        textContainer: NSTextContainer?,
+        proposedLineFragment: CGRect,
+        position: CGPoint
+    ) -> CGRect {
+        return self.view?.bounds ?? CGRect(x: 0, y: 0, width: 80, height: 24)
+    }
+}
+
+private class InteractiveButtonAttachment: NSTextAttachment {
+    override func viewProvider(
+        for parentView: NSView?,
+        location: any NSTextLocation,
+        textContainer: NSTextContainer?
+    ) -> NSTextAttachmentViewProvider? {
+        let viewProvider = InteractiveButtonAttachmentViewProvider(
             textAttachment: self,
             parentView: parentView,
             textLayoutManager: textContainer?.textLayoutManager,

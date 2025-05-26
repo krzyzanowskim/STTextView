@@ -36,25 +36,44 @@ extension STTextView {
             }
 
             if !handled, !holdsShift, !holdsOption, !holdsControl,
-               let interactionLocation = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location),
-               let linkAttributeValue = textLayoutManager.textAttributedString(at: interactionLocation)?.attribute(.link, at: 0, effectiveRange: nil) {
-                // The value of this attribute is an NSURL object (preferred) or an NSString object. The default value of this property is nil, indicating no link.
-                let linkURL: URL? = switch linkAttributeValue {
-                    case let value as URL:
-                        value
-                    case let value as String:
-                        URL(string: value)
-                    default:
-                        nil
-                    }
-
-                if let linkURL {
-                    if !self.delegateProxy.textView(self, clickedOnLink: linkAttributeValue, at: interactionLocation) {
-                        if NSWorkspace.shared.urlForApplication(toOpen: linkURL) != nil {
-                            NSWorkspace.shared.open(linkURL)
+               let interactionLocation = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)
+            {
+                // Check for text attachment first
+                // Note: This handles clicks on the text attachment character, not direct clicks on attachment views
+                // Direct clicks on attachment views are handled by the attachment views themselves due to hitTest fix
+                if let attachmentAttributeValue = textLayoutManager.textAttributedString(at: interactionLocation)?.attribute(.attachment, at: 0, effectiveRange: nil) as? NSTextAttachment {
+                    // First, select the attachment
+                    selectAttachment(at: interactionLocation)
+                    
+                    // Then call delegate methods
+                    if delegateProxy.textView(self, shouldAllowInteractionWith: attachmentAttributeValue, at: interactionLocation) {
+                        if !delegateProxy.textView(self, clickedOnAttachment: attachmentAttributeValue, at: interactionLocation) {
+                            // Default attachment handling - could be extended for specific attachment types
                         }
+                        handled = true
                     }
-                    handled = true
+                }
+                
+                // Check for link if no attachment was handled
+                if !handled, let linkAttributeValue = textLayoutManager.textAttributedString(at: interactionLocation)?.attribute(.link, at: 0, effectiveRange: nil) {
+                    // The value of this attribute is an NSURL object (preferred) or an NSString object. The default value of this property is nil, indicating no link.
+                    let linkURL: URL? = switch linkAttributeValue {
+                        case let value as URL:
+                            value
+                        case let value as String:
+                            URL(string: value)
+                        default:
+                            nil
+                        }
+
+                    if let linkURL {
+                        if !self.delegateProxy.textView(self, clickedOnLink: linkAttributeValue, at: interactionLocation) {
+                            if NSWorkspace.shared.urlForApplication(toOpen: linkURL) != nil {
+                                NSWorkspace.shared.open(linkURL)
+                            }
+                        }
+                        handled = true
+                    }
                 }
             }
 
