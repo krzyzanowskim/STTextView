@@ -19,7 +19,7 @@ extension STTextView {
             return
         }
 
-        let rangeView = STTextLayoutRangeView(textLayoutManager: textLayoutManager, textRange: textRange)
+        let rangeView = STTextRenderView(textLayoutManager: textLayoutManager, textRange: textRange)
         let draggingImage = rangeView.image()
 
         let draggingFrame = gestureRecognizer.view?.convert(rangeView.frame, from: contentView) ?? rangeView.frame
