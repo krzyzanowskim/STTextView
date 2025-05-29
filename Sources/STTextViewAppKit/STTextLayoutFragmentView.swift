@@ -100,8 +100,8 @@ final class STTextLayoutFragmentView: NSView {
         if attachmentView.accessibilityLabel() == nil {
             // Try to get a meaningful label from the attachment
             if let textAttachment = provider.textAttachment {
-                if let contents = textAttachment.contents,
-                   let fileType = textAttachment.fileType,
+                if let _ = textAttachment.contents,
+                   let _ = textAttachment.fileType,
                    let fileName = textAttachment.fileWrapper?.filename {
                     attachmentView.setAccessibilityLabel("Attachment: \(fileName)")
                 } else {
