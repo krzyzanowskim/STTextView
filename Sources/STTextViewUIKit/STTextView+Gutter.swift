@@ -13,6 +13,7 @@ extension STTextView {
             if gutterView == nil, newValue == true {
                 let gutterView = STGutterView()
                 gutterView.frame.size.width = gutterView.minimumThickness
+                gutterView.textColor = textColor
                 gutterView.selectedLineTextColor = textColor
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
@@ -55,7 +56,7 @@ extension STTextView {
 
         let lineTextAttributes: [NSAttributedString.Key: Any] = [
             .font: gutterView.font,
-            .foregroundColor: UIColor.secondaryLabel.cgColor
+            .foregroundColor: gutterView.textColor.cgColor
         ]
 
         let selectedLineTextAttributes: [NSAttributedString.Key: Any] = [
