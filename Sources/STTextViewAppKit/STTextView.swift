@@ -120,6 +120,15 @@ import AVFoundation
 
         set {
             _defaultTypingAttributes[.foregroundColor] = newValue
+
+            // apply to the document
+            if !textLayoutManager.documentRange.isEmpty {
+                addAttributes([.foregroundColor: newValue], range: textLayoutManager.documentRange)
+                needsLayout = true
+                needsDisplay = true
+            }
+
+            updateTypingAttributes()
         }
     }
 
