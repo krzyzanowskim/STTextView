@@ -182,6 +182,13 @@ import STTextViewCommon
 
         set {
             _defaultTypingAttributes[.foregroundColor] = newValue
+
+            // apply to the document
+            if !textLayoutManager.documentRange.isEmpty {
+                addAttributes([.foregroundColor: newValue], range: textLayoutManager.documentRange)
+            }
+
+            updateTypingAttributes()
         }
     }
 
