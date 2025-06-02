@@ -684,6 +684,7 @@ import AVFoundation
 
         setupTextLayoutManager(textLayoutManager)
         setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
+        registerForDraggedTypes(readablePasteboardTypes)
     }
 
     @available(*, unavailable)
