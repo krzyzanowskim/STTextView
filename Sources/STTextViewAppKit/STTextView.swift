@@ -245,7 +245,7 @@ import AVFoundation
     ///
     /// For performance reasons, this value is the current backing store of the text object.
     /// If you want to maintain a snapshot of this as you manipulate the text storage, you should make a copy of the appropriate substring.
-    @objc public var text: String? {
+    @objc open var text: String? {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
@@ -267,7 +267,7 @@ import AVFoundation
     /// The styled text that the text view displays.
     ///
     /// Assigning a new value to this property also replaces the value of the `text` property with the same string data, albeit without any formatting information. In addition, the `font`, `textColor`, and `textAlignment` properties are updated to reflect the typing attributes of the text view.
-    @objc public var attributedText: NSAttributedString? {
+    @objc open var attributedText: NSAttributedString? {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
