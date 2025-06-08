@@ -613,6 +613,7 @@ import AVFoundation
     /// keep the anchors unchanged while dragging.
     internal var mouseDraggingSelectionAnchors: [NSTextSelection]? = nil
     internal var draggingSession: NSDraggingSession? = nil
+    internal var originalDragSelections: [NSTextRange]? = nil
 
     open override class var defaultMenu: NSMenu? {
         // evaluated once, and cached
@@ -684,6 +685,7 @@ import AVFoundation
 
         setupTextLayoutManager(textLayoutManager)
         setSelectedTextRange(NSTextRange(location: textLayoutManager.documentRange.location), updateLayout: false)
+        registerForDraggedTypes(readablePasteboardTypes)
     }
 
     @available(*, unavailable)
@@ -1481,7 +1483,7 @@ import AVFoundation
     ///
     /// Subclasses may override this method to clean up any additional data structures used for dragging. In your overridden method, be sure to invoke super’s implementation of this method.
     open func cleanUpAfterDragOperation() {
-
+        originalDragSelections = nil
     }
 
     open func addPlugin(_ instance: any STPlugin) {
