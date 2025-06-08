@@ -5,6 +5,9 @@ import AppKit
 
 extension STTextView: NSDraggingSource {
 
+    public func draggingSession(_ session: NSDraggingSession, willBeginAt screenPoint: NSPoint) {
+        originalDragSelections = textLayoutManager.textSelections.flatMap(\.textRanges)
+    }
     public func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
         context == .outsideApplication ? .copy : .move
     }
