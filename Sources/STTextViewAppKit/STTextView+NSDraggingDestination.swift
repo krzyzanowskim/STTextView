@@ -73,7 +73,9 @@ extension STTextView {
         for selection in sortedSelections {
             replaceCharacters(in: NSRange(selection, in: textContentManager), with: "")
         }
-        insertText(textToInsert, replacementRange: NSRange(location: insertionOffset - deletedBeforeInsertion, length: 0))
+        let insertLocation = insertionOffset - deletedBeforeInsertion
+        insertText(textToInsert, replacementRange: NSRange(location: insertLocation, length: 0))
+        setSelectedRange(NSRange(location: insertLocation + textToInsert.length, length: 0))
         undoManager?.endUndoGrouping()
     }
     
