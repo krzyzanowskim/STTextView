@@ -436,7 +436,7 @@ import STTextViewCommon
     }
 
     open override var canBecomeFirstResponder: Bool {
-        !isFirstResponder && isEditable
+        !isFirstResponder && (isEditable || isSelectable)
     }
 
     public convenience init(frame: CGRect, textContainer: NSTextContainer?) {
