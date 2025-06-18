@@ -971,12 +971,15 @@ import AVFoundation
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     private func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
-        guard let textRange = NSTextRange(range, in: textContentManager) else {
-            assertionFailure("Invalid range \(range)")
-            return
+        textContentManager.performEditingTransaction {
+            (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: range)
         }
 
-        addAttributes(attrs, range: textRange, updateLayout: updateLayout)
+        updateTypingAttributes()
+
+        if updateLayout {
+            needsLayout = true
+        }
     }
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
