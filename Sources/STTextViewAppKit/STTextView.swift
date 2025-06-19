@@ -1274,6 +1274,22 @@ import AVFoundation
 
     /// Resizes the receiver to fit its text.
     open func sizeToFit() {
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let verticalScrollInset = scrollView?.contentInsets.verticalInsets ?? 0
+        
+        // For wrapped text, we need to configure container size BEFORE layout calculations
+        if !isHorizontallyResizable {
+            // Pre-configure text container width for wrapping mode
+            let proposedContentWidth = visibleRect.width - gutterWidth
+            if !textContainer.size.width.isAlmostEqual(to: proposedContentWidth) {
+                var containerSize = textContainer.size
+                containerSize.width = proposedContentWidth
+                textContainer.size = containerSize
+                logger.debug("Pre-configured textContainer.size.width \(proposedContentWidth) for wrapping \(#function)")
+            }
+        }
+        
+        // Now perform layout with correct container size
         // Estimate `usageBoundsForTextContainer` size is based on performed layout.
         // If layout didn't happen for the whole document, it only cover
         // the fragment that is known. And even after ensureLayout for the whole document
@@ -1297,8 +1313,6 @@ import AVFoundation
         let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
         logger.debug("usageBoundsForTextContainer \(usageBoundsForTextContainer.debugDescription) \(#function)")
 
-        let gutterWidth = gutterView?.frame.width ?? 0
-        let verticalScrollInset = scrollView?.contentInsets.verticalInsets ?? 0
         let frameSize: CGSize
         if isHorizontallyResizable {
             // no-wrapping
@@ -1331,6 +1345,7 @@ import AVFoundation
             selectionView.frame = contentFrame
         }
         
+        // Final container size configuration (handles vertical resizing and any adjustments)
         _configureTextContainerSize()
     }
 

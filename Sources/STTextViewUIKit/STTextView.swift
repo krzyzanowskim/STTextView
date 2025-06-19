@@ -690,6 +690,23 @@ import STTextViewCommon
     }
 
     open override func sizeToFit() {
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let verticalScrollInset = contentInset.top + contentInset.bottom
+        let visibleRectSize = self.bounds.size
+        
+        // For wrapped text, we need to configure container size BEFORE layout calculations
+        if !isHorizontallyResizable {
+            // Pre-configure text container width for wrapping mode
+            let proposedContentWidth = visibleRectSize.width - gutterWidth
+            if !textContainer.size.width.isAlmostEqual(to: proposedContentWidth) {
+                var containerSize = textContainer.size
+                containerSize.width = proposedContentWidth
+                textContainer.size = containerSize
+                logger.debug("Pre-configured textContainer.size.width \(proposedContentWidth) for wrapping \(#function)")
+            }
+        }
+        
+        // Now perform layout with correct container size
         // Estimate `usageBoundsForTextContainer` size is based on performed layout.
         // If layout didn't happen for the whole document, it only cover
         // the fragment that is known. And even after ensureLayout for the whole document
@@ -716,10 +733,6 @@ import STTextViewCommon
         let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
         logger.debug("usageBoundsForTextContainer \(usageBoundsForTextContainer.debugDescription) \(#function)")
 
-        let gutterWidth = gutterView?.frame.width ?? 0
-        let verticalScrollInset = contentInset.top + contentInset.bottom
-        let visibleRectSize = self.bounds.size
-
         let frameSize: CGSize
         if isHorizontallyResizable {
             // no-wrapping
@@ -742,6 +755,7 @@ import STTextViewCommon
             self.contentSize = frameSize
         }
 
+        // Final container size configuration (handles vertical resizing and any adjustments)
         _configureTextContainerSize()
     }
 
