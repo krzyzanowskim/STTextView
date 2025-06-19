@@ -918,7 +918,14 @@ import AVFoundation
     }
 
     open override var intrinsicContentSize: NSSize {
-        textLayoutManager.usageBoundsForTextContainer.size
+        // usageBoundsForTextContainer already includes lineFragmentPadding via STTextLayoutManager workaround
+        let textSize = textLayoutManager.usageBoundsForTextContainer.size
+        let gutterWidth = gutterView?.frame.width ?? 0
+        
+        return NSSize(
+            width: textSize.width + gutterWidth,
+            height: textSize.height
+        )
     }
 
     open override class var isCompatibleWithResponsiveScrolling: Bool {

@@ -22,7 +22,7 @@ final class STGutterLineNumberCell: UIView {
 
         let attributedString = NSAttributedString(string: "\(number)", attributes: attributes)
         self.ctLine = CTLineCreateWithAttributedString(attributedString)
-        self.textWidth = ceil(CTLineGetTypographicBounds(ctLine, nil, nil, nil))
+        self.textWidth = ceil(CTLineGetBoundsWithOptions(ctLine, []).width)
 
         super.init(frame: .zero)
         clipsToBounds = true
