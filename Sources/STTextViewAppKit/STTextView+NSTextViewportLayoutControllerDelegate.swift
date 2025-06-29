@@ -32,7 +32,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         }
 
         let rect = CGRect(x: minX, y: minY, width: maxX, height: maxY - minY)
-        logger.debug("viewportBounds \(rect.debugDescription)")
         return rect
     }
 

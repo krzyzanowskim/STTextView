@@ -731,7 +731,6 @@ import STTextViewCommon
         super.sizeToFit()
 
         let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
-        logger.debug("usageBoundsForTextContainer \(usageBoundsForTextContainer.debugDescription) \(#function)")
 
         let frameSize: CGSize
         if isHorizontallyResizable {
