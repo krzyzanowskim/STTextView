@@ -40,7 +40,7 @@ extension STTextView {
             // the contentOffset is the adjustment to make it visible
             gutterView.frame.origin.x = contentOffset.x
             gutterView.frame.origin.y = contentOffset.y
-            gutterView.frame.size.height = visibleSize.height
+            gutterView.frame.size.height = contentView.frame.height
             layoutGutterLineNumbers()
         }
     }
@@ -49,7 +49,7 @@ extension STTextView {
         guard let gutterView else {
             return
         }
-
+        
         gutterView.containerView.subviews.forEach { v in
             v.removeFromSuperview()
         }
