@@ -171,7 +171,7 @@ extension STTextView {
                             cellFrame = CGRect(
                                 origin: CGPoint(
                                     x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
                                 ),
                                 size: CGSize(
                                     width: textLineFragment.typographicBounds.width,
@@ -191,7 +191,7 @@ extension STTextView {
                             cellFrame = CGRect(
                                 origin: CGPoint(
                                     x: layoutFragment.layoutFragmentFrame.origin.x + prevTextLineFragment.typographicBounds.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY /*- scrollView.contentView.bounds.minY - scrollView.contentInsets.top*/
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
                                 ),
                                 size: CGSize(
                                     width: textLineFragment.typographicBounds.width,
@@ -209,7 +209,7 @@ extension STTextView {
                         cellFrame = CGRect(
                             origin: CGPoint(
                                 x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y /*- scrollView.contentView.bounds.minY - scrollView.contentInsets.top*/
+                                y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
                             ),
                             size: CGSize(
                                 width: layoutFragment.layoutFragmentFrame.width, // extend width to he fragment layout for the convenience of gutter
