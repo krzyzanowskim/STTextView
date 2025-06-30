@@ -996,8 +996,6 @@ import AVFoundation
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: range)
         }
 
-        updateTypingAttributes()
-
         if updateLayout {
             needsLayout = true
         }
@@ -1008,8 +1006,6 @@ import AVFoundation
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
-
-        updateTypingAttributes()
 
         if updateLayout {
             needsLayout = true
@@ -1036,8 +1032,6 @@ import AVFoundation
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
 
-        updateTypingAttributes()
-
         if updateLayout {
             needsLayout = true
         }
@@ -1063,8 +1057,6 @@ import AVFoundation
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
         }
-
-        updateTypingAttributes()
 
         if updateLayout {
             needsLayout = true

@@ -577,7 +577,6 @@ import STTextViewCommon
         }
 
         if updateLayout {
-            updateTypingAttributes()
             setNeedsLayout()
         }
     }
@@ -605,7 +604,6 @@ import STTextViewCommon
 
 
         if updateLayout {
-            updateTypingAttributes()
             setNeedsLayout()
         }
     }
@@ -630,8 +628,6 @@ import STTextViewCommon
         textContentManager.performEditingTransaction {
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
         }
-
-        updateTypingAttributes()
 
         if updateLayout {
             setNeedsLayout()
