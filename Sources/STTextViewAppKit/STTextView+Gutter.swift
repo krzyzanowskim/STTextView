@@ -16,25 +16,22 @@ extension STTextView {
     internal var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
-                let gutterView = STGutterView()
+                let gutterView = STGutterView(frame: contentView.bounds)
                 gutterView.frame.size.width = gutterView.minimumThickness
                 gutterView.textColor = textColor.withAlphaComponent(0.45)
                 gutterView.selectedLineTextColor = textColor
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 gutterView.backgroundColor = backgroundColor
-                if let scrollView {
-                    scrollView.addSubview(gutterView, positioned: .below, relativeTo: scrollView.horizontalScroller)
-                }
+                self.addSubview(gutterView)
                 self.gutterView = gutterView
-                needsLayout = true
             } else if newValue == false {
                 if let gutterView {
                     gutterView.removeFromSuperview()
                     self.gutterView = nil
-                    needsLayout = true
                 }
             }
+            needsLayout = true
             layoutGutter()
         }
         get {
@@ -43,19 +40,16 @@ extension STTextView {
     }
 
     internal func layoutGutter() {
-        if let gutterView {
-            var origin = frame.origin
-            var height = contentView.visibleRect.height
-            if let scrollView {
-                origin.y = origin.y + scrollView.contentInsets.top
-                height = scrollView.documentVisibleRect.height - scrollView.contentInsets.top
-            }
-            gutterView.frame.origin = origin
-            gutterView.frame.size.height = height
-            layoutGutterLineNumbers()
-            layoutGutterMarkers()
+        guard let gutterView else {
+            return
         }
+
+        gutterView.frame.size.height = contentView.bounds.height
+
+        layoutGutterLineNumbers()
+        layoutGutterMarkers()
     }
+
 
     private func layoutGutterLineNumbers() {
         guard let gutterView, let scrollView else {
@@ -160,7 +154,7 @@ extension STTextView {
                     // calculated values depends on the "isExtraLineFragment" condition
                     var baselineYOffset: CGFloat = 0
                     let locationForFirstCharacter: CGPoint
-                    let lineFragmentFrame: CGRect
+                    let cellFrame: CGRect
 
                     // The logic for extra line handling would use some cleanup
                     // It apply workaround for FB15131180 invalid frame being reported
@@ -174,7 +168,7 @@ extension STTextView {
                                 baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
                             }
 
-                            lineFragmentFrame = CGRect(
+                            cellFrame = CGRect(
                                 origin: CGPoint(
                                     x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
                                     y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
@@ -194,10 +188,10 @@ extension STTextView {
                                 baselineYOffset = -(prevTextLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
                             }
 
-                            lineFragmentFrame = CGRect(
+                            cellFrame = CGRect(
                                 origin: CGPoint(
                                     x: layoutFragment.layoutFragmentFrame.origin.x + prevTextLineFragment.typographicBounds.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY /*- scrollView.contentView.bounds.minY - scrollView.contentInsets.top*/
                                 ),
                                 size: CGSize(
                                     width: textLineFragment.typographicBounds.width,
@@ -212,10 +206,10 @@ extension STTextView {
                             baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
                         }
 
-                        lineFragmentFrame = CGRect(
+                        cellFrame = CGRect(
                             origin: CGPoint(
                                 x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
+                                y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y /*- scrollView.contentView.bounds.minY - scrollView.contentInsets.top*/
                             ),
                             size: CGSize(
                                 width: layoutFragment.layoutFragmentFrame.width, // extend width to he fragment layout for the convenience of gutter
@@ -244,11 +238,11 @@ extension STTextView {
                     numberCell.frame = CGRect(
                         origin: CGPoint(
                             x: bounds.minX,
-                            y: lineFragmentFrame.origin.y
+                            y: cellFrame.origin.y
                         ),
                         size: CGSize(
-                            width: max(lineFragmentFrame.intersection(gutterView.containerView.frame).width, gutterView.containerView.frame.width),
-                            height: lineFragmentFrame.size.height
+                            width: max(cellFrame.intersection(gutterView.containerView.frame).width, gutterView.containerView.frame.width),
+                            height: cellFrame.size.height
                         )
                     ).pixelAligned
 

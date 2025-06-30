@@ -8,7 +8,7 @@
 //                  |---(STLineHighlightView | SelectionHighlightView)
 //          |---contentView
 //                  |---(STInsertionPointView | STTextLayoutFragmentView)
-//      |---gutterView
+//          |---gutterView
 //
 //
 // The default implementation of the NSView method inputContext manages
@@ -1244,7 +1244,6 @@ import AVFoundation
     }
 
     @objc internal func enclosingClipViewBoundsDidChange(_ notification: Notification) {
-        layoutGutter()
         cancelComplete(notification.object)
     }
 
