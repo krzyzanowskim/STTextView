@@ -1,5 +1,32 @@
 # Changelog
 
+## [2.0.9] - 2025-07-01
+
+### Changed
+- Improve layout invalidation logic after text attribute mutations
+- Fix gutter cell Y-origin calculation by removing scrollView offset adjustments
+- Fix gutter height calculation in STTextView to match content view height
+- Simplify gutter layout and initialization logic in STTextView
+- Remove redundant updateTypingAttributes() calls after text attribute edits
+- Improve prepareContent overdraw logic to reduce layout recalculations
+- Remove debug logging statements from layout and sizing methods
+
+## [2.0.8] - 2025-06-19
+
+### Changed
+- Remove throttling logic for layout updates and delete the Throttler utility
+- Preconfigure text container width in sizeToFit for wrapping mode
+- Fix line number width calculation and update layout order in text view
+- Bypass NSTextRange when applying attributes to improve reliability
+- Accept dragged text from within and outside the text view in [#89](https://github.com/krzyzanowskim/STTextView/pull/89)
+- Make text and attributedText properties open for subclassing
+- Apply new foregroundColor to entire document when updated
+- Apply new foregroundColor to existing text and update layout/display accordingly
+- Update gutter view text color to match textColor for consistency
+- Rename STTextLayoutRangeView to STTextRenderView and improve layout calculation
+- Improve accessibility label generation and set gutter background color
+- Add support for interactive text attachment views in STTextView
+
 ## [2.0.7] - 2025-05-19
 
 ### Changed
