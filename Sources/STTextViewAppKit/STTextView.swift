@@ -992,11 +992,15 @@ import AVFoundation
 
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     private func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
-        textContentManager.performEditingTransaction {
-            (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: range)
+        if let textContentStorage = textContentManager as? NSTextContentStorage,
+           let textStorage = textContentStorage.attributedString as? NSTextStorage
+        {
+            textContentManager.performEditingTransaction {
+                textStorage.addAttributes(attrs, range: range)
+            }
         }
 
-        if updateLayout {
+        if updateLayout, !textContentManager.hasEditingTransaction {
             needsLayout = true
         }
     }
@@ -1007,7 +1011,7 @@ import AVFoundation
             (textContentManager as? NSTextContentStorage)?.textStorage?.addAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
 
-        if updateLayout {
+        if updateLayout, !textContentManager.hasEditingTransaction {
             needsLayout = true
         }
     }
@@ -1032,7 +1036,7 @@ import AVFoundation
             (textContentManager as? NSTextContentStorage)?.textStorage?.setAttributes(attrs, range: NSRange(range, in: textContentManager))
         }
 
-        if updateLayout {
+        if updateLayout, !textContentManager.hasEditingTransaction {
             needsLayout = true
         }
     }
@@ -1058,7 +1062,7 @@ import AVFoundation
             (textContentManager as? NSTextContentStorage)?.textStorage?.removeAttribute(attribute, range: NSRange(range, in: textContentManager))
         }
 
-        if updateLayout {
+        if updateLayout, !textContentManager.hasEditingTransaction {
             needsLayout = true
         }
     }
