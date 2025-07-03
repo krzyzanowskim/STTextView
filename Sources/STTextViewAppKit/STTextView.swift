@@ -935,7 +935,7 @@ import AVFoundation
     open override func prepareContent(in rect: NSRect) {
         let oldPreparedContentRect = preparedContentRect
         let overdraw: CGFloat = visibleRect.height / 2
-        let granularity: CGFloat = visibleRect.height / 4
+        let granularity: CGFloat = visibleRect.height / 3
 
         var prepareRect = rect
         // Round to granularity boundary to reduce overdraw changes
