@@ -23,8 +23,12 @@ extension STTextView {
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 gutterView.backgroundColor = backgroundColor
-                self.addSubview(gutterView)
-                self.gutterView = gutterView
+                if let scrollView {
+                    scrollView.addFloatingSubview(gutterView, for: .horizontal)
+                    self.gutterView = gutterView
+                } else {
+                    assertionFailure("Missing enclosing scrollView. Setup not supported.")
+                }
             } else if newValue == false {
                 if let gutterView {
                     gutterView.removeFromSuperview()
