@@ -13,6 +13,50 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 
 [TextKit 2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit 1 replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit 2 and provide support along TextKit 1 bit. As I started to learn more about `NSTextView` + TextKit2, I realized that as of today (Feb 2022), neither `NSTextView` nor TextKit 2 classes are fully functional. Along the way, I reported several bug reports to Apple requesting DTS (support tickets). Eventually, I got blocked by specific bugs that pushed me to start this project.
 
+## 📋 Platform Requirements
+
+- **macOS**: 12.0+
+- **iOS**: 16.0+
+- **Mac Catalyst**: 16.0+
+- **Swift**: 5.5+
+- **Xcode**: 14.0+
+
+## 🏗️ Architecture Overview
+
+STTextView uses a modular architecture with platform-specific implementations:
+
+```
+STTextView (umbrella target)
+├── STTextViewCommon (shared code)
+├── STTextViewAppKit (macOS implementation)
+├── STTextViewUIKit (iOS/Catalyst implementation)
+├── STTextViewSwiftUI (SwiftUI wrappers)
+└── STObjCLandShim (Objective-C bridging)
+```
+
+### Core Components
+
+- **STTextView**: Main view that coordinates all components
+- **STContentView**: Renders text fragments and insertion point
+- **STSelectionView**: Handles selection overlays
+- **STGutterView**: Optional line numbers and markers
+- **STLineHighlightView**: Current line highlighting
+
+### TextKit 2 Integration
+
+Text layout is managed through custom TextKit 2 components:
+- **STTextLayoutManager**: Custom NSTextLayoutManager subclass
+- **STTextContentStorage**: NSTextContentStorage subclass with performance optimizations
+- **STTextLayoutFragment**: Custom fragment rendering
+
+### Performance Optimization
+
+STTextView implements a sophisticated layout optimization system to minimize unnecessary text layout passes:
+- Smart layout triggering with `needsTextLayout` tracking
+- Viewport bounds comparison to avoid redundant layouts
+- Immediate layout for content changes, deferred for view changes
+- Leverages TextKit 2's incremental layout capabilities
+
 ## ✨ Features
 
 - macOS text system integration
@@ -59,6 +103,23 @@ let package = Package(
 )
 ```
 
+### Build & Test
+
+```bash
+# Build the library
+swift build
+
+# Run all tests
+swift test
+
+# Run specific platform tests
+swift test --filter STTextViewAppKitTests
+swift test --filter STTextViewUIKitTests
+
+# Build release version
+swift build -c release
+```
+
 ## Demo Application
 
 The demo applications [TextEdit](TextEdit) and [TextEdit.SwiftUI](TextEdit.SwiftUI) lets you explore the library.
@@ -72,6 +133,42 @@ Plugins in an STTextView component offer additional functionalities and customiz
 - [Plugin-Annotations](https://github.com/krzyzanowskim/STTextView-Plugin-Annotations) Anchored annotations (eg. inlined error message)) plugin.
 - [Plugin-Template](https://github.com/krzyzanowskim/STTextView-Plugin-Template) Dummy plugin template repository ready to build new plugin.
 - ... [add more](https://github.com/topics/sttextview) plugins
+
+### Plugin Development
+
+To create a custom plugin:
+
+1. **Implement the STPlugin protocol**:
+```swift
+class MyPlugin: STPlugin {
+    func setUp(context: STPluginContext) {
+        // Initialize your plugin
+    }
+    
+    func tearDown() {
+        // Clean up resources
+    }
+}
+```
+
+2. **Use STPluginContext for host communication**:
+   - Access the text view and its properties
+   - Subscribe to text changes and events
+   - Modify text attributes and selections
+
+3. **Handle events via STPluginEvents**:
+   - Text changes
+   - Selection changes
+   - Layout updates
+   - View lifecycle events
+
+4. **Add the plugin to your text view**:
+```swift
+let plugin = MyPlugin()
+textView.addPlugin(plugin)
+```
+
+For a complete example, see the [Plugin-Template](https://github.com/krzyzanowskim/STTextView-Plugin-Template) repository.
 
 ## Usage
 
@@ -195,6 +292,32 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 - [FB17020435](https://gist.github.com/krzyzanowskim/da247e1a9f5f94f0e14a1e3047b86e59): enumerateCaretOffsetsInLineFragmentAtLocation:usingBlock: documentation is not accurate 
 
 ... I'm aware that the list of issues is not complete. I managed to workaround most of the problems in STTextView.
+
+## 🚀 Performance Guidelines
+
+When working with STTextView for optimal performance:
+
+### Layout Optimization
+
+1. **Use smart layout calls**: Prefer `layoutViewportIfNeeded()` over direct `layoutViewport()` calls
+2. **Trigger text layout immediately for content changes**: 
+   - Content/attribute changes → Set `needsTextLayout = true` then call `layoutViewportIfNeeded()`
+   - View-only changes → Only set `needsLayout = true`
+3. **Trust the optimization system**: The view automatically checks if layout is actually needed
+4. **Selection changes**: Update selection views only, avoid triggering text layout
+
+### Best Practices
+
+- **Large documents**: Enable virtual scrolling for documents with thousands of lines
+- **Syntax highlighting**: Use plugins with incremental parsing for real-time highlighting
+- **Multiple text views**: Share text storage when displaying the same content
+- **Batch operations**: Group multiple text changes to minimize layout passes
+
+### Memory Management
+
+- Release unused plugins when not needed
+- Clear undo manager history for very large operations
+- Use weak references in delegate callbacks to avoid retain cycles
 
 ## Why ST?
 
