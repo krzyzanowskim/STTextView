@@ -364,7 +364,6 @@ import AVFoundation
 
     /// Gutter view
     public var gutterView: STGutterView?
-    internal var scrollViewFrameObserver: NSKeyValueObservation?
 
     /// The highlight color of the selected line.
     ///
