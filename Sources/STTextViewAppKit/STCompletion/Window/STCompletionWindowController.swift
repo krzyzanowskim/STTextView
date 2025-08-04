@@ -6,6 +6,8 @@ import AppKit
 open class STCompletionWindowController: NSWindowController {
 
     public weak var delegate: STCompletionWindowDelegate?
+    private var _willCloseNotificationObserver: NSObjectProtocol?
+    private var _didResignKeyNotificationObserver: NSObjectProtocol?
 
     private var completionViewController: any STCompletionViewControllerProtocol {
         window!.contentViewController as! any STCompletionViewControllerProtocol
@@ -23,6 +25,7 @@ open class STCompletionWindowController: NSWindowController {
         window.contentMinSize = CGSize(width: 300, height: 50)
         window.styleMask = [.resizable, .fullSizeContentView]
         window.autorecalculatesKeyViewLoop = true
+        window.isReleasedWhenClosed = true
         window.level = .popUpMenu
         window.backgroundColor = .clear
         window.isExcludedFromWindowsMenu = true
@@ -57,18 +60,18 @@ open class STCompletionWindowController: NSWindowController {
 
         if !isVisible {
             parentWindow.addChildWindow(window, ordered: .above)
+
+            _willCloseNotificationObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] notification in
+                self?.cleanupOnClose()
+            }
+
+            _didResignKeyNotificationObserver = NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: parentWindow, queue: .main) { [weak self] notification in
+                self?.close()
+            }
         }
 
         completionViewController.items = items
         window.setFrameTopLeftPoint(origin)
-
-        NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] notification in
-            self?.cleanupOnClose()
-        }
-
-        NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: parentWindow, queue: .main) { [weak self] notification in
-            self?.close()
-        }
     }
 
     private func cleanupOnClose() {
@@ -77,16 +80,23 @@ open class STCompletionWindowController: NSWindowController {
 
     open override func close() {
         guard isVisible else { return }
+        _willCloseNotificationObserver = nil
+        _didResignKeyNotificationObserver = nil
         super.close()
     }
 }
 
 public protocol STCompletionWindowDelegate: AnyObject {
     func completionWindowController(_ windowController: STCompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement)
+    func completionWindowControllerCancel(_ windowController: STCompletionWindowController)
 }
 
 extension STCompletionWindowController: STCompletionViewControllerDelegate {
     public func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement) {
         delegate?.completionWindowController(self, complete: item, movement: movement)
+    }
+
+    public func completionViewControllerCancel<T: STCompletionViewControllerProtocol>(_ viewController: T) {
+        delegate?.completionWindowControllerCancel(self)
     }
 }

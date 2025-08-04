@@ -491,14 +491,21 @@ import AVFoundation
     internal let selectionView: STSelectionView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
-    private var usageBoundsForTextContainerObserver: NSKeyValueObservation?
+    private var _usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
     internal lazy var speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
 
-    internal lazy var completionWindowController: STCompletionWindowController? = {
-        let viewController = delegateProxy.textViewCompletionViewController(self)
-        return STCompletionWindowController(viewController)
-    }()
+    internal var _completionWindowController: STCompletionWindowController?
+    internal var completionWindowController: STCompletionWindowController? {
+        if _completionWindowController == nil {
+            let completionViewController = delegateProxy.textViewCompletionViewController(self)
+            let completionWindowController = STCompletionWindowController(completionViewController)
+            _completionWindowController = completionWindowController
+            return completionWindowController
+        }
+
+        return _completionWindowController
+    }
 
     /// Completion window is presented currently
     open var isCompletionActive: Bool {
@@ -736,8 +743,8 @@ import AVFoundation
             // textCheckingController.didChangeSelectedRange()
         }
 
-        usageBoundsForTextContainerObserver = nil
-        usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] _, _ in
+        _usageBoundsForTextContainerObserver = nil
+        _usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] _, _ in
             // FB13291926: this notification no longer works
             self?.needsUpdateConstraints = true
         }

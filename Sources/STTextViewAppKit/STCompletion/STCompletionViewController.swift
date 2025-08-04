@@ -7,8 +7,8 @@ import SwiftUI
 open class STCompletionViewController: NSViewController, STCompletionViewControllerProtocol {
 
     public weak var delegate: STCompletionViewControllerDelegate?
-    public var tableView: NSTableView!
-    private var scrollView: NSScrollView!
+    private(set) public var tableView: NSTableView!
+    private var _scrollView: NSScrollView!
 
     open var items: [any STCompletionItem] = [] {
         didSet {
@@ -17,8 +17,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         }
     }
 
-
-    private var eventMonitor: Any?
+    private var _eventMonitor: Any?
 
     open override func loadView() {
         view = NSView(frame: .zero)
@@ -42,18 +41,18 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         scrollView.autoresizingMask = [.width, .height]
         scrollView.documentView = tableView
         view.addSubview(scrollView)
-        self.scrollView = scrollView
+        self._scrollView = scrollView
     }
 
     open override func viewDidLoad() {
         super.viewDidLoad()
-        scrollView.automaticallyAdjustsContentInsets = false
-        scrollView.contentInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
-        scrollView.drawsBackground = false
-        scrollView.backgroundColor = .clear
-        scrollView.borderType = .noBorder
-        scrollView.hasVerticalScroller = true
-        scrollView.verticalScroller = NoKnobScroller()
+        _scrollView.automaticallyAdjustsContentInsets = false
+        _scrollView.contentInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
+        _scrollView.drawsBackground = false
+        _scrollView.backgroundColor = .clear
+        _scrollView.borderType = .noBorder
+        _scrollView.hasVerticalScroller = true
+        _scrollView.verticalScroller = NoKnobScroller()
 
         tableView.style = .plain
         tableView.usesAlternatingRowBackgroundColors = false
@@ -92,7 +91,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
     open override func viewDidAppear() {
         super.viewDidAppear()
 
-        eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event -> NSEvent? in
+        _eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event -> NSEvent? in
             guard let self = self else { return nil }
 
             if let characters = event.characters {
@@ -122,10 +121,10 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
     open override func viewDidDisappear() {
         super.viewDidDisappear()
 
-        if let eventMonitor = eventMonitor {
+        if let eventMonitor = _eventMonitor {
             NSEvent.removeMonitor(eventMonitor)
         }
-        eventMonitor = nil
+        _eventMonitor = nil
     }
 
     open override func insertTab(_ sender: Any?) {
@@ -141,7 +140,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
     }
 
     open override func cancelOperation(_ sender: Any?) {
-        view.window?.windowController?.close()
+        delegate?.completionViewControllerCancel(self)
     }
 
     private func insertCompletion(movement: NSTextMovement) {
@@ -176,12 +175,12 @@ extension STCompletionViewController: NSTableViewDataSource {
 
 private class STTableRowView: NSTableRowView {
 
-    private let parentCornerRadius: CGFloat
-    private let inset: CGFloat
+    private let _parentCornerRadius: CGFloat
+    private let _inset: CGFloat
 
     init(parentCornerRadius: CGFloat, inset: CGFloat) {
-        self.parentCornerRadius = parentCornerRadius * 2
-        self.inset = inset
+        self._parentCornerRadius = parentCornerRadius * 2
+        self._inset = inset
         super.init(frame: .zero)
     }
 
@@ -195,7 +194,7 @@ private class STTableRowView: NSTableRowView {
             context.saveGState()
             let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
 
-            let radius = (parentCornerRadius - inset) / 2
+            let radius = (_parentCornerRadius - _inset) / 2
             let path = NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius)
             context.setFillColor(NSColor.white.withAlphaComponent(isDark ? 0.2 : 1).cgColor)
             path.fill()
