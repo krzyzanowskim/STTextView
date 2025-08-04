@@ -993,7 +993,7 @@ import AVFoundation
     /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
     private func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
         if let textContentStorage = textContentManager as? NSTextContentStorage,
-           let textStorage = textContentStorage.attributedString as? NSTextStorage
+           let textStorage = textContentStorage.textStorage
         {
             textContentManager.performEditingTransaction {
                 textStorage.addAttributes(attrs, range: range)
