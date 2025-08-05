@@ -1563,6 +1563,12 @@ private extension NSViewInvalidating where Self == STTextView.Invalidations.Curs
     }
 }
 
+private extension NSViewInvalidating where Self == STTextView.Invalidations.LayoutViewport {
+    static var layoutViewport: STTextView.Invalidations.LayoutViewport {
+        STTextView.Invalidations.LayoutViewport()
+    }
+}
+
 private extension STTextView.Invalidations {
 
     struct InsertionPoint: NSViewInvalidating {
@@ -1580,6 +1586,17 @@ private extension STTextView.Invalidations {
 
         func invalidate(view: NSView) {
             view.window?.invalidateCursorRects(for: view)
+        }
+    }
+
+    struct LayoutViewport: NSViewInvalidating {
+
+        func invalidate(view: NSView) {
+            guard let textView = view as? STTextView else {
+                return
+            }
+
+            textView.layoutViewport()
         }
     }
 
