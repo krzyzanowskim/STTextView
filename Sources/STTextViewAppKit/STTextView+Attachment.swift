@@ -95,8 +95,8 @@ extension STTextView {
     /// - Returns: An array of attachment views that are currently visible.
     public func visibleAttachmentViews() -> [NSView] {
         var attachmentViews: [NSView] = []
-        
-        for fragmentView in contentView.subviews.compactMap({ $0 as? STTextLayoutFragmentView }) {
+
+        for fragmentView in contentViewportView.subviews.compactMap({ $0 as? STTextLayoutFragmentView }) {
             for provider in fragmentView.layoutFragment.textAttachmentViewProviders {
                 if let view = provider.view {
                     attachmentViews.append(view)
@@ -131,7 +131,7 @@ extension STTextView {
     /// Forces a layout update for all attachment views.
     /// This can be useful when attachment content has changed and needs to be redrawn.
     public func invalidateAttachmentViews() {
-        for fragmentView in contentView.subviews.compactMap({ $0 as? STTextLayoutFragmentView }) {
+        for fragmentView in contentViewportView.subviews.compactMap({ $0 as? STTextLayoutFragmentView }) {
             fragmentView.needsLayout = true
             fragmentView.needsDisplay = true
         }
