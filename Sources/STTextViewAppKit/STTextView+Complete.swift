@@ -15,10 +15,7 @@ extension STTextView {
         if !didPerformCompletion {
             _completionTask?.cancel()
             _completionTask = Task(priority: .userInitiated) { [weak self] in
-                guard let self else { return }
-                if Task.isCancelled {
-                    return
-                }
+                guard let self, !Task.isCancelled else { return }
                 let sessionId = UUID().uuidString
                 logger.debug("async completion: \(sessionId)")
                 let result = await performAsyncCompletion()

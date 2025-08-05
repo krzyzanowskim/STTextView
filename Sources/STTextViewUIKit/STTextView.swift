@@ -555,12 +555,12 @@ import STTextViewCommon
         setSelectedTextRange(textRange, updateLayout: true)
     }
 
-    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    /// Add attribute.
     open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
         addAttributes(attrs, range: range, updateLayout: true)
     }
 
-    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    /// Add attribute.
     internal func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
@@ -569,7 +569,7 @@ import STTextViewCommon
         addAttributes(attrs, range: textRange, updateLayout: updateLayout)
     }
 
-    /// Add attribute. Need `needsViewportLayout = true` to reflect changes.
+    /// Add attribute.
     internal func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
@@ -581,12 +581,12 @@ import STTextViewCommon
         }
     }
 
-    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    /// Set attributes.
     open func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
         setAttributes(attrs, range: range, updateLayout: true)
     }
 
-    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    /// Set attributes.
     internal func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
@@ -595,7 +595,7 @@ import STTextViewCommon
         setAttributes(attrs, range: textRange, updateLayout: updateLayout)
     }
 
-    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    /// Set attributes.
     internal func setAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
@@ -608,12 +608,12 @@ import STTextViewCommon
         }
     }
 
-    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    /// Set attributes.
     open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange) {
         removeAttribute(attribute, range: range, updateLayout: true)
     }
 
-    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    /// Set attributes.
     internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
@@ -622,7 +622,7 @@ import STTextViewCommon
         removeAttribute(attribute, range: textRange, updateLayout: updateLayout)
     }
 
-    /// Set attributes. Need `needsViewportLayout = true` to reflect changes.
+    /// Set attributes.
     internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
