@@ -997,6 +997,10 @@ import AVFoundation
         }
     }
 
+    /// Sets the rendering attribute for the value and range you specify.
+    ///
+    /// Rendering attributes are used only for onscreen drawing and are not persistent in any way.
+    /// Currently the only rendering attributes recognized are those that do not affect layout (colors, underlines, and so on).
     open func addRenderingAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             return
@@ -1069,12 +1073,23 @@ import AVFoundation
         }
     }
 
-    /// Set attributes.
+    /// Remove rendering attribute.
+    open func removeRenderingAttribute(_ attribute: NSAttributedString.Key, range: NSRange) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            return
+        }
+
+        textLayoutManager.removeRenderingAttribute(attribute, for: textRange)
+
+        needsLayout = true
+    }
+
+    /// Remove attributes.
     open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange) {
         removeAttribute(attribute, range: range, updateLayout: true)
     }
 
-    /// Set attributes.
+    /// Remove attributes.
     internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
@@ -1083,7 +1098,7 @@ import AVFoundation
         removeAttribute(attribute, range: textRange, updateLayout: updateLayout)
     }
 
-    /// Set attributes.
+    /// Remove attributes.
     internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
