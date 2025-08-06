@@ -997,6 +997,18 @@ import AVFoundation
         }
     }
 
+    open func addRenderingAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            return
+        }
+
+        for attr in attrs {
+            textLayoutManager.addRenderingAttribute(attr.key, value: attr.value, for: textRange)
+        }
+
+        needsLayout = true
+    }
+
     /// Add attribute.
     open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
         addAttributes(attrs, range: range, updateLayout: true)
@@ -1007,7 +1019,7 @@ import AVFoundation
         if let textContentStorage = textContentManager as? NSTextContentStorage,
            let textStorage = textContentStorage.textStorage
         {
-            if !textContentManager.hasEditingTransaction {
+            if textContentManager.hasEditingTransaction {
                 textStorage.addAttributes(attrs, range: range)
             } else {
                 textContentManager.performEditingTransaction {
