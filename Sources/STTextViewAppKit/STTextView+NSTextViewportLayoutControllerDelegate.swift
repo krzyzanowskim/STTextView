@@ -37,6 +37,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         // Cleanup viewport view area
+        _isLayoutViewport = true
         contentViewportView.subviews = []
     }
 
@@ -81,6 +82,8 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 events.didLayoutViewportHandler?(viewportRange)
             }
         }
+
+        _isLayoutViewport = false
     }
 
     private func updateContentViewportView(_ textViewportLayoutController: NSTextViewportLayoutController) {

@@ -403,6 +403,9 @@ import AVFoundation
     internal var _undoManager: UndoManager?
     internal var _yankingManager = YankingManager()
 
+    /// Whether layout is in progress
+    internal var _isLayoutViewport = false
+
     internal var markedText: STMarkedText? = nil
 
     /// The attributes used to draw marked text.
@@ -1292,6 +1295,7 @@ import AVFoundation
 
     @objc internal func enclosingClipViewBoundsDidChange(_ notification: Notification) {
         cancelComplete(notification.object)
+        layoutViewport()
     }
 
     open override func viewDidEndLiveResize() {
@@ -1367,14 +1371,14 @@ import AVFoundation
         }
 
         if !frame.size.isAlmostEqual(to: frameSize) {
-            self.setFrameSize(frameSize)
+            self.setFrameSize(frameSize) // layout()
         }
 
         let contentFrame = CGRect(
             x: gutterWidth,
             y: frame.origin.y,
-            width: frame.width - gutterWidth,
-            height: frame.height
+            width: frameSize.width - gutterWidth,
+            height: frameSize.height
         )
 
         if !contentFrame.isAlmostEqual(to: contentView.frame) {
@@ -1391,6 +1395,10 @@ import AVFoundation
         // for far jump it tries to layout everything starting at location 0
         // even though viewport range is properly calculated.
         // No known workaround.
+        if _isLayoutViewport {
+            return
+        }
+        
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
