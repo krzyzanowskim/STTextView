@@ -823,12 +823,7 @@ import AVFoundation
         super.viewDidMoveToSuperview()
 
         if let scrollView {
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(enclosingClipViewBoundsDidChange(_:)),
-                name: NSClipView.boundsDidChangeNotification,
-                object: scrollView.contentView
-            )
+            NotificationCenter.default.addObserver(self, selector: #selector(didLiveScrollNotification(_:)), name: NSScrollView.didLiveScrollNotification, object: scrollView)
         }
     }
 
@@ -1293,7 +1288,7 @@ import AVFoundation
         }
     }
 
-    @objc internal func enclosingClipViewBoundsDidChange(_ notification: Notification) {
+    @objc internal func didLiveScrollNotification(_ notification: Notification) {
         cancelComplete(notification.object)
         layoutViewport()
     }
