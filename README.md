@@ -293,32 +293,6 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 
 ... I'm aware that the list of issues is not complete. I managed to workaround most of the problems in STTextView.
 
-## 🚀 Performance Guidelines
-
-When working with STTextView for optimal performance:
-
-### Layout Optimization
-
-1. **Use smart layout calls**: Prefer `layoutViewportIfNeeded()` over direct `layoutViewport()` calls
-2. **Trigger text layout immediately for content changes**: 
-   - Content/attribute changes → Set `needsTextLayout = true` then call `layoutViewportIfNeeded()`
-   - View-only changes → Only set `needsLayout = true`
-3. **Trust the optimization system**: The view automatically checks if layout is actually needed
-4. **Selection changes**: Update selection views only, avoid triggering text layout
-
-### Best Practices
-
-- **Large documents**: Enable virtual scrolling for documents with thousands of lines
-- **Syntax highlighting**: Use plugins with incremental parsing for real-time highlighting
-- **Multiple text views**: Share text storage when displaying the same content
-- **Batch operations**: Group multiple text changes to minimize layout passes
-
-### Memory Management
-
-- Release unused plugins when not needed
-- Clear undo manager history for very large operations
-- Use weak references in delegate callbacks to avoid retain cycles
-
 ## Why ST?
 
 (**ST** prefix stands for "**S**wift s**T**udio" because **[SS](https://en.wikipedia.org/wiki/Schutzstaffel)** is not good prefix since 1939)
