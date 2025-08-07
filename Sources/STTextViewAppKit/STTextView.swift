@@ -824,6 +824,7 @@ import AVFoundation
 
         if let scrollView {
             NotificationCenter.default.addObserver(self, selector: #selector(didLiveScrollNotification(_:)), name: NSScrollView.didLiveScrollNotification, object: scrollView)
+            NotificationCenter.default.addObserver(self, selector: #selector(didEndLiveScrollNotification(_:)), name: NSScrollView.didEndLiveScrollNotification, object: scrollView)
         }
     }
 
@@ -1290,6 +1291,13 @@ import AVFoundation
 
     @objc internal func didLiveScrollNotification(_ notification: Notification) {
         cancelComplete(notification.object)
+        // TODO: throttle.
+        // Need to adjust/layout viewport as scroll, but also doing that while scrolling is too much
+        // the prepareContent layout pass should be enough. Unless contentView resize as part of viewportLayout, then it need to re-layout for that
+        layoutViewport()
+    }
+
+    @objc internal func didEndLiveScrollNotification(_ notification: Notification) {
         layoutViewport()
     }
 
