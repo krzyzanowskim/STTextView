@@ -8,8 +8,8 @@
 //                  |---(STLineHighlightView | SelectionHighlightView)
 //          |---contentView
 //                  |---STInsertionPointView
-//          |---contentViewportView
-//                  |---STTextLayoutFragmentView
+//                  |---contentViewportView
+//                          |---STTextLayoutFragmentView
 //          |---gutterView
 //
 //
@@ -299,7 +299,7 @@ import AVFoundation
         set {
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
-                textContainer.size = NSTextContainer().size
+                textContainer.size = _defaultTextContainerSize
                 needsLayout = true
             }
         }
@@ -331,7 +331,7 @@ import AVFoundation
         set {
             if textContainer.heightTracksTextView != newValue {
                 textContainer.heightTracksTextView = newValue
-                textContainer.size = NSTextContainer().size
+                textContainer.size = _defaultTextContainerSize
                 needsLayout = true
             }
         }
@@ -353,7 +353,7 @@ import AVFoundation
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
-    @MainActor @Invalidating(.layout)
+    @MainActor @Invalidating(.layoutViewport)
     @objc dynamic open var highlightSelectedLine: Bool = false
 
     /// Enable to show line numbers in the gutter.
@@ -402,9 +402,6 @@ import AVFoundation
     @objc dynamic open var allowsUndo: Bool
     internal var _undoManager: UndoManager?
     internal var _yankingManager = YankingManager()
-
-    /// Whether layout is in progress
-    internal var _isLayoutViewport = false
 
     internal var markedText: STMarkedText? = nil
 
@@ -499,7 +496,9 @@ import AVFoundation
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     private var _usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
-    internal lazy var speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
+    internal lazy var _speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
+    private lazy var _defaultTextContainerSize: CGSize = NSTextContainer().size
+    internal var _inLayoutViewport: Bool = false
 
     internal var _completionWindowController: STCompletionWindowController?
     internal var completionWindowController: STCompletionWindowController? {
@@ -558,11 +557,10 @@ import AVFoundation
     @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
     /// A Boolean value that indicates whether to substitute visible glyphs for whitespace and other typically invisible characters.
-    @Invalidating(.layout, .display)
+    @Invalidating(.layoutViewport, .display)
     public var showsInvisibleCharacters: Bool = false {
         willSet {
             textLayoutManager.invalidateLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
-            needsLayout = true
         }
     }
 
@@ -662,6 +660,7 @@ import AVFoundation
         contentViewportView = STContentViewportView()
 
         selectionView = STSelectionView()
+        selectionView.autoresizingMask = [.width, .height]
 
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
@@ -689,7 +688,7 @@ import AVFoundation
 
         addSubview(selectionView)
         addSubview(contentView)
-        addSubview(contentViewportView)
+        contentView.addSubview(contentViewportView)
 
         do {
             let recognizer = DragSelectedTextGestureRecognizer(target: self, action: #selector(_dragSelectedTextGestureRecognizer(gestureRecognizer:)))
@@ -754,7 +753,7 @@ import AVFoundation
 
         _usageBoundsForTextContainerObserver = nil
         _usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] _, _ in
-            // FB13291926: this notification no longer works
+            // FB13291926: Notification no longer works. Fixed again in macOS 15.6
             self?.needsUpdateConstraints = true
         }
     }
@@ -824,7 +823,6 @@ import AVFoundation
 
         if let scrollView {
             NotificationCenter.default.addObserver(self, selector: #selector(didLiveScrollNotification(_:)), name: NSScrollView.didLiveScrollNotification, object: scrollView)
-            NotificationCenter.default.addObserver(self, selector: #selector(didEndLiveScrollNotification(_:)), name: NSScrollView.didEndLiveScrollNotification, object: scrollView)
         }
     }
 
@@ -840,7 +838,7 @@ import AVFoundation
     open override func hitTest(_ point: NSPoint) -> NSView? {
         let result = super.hitTest(point)
 
-        // click-through `contentView`, `selectionView` and `decorationView` subviews
+        // click-through `contentView`, `contentViewportView`, `selectionView` subviews
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent
         // for interaction.
@@ -945,22 +943,10 @@ import AVFoundation
 
     open override func prepareContent(in rect: NSRect) {
         let oldPreparedContentRect = preparedContentRect
-        let overdraw: CGFloat = rect.height / 8
-        let granularity: CGFloat = rect.height / 8
 
-        var prepareRect = rect
-        // Round to granularity boundary to reduce overdraw changes
-        let roundedY = floor(rect.origin.y / granularity) * granularity
-        let roundedX = floor(rect.origin.x / granularity) * granularity
-        
-        prepareRect.origin.y = ceil(max(0, roundedY - overdraw))
-        prepareRect.origin.x = ceil(max(0, roundedX - overdraw))
-        prepareRect.size.height = ceil((rect.maxY - prepareRect.origin.y) + overdraw)
-        prepareRect.size.width = ceil((rect.maxX - prepareRect.origin.x) + overdraw)
+        super.prepareContent(in: rect)
 
-        super.prepareContent(in: prepareRect)
-
-        if oldPreparedContentRect != prepareRect {
+        if !oldPreparedContentRect.isAlmostEqual(to: preparedContentRect) {
             layoutViewport()
         }
     }
@@ -1271,39 +1257,33 @@ import AVFoundation
         }
     }
 
-    // Update textContainer width to match textview width if track textview width
-    // widthTracksTextView = true
-    private func _configureTextContainerSize() {
-        var proposedSize = textContainer.size
-        if !isHorizontallyResizable {
-            proposedSize.width = contentView.frame.width // - _textContainerInset.width * 2
-        }
-
-        if !isVerticallyResizable {
-            proposedSize.height = contentView.frame.height // - _textContainerInset.height * 2
-        }
-
-        if !textContainer.size.isAlmostEqual(to: proposedSize)  {
-            textContainer.size = proposedSize
-            logger.debug("textContainer.size (\(self.textContainer.size.width), \(self.textContainer.size.width)) \(#function)")
-        }
-    }
-
     @objc internal func didLiveScrollNotification(_ notification: Notification) {
         cancelComplete(notification.object)
-        // TODO: throttle.
-        // Need to adjust/layout viewport as scroll, but also doing that while scrolling is too much
-        // the prepareContent layout pass should be enough. Unless contentView resize as part of viewportLayout, then it need to re-layout for that
-        layoutViewport()
     }
 
-    @objc internal func didEndLiveScrollNotification(_ notification: Notification) {
-        layoutViewport()
+    open override func viewDidUnhide() {
+        super.viewDidUnhide()
+        self.prepareContent(in: visibleRect) // layoutViewport() on change
     }
 
-    open override func viewDidEndLiveResize() {
-        super.viewDidEndLiveResize()
-        layoutViewport()
+    internal func layoutViewport() {
+        if _inLayoutViewport {
+            return
+        }
+
+        let gutterWidth = gutterView?.frame.width ?? 0
+
+        sizeToFit()
+
+        contentView.frame = CGRect(x: gutterWidth, y: contentView.frame.origin.y, width: frame.size.width - gutterWidth, height: frame.size.height)
+        contentViewportView.frame = contentView.bounds
+        selectionView.frame = contentView.frame
+
+        textLayoutManager.textViewportLayoutController.layoutViewport()
+
+        updateSelectedRangeHighlight()
+        updateSelectedLineHighlight()
+        layoutGutter()
     }
 
     open override func layout() {
@@ -1319,22 +1299,37 @@ import AVFoundation
     }
 
     /// Resizes the receiver to fit its text.
+    ///
+    /// The text view will not be sized any smaller than its minimum size, however.
     open func sizeToFit() {
         let gutterWidth = gutterView?.frame.width ?? 0
-        let verticalScrollInset = scrollView?.contentInsets.verticalInsets ?? 0
-        
-        // For wrapped text, we need to configure container size BEFORE layout calculations
+        // TODO: let verticalScrollInset = scrollView?.contentInsets.verticalInsets ?? 0
+
+        var newTextContainerSize = textContainer.size
         if !isHorizontallyResizable {
-            // Pre-configure text container width for wrapping mode
+            // setup text container for wrap-text, need for layout
             let proposedContentWidth = visibleRect.width - gutterWidth
-            if !textContainer.size.width.isAlmostEqual(to: proposedContentWidth) {
-                var containerSize = textContainer.size
-                containerSize.width = proposedContentWidth
-                textContainer.size = containerSize
-                logger.debug("Pre-configured textContainer.size.width \(proposedContentWidth) for wrapping \(#function)")
+            if !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
+                newTextContainerSize.width = proposedContentWidth
             }
+        } else {
+            newTextContainerSize.width = _defaultTextContainerSize.width
         }
-        
+
+        if !isVerticallyResizable {
+            let proposedContentHeight = visibleRect.height
+            if !newTextContainerSize.height.isAlmostEqual(to: proposedContentHeight) {
+                newTextContainerSize.height = proposedContentHeight
+            }
+        } else {
+            newTextContainerSize.height = _defaultTextContainerSize.height
+        }
+
+        if !textContainer.size.isAlmostEqual(to: newTextContainerSize) {
+            textContainer.size = newTextContainerSize
+            logger.debug("\(#function) pre-configure textContainer.size \(newTextContainerSize.debugDescription)")
+        }
+
         // Now perform layout with correct container size
         // Estimate `usageBoundsForTextContainer` size is based on performed layout.
         // If layout didn't happen for the whole document, it only cover
@@ -1358,51 +1353,34 @@ import AVFoundation
         textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
         let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
 
-        let frameSize: CGSize
-        if isHorizontallyResizable {
-            // no-wrapping
-            frameSize = CGSize(
-                width: max(usageBoundsForTextContainer.size.width + gutterWidth + textContainer.lineFragmentPadding, visibleRect.width),
-                height: max(usageBoundsForTextContainer.size.height, visibleRect.height - verticalScrollInset)
-            )
-        } else {
-            // wrapping
-            frameSize = CGSize(
-                width: visibleRect.width,
-                height: max(usageBoundsForTextContainer.size.height, visibleRect.height - verticalScrollInset)
-            )
+        // DON'T resize container here, it cause another layout!
+        // textContainer.size.height = usageBoundsForTextContainer.height
+
+        // Adjust self.frame to match textContainer.size used for layout
+        var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainer.size)
+        if !isHorizontallyResizable {
+            // wrap-text
+            newFrame.size.width = textContainer.size.width + gutterWidth
+        } else if isHorizontallyResizable {
+            // no wrap-text
+            // limit width to fit the width of usage bounds
+            newFrame.size.width = max(visibleRect.width, usageBoundsForTextContainer.width + gutterWidth + textContainer.lineFragmentPadding)
         }
 
-        if !frame.size.isAlmostEqual(to: frameSize) {
-            self.setFrameSize(frameSize) // layout()
+        if !isVerticallyResizable {
+            // limit-text
+            newFrame.size.height = usageBoundsForTextContainer.height
+        } else if isVerticallyResizable {
+            // expand
+            // changes height to fit the height of its text
+            newFrame.size.height = max(visibleRect.height, usageBoundsForTextContainer.height)
         }
 
-        let contentFrame = CGRect(
-            x: gutterWidth,
-            y: frame.origin.y,
-            width: frameSize.width - gutterWidth,
-            height: frameSize.height
-        )
+        newFrame = newFrame.pixelAligned
 
-        if !contentFrame.isAlmostEqual(to: contentView.frame) {
-            contentView.frame = contentFrame
-            selectionView.frame = contentFrame
+        if !newFrame.size.isAlmostEqual(to: frame.size) {
+            self.setFrameSize(newFrame.size) // layout()
         }
-        
-        // Final container size configuration (handles vertical resizing and any adjustments)
-        _configureTextContainerSize()
-    }
-
-    internal func layoutViewport() {
-        // layoutViewport does not handle properly layout range
-        // for far jump it tries to layout everything starting at location 0
-        // even though viewport range is properly calculated.
-        // No known workaround.
-        if _isLayoutViewport {
-            return
-        }
-        
-        textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
     open func scrollRangeToVisible(_ range: NSRange) {

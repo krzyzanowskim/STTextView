@@ -22,14 +22,14 @@ extension STTextView {
         if !attrString.isEmpty {
             let utterance = AVSpeechUtterance(attributedString: attrString)
             utterance.prefersAssistiveTechnologySettings = true
-            speechSynthesizer.speak(utterance)
+            _speechSynthesizer.speak(utterance)
         }
     }
 
     /// Stops the speaking of text.
     @objc open func stopSpeaking(_ sender: Any?) {
-        if speechSynthesizer.isSpeaking {
-            speechSynthesizer.stopSpeaking(at: .word)
+        if _speechSynthesizer.isSpeaking {
+            _speechSynthesizer.stopSpeaking(at: .word)
         }
     }
 }
