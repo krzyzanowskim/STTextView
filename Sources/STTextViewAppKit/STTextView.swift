@@ -813,8 +813,8 @@ import AVFoundation
             self.backgroundColor = self.backgroundColor
 
             self.updateSelectedRangeHighlight()
-            self.layoutGutter()
             self.updateSelectedLineHighlight()
+            self.layoutGutter()
         }
     }
 
@@ -1271,14 +1271,17 @@ import AVFoundation
             return
         }
 
-        let gutterWidth = gutterView?.frame.width ?? 0
-
         sizeToFit()
 
-        contentView.frame = CGRect(x: gutterWidth, y: contentView.frame.origin.y, width: frame.size.width - gutterWidth, height: frame.size.height)
-        contentViewportView.frame = contentView.bounds
-        selectionView.frame = contentView.frame
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let newContentFrame = CGRect(x: gutterWidth, y: contentView.frame.origin.y, width: frame.size.width - gutterWidth, height: frame.size.height)
+        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
+            contentView.frame = newContentFrame
+            contentViewportView.frame = contentView.bounds
+            selectionView.frame = contentView.frame
+        }
 
+        // not matter what, the layoutViewport() is slow
         textLayoutManager.textViewportLayoutController.layoutViewport()
 
         updateSelectedRangeHighlight()
@@ -1351,29 +1354,29 @@ import AVFoundation
 
         // Estimated text container size to layout document
         textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
-        let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
+        let usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
 
         // DON'T resize container here, it cause another layout!
         // textContainer.size.height = usageBoundsForTextContainer.height
 
         // Adjust self.frame to match textContainer.size used for layout
-        var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainer.size)
+        var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
         if !isHorizontallyResizable {
             // wrap-text
             newFrame.size.width = textContainer.size.width + gutterWidth
         } else if isHorizontallyResizable {
             // no wrap-text
             // limit width to fit the width of usage bounds
-            newFrame.size.width = max(visibleRect.width, usageBoundsForTextContainer.width + gutterWidth + textContainer.lineFragmentPadding)
+            newFrame.size.width = max(visibleRect.width, usageBoundsForTextContainerSize.width + gutterWidth + textContainer.lineFragmentPadding)
         }
 
         if !isVerticallyResizable {
             // limit-text
-            newFrame.size.height = usageBoundsForTextContainer.height
+            newFrame.size.height = usageBoundsForTextContainerSize.height
         } else if isVerticallyResizable {
             // expand
             // changes height to fit the height of its text
-            newFrame.size.height = max(visibleRect.height, usageBoundsForTextContainer.height)
+            newFrame.size.height = max(visibleRect.height, usageBoundsForTextContainerSize.height)
         }
 
         newFrame = newFrame.pixelAligned

@@ -36,7 +36,7 @@ open class STTextContentStorage: NSTextContentStorage {
         // that breaks multi cursor setup
         // Workaround: Fix _fixSelectionAfterChangeInCharacterRange nad fix selection by myself
 
-        textStorage.beginEditing()
+        // set needsLayout = true
         textStorage.replaceCharacters(
             in: NSRange(range, in: self),
             with: replacementString
@@ -44,7 +44,6 @@ open class STTextContentStorage: NSTextContentStorage {
 
         // endEditing updates `NSTextLayoutManager.textSelections` value
         // that behavior may be undesired in certain scenarios where change suppose to keep the selection intact (at least adjusted)
-        textStorage.endEditing()
 
         fix_fixSelectionAfterChangeInCharacterRange()
     }
