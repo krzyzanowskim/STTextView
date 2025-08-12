@@ -1352,9 +1352,16 @@ import AVFoundation
         // Asking for the end location result in estimated `usageBoundsForTextContainer`
         // that eventually get right as more and more layout happen (when scrolling)
 
-        // Estimated text container size to layout document
-        textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
-        let usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
+        // Estimated text container size to layout document.
+        // It is impossible to get the stable content size performantly: https://developer.apple.com/forums/thread/761364?answerId=799739022#799739022
+        // textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
+        var usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
+
+        // the enumerate seems to be faster than ensureLayout, but still failing
+        textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+            usageBoundsForTextContainerSize.height = layoutFragment.layoutFragmentFrame.maxY
+            return false
+        }
 
         // DON'T resize container here, it cause another layout!
         // textContainer.size.height = usageBoundsForTextContainer.height
