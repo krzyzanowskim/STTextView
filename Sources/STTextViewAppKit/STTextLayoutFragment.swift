@@ -87,31 +87,31 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
         guard let textLayoutManager = textLayoutManager else {
             return
         }
-        
+
+        let characterSet = NSCharacterSet.whitespacesAndNewlines
+
         context.saveGState()
-        
+
         for lineFragment in textLineFragments where !lineFragment.isExtraLineFragment {
-            
-            let sourceString = lineFragment.attributedString.string
-            
-            guard let lineFragmentTextRange = lineFragment.textRange(in: self),
-                  let lineFragmentRange = Range(lineFragment.characterRange, in: sourceString)
-            else {
+            guard let lineFragmentTextRange = lineFragment.textRange(in: self) else {
                 continue
             }
-            
-            let substring = sourceString[lineFragmentRange]
-            
-            for (offset, character) in substring.utf16.enumerated() where Unicode.Scalar(character)?.properties.isWhitespace == true {
-                
-                guard let segmentLocation = textLayoutManager.location(lineFragmentTextRange.location, offsetBy: offset),
+
+            let substring = lineFragment.attributedString.attributedSubstring(from: lineFragment.characterRange).string as NSString
+            for offset in 0..<substring.length {
+                let character = substring.character(at: offset)
+                if let scalar = Unicode.Scalar(character), !characterSet.contains(scalar) {
+                    continue
+                }
+
+                guard let segmentLocation = textLayoutManager.location(lineFragmentTextRange.location, offsetBy: offset), // O(n)
                       let segmentRange = NSTextRange(location: segmentLocation, end: segmentLocation),
                       let segmentFrame = textLayoutManager.textSegmentFrame(in: segmentRange, type: .standard),
                       let font = lineFragment.attributedString.attribute(.font, at: offset, effectiveRange: nil) as? NSFont
                 else {
                     continue
                 }
-                
+
                 let symbol: Character = switch character {
                 case 0x0020: "\u{00B7}"  // • Space
                 case 0x0009: "\u{00BB}"  // » Tab
@@ -126,22 +126,36 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
                 case 0x2029: "\u{00B6}"  // ¶ Paragraph Separator
                 default: "\u{00B7}"  // • Default symbol for unspecified whitespace
                 }
-                
+
                 let symbolString = String(symbol)
                 let attributes: [NSAttributedString.Key: Any] = [
                     .font: font,
                     .foregroundColor: NSColor.placeholderTextColor
                 ]
-                
+
                 let charSize = symbolString.size(withAttributes: attributes)
                 let writingDirection = textLayoutManager.baseWritingDirection(at: lineFragmentTextRange.location)
-                
-                let frameRect = CGRect(origin: CGPoint(x: segmentFrame.origin.x - layoutFragmentFrame.origin.x, y: segmentFrame.origin.y - layoutFragmentFrame.origin.y), size: segmentFrame.size)
-                
-                let point = CGPoint(x: frameRect.origin.x - (writingDirection == .leftToRight ? 0 : charSize.width),
-                                    y: frameRect.origin.y)
-                
+
+                let frameRect = CGRect(
+                    origin: CGPoint(
+                        x: segmentFrame.origin.x - layoutFragmentFrame.origin.x,
+                        y: segmentFrame.origin.y - layoutFragmentFrame.origin.y
+                    ),
+                    size: segmentFrame.size
+                )
+
+                let point = CGPoint(
+                    x: frameRect.origin.x - (writingDirection == .leftToRight ? 0 : charSize.width),
+                    y: frameRect.origin.y
+                )
+
                 symbolString.draw(at: point, withAttributes: attributes)
+
+                if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
+                    context.setStrokeColor(NSColor.systemRed.cgColor)
+                    context.setLineWidth(1.0)
+                    context.stroke(CGRect(origin: frameRect.origin, size: CGSize(width: charSize.width, height: charSize.height)))
+                }
             }
         }
         
