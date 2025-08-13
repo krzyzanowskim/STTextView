@@ -11,8 +11,8 @@ extension STTextView {
     }
 
     @discardableResult
-    internal func scrollToVisible(_ selectionTextRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
-        guard var rect = textLayoutManager.textSegmentFrame(in: selectionTextRange, type: type) else {
+    internal func scrollToVisible(_ textRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
+        guard var rect = textLayoutManager.textSegmentFrame(in: textRange, type: type) else {
             return false
         }
 
@@ -27,7 +27,6 @@ extension STTextView {
         rect.origin.x -= gutterView?.frame.width ?? 0
         rect.size.width += gutterView?.frame.width ?? 0
         let didScroll = contentView.scrollToVisible(rect)
-        // textLayoutManager.textViewportLayoutController.relocateViewport(to: selectionTextRange.location)
         return didScroll
     }
 
