@@ -13,6 +13,16 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         _inLayoutViewport = true
         contentViewportView.subviews = []
+
+        sizeToFit()
+
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let newContentFrame = CGRect(x: gutterWidth, y: contentView.frame.origin.y, width: frame.size.width - gutterWidth, height: frame.size.height)
+        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
+            contentView.frame = newContentFrame
+            contentViewportView.frame = contentView.bounds
+            selectionView.frame = contentView.frame
+        }
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {

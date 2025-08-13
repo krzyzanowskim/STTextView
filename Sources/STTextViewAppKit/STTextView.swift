@@ -1271,16 +1271,6 @@ import AVFoundation
             return
         }
 
-        sizeToFit()
-
-        let gutterWidth = gutterView?.frame.width ?? 0
-        let newContentFrame = CGRect(x: gutterWidth, y: contentView.frame.origin.y, width: frame.size.width - gutterWidth, height: frame.size.height)
-        if !newContentFrame.isAlmostEqual(to: contentView.frame) {
-            contentView.frame = newContentFrame
-            contentViewportView.frame = contentView.bounds
-            selectionView.frame = contentView.frame
-        }
-
         // not matter what, the layoutViewport() is slow
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
