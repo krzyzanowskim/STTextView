@@ -42,8 +42,8 @@ extension STTextView {
 
         updateTypingAttributes()
         updateSelectedRangeHighlight()
-        layoutGutter()
         updateSelectedLineHighlight()
+        layoutGutter()
     }
 
     open override func selectLine(_ sender: Any?) {
@@ -461,6 +461,11 @@ extension STTextView {
         updateTypingAttributes()
         needsScrollToSelection = true
         needsDisplay = true
+
+        if let loc = textLayoutManager.textSelections.first?.textRanges.first?.location {
+            textLayoutManager.textViewportLayoutController.relocateViewport(to: loc)
+        }
+
     }
 
     internal func updateTextSelection(
