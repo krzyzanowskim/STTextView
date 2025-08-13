@@ -26,7 +26,9 @@ extension STTextView {
         // adjust rect to mimick it's size to include gutter overlay
         rect.origin.x -= gutterView?.frame.width ?? 0
         rect.size.width += gutterView?.frame.width ?? 0
-        return contentView.scrollToVisible(rect)
+        let didScroll = contentView.scrollToVisible(rect)
+        // textLayoutManager.textViewportLayoutController.relocateViewport(to: selectionTextRange.location)
+        return didScroll
     }
 
     open override func centerSelectionInVisibleArea(_ sender: Any?) {

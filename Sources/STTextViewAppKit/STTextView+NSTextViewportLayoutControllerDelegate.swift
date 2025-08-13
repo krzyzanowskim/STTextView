@@ -45,7 +45,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        // adjustViewportOffsetIfNeeded()
+        adjustViewportOffsetIfNeeded()
+        updateSelectedRangeHighlight()
+        updateSelectedLineHighlight()
+        layoutGutter()
 
         if let viewportRange = textViewportLayoutController.viewportRange {
             for events in plugins.events {
@@ -56,40 +59,40 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         _inLayoutViewport = false
     }
 
-//    private func adjustViewportOffsetIfNeeded() {
-//        guard let clipView = scrollView?.contentView else {
-//            return
-//        }
-//
-//        func adjustViewportOffset() {
-//            guard let viewportRange = viewportLayoutController.viewportRange else {
-//                return
-//            }
-//
-//            let viewportLayoutController = textLayoutManager.textViewportLayoutController
-//            var layoutYPoint: CGFloat = 0
-//            textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: [.reverse, .ensuresLayout]) { layoutFragment in
-//                layoutYPoint = layoutFragment.layoutFragmentFrame.origin.y
-//                return true // NOTE: should break early (return false)?
-//            }
-//
-//            if !layoutYPoint.isZero {
-//                let adjustmentDelta = bounds.minY - layoutYPoint
-//                viewportLayoutController.adjustViewport(byVerticalOffset: adjustmentDelta)
-//                scroll(CGPoint(x: clipView.bounds.minX, y: clipView.bounds.minY + adjustmentDelta))
-//            }
-//        }
-//
-//        let viewportLayoutController = textLayoutManager.textViewportLayoutController
-//        let contentOffset = clipView.bounds.minY
-//        if contentOffset < clipView.bounds.height, let viewportRange = viewportLayoutController.viewportRange,
-//            viewportRange.location > textLayoutManager.documentRange.location
-//        {
-//            // Nearing top, see if we need to adjust and make room above.
-//            adjustViewportOffset()
-//        } else if let viewportRange = viewportLayoutController.viewportRange, viewportRange.location == textLayoutManager.documentRange.location {
-//            // At top, see if we need to adjust and reduce space above.
-//            adjustViewportOffset()
-//        }
-//    }
+    private func adjustViewportOffsetIfNeeded() {
+        guard let clipView = scrollView?.contentView else {
+            return
+        }
+
+        func adjustViewportOffset() {
+            guard let viewportRange = viewportLayoutController.viewportRange else {
+                return
+            }
+
+            let viewportLayoutController = textLayoutManager.textViewportLayoutController
+            var layoutYPoint: CGFloat = 0
+            textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: [.reverse, .ensuresLayout]) { layoutFragment in
+                layoutYPoint = layoutFragment.layoutFragmentFrame.origin.y
+                return true // NOTE: should break early (return false)?
+            }
+
+            if !layoutYPoint.isZero {
+                let adjustmentDelta = bounds.minY - layoutYPoint
+                viewportLayoutController.adjustViewport(byVerticalOffset: adjustmentDelta)
+                scroll(CGPoint(x: clipView.bounds.minX, y: clipView.bounds.minY + adjustmentDelta))
+            }
+        }
+
+        let viewportLayoutController = textLayoutManager.textViewportLayoutController
+        let contentOffset = clipView.bounds.minY
+        if contentOffset < clipView.bounds.height, let viewportRange = viewportLayoutController.viewportRange,
+            viewportRange.location > textLayoutManager.documentRange.location
+        {
+            // Nearing top, see if we need to adjust and make room above.
+            adjustViewportOffset()
+        } else if let viewportRange = viewportLayoutController.viewportRange, viewportRange.location == textLayoutManager.documentRange.location {
+            // At top, see if we need to adjust and reduce space above.
+            adjustViewportOffset()
+        }
+    }
 }

@@ -1283,10 +1283,6 @@ import AVFoundation
 
         // not matter what, the layoutViewport() is slow
         textLayoutManager.textViewportLayoutController.layoutViewport()
-
-        updateSelectedRangeHighlight()
-        updateSelectedLineHighlight()
-        layoutGutter()
     }
 
     open override func layout() {
@@ -1354,14 +1350,14 @@ import AVFoundation
 
         // Estimated text container size to layout document.
         // It is impossible to get the stable content size performantly: https://developer.apple.com/forums/thread/761364?answerId=799739022#799739022
-        // textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
-        var usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
+        textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
+        let usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
 
         // the enumerate seems to be faster than ensureLayout, but still failing
-        textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-            usageBoundsForTextContainerSize.height = layoutFragment.layoutFragmentFrame.maxY
-            return false
-        }
+        //textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+        //    usageBoundsForTextContainerSize.height = layoutFragment.layoutFragmentFrame.maxY
+        //    return false
+        //}
 
         // DON'T resize container here, it cause another layout!
         // textContainer.size.height = usageBoundsForTextContainer.height
@@ -1427,13 +1423,13 @@ import AVFoundation
     /// Invoked automatically at the end of a series of changes, this method posts an `textDidChangeNotification` to the default notification center, which also results in the delegate receiving `textViewDidChangeText(_:)` message.
     /// Subclasses implementing methods that change their text should invoke this method at the end of those methods.
     open func didChangeText() {
-        needsScrollToSelection = true
 
         let notification = Notification(name: STTextView.textDidChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         delegateProxy.textViewDidChangeText(notification)
         _yankingManager.textChanged()
 
+        needsScrollToSelection = true
         needsDisplay = true
     }
 
