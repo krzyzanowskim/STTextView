@@ -4,12 +4,12 @@
 //
 //  NSScrollView
 //      |---STTextView
-//          |---selectionView
-//                  |---(STLineHighlightView | SelectionHighlightView)
 //          |---contentView
-//                  |---STInsertionPointView
-//                  |---contentViewportView
-//                      |---STTextLayoutFragmentView
+//              |---STInsertionPointView
+//              |---selectionView
+//                  |---(STLineHighlightView | SelectionHighlightView)
+//              |---contentViewportView
+//                  |---STTextLayoutFragmentView
 //          |---gutterView
 //
 //
@@ -659,6 +659,7 @@ import AVFoundation
         contentViewportView = STContentViewportView()
         contentViewportView.autoresizingMask = [.width, .height]
         selectionView = STSelectionView()
+        selectionView.autoresizingMask = [.width, .height]
 
         allowsUndo = true
         _undoManager = CoalescingUndoManager()
@@ -684,8 +685,8 @@ import AVFoundation
         wantsLayer = true
         autoresizingMask = [.width, .height]
 
-        addSubview(selectionView)
         addSubview(contentView)
+        contentView.addSubview(selectionView)
         contentView.addSubview(contentViewportView)
 
         do {
@@ -1229,9 +1230,10 @@ import AVFoundation
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }).compactMap({ $0.clamped(to: viewportRange) }) {
             // NOTE: enumerateTextSegments is very slow https://github.com/krzyzanowskim/STTextView/discussions/25#discussioncomment-6464398
             //       Clamp enumerated range to viewport range
-            textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: .rangeNotRequired) {(_, textSegmentFrame, _, _) in
+            // if let selectionFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard) {
+            textLayoutManager.enumerateTextSegments(in: textRange, type: .selection) {(_, textSegmentFrame, _, _) in
 
-                let selectionFrame = textSegmentFrame.intersection(frame).pixelAligned
+                let selectionFrame = textSegmentFrame.intersection(selectionView.frame).pixelAligned
                 guard !selectionFrame.isNull else {
                     return true
                 }
@@ -1365,7 +1367,6 @@ import AVFoundation
 
         if !contentFrame.isAlmostEqual(to: contentView.frame) {
             contentView.frame = contentFrame
-            selectionView.frame = contentFrame
         }
         
         // Final container size configuration (handles vertical resizing and any adjustments)

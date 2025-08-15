@@ -7,7 +7,13 @@ import STTextKitPlus
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        visibleRect.union(preparedContentRect)
+        var rect = visibleRect.union(preparedContentRect)
+
+        if isHorizontallyResizable {
+            rect.size.width = max(rect.width, contentView.frame.width)
+        }
+
+        return rect
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
