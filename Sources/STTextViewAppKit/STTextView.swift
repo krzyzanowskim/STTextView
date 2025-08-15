@@ -351,7 +351,7 @@ import AVFoundation
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
-    @MainActor @Invalidating(.layout)
+    @MainActor @Invalidating(.layoutViewport)
     @objc dynamic open var highlightSelectedLine: Bool = false
 
     /// Enable to show line numbers in the gutter.
@@ -553,11 +553,10 @@ import AVFoundation
     @objc public lazy var isAutomaticQuoteSubstitutionEnabled = NSSpellChecker.isAutomaticQuoteSubstitutionEnabled
 
     /// A Boolean value that indicates whether to substitute visible glyphs for whitespace and other typically invisible characters.
-    @Invalidating(.layout, .display)
+    @Invalidating(.layoutViewport, .display)
     public var showsInvisibleCharacters: Bool = false {
         willSet {
             textLayoutManager.invalidateLayout(for: textLayoutManager.textViewportLayoutController.viewportRange ?? textLayoutManager.documentRange)
-            needsLayout = true
         }
     }
 
