@@ -30,8 +30,9 @@ open class STTextContentStorage: NSTextContentStorage {
             replacementString.append(attributedTextElement.attributedString)
         }
         replacementString.endEditing()
-
-        textStorage.replaceCharacters( // set needsLayout = true
+        
+        // set needsLayout = true
+        textStorage.replaceCharacters(
             in: NSRange(range, in: self),
             with: replacementString
         )

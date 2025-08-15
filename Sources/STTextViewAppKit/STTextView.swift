@@ -297,7 +297,7 @@ import AVFoundation
         set {
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
-                textContainer.size = NSTextContainer().size
+                textContainer.size = _defaultTextContainerSize
                 needsLayout = true
             }
         }
@@ -329,7 +329,7 @@ import AVFoundation
         set {
             if textContainer.heightTracksTextView != newValue {
                 textContainer.heightTracksTextView = newValue
-                textContainer.size = NSTextContainer().size
+                textContainer.size = _defaultTextContainerSize
                 needsLayout = true
             }
         }
@@ -493,7 +493,8 @@ import AVFoundation
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     private var _usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
-    internal lazy var speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
+    internal lazy var _speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
+    private lazy var _defaultTextContainerSize: CGSize = NSTextContainer().size
 
     internal var _completionWindowController: STCompletionWindowController?
     internal var completionWindowController: STCompletionWindowController? {
@@ -1383,13 +1384,13 @@ import AVFoundation
     /// Invoked automatically at the end of a series of changes, this method posts an `textDidChangeNotification` to the default notification center, which also results in the delegate receiving `textViewDidChangeText(_:)` message.
     /// Subclasses implementing methods that change their text should invoke this method at the end of those methods.
     open func didChangeText() {
-        needsScrollToSelection = true
 
         let notification = Notification(name: STTextView.textDidChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
         delegateProxy.textViewDidChangeText(notification)
         _yankingManager.textChanged()
 
+        needsScrollToSelection = true
         needsDisplay = true
     }
 
