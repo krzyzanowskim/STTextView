@@ -812,8 +812,8 @@ import AVFoundation
             self.backgroundColor = self.backgroundColor
 
             self.updateSelectedRangeHighlight()
-            self.layoutGutter()
             self.updateSelectedLineHighlight()
+            self.layoutGutter()
         }
     }
 
@@ -1240,7 +1240,7 @@ import AVFoundation
             //       Clamp enumerated range to viewport range
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection) {(_, textSegmentFrame, _, _) in
 
-                var selectionFrame = textSegmentFrame.intersection(selectionView.frame).pixelAligned
+                let selectionFrame = textSegmentFrame.intersection(selectionView.frame).pixelAligned
                 guard !selectionFrame.isNull else {
                     return true
                 }
@@ -1259,24 +1259,6 @@ import AVFoundation
 
                 return true // keep going
             }
-        }
-    }
-
-    // Update textContainer width to match textview width if track textview width
-    // widthTracksTextView = true
-    private func _configureTextContainerSize() {
-        var proposedSize = textContainer.size
-        if !isHorizontallyResizable {
-            proposedSize.width = contentView.frame.width // - _textContainerInset.width * 2
-        }
-
-        if !isVerticallyResizable {
-            proposedSize.height = contentView.frame.height // - _textContainerInset.height * 2
-        }
-
-        if !textContainer.size.isAlmostEqual(to: proposedSize)  {
-            textContainer.size = proposedSize
-            logger.debug("textContainer.size (\(self.textContainer.size.width), \(self.textContainer.size.width)) \(#function)")
         }
     }
 
@@ -1309,18 +1291,34 @@ import AVFoundation
     /// Resizes the receiver to fit its text.
     open func sizeToFit() {
         let gutterWidth = gutterView?.frame.width ?? 0
-        let verticalScrollInset = scrollView?.contentInsets.verticalInsets ?? 0
-        
-        // For wrapped text, we need to configure container size BEFORE layout calculations
+
+        // TODO: respect scrollview vertical scroll inset value
+        // let verticalScrollInset = scrollView?.contentInsets.verticalInsets ?? 0
+
+        // Need to configure TextContainer before layout calculations
+        var newTextContainerSize = textContainer.size
         if !isHorizontallyResizable {
-            // Pre-configure text container width for wrapping mode
+            // setup text container for wrap-text, need for layout
             let proposedContentWidth = visibleRect.width - gutterWidth
-            if !textContainer.size.width.isAlmostEqual(to: proposedContentWidth) {
-                var containerSize = textContainer.size
-                containerSize.width = proposedContentWidth
-                textContainer.size = containerSize
-                logger.debug("Pre-configured textContainer.size.width \(proposedContentWidth) for wrapping \(#function)")
+            if !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
+                newTextContainerSize.width = proposedContentWidth
             }
+        } else {
+            newTextContainerSize.width = _defaultTextContainerSize.width
+        }
+
+        if !isVerticallyResizable {
+            let proposedContentHeight = visibleRect.height
+            if !newTextContainerSize.height.isAlmostEqual(to: proposedContentHeight) {
+                newTextContainerSize.height = proposedContentHeight
+            }
+        } else {
+            newTextContainerSize.height = _defaultTextContainerSize.height
+        }
+
+        if !textContainer.size.isAlmostEqual(to: newTextContainerSize) {
+            textContainer.size = newTextContainerSize
+            logger.debug("\(#function) pre-configure textContainer.size \(newTextContainerSize.debugDescription)")
         }
         
         // Now perform layout with correct container size
@@ -1343,41 +1341,49 @@ import AVFoundation
         // that eventually get right as more and more layout happen (when scrolling)
 
         // Estimated text container size to layout document
+        // It is impossible to get the stable content size performantly: https://developer.apple.com/forums/thread/761364?answerId=799739022#799739022
         textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
-        let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
+        let usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
 
-        let frameSize: CGSize
-        if isHorizontallyResizable {
-            // no-wrapping
-            frameSize = CGSize(
-                width: max(usageBoundsForTextContainer.size.width + gutterWidth + textContainer.lineFragmentPadding, visibleRect.width),
-                height: max(usageBoundsForTextContainer.size.height, visibleRect.height - verticalScrollInset)
-            )
-        } else {
-            // wrapping
-            frameSize = CGSize(
-                width: visibleRect.width,
-                height: max(usageBoundsForTextContainer.size.height, visibleRect.height - verticalScrollInset)
-            )
+        // DON'T resize container, it trigger another layout()!
+
+        // Adjust self.frame to match textContainer.size used for layout
+        var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
+        if !isHorizontallyResizable {
+            // wrap-text
+            newFrame.size.width = textContainer.size.width + gutterWidth
+        } else if isHorizontallyResizable {
+            // no wrap-text
+            // limit width to fit the width of usage bounds
+            newFrame.size.width = max(visibleRect.width, usageBoundsForTextContainerSize.width + gutterWidth + textContainer.lineFragmentPadding)
         }
 
-        if !frame.size.isAlmostEqual(to: frameSize) {
-            self.setFrameSize(frameSize)
+        if !isVerticallyResizable {
+            // limit-text
+            newFrame.size.height = usageBoundsForTextContainerSize.height
+        } else if isVerticallyResizable {
+            // expand
+            // changes height to fit the height of its text
+            newFrame.size.height = max(visibleRect.height, usageBoundsForTextContainerSize.height)
         }
 
-        let contentFrame = CGRect(
-            x: gutterWidth,
-            y: frame.origin.y,
-            width: frame.width - gutterWidth,
-            height: frame.height
-        )
+        newFrame = newFrame.pixelAligned
 
-        if !contentFrame.isAlmostEqual(to: contentView.frame) {
-            contentView.frame = contentFrame
+        if !newFrame.size.isAlmostEqual(to: frame.size) {
+            setFrameSize(newFrame.size) // layout()
         }
-        
-        // Final container size configuration (handles vertical resizing and any adjustments)
-        _configureTextContainerSize()
+    }
+
+    open override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+
+        // Adjust contentView size
+        let gutterWidth = gutterView?.frame.width ?? 0
+        var contentViewFrame = contentView.frame
+        contentViewFrame.origin.x = gutterWidth
+        contentViewFrame.size.width = frame.size.width - gutterWidth
+        contentViewFrame.size.height = frame.size.height
+        contentView.frame = contentViewFrame
     }
 
     internal func layoutViewport() {

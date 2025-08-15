@@ -12,6 +12,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         contentViewportView.subviews = []
+        sizeToFit()
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
@@ -44,7 +45,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        sizeToFit()
         updateSelectedRangeHighlight()
         updateSelectedLineHighlight()
         adjustViewportOffsetIfNeeded()
