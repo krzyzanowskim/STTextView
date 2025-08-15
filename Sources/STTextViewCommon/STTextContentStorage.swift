@@ -24,19 +24,26 @@ open class STTextContentStorage: NSTextContentStorage {
             return
         }
 
+        // Replace text and (unexpectedly) reset textSelections in
+        // -[NSTextLayoutManager _fixSelectionAfterChangeInCharacterRange:changeInLength:]
+        // that breaks multi cursor setup
+        // Workaround: Fix _fixSelectionAfterChangeInCharacterRange nad fix selection by myself
+
         let replacementString = NSMutableAttributedString()
         replacementString.beginEditing()
         for attributedTextElement in attributedTextElements {
             replacementString.append(attributedTextElement.attributedString)
         }
         replacementString.endEditing()
-        
+
         // set needsLayout = true
         textStorage.replaceCharacters(
             in: NSRange(range, in: self),
             with: replacementString
         )
 
+        // endEditing updates `NSTextLayoutManager.textSelections` value
+        // that behavior may be undesired in certain scenarios where change suppose to keep the selection intact (at least adjusted)
         fix_fixSelectionAfterChangeInCharacterRange()
     }
 

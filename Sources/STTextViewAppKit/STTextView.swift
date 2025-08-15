@@ -972,6 +972,22 @@ import AVFoundation
         }
     }
 
+    /// Sets the rendering attribute for the value and range you specify.
+    ///
+    /// Rendering attributes are used only for onscreen drawing and are not persistent in any way.
+    /// Currently the only rendering attributes recognized are those that do not affect layout (colors, underlines, and so on).
+    open func addRenderingAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            return
+        }
+
+        for attr in attrs {
+            textLayoutManager.addRenderingAttribute(attr.key, value: attr.value, for: textRange)
+        }
+
+        needsLayout = true
+    }
+
     /// Add attribute.
     open func addAttributes(_ attrs: [NSAttributedString.Key: Any], range: NSRange) {
         addAttributes(attrs, range: range, updateLayout: true)
@@ -1030,6 +1046,17 @@ import AVFoundation
         if updateLayout, !textContentManager.hasEditingTransaction {
             needsLayout = true
         }
+    }
+
+    /// Remove rendering attribute.
+    open func removeRenderingAttribute(_ attribute: NSAttributedString.Key, range: NSRange) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else {
+            return
+        }
+
+        textLayoutManager.removeRenderingAttribute(attribute, for: textRange)
+
+        needsLayout = true
     }
 
     /// Remove attributes.
