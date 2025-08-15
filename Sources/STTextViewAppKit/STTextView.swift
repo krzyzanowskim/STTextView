@@ -942,7 +942,15 @@ import AVFoundation
 
     open override func prepareContent(in rect: NSRect) {
         let oldPreparedContentRect = preparedContentRect
+
+        var rect = rect
+
+        // Expand content to the full width.
+        // This affects viewport
+        rect.size.width = max(rect.width, frame.width)
+
         super.prepareContent(in: rect)
+
         if !oldPreparedContentRect.isAlmostEqual(to: preparedContentRect) {
             layoutViewport()
         }
@@ -1230,10 +1238,9 @@ import AVFoundation
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }).compactMap({ $0.clamped(to: viewportRange) }) {
             // NOTE: enumerateTextSegments is very slow https://github.com/krzyzanowskim/STTextView/discussions/25#discussioncomment-6464398
             //       Clamp enumerated range to viewport range
-            // if let selectionFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard) {
             textLayoutManager.enumerateTextSegments(in: textRange, type: .selection) {(_, textSegmentFrame, _, _) in
 
-                let selectionFrame = textSegmentFrame.intersection(selectionView.frame).pixelAligned
+                var selectionFrame = textSegmentFrame.intersection(selectionView.frame).pixelAligned
                 guard !selectionFrame.isNull else {
                     return true
                 }
