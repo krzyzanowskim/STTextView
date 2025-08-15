@@ -11,11 +11,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        // TODO: update difference, not all layers
-        /// Remove everything except insertion point
-        contentView.subviews.removeAll {
-            type(of: $0) != STInsertionPointView.self
-        }
+        contentViewportView.subviews = []
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
@@ -25,6 +21,8 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
         }
 
+        // textLayoutFragment.layoutFragmentFrame is calculated in `self` coordinates,
+        // but we use it in contentViewportView coordinates. contentViewportView frame is offset by gutterWidth
         let layoutFragmentFrame = textLayoutFragment.layoutFragmentFrame
         let fragmentView: STTextLayoutFragmentView
         if let cachedFragmentView = fragmentViewMap.object(forKey: textLayoutFragment) {
@@ -41,7 +39,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             fragmentView.needsDisplay = true
         }
 
-        contentView.addSubview(fragmentView)
+        contentViewportView.addSubview(fragmentView)
         fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
     }
 

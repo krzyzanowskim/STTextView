@@ -7,7 +7,9 @@
 //          |---selectionView
 //                  |---(STLineHighlightView | SelectionHighlightView)
 //          |---contentView
-//                  |---(STInsertionPointView | STTextLayoutFragmentView)
+//                  |---STInsertionPointView
+//                  |---contentViewportView
+//                      |---STTextLayoutFragmentView
 //          |---gutterView
 //
 //
@@ -481,6 +483,7 @@ import AVFoundation
 
     /// Content view. Layout fragments content.
     internal let contentView: STContentView
+    internal let contentViewportView: STContentViewportView
 
     /// Content frame. Layout fragments content frame.
     public var contentFrame: CGRect {
@@ -653,6 +656,8 @@ import AVFoundation
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
         contentView = STContentView()
+        contentViewportView = STContentViewportView()
+        contentViewportView.autoresizingMask = [.width, .height]
         selectionView = STSelectionView()
 
         allowsUndo = true
@@ -681,6 +686,7 @@ import AVFoundation
 
         addSubview(selectionView)
         addSubview(contentView)
+        contentView.addSubview(contentViewportView)
 
         do {
             let recognizer = DragSelectedTextGestureRecognizer(target: self, action: #selector(_dragSelectedTextGestureRecognizer(gestureRecognizer:)))
@@ -830,12 +836,12 @@ import AVFoundation
     open override func hitTest(_ point: NSPoint) -> NSView? {
         let result = super.hitTest(point)
 
-        // click-through `contentView`, `selectionView` subviews
+        // click-through `contentView`, `contentViewportView`, `selectionView` subviews
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent
         // for interaction.
         if let view = result, view != self,
-           (view.isDescendant(of: contentView) || view.isDescendant(of: selectionView))
+           (view.isDescendant(of: contentView) || view.isDescendant(of: contentViewportView) || view.isDescendant(of: selectionView))
         {
             // Check if this is an attachment view - allow it to handle its own events
             if isTextAttachmentView(view) {
