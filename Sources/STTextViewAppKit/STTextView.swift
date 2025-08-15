@@ -745,7 +745,7 @@ import AVFoundation
 
         _usageBoundsForTextContainerObserver = nil
         _usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] _, _ in
-            // FB13291926: this notification no longer works
+            // FB13291926: Notification no longer works. Fixed again in macOS 15.6
             self?.needsUpdateConstraints = true
         }
     }
@@ -835,7 +835,7 @@ import AVFoundation
     open override func hitTest(_ point: NSPoint) -> NSView? {
         let result = super.hitTest(point)
 
-        // click-through `contentView`, `selectionView` and `decorationView` subviews
+        // click-through `contentView`, `selectionView` subviews
         // that makes first responder properly redirect to main view
         // and ignore utility subviews that should remain transparent
         // for interaction.
@@ -940,22 +940,8 @@ import AVFoundation
 
     open override func prepareContent(in rect: NSRect) {
         let oldPreparedContentRect = preparedContentRect
-        let overdraw: CGFloat = rect.height / 4
-        let granularity: CGFloat = rect.height / 4
-
-        var prepareRect = rect
-        // Round to granularity boundary to reduce overdraw changes
-        let roundedY = floor(rect.origin.y / granularity) * granularity
-        let roundedX = floor(rect.origin.x / granularity) * granularity
-        
-        prepareRect.origin.y = ceil(max(0, roundedY - overdraw))
-        prepareRect.origin.x = ceil(max(0, roundedX - overdraw))
-        prepareRect.size.height = ceil((rect.maxY - prepareRect.origin.y) + overdraw)
-        prepareRect.size.width = ceil((rect.maxX - prepareRect.origin.x) + overdraw)
-
-        super.prepareContent(in: prepareRect)
-
-        if oldPreparedContentRect != prepareRect {
+        super.prepareContent(in: rect)
+        if !oldPreparedContentRect.isAlmostEqual(to: preparedContentRect) {
             layoutViewport()
         }
     }
@@ -1001,7 +987,7 @@ import AVFoundation
         if let textContentStorage = textContentManager as? NSTextContentStorage,
            let textStorage = textContentStorage.textStorage
         {
-            if !textContentManager.hasEditingTransaction {
+            if textContentManager.hasEditingTransaction {
                 textStorage.addAttributes(attrs, range: range)
             } else {
                 textContentManager.performEditingTransaction {
@@ -1051,12 +1037,12 @@ import AVFoundation
         }
     }
 
-    /// Set attributes.
+    /// Remove attributes.
     open func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange) {
         removeAttribute(attribute, range: range, updateLayout: true)
     }
 
-    /// Set attributes.
+    /// Remove attributes.
     internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSRange, updateLayout: Bool) {
         guard let textRange = NSTextRange(range, in: textContentManager) else {
             preconditionFailure("Invalid range \(range)")
@@ -1065,7 +1051,7 @@ import AVFoundation
         removeAttribute(attribute, range: textRange, updateLayout: updateLayout)
     }
 
-    /// Set attributes.
+    /// Remove attributes.
     internal func removeAttribute(_ attribute: NSAttributedString.Key, range: NSTextRange, updateLayout: Bool = true) {
 
         textContentManager.performEditingTransaction {
@@ -1203,13 +1189,13 @@ import AVFoundation
         guard !textLayoutManager.textSelections.isEmpty,
             let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange
         else {
-            selectionView.subviews.removeAll()
+            selectionView.subviews = []
             // don't highlight when there's selection
             return
         }
 
         if !selectionView.subviews.isEmpty {
-            selectionView.subviews.removeAll()
+            selectionView.subviews = []
         }
 
         for textRange in textLayoutManager.textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location }).compactMap({ $0.clamped(to: viewportRange) }) {
@@ -1259,6 +1245,11 @@ import AVFoundation
 
     @objc internal func enclosingClipViewBoundsDidChange(_ notification: Notification) {
         cancelComplete(notification.object)
+    }
+
+    open override func viewDidUnhide() {
+        super.viewDidUnhide()
+        self.prepareContent(in: visibleRect) // layoutViewport() on change
     }
 
     open override func viewDidEndLiveResize() {
@@ -1354,10 +1345,7 @@ import AVFoundation
     }
 
     internal func layoutViewport() {
-        // layoutViewport does not handle properly layout range
-        // for far jump it tries to layout everything starting at location 0
-        // even though viewport range is properly calculated.
-        // No known workaround.
+        // not matter what, the layoutViewport() is slow
         textLayoutManager.textViewportLayoutController.layoutViewport()
     }
 
