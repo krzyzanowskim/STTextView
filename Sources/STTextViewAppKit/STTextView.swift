@@ -1345,6 +1345,12 @@ import AVFoundation
         textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
         let usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
 
+        // the enumerate seems to be faster than ensureLayout, but still estimated
+        // textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+        //     usageBoundsForTextContainerSize.height = layoutFragment.layoutFragmentFrame.maxY
+        //     return false
+        // }
+
         // DON'T resize container, it trigger another layout()!
 
         // Adjust self.frame to match textContainer.size used for layout

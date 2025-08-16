@@ -6,13 +6,23 @@ import STTextKitPlus
 
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
-    public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        visibleRect.union(preparedContentRect)
-    }
-
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         contentViewportView.subviews = []
         sizeToFit()
+
+        if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
+            let viewportDebugView = NSView(frame: viewportBounds(for: textViewportLayoutController))
+            viewportDebugView.frame.origin.x = -(gutterView?.frame.width ?? 0)
+            viewportDebugView.clipsToBounds = true
+            viewportDebugView.wantsLayer = true
+            viewportDebugView.layer?.borderColor = NSColor.magenta.cgColor
+            viewportDebugView.layer?.borderWidth = 4
+            contentViewportView.addSubview(viewportDebugView)
+        }
+    }
+
+    public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
+        visibleRect.union(preparedContentRect)
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
