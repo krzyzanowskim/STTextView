@@ -290,6 +290,7 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 - [FB14700414](https://gist.github.com/krzyzanowskim/0a83eb9d5303016b277920a6b7c9f9fc): NSTextList doesn't work since macOS 14 (regression)
 - [FB15131180](https://gist.github.com/krzyzanowskim/510ecf8df259d779e22df8ad13c256c0): TextKit extra line frame is incorrect and does not respect layout fragment size (regression)
 - [FB17020435](https://gist.github.com/krzyzanowskim/da247e1a9f5f94f0e14a1e3047b86e59): enumerateCaretOffsetsInLineFragmentAtLocation:usingBlock: documentation is not accurate 
+- [FB19698121](https://gist.github.com/krzyzanowskim/4d831e0f44035b605768ff9d2a4c285e): TextKit 2 undocumented and unexpected behavior in textViewportLayoutControllerDidLayout
 
 ... I'm aware that the list of issues is not complete. I managed to workaround most of the problems in STTextView.
 
