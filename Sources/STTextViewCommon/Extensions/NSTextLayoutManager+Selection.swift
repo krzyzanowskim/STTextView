@@ -66,7 +66,7 @@ package extension NSTextLayoutManager {
     }
 
     func textAttributedString(at location: any NSTextLocation) -> NSAttributedString? {
-        if let range = NSTextRange(location: location, end: self.location(location, offsetBy: 1)), !range.isEmpty {
+        if let range = textRange(for: .character, enclosing: location), !range.isEmpty {
             return textAttributedString(in: range)
         }
 
