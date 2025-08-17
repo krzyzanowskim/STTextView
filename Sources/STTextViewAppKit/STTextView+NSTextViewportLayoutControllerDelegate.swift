@@ -55,7 +55,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        if let scrollView, scrollView.contentView.bounds.maxY.isAlmostEqual(to: scrollView.documentView!.bounds.maxY),
+        if let scrollView, let documentView = scrollView.documentView, scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
            let viewportRange = textViewportLayoutController.viewportRange,
            let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty
         {
