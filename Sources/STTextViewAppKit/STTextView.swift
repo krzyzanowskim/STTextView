@@ -1342,14 +1342,14 @@ import AVFoundation
 
         // Estimated text container size to layout document
         // It is impossible to get the stable content size performantly: https://developer.apple.com/forums/thread/761364?answerId=799739022#799739022
-        textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
-        let usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
+        // textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
+        var usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
 
         // the enumerate seems to be faster than ensureLayout, but still estimated
-        // textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-        //     usageBoundsForTextContainerSize.height = layoutFragment.layoutFragmentFrame.maxY
-        //     return false
-        // }
+        textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+            usageBoundsForTextContainerSize.height = layoutFragment.layoutFragmentFrame.maxY
+            return false
+        }
 
         // DON'T resize container, it trigger another layout()!
 

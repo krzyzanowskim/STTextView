@@ -55,52 +55,65 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
+        if let scrollView, scrollView.contentView.bounds.maxY.isAlmostEqual(to: scrollView.documentView!.bounds.maxY),
+           let viewportRange = textViewportLayoutController.viewportRange,
+           let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty
+        {
+            logger.debug("Attempt to relocate viewport to the bottom")
+            textLayoutManager.ensureLayout(for: textRange)
+            var lastLineMaxY = textViewportLayoutController.viewportBounds.maxY
+            textLayoutManager.enumerateTextLayoutFragments(from: textRange.endLocation, options: [.reverse, .ensuresLayout]) { layoutFragment in
+                lastLineMaxY = layoutFragment.layoutFragmentFrame.maxY
+                return false // stop.
+            }
+
+            setFrameSize(CGSize(width: frame.width, height: lastLineMaxY))
+
+            let suggestedAnchor = textViewportLayoutController.relocateViewport(to: textRange.endLocation)
+            let offset = frame.height - suggestedAnchor
+            if !offset.isAlmostZero() {
+                logger.debug("  Adjust viewport to anchor: \(suggestedAnchor)")
+                textViewportLayoutController.adjustViewport(byVerticalOffset: -offset)
+            }
+        } else if textViewportLayoutController.viewportRange == nil {
+            logger.debug("Attempt to recovery last viewportRange from cache")
+
+            // Restore last layout fragment from cached fragments
+            let lastLayoutFragment = (fragmentViewMap.keyEnumerator().allObjects as! [NSTextLayoutFragment]).max { lhs, rhs in
+                lhs.layoutFragmentFrame.maxY < rhs.layoutFragmentFrame.maxY
+            }
+
+            guard let lastLayoutFragment else {
+                logger.debug("  failed to find last fragment from cache.")
+                return
+            }
+
+            let textRange = NSTextRange(location: lastLayoutFragment.rangeInElement.endLocation, end: textLayoutManager.documentRange.endLocation)!
+            textLayoutManager.ensureLayout(for: textRange)
+            var lastLineMaxY = textViewportLayoutController.viewportBounds.maxY
+            textLayoutManager.enumerateTextLayoutFragments(from: textRange.endLocation, options: [.reverse, .ensuresLayout]) { layoutFragment in
+                lastLineMaxY = layoutFragment.layoutFragmentFrame.maxY
+                return false // stop.
+            }
+
+            setFrameSize(CGSize(width: frame.width, height: lastLineMaxY))
+
+            let suggestedAnchor = textViewportLayoutController.relocateViewport(to: textRange.endLocation)
+            let offset = frame.height - suggestedAnchor
+            if !offset.isAlmostZero() {
+                logger.debug("  Adjust viewport to anchor: \(suggestedAnchor)")
+                textViewportLayoutController.adjustViewport(byVerticalOffset: -offset)
+            }
+        }
+
         updateSelectedRangeHighlight()
         updateSelectedLineHighlight()
-        adjustViewportOffsetIfNeeded()
         layoutGutter()
 
         if let viewportRange = textViewportLayoutController.viewportRange {
             for events in plugins.events {
                 events.didLayoutViewportHandler?(viewportRange)
             }
-        }
-    }
-
-    private func adjustViewportOffsetIfNeeded() {
-        guard let clipView = scrollView?.contentView else {
-            return
-        }
-
-        func adjustViewportOffset() {
-            guard let viewportRange = viewportLayoutController.viewportRange else {
-                return
-            }
-
-            let viewportLayoutController = textLayoutManager.textViewportLayoutController
-            var layoutYPoint: CGFloat = 0
-            textLayoutManager.enumerateTextLayoutFragments(from: viewportRange.location, options: [.reverse, .ensuresLayout]) { layoutFragment in
-                layoutYPoint = layoutFragment.layoutFragmentFrame.origin.y
-                return true // NOTE: should break early (return false)?
-            }
-
-            if !layoutYPoint.isZero {
-                let adjustmentDelta = bounds.minY - layoutYPoint
-                viewportLayoutController.adjustViewport(byVerticalOffset: adjustmentDelta)
-                scroll(CGPoint(x: clipView.bounds.minX, y: clipView.bounds.minY + adjustmentDelta))
-            }
-        }
-
-        let viewportLayoutController = textLayoutManager.textViewportLayoutController
-        let contentOffset = clipView.bounds.minY
-        if contentOffset < clipView.bounds.height, let viewportRange = viewportLayoutController.viewportRange,
-            viewportRange.location > textLayoutManager.documentRange.location
-        {
-            // Nearing top, see if we need to adjust and make room above.
-            adjustViewportOffset()
-        } else if let viewportRange = viewportLayoutController.viewportRange, viewportRange.location == textLayoutManager.documentRange.location {
-            // At top, see if we need to adjust and reduce space above.
-            adjustViewportOffset()
         }
     }
 }
