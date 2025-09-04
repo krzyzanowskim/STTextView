@@ -1,8 +1,53 @@
 # Changelog
 
+## [2.2.0] - 2025-09-05
+
+### Changed
+- Fix attachment view positioning by setting full frame and skipping zero-sized frames
+- Refactor textAttributedString(at:) to use textRange(for:enclosing:) instead of manual range creation
+- Fix overflow check when detecting scroll position in layout controller delegate
+- Improve gutter layout stability and viewport handling during layout
+- Add FB19698121 to the list of known TextKit 2 issues in README
+- Add debug visualization for layout viewport in STTextView
+- Refactor text view layout to improve stability and eliminate redundant size updates
+- Expand viewport layout and selection rendering to match view width
+- Fix selection highlighting and layout when horizontally resizable
+- Remove mise.toml configuration file including cargo tool dependencies
+- Refactor STTextView to introduce contentViewportView for better layout separation
+- Add support for rendering attributes for temporary text styling
+- Improve whitespace glyph rendering and add ST_LAYOUT_DEBUG diagnostics
+- Refactor viewport invalidation and rename parameter in scrollToVisible()
+- Replace NSClipView bounds change observer with NSScrollView live scroll notification
+- Refactor speech synthesizer and text container size handling for clarity
+- Fix observer for usageBoundsForTextContainer and improve layout viewport logic
+- Remove performance guidelines section from README
+
+## [2.1.2] - 2025-08-05
+
+### Changed
+- Add LayoutViewport invalidation to STTextView for viewport layout updates
+- Refactor attribute mutation methods and improve completion cancellation check
+- Refactor completion view/window controllers and improve cleanup behavior
+- Remove unused scrollViewFrameObserver property from STTextView
+- Fix type casting for textStorage access in addAttributes method
+- Add documentation for platform requirements, architecture, plugins, build, and performance
+
+## [2.1.1] - 2025-07-05
+
+### Changed
+- Ensure gutterView is added as a floating subview of the enclosing scrollView
+
+## [2.1.0] - 2025-07-04
+
+### Changed
+- Disable responsive scrolling and adjust overdraw heuristics in prepareContent(in:)
+- Adjust content preparation granularity for STTextView rendering
+- Avoid fatal error when setting invalid selection range in STTextView
+
 ## [2.0.9] - 2025-07-01
 
 ### Changed
+- Update changelog for versions 2.0.8 and 2.0.9
 - Improve layout invalidation logic after text attribute mutations
 - Fix gutter cell Y-origin calculation by removing scrollView offset adjustments
 - Fix gutter height calculation in STTextView to match content view height
@@ -30,6 +75,7 @@
 ## [2.0.7] - 2025-05-19
 
 ### Changed
+- Update changelog
 - Annotate invalidating properties with @MainActor to ensure main-thread execution
 - Implement UITextInput methods for position and range queries in STTextView
 - Move scroll handling and scrollToVisible logic from STTextView.swift to STTextView+Scrolling.swift
