@@ -60,8 +60,13 @@ final class STTextLayoutFragmentView: NSView {
                 continue
             }
 
-            let viewOrig = layoutFragment.frameForTextAttachment(at: attachmentViewProvider.location).origin
-            attachmentView.frame.origin = viewOrig
+            let frameForTextAttachment = layoutFragment.frameForTextAttachment(at: attachmentViewProvider.location)
+            guard frameForTextAttachment != .zero else {
+                continue
+            }
+
+            attachmentView.frame = frameForTextAttachment
+
             if attachmentView.superview == nil {
                 addSubview(attachmentView)
                 
