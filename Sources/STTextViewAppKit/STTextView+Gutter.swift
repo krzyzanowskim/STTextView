@@ -30,14 +30,14 @@ extension STTextView {
                 } else {
                     assertionFailure("Missing enclosing scrollView. Setup not supported.")
                 }
-            } else if newValue == false {
-                if let gutterView {
-                    gutterView.removeFromSuperview()
-                    self.gutterView = nil
-                }
+                needsLayout = true
+                layoutGutter()
+            } else if newValue == false, let gutterView {
+                gutterView.removeFromSuperview()
+                self.gutterView = nil
+                needsLayout = true
+                layoutGutter()
             }
-            needsLayout = true
-            layoutGutter()
         }
         get {
             gutterView != nil
