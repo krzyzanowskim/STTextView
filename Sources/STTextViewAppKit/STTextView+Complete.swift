@@ -30,7 +30,7 @@ extension STTextView {
     @preconcurrency @MainActor
     @objc open func cancelComplete(_ sender: Any?) {
         _completionTask?.cancel()
-        completionWindowController?.close()
+        _completionWindowController?.close()
         _completionWindowController = nil
     }
 
