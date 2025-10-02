@@ -48,8 +48,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         super.viewDidLoad()
         _scrollView.automaticallyAdjustsContentInsets = false
         _scrollView.contentInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
-        _scrollView.drawsBackground = false
-        _scrollView.backgroundColor = .clear
+        _scrollView.backgroundColor = NSColor.gridColor
         _scrollView.borderType = .noBorder
         _scrollView.hasVerticalScroller = true
         _scrollView.verticalScroller = NoKnobScroller()
@@ -196,7 +195,7 @@ private class STTableRowView: NSTableRowView {
 
             let radius = (_parentCornerRadius - _inset) / 2
             let path = NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius)
-            context.setFillColor(NSColor.white.withAlphaComponent(isDark ? 0.2 : 1).cgColor)
+            context.setFillColor(NSColor.highlightColor.withAlphaComponent(isDark ? 0.2 : 1).cgColor)
             path.fill()
             context.restoreGState()
         }
