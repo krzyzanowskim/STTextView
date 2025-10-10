@@ -37,11 +37,11 @@ private class MarkerView: NSView {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         let bezierPath = indicatorPath(size: bounds.size)
-        NSColor.controlAccentColor.withAlphaComponent(0.6).setFill()
+        NSColor.systemBlue.setFill()
         bezierPath.fill()
     }
 
-    private func indicatorPath(size: CGSize, inset: CGFloat = 1) -> NSBezierPath {
+    private func indicatorPath(size: CGSize, inset: CGFloat = 0) -> NSBezierPath {
         // Original dimensions from SVG
         let originalWidth: CGFloat = 83
         let originalHeight: CGFloat = 38

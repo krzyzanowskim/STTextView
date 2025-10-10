@@ -45,11 +45,11 @@ open class STGutterView: NSView, NSDraggingSource {
 
     /// The insets of the ruler view.
     @Invalidating(.display)
-    open var insets: STRulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
+    open var insets: STRulerInsets = STRulerInsets(leading: 4.0, trailing: 4.0)
 
     /// Minimum thickness.
     @Invalidating(.layout)
-    open var minimumThickness: CGFloat = 40
+    open var minimumThickness: CGFloat = 35
 
     /// The text color of the line numbers.
     @Invalidating(.display)
@@ -142,9 +142,10 @@ open class STGutterView: NSView, NSDraggingSource {
         wantsLayer = true
         clipsToBounds = true
 
-        addSubview(separatorView)
-        addSubview(containerView)
+        // Add marker container first so it's behind line numbers
         addSubview(markerContainerView)
+        addSubview(containerView)
+        addSubview(separatorView)
 
         updateBackgroundColor()
     }
@@ -198,7 +199,8 @@ open class STGutterView: NSView, NSDraggingSource {
 
             if let cellView {
                 marker.view.frame.origin = cellView.frame.origin
-                marker.view.frame.size = cellView.frame.size
+                // Make marker fill the full gutter width for Xcode-like appearance
+                marker.view.frame.size.width = self.frame.width
                 marker.view.frame.size.height = min(cellView.textSize.height + cellView.firstBaselineOffsetFromTop, cellView.frame.size.height)
                 markerContainerView.addSubview(marker.view)
             }
