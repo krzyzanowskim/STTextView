@@ -12,7 +12,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
         if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
             let viewportDebugView = NSView(frame: viewportBounds(for: textViewportLayoutController))
-            viewportDebugView.frame.origin.x = -(gutterView?.frame.width ?? 0)
             viewportDebugView.clipsToBounds = true
             viewportDebugView.wantsLayer = true
             viewportDebugView.layer?.borderColor = NSColor.magenta.cgColor
@@ -22,7 +21,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        visibleRect.union(preparedContentRect)
+        contentView.visibleRect.union(preparedContentRect.insetBy(dx: gutterView?.frame.width ?? 0, dy: 0))
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {

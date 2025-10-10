@@ -4,13 +4,13 @@
 //
 //  NSScrollView
 //      |---STTextView
+//          |---gutterView
 //          |---contentView
 //              |---STInsertionPointView
 //              |---selectionView
 //                  |---(STLineHighlightView | SelectionHighlightView)
 //              |---contentViewportView
 //                  |---STTextLayoutFragmentView
-//          |---gutterView
 //
 //
 // The default implementation of the NSView method inputContext manages
@@ -656,8 +656,13 @@ import AVFoundation
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
         contentView = STContentView()
+        if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
+            contentView.layer?.borderColor = NSColor.magenta.cgColor
+            contentView.layer?.borderWidth = 4
+        }
         contentViewportView = STContentViewportView()
         contentViewportView.autoresizingMask = [.width, .height]
+
         selectionView = STSelectionView()
         selectionView.autoresizingMask = [.width, .height]
 
@@ -760,9 +765,9 @@ import AVFoundation
     open override func resetCursorRects() {
         super.resetCursorRects()
 
-        let visibleRect = contentView.convert(contentView.visibleRect, to: self)
-        if isSelectable, visibleRect != .zero {
-            addCursorRect(visibleRect, cursor: .iBeam)
+        let contentViewVisibleRect = contentView.convert(contentView.visibleRect, to: self)
+        if isSelectable, contentViewVisibleRect != .zero {
+            addCursorRect(contentViewVisibleRect, cursor: .iBeam)
 
             // This iteration may be performance intensive. I think it can be debounced without
             // affecting the correctness
@@ -1357,11 +1362,11 @@ import AVFoundation
         var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
         if !isHorizontallyResizable {
             // wrap-text
-            newFrame.size.width = textContainer.size.width + gutterWidth
+            newFrame.size.width = textContainer.size.width
         } else if isHorizontallyResizable {
             // no wrap-text
             // limit width to fit the width of usage bounds
-            newFrame.size.width = max(visibleRect.width, usageBoundsForTextContainerSize.width + gutterWidth + textContainer.lineFragmentPadding)
+            newFrame.size.width = max(visibleRect.width, usageBoundsForTextContainerSize.width - gutterWidth + textContainer.lineFragmentPadding)
         }
 
         if !isVerticallyResizable {
@@ -1383,13 +1388,14 @@ import AVFoundation
     open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
 
-        // Adjust contentView size
-        let gutterWidth = gutterView?.frame.width ?? 0
-        var contentViewFrame = contentView.frame
-        contentViewFrame.origin.x = gutterWidth
-        contentViewFrame.size.width = frame.size.width - gutterWidth
-        contentViewFrame.size.height = frame.size.height
-        contentView.frame = contentViewFrame
+        // contentView should always fill the entire STTextView
+        contentView.frame.origin.x = gutterView?.frame.width ?? 0
+        contentView.frame.size = newSize
+
+        // If gutter exists, layout it and adjust other subviews
+        if gutterView != nil {
+            layoutGutter()
+        }
     }
 
     internal func layoutViewport() {

@@ -16,20 +16,18 @@ extension STTextView {
     internal var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
-                let gutterView = STGutterView(frame: contentView.bounds)
+                let gutterView = STGutterView()
                 // estimate max gutter width
+                gutterView.frame.origin = .zero
                 gutterView.frame.size.width = max(gutterView.minimumThickness, CGFloat(textContentManager.length) / (1024 * 100))
+                gutterView.frame.size.height = contentView.bounds.height
                 gutterView.textColor = textColor.withAlphaComponent(0.45)
                 gutterView.selectedLineTextColor = textColor
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
                 gutterView.backgroundColor = backgroundColor
-                if let scrollView {
-                    scrollView.addFloatingSubview(gutterView, for: .horizontal)
-                    self.gutterView = gutterView
-                } else {
-                    assertionFailure("Missing enclosing scrollView. Setup not supported.")
-                }
+                self.addSubview(gutterView)
+                self.gutterView = gutterView
                 needsLayout = true
                 layoutGutter()
             } else if newValue == false, let gutterView {
