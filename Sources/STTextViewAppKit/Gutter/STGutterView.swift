@@ -189,19 +189,15 @@ open class STGutterView: NSView, NSDraggingSource {
         }
 
         for marker in markers {
-            let cellView = containerView.subviews
-                .compactMap {
-                    $0 as? STGutterLineNumberCell
-                }
-                .first {
-                    $0.lineNumber == marker.lineNumber
-                }
+            let lineNumberCell = containerView.subviews
+                .compactMap { $0 as? STGutterLineNumberCell }
+                .first { $0.lineNumber == marker.lineNumber }
 
-            if let cellView {
-                marker.view.frame.origin = cellView.frame.origin
-                // Make marker fill the full gutter width for Xcode-like appearance
-                marker.view.frame.size.width = self.frame.width
-                marker.view.frame.size.height = min(cellView.textSize.height + cellView.firstBaselineOffsetFromTop, cellView.frame.size.height)
+            if let lineNumberCell {
+                marker.view.frame.origin.x = lineNumberCell.frame.origin.x
+                marker.view.frame.origin.y = lineNumberCell.frame.origin.y // + (lineNumberCell.frame.height / 2) - (lineNumberCell.textSize.height / 2)
+                marker.view.frame.size.width = max(self.frame.width * 0.6, minimumThickness)
+                marker.view.frame.size.height = lineNumberCell.textSize.height
                 markerContainerView.addSubview(marker.view)
             }
         }
@@ -242,6 +238,8 @@ open class STGutterView: NSView, NSDraggingSource {
     public override func mouseDragged(with event: NSEvent) {
         super.mouseDragged(with: event)
     }
+
+    // MARK: NSDraggingSource
 
     public func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
         .delete

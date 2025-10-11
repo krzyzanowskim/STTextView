@@ -30,7 +30,12 @@ final class STGutterLineNumberCell: NSView {
 
         let attributedString = NSAttributedString(string: "\(number)", attributes: attributes)
         self.ctLine = CTLineCreateWithAttributedString(attributedString)
-        self.textSize = CGSize(width: ceil(CTLineGetBoundsWithOptions(ctLine, []).size.width), height: ctLine.height())
+        if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle {
+            let lineHeight = floor(ctLine.height() * paragraphStyle.stLineHeightMultiple)
+            self.textSize = CGSize(width: ceil(CTLineGetBoundsWithOptions(ctLine, []).size.width), height: lineHeight)
+        } else {
+            self.textSize = CGSize(width: ceil(CTLineGetBoundsWithOptions(ctLine, []).size.width), height: ctLine.height())
+        }
 
         super.init(frame: .zero)
         wantsLayer = true

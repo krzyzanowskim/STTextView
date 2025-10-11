@@ -226,6 +226,10 @@ extension STTextView {
                         effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                     }
 
+                    if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                        effectiveLineTextAttributes[.paragraphStyle] = paragraphStyle
+                    }
+
                     let numberCell = STGutterLineNumberCell(
                         firstBaseline: locationForFirstCharacter.y + baselineYOffset,
                         attributes: effectiveLineTextAttributes,
