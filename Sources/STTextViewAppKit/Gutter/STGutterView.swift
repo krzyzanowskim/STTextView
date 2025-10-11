@@ -49,7 +49,7 @@ open class STGutterView: NSView, NSDraggingSource {
 
     /// The insets of the ruler view.
     @Invalidating(.display)
-    open var insets: STRulerInsets = STRulerInsets(leading: 4.0, trailing: 4.0)
+    open var insets: STRulerInsets = STRulerInsets(leading: 4.0, trailing: 6.0)
 
     /// Minimum thickness.
     @Invalidating(.layout)
