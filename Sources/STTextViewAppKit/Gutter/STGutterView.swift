@@ -198,10 +198,10 @@ open class STGutterView: NSView, NSDraggingSource {
                 .first { $0.lineNumber == marker.lineNumber }
 
             if let lineNumberCell {
-                marker.view.frame.origin.x = lineNumberCell.frame.origin.x
-                marker.view.frame.origin.y = lineNumberCell.frame.origin.y // + (lineNumberCell.frame.height / 2) - (lineNumberCell.textSize.height / 2)
                 marker.view.frame.size.width = max(self.frame.width * 0.6, minimumThickness)
                 marker.view.frame.size.height = lineNumberCell.textSize.height
+                marker.view.frame.origin.x = lineNumberCell.frame.size.width - marker.view.frame.size.width - 1.5 /* separator */
+                marker.view.frame.origin.y = lineNumberCell.frame.origin.y
                 markerContainerView.addSubview(marker.view)
             }
         }
@@ -267,7 +267,10 @@ open class STGutterView: NSView, NSDraggingSource {
                 let pasteboardItem = NSPasteboardItem()
                 pasteboardItem.setString("", forType: .string)
                 let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
-                draggingItem.setDraggingFrame(CGRect(origin: lineNumberCell.frame.origin, size: marker.view.frame.size), contents: marker.view.stImage())
+                draggingItem.setDraggingFrame(
+                    CGRect(origin: marker.view.frame.origin, size: marker.view.frame.size),
+                    contents: marker.view.stImage()
+                )
                 let draggingSession = beginDraggingSession(with: [draggingItem], event: event, source: self)
                 draggingSession.animatesToStartingPositionsOnCancelOrFail = false
                 _draggingMarker = marker
