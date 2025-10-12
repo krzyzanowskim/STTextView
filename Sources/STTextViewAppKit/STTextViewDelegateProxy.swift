@@ -39,7 +39,7 @@ class STTextViewDelegateProxy: STTextViewDelegate {
         source?.textView(textView, willChangeTextIn: affectedCharRange, replacementString: replacementString)
 
         for events in textView.plugins.events {
-            events.willChangeTextHandler?(affectedCharRange)
+            events.willChangeTextHandler?(affectedCharRange, replacementString)
         }
     }
 
