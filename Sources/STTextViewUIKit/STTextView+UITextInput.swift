@@ -391,7 +391,12 @@ extension STTextView: UITextInput {
     /* Hit testing. */
 
     public func closestPosition(to point: CGPoint) -> UITextPosition? {
-        textLayoutManager.location(interactingAt: point.moved(dx: -contentView.frame.origin.x), inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition
+        let eventPoint = point.moved(dx: -contentView.frame.origin.x)
+        if let position = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition {
+            return position
+        } else {
+            return textLayoutManager.textSelectionNavigation.textSelections(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.first?.location.uiTextPosition
+        }
     }
 
     public func closestPosition(to point: CGPoint, within range: UITextRange) -> UITextPosition? {
