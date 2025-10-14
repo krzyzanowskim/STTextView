@@ -825,6 +825,22 @@ import STTextViewCommon
         replaceCharacters(in: range, with: string, useTypingAttributes: true, allowsTypingCoalescing: false)
     }
 
+    open func replaceCharacters(in range: NSRange, with string: String) {
+        guard let textContentManager = textLayoutManager.textContentManager,
+              let textRange = NSTextRange(range, in: textContentManager) else {
+            return
+        }
+        replaceCharacters(in: textRange, with: string)
+    }
+
+    open func replaceCharacters(in range: NSRange, with string: NSAttributedString) {
+        guard let textContentManager = textLayoutManager.textContentManager,
+              let textRange = NSTextRange(range, in: textContentManager) else {
+            return
+        }
+        replaceCharacters(in: textRange, with: string, allowsTypingCoalescing: false)
+    }
+
     internal func replaceCharacters(in textRanges: [NSTextRange], with replacementString: String, useTypingAttributes: Bool, allowsTypingCoalescing: Bool) {
         self.replaceCharacters(
             in: textRanges,
@@ -913,6 +929,11 @@ import STTextViewCommon
 
         inputDelegate?.textDidChange(self)
         delegateProxy.textViewDidChangeText(notification)
+    }
+
+    /// Informs the receiver that it should begin coalescing successive typing operations in a new undo grouping
+    public func breakUndoCoalescing() {
+        (undoManager as? CoalescingUndoManager)?.endCoalescing()
     }
 
     open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
