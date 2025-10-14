@@ -6,14 +6,14 @@ import UIKit
 
 public class STPluginEvents {
 
-    var willChangeTextHandler: ((_ affectedRange: NSTextRange) -> Void)?
+    var willChangeTextHandler: ((_ affectedRange: NSTextRange, _ replacementString: String?) -> Void)?
     var didChangeTextHandler: ((_ affectedRange: NSTextRange, _ replacementString: String?) -> Void)?
     var shouldChangeTextHandler: ((_ affectedCharRange: NSTextRange, _ replacementString: String?) -> Bool)?
     var onContextMenuHandler: ((_ location: NSTextLocation, _ contentManager: NSTextContentManager) -> UIMenu)?
     var didLayoutViewportHandler: ((_ visibleRange: NSTextRange?) -> Void)?
 
     @discardableResult
-    public func onWillChangeText(_ handler: @escaping (_ affectedRange: NSTextRange) -> Void) -> Self {
+    public func onWillChangeText(_ handler: @escaping (_ affectedRange: NSTextRange, _ replacementString: String?) -> Void) -> Self {
         willChangeTextHandler = handler
         return self
     }
