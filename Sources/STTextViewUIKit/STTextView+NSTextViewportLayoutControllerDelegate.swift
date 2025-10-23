@@ -36,7 +36,15 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        sizeToFit()
+        // Avoid calling sizeToFit during bounce animation as it resets contentSize
+        // which cancels the bounce per openradar.appspot.com/8045239
+        let isBouncing = (contentOffset.y < -contentInset.top || contentOffset.y > max(0, contentSize.height - bounds.height + contentInset.bottom))
+            && (isTracking || isDecelerating)
+
+        if !isBouncing {
+            sizeToFit()
+        }
+
         updateSelectedLineHighlight()
         layoutGutter()
         // adjustViewportOffsetIfNeeded()
