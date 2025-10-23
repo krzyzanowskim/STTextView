@@ -35,14 +35,18 @@ extension STTextView {
     }
 
     internal func layoutGutter() {
-        if let gutterView {
-            // gutter view floats on the edge
-            // the contentOffset is the adjustment to make it visible
-            gutterView.frame.origin.x = contentOffset.x
-            gutterView.frame.origin.y = contentOffset.y
-            gutterView.frame.size.height = contentView.frame.height
-            layoutGutterLineNumbers()
+        guard let gutterView, textLayoutManager.textViewportLayoutController.viewportRange != nil else {
+            return
         }
+
+        // gutter view floats on the edge
+        // the contentOffset is the adjustment to make it visible
+        gutterView.frame.origin.x = contentOffset.x
+        gutterView.frame.origin.y = contentOffset.y
+        gutterView.frame.size.height = contentView.frame.height
+
+        layoutGutterLineNumbers()
+        layoutGutterMarkers()
     }
 
     private func layoutGutterLineNumbers() {
@@ -252,5 +256,13 @@ extension STTextView {
                 gutterView.frame.size.width = newGutterWidth
             }
         }
+    }
+
+    private func layoutGutterMarkers() {
+        guard let gutterView else {
+            return
+        }
+
+        gutterView.layoutMarkers()
     }
 }

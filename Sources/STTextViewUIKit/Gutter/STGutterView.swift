@@ -1,5 +1,12 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
+//
+//  STGutterView
+//      |- STGutterContainerView
+//      |- STGutterSeparatorView
+//          |-STGutterLineNumberCell
+//      |- STGutterMarkerContainerView
+//          |-STGutterMarker.view
 
 import UIKit
 import STTextViewCommon
@@ -19,10 +26,11 @@ public extension STGutterViewDelegate {
     }
 }
 
-/// A gutter to the side of a scroll view’s document view.
+/// A gutter to the side of a scroll view's document view.
 open class STGutterView: UIView {
-    internal let containerView: UIView
-    internal let markerContainerView: UIView
+    internal let separatorView: STGutterSeparatorView
+    internal let containerView: STGutterContainerView
+    internal let markerContainerView: STGutterMarkerContainerView
 
     /// Delegate
     weak var delegate: (any STGutterViewDelegate)?
@@ -36,19 +44,25 @@ open class STGutterView: UIView {
 
     /// The insets of the ruler view.
     @Invalidating(.display)
-    open var insets: STRulerInsets = STRulerInsets(leading: 6.0, trailing: 6.0)
+    open var insets: STRulerInsets = STRulerInsets(leading: 4.0, trailing: 6.0)
 
     /// Minimum thickness.
     @Invalidating(.layout)
-    open var minimumThickness: CGFloat = 40
+    open var minimumThickness: CGFloat = 35
 
     /// The text color of the line numbers.
     @Invalidating(.display)
     open var textColor = UIColor.secondaryLabel
 
     /// A Boolean indicating whether to draw a separator or not. Default true.
-    @Invalidating(.display)
-    open var drawSeparator: Bool = true
+    open var drawSeparator: Bool {
+        get {
+            separatorView.drawSeparator
+        }
+        set {
+            separatorView.drawSeparator = newValue
+        }
+    }
 
     /// A Boolean that controls whether the text view highlights the currently selected line. Default false.
     @Invalidating(.display)
@@ -65,8 +79,14 @@ open class STGutterView: UIView {
     /// The color of the separator.
     ///
     /// Needs ``drawSeparator`` to be set to `true`.
-    @Invalidating(.display)
-    open var separatorColor = UIColor.separator.withAlphaComponent(0.1)
+    open var separatorColor: UIColor {
+        get {
+            separatorView.separatorColor
+        }
+        set {
+            separatorView.separatorColor = newValue
+        }
+    }
 
     /// The receiver’s gutter markers to markers, removing any existing ruler markers and not consulting with the client view about the new markers.
     @Invalidating(.markers)
@@ -81,14 +101,13 @@ open class STGutterView: UIView {
     private var tapGestureRecognizer: UIGestureRecognizer?
 
     public override init(frame: CGRect) {
-        containerView = UIView(frame: frame)
-        containerView.clipsToBounds = true
-        containerView.isOpaque = true
+        separatorView = STGutterSeparatorView(frame: frame)
+        separatorView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        containerView = STGutterContainerView(frame: frame)
         containerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        markerContainerView = UIView(frame: frame)
-        markerContainerView.clipsToBounds = true
-        markerContainerView.isOpaque = true
+        markerContainerView = STGutterMarkerContainerView(frame: frame)
         markerContainerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         super.init(frame: frame)
@@ -96,8 +115,10 @@ open class STGutterView: UIView {
         isUserInteractionEnabled = true
         isOpaque = false
 
-        addSubview(containerView)
+        // Add marker container first so it's behind line numbers
         addSubview(markerContainerView)
+        addSubview(containerView)
+        addSubview(separatorView)
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(_:)))
         tapGestureRecognizer.numberOfTapsRequired = 1
@@ -114,21 +135,6 @@ open class STGutterView: UIView {
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         backgroundColor = self.backgroundColor?.resolvedColor(with: traitCollection) ?? UIColor.systemBackground.resolvedColor(with: traitCollection)
-    }
-
-    open override func draw(_ rect: CGRect) {
-        super.draw(rect)
-
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return
-        }
-
-        if drawSeparator {
-            context.setLineWidth(1)
-            context.setStrokeColor(separatorColor.cgColor)
-            context.addLines(between: [CGPoint(x: frame.width - 0.5, y: 0), CGPoint(x: frame.width - 0.5, y: bounds.maxY) ])
-            context.strokePath()
-        }
     }
 
     @objc private func handleTapGesture(_ sender: UIGestureRecognizer) {
@@ -174,18 +180,16 @@ open class STGutterView: UIView {
         }
 
         for marker in markers {
-            let cellView = containerView.subviews
-                .compactMap {
-                    $0 as? STGutterLineNumberCell
-                }
-                .first {
-                    $0.lineNumber == marker.lineNumber
-                }
+            let lineNumberCell = containerView.subviews
+                .compactMap { $0 as? STGutterLineNumberCell }
+                .first { $0.lineNumber == marker.lineNumber }
 
-            if let cellView {
+            if let lineNumberCell {
+                marker.view.frame.size.width = max(self.frame.width * 0.6, minimumThickness)
+                marker.view.frame.size.height = lineNumberCell.textSize.height
+                marker.view.frame.origin.x = lineNumberCell.frame.size.width - marker.view.frame.size.width - 1.5 /* separator */
+                marker.view.frame.origin.y = lineNumberCell.frame.origin.y
                 markerContainerView.addSubview(marker.view)
-                marker.view.frame.size = cellView.frame.size
-                marker.view.frame.origin = cellView.frame.origin
             }
         }
     }

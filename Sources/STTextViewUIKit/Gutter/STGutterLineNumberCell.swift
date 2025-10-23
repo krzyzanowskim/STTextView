@@ -10,6 +10,7 @@ final class STGutterLineNumberCell: UIView {
     private let firstBaseline: CGFloat
     private let ctLine: CTLine
     private let textWidth: CGFloat
+    let textSize: CGSize
     var insets: STRulerInsets = STRulerInsets()
 
     override var debugDescription: String {
@@ -23,6 +24,14 @@ final class STGutterLineNumberCell: UIView {
         let attributedString = NSAttributedString(string: "\(number)", attributes: attributes)
         self.ctLine = CTLineCreateWithAttributedString(attributedString)
         self.textWidth = ceil(CTLineGetBoundsWithOptions(ctLine, []).width)
+
+        let bounds = CTLineGetBoundsWithOptions(ctLine, [])
+        if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle {
+            let lineHeight = floor(bounds.height * paragraphStyle.stLineHeightMultiple)
+            self.textSize = CGSize(width: ceil(bounds.width), height: lineHeight)
+        } else {
+            self.textSize = CGSize(width: ceil(bounds.width), height: bounds.height)
+        }
 
         super.init(frame: .zero)
         clipsToBounds = true
