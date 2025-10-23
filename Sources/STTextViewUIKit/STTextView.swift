@@ -960,7 +960,13 @@ import STTextViewCommon
     open override func layoutSubviews() {
         super.layoutSubviews()
 
-        layoutViewport()
+        // Avoid triggering layout during bounce animation
+        // resetting frames/contentSize during layoutSubviews cancels the bounce animation
+        let isBouncing = (contentOffset.y < -contentInset.top || contentOffset.y > max(0, contentSize.height - bounds.height + contentInset.bottom)) && (isTracking || isDecelerating)
+
+        if !isBouncing {
+            layoutViewport()
+        }
     }
 
     private func layoutViewport() {
