@@ -86,6 +86,11 @@ private struct TextViewRepresentable: UIViewRepresentable {
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
         textView.showsLineNumbers = options.contains(.showLineNumbers)
 
+        if options.contains(.showLineNumbers) {
+            textView.gutterView?.font = textView.font
+            textView.gutterView?.textColor = .secondaryLabel
+        }
+
         context.coordinator.isUpdating = true
         textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
         context.coordinator.isUpdating = false
@@ -98,21 +103,16 @@ private struct TextViewRepresentable: UIViewRepresentable {
     }
 
     func updateUIView(_ textView: STTextView, context: Context) {
-        context.coordinator.parent = self
-
-        do {
+        if !context.coordinator.isUserEditing {
             context.coordinator.isUpdating = true
-            if context.coordinator.isDidChangeText == false {
-                textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
-            }
+            textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
             context.coordinator.isUpdating = false
-            context.coordinator.isDidChangeText = false
         }
+        context.coordinator.isUserEditing = false
 
-//        if textView.selectedRange() != selection, let selection {
-//            textView.setSelectedRange(selection)
-//            textView.setNeedsLayout()
-//        }
+        if textView.textSelection != selection, let selection {
+            textView.textSelection = selection
+        }
 
         if textView.isEditable != isEnabled {
             textView.isEditable = isEnabled
@@ -126,6 +126,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
 
         if textView.font != font {
             textView.font = font
+            textView.gutterView?.font = font
             textView.setNeedsLayout()
         }
 
@@ -134,11 +135,20 @@ private struct TextViewRepresentable: UIViewRepresentable {
             textView.setNeedsLayout()
         }
 
+        if textView.showsLineNumbers != options.contains(.showLineNumbers) {
+            textView.showsLineNumbers = options.contains(.showLineNumbers)
+            if options.contains(.showLineNumbers) {
+                textView.gutterView?.font = textView.font
+                textView.gutterView?.textColor = .secondaryLabel
+            }
+            textView.setNeedsLayout()
+        }
+
         textView.layoutIfNeeded()
     }
 
     func makeCoordinator() -> TextCoordinator {
-        TextCoordinator(parent: self)
+        TextCoordinator(text: $text, selection: $selection)
     }
 
     private func styledAttributedString(_ typingAttributes: [NSAttributedString.Key: Any]) -> AttributedString {
@@ -158,13 +168,14 @@ private struct TextViewRepresentable: UIViewRepresentable {
     }
 
     class TextCoordinator: STTextViewDelegate {
-        var parent: TextViewRepresentable
+        @Binding var text: AttributedString
+        @Binding var selection: NSRange?
         var isUpdating: Bool = false
-        var isDidChangeText: Bool = false
-        var enqueuedValue: AttributedString?
+        var isUserEditing: Bool = false
 
-        init(parent: TextViewRepresentable) {
-            self.parent = parent
+        init(text: Binding<AttributedString>, selection: Binding<NSRange?>) {
+            self._text = text
+            self._selection = selection
         }
 
         func textViewDidChangeText(_ notification: Notification) {
@@ -173,11 +184,8 @@ private struct TextViewRepresentable: UIViewRepresentable {
             }
 
             if !isUpdating {
-                let newTextValue = AttributedString(textView.attributedText ?? NSAttributedString())
-                DispatchQueue.main.async {
-                    self.isDidChangeText = true
-                    self.parent.text = newTextValue
-                }
+                isUserEditing = true
+                text = AttributedString(textView.attributedText ?? NSAttributedString())
             }
         }
 
@@ -186,10 +194,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
                 return
             }
 
-            Task { @MainActor in
-                self.isDidChangeText = true
-                self.parent.selection = textView.textSelection
-            }
+            selection = textView.textSelection
         }
 
     }

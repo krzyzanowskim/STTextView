@@ -10,6 +10,18 @@ class STGutterSeparatorView: UIView {
     @Invalidating(.display)
     var separatorColor = UIColor.separator.withAlphaComponent(0.1)
 
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+        isOpaque = false
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        backgroundColor = .clear
+        isOpaque = false
+    }
+
     override func draw(_ rect: CGRect) {
         super.draw(rect)
 

@@ -17,6 +17,7 @@ extension STTextView {
                 gutterView.selectedLineTextColor = textColor
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
+                gutterView.backgroundColor = backgroundColor
                 self.addSubview(gutterView)
                 self.gutterView = gutterView
                 setNeedsLayout()

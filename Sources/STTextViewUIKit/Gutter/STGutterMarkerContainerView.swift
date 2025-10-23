@@ -10,6 +10,7 @@ final class STGutterMarkerContainerView: UIView {
         super.init(frame: frame)
         clipsToBounds = true
         isOpaque = false
+        backgroundColor = .clear
     }
 
     @available(*, unavailable)
