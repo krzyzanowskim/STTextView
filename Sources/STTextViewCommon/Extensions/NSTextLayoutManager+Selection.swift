@@ -34,7 +34,7 @@ package extension NSTextLayoutManager {
             output.reserveCapacity(128)
         }
         enumerateSubstrings(from: range.location, options: .byComposedCharacterSequences) { (substring, substringRange, _, stop) in
-            let shouldContinue = substringRange.location <= range.endLocation
+            let shouldContinue = substringRange.location < range.endLocation
             if !shouldContinue {
                 stop.pointee = true
                 return

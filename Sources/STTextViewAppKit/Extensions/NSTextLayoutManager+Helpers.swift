@@ -8,7 +8,7 @@ extension NSTextLayoutManager {
 
     func enumerateSubstrings(in range: NSTextRange, options: String.EnumerationOptions = [], using block: (String?, NSTextRange, NSTextRange?, UnsafeMutablePointer<ObjCBool>) -> Void) {
         enumerateSubstrings(from: range.location, options: options) { substring, substringRange, enclosingRange, stop in
-            let shouldContinue = substringRange.location <= range.endLocation
+            let shouldContinue = substringRange.location < range.endLocation
             if !shouldContinue {
                 stop.pointee = true
                 return
@@ -29,7 +29,7 @@ extension NSTextLayoutManager {
     ///   - block: A closure you provide to determine if the enumeration finishes early.
     func enumerateRenderingAttributes(in range: NSTextRange, reverse: Bool, using block: (NSTextLayoutManager, [NSAttributedString.Key : Any], NSTextRange) -> Bool) {
         enumerateRenderingAttributes(from: range.location, reverse: reverse) { textLayoutManager, attributes, textRange in
-            let shouldContinue = textRange.location <= range.endLocation
+            let shouldContinue = textRange.location < range.endLocation
             if !shouldContinue {
                 return false
             }
