@@ -5,6 +5,10 @@ import AppKit
 
 final class STContentViewportView: NSView {
 
+    override func makeBackingLayer() -> CALayer {
+        CATiledLayer()
+    }
+
     var backgroundColor: NSColor? {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
