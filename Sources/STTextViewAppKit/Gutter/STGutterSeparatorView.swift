@@ -10,6 +10,10 @@ class STGutterSeparatorView: NSView {
     @Invalidating(.display)
     var separatorColor = NSColor.separatorColor.withAlphaComponent(0.1)
 
+    public override func makeBackingLayer() -> CALayer {
+        CATiledLayer()
+    }
+
     override var isFlipped: Bool {
         true
     }

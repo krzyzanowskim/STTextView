@@ -6,6 +6,10 @@ import AppKit
 // Gutter line number cells container
 final class STGutterMarkerContainerView: NSView {
 
+    public override func makeBackingLayer() -> CALayer {
+        CATiledLayer()
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         wantsLayer = true
