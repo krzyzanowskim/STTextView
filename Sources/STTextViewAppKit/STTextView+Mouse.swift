@@ -2,6 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import AppKit
+import STTextKitPlus
 
 extension STTextView {
 
@@ -16,15 +17,13 @@ extension STTextView {
         }
 
         var handled: Bool = false
+        let eventPoint = contentView.convert(event.locationInWindow, from: nil)
+        let holdsShift = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.shift)
+        let holdsControl = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.control)
+        let holdsOption = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.option)
 
         switch event.clickCount {
         case 1:
-            let eventPoint = contentView.convert(event.locationInWindow, from: nil)
-
-            let holdsShift = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.shift)
-            let holdsControl = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.control)
-            let holdsOption = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.option)
-
             if !handled, holdsShift && holdsControl {
                 textLayoutManager.appendInsertionPointSelection(interactingAt: eventPoint)
                 updateTypingAttributes()
@@ -89,6 +88,35 @@ extension STTextView {
                 handled = true
             }
         case 2:
+            // Double-tap to select is different than regular selection.
+            // It select last word in the line or in the document.
+            // https://github.com/krzyzanowskim/STTextView/discussions/93
+            if let caretLocation = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location) {
+                textLayoutManager.textSelections = [NSTextSelection(caretLocation, affinity: .downstream)]
+            } else if let interactionRange = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.last,
+                      interactionRange.location >= textLayoutManager.documentRange.endLocation
+            {
+                // effective selection is end of the document
+                var lastTextLayoutFragment: NSTextLayoutFragment? = nil
+                textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: .reverse) { textLayoutFragment in
+                    lastTextLayoutFragment = textLayoutFragment
+                    return false
+                }
+
+                if let lastTextLayoutFragment, !lastTextLayoutFragment.isExtraLineFragment {
+                    var lastLocation: (any NSTextLocation)? = nil
+                    textLayoutManager.enumerateCaretOffsetsInLineFragment(at: lastTextLayoutFragment.rangeInElement.location) { _, location, isLeading, stop in
+                        if isLeading {
+                            lastLocation = location
+                        }
+                    }
+
+                    if let lastLocation {
+                        textLayoutManager.textSelections = [NSTextSelection(lastLocation, affinity: .downstream)]
+                    }
+                }
+            }
+
             selectWord(self)
             handled = true
         case 3:
