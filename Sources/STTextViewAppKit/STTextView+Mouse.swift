@@ -35,7 +35,7 @@ extension STTextView {
             }
 
             if !handled, !holdsShift, !holdsOption, !holdsControl,
-               let interactionLocation = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)
+               let interactionLocation = textLayoutManager.caretLocation(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)
             {
                 // Check for text attachment first
                 // Note: This handles clicks on the text attachment character, not direct clicks on attachment views
@@ -91,7 +91,7 @@ extension STTextView {
             // Double-tap to select is different than regular selection.
             // It select last word in the line or in the document.
             // https://github.com/krzyzanowskim/STTextView/discussions/93
-            if let caretLocation = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location) {
+            if let caretLocation = textLayoutManager.caretLocation(interactingAt: eventPoint, options: .allowOutside, inContainerAt: textLayoutManager.documentRange.location) {
                 textLayoutManager.textSelections = [NSTextSelection(caretLocation, affinity: .downstream)]
             } else if let interactionRange = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.last,
                       interactionRange.location >= textLayoutManager.documentRange.endLocation
