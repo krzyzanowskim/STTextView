@@ -37,7 +37,7 @@ extension STTextView {
         }
 
         textLayoutManager.textSelections = [
-            NSTextSelection(range: textLayoutManager.documentRange, affinity: .downstream, granularity: .line)
+            NSTextSelection(range: textLayoutManager.documentRange, affinity: .downstream, granularity: .character)
         ]
 
         updateTypingAttributes()
@@ -481,7 +481,7 @@ extension STTextView {
             modifiers.insert(.visual)
         }
 
-        let selections = textLayoutManager.textSelectionNavigation.textSelections(
+        let newSelections = textLayoutManager.textSelectionNavigation.textSelections(
             interactingAt: point,
             inContainerAt: location,
             anchors: anchors,
@@ -490,8 +490,8 @@ extension STTextView {
             bounds: textLayoutManager.usageBoundsForTextContainer
         )
 
-        if !selections.isEmpty {
-            textLayoutManager.textSelections = selections
+        if !newSelections.isEmpty {
+            textLayoutManager.textSelections = newSelections
         }
 
         updateTypingAttributes()
