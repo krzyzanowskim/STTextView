@@ -132,6 +132,10 @@ open class STGutterView: NSView, NSDraggingSource {
         true
     }
 
+    public override func makeBackingLayer() -> CALayer {
+        CATiledLayer()
+    }
+
     override init(frame: CGRect) {
         separatorView = STGutterSeparatorView(frame: frame)
         separatorView.autoresizingMask = [.width, .height]
