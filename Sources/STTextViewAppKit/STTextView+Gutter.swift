@@ -122,25 +122,7 @@ extension STTextView {
                 gutterView.containerView.addSubview(numberCell)
             }
         } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
-            // Get visible fragment views from the map and sort by document order
-            let visibleFragmentViews = (fragmentViewMap.keyEnumerator().allObjects as! [NSTextLayoutFragment])
-                .compactMap { layoutFragment -> (NSTextLayoutFragment, STTextLayoutFragmentView)? in
-                    guard let fragmentView = fragmentViewMap.object(forKey: layoutFragment),
-                          layoutFragment.rangeInElement.intersects(viewportRange)
-                    else {
-                        return nil
-                    }
-                    return (layoutFragment, fragmentView)
-                }
-                .sorted { lhs, rhs in
-                    lhs.0.rangeInElement.location.compare(rhs.0.rangeInElement.location) == .orderedAscending
-                }
 
-            guard !visibleFragmentViews.isEmpty else {
-                return
-            }
-
-            // Calculate line number offset based on document position
             let textElements = textContentManager.textElements(
                 for: NSTextRange(
                     location: textLayoutManager.documentRange.location,
@@ -148,11 +130,11 @@ extension STTextView {
                 )!
             )
 
+            // if not empty document
             var requiredWidthFitText = gutterView.minimumThickness
             let startLineIndex = textElements.count
             var linesCount = 0
-
-            for (layoutFragment, fragmentView) in visibleFragmentViews {
+            textLayoutManager.enumerateTextLayoutFragments(in: viewportRange/*, options: .ensuresLayout*/) { layoutFragment in
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                 for textLineFragment in layoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == textLineFragment) {
@@ -164,11 +146,15 @@ extension STTextView {
                     )
                     let lineNumber = startLineIndex + linesCount + 1
 
-                    // Calculate baseline offset based on paragraph style
+                    // calculated values depends on the "isExtraLineFragment" condition
                     var baselineYOffset: CGFloat = 0
                     let locationForFirstCharacter: CGPoint
                     let cellFrame: CGRect
 
+                    // The logic for extra line handling would use some cleanup
+                    // It apply workaround for FB15131180 invalid frame being reported
+                    // for the extra line fragment. The workaround is to calculate (adjust)
+                    // extra line fragment frame based on previous text line (from the same layout fragment)
                     if layoutFragment.isExtraLineFragment {
                         locationForFirstCharacter = STGutterCalculations.locationForFirstCharacter(
                             in: layoutFragment,
@@ -190,18 +176,12 @@ extension STTextView {
                             )
                         }
 
-                        // Use fragment view's actual frame for positioning
-                        let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-                        cellFrame = CGRect(
-                            origin: CGPoint(
-                                x: fragmentView.frame.origin.x + prevTextLineFragment.typographicBounds.origin.x,
-                                y: fragmentView.frame.origin.y + prevTextLineFragment.typographicBounds.maxY
-                            ),
-                            size: CGSize(
-                                width: fragmentView.frame.width,
-                                height: prevTextLineFragment.typographicBounds.height
-                            )
-                        )
+                        // Don't use fragment view for extra line fragments - use calculated frame
+                        cellFrame = STGutterCalculations.calculateExtraLineFragmentFrame(
+                            layoutFragment: layoutFragment,
+                            textLineFragment: textLineFragment,
+                            isExtraTextLineFragment: textLineFragment.isExtraLineFragment
+                        ).pixelAligned
                     } else {
                         locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
 
@@ -212,17 +192,31 @@ extension STTextView {
                             )
                         }
 
-                        // Use fragment view's actual frame for positioning
-                        cellFrame = CGRect(
-                            origin: CGPoint(
-                                x: fragmentView.frame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                y: fragmentView.frame.origin.y + textLineFragment.typographicBounds.origin.y
-                            ),
-                            size: CGSize(
-                                width: fragmentView.frame.width,
-                                height: fragmentView.frame.height
+                        // Look up the fragment view for accurate positioning (only for normal fragments)
+                        if let fragmentView = fragmentViewMap.object(forKey: layoutFragment) {
+                            // Use fragment view's actual frame for positioning
+                            cellFrame = CGRect(
+                                origin: CGPoint(
+                                    x: fragmentView.frame.origin.x + textLineFragment.typographicBounds.origin.x,
+                                    y: fragmentView.frame.origin.y + textLineFragment.typographicBounds.origin.y
+                                ),
+                                size: CGSize(
+                                    width: fragmentView.frame.width,
+                                    height: fragmentView.frame.height
+                                )
                             )
-                        )
+                        } else {
+                            cellFrame = CGRect(
+                                origin: CGPoint(
+                                    x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
+                                ),
+                                size: CGSize(
+                                    width: layoutFragment.layoutFragmentFrame.width, // extend width to he fragment layout for the convenience of gutter
+                                    height: layoutFragment.layoutFragmentFrame.height
+                                )
+                            ).pixelAligned
+                        }
                     }
 
                     var effectiveLineTextAttributes = lineTextAttributes
@@ -261,6 +255,8 @@ extension STTextView {
                     requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)
                     linesCount += 1
                 }
+
+                return true
             }
 
             // FIXME: gutter width change affects contentView frame (in setFrameSize) layout that affects viewport layout
