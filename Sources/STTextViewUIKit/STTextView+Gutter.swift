@@ -120,7 +120,7 @@ extension STTextView {
                 gutterView.containerView.addSubview(numberCell)
             }
         } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
-            // Get visible fragment views from the map and sort by vertical position
+            // Get visible fragment views from the map and sort by document order
             let visibleFragmentViews = (fragmentViewMap.keyEnumerator().allObjects as! [NSTextLayoutFragment])
                 .compactMap { layoutFragment -> (NSTextLayoutFragment, STTextLayoutFragmentView)? in
                     guard let fragmentView = fragmentViewMap.object(forKey: layoutFragment),
@@ -130,7 +130,9 @@ extension STTextView {
                     }
                     return (layoutFragment, fragmentView)
                 }
-                .sorted { $0.1.frame.origin.y < $1.1.frame.origin.y }
+                .sorted { lhs, rhs in
+                    lhs.0.rangeInElement.location.compare(rhs.0.rangeInElement.location) == .orderedAscending
+                }
 
             guard !visibleFragmentViews.isEmpty else {
                 return
