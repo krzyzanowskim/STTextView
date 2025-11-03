@@ -17,7 +17,7 @@ extension STTextView {
                 gutterView.frame.origin = .zero
                 gutterView.frame.size.width = max(gutterView.minimumThickness, CGFloat(textContentManager.length) / (1024 * 100))
                 gutterView.frame.size.height = contentView.bounds.height
-                gutterView.textColor = textColor
+                gutterView.textColor = textColor.withAlphaComponent(0.45)
                 gutterView.selectedLineTextColor = textColor
                 gutterView.highlightSelectedLine = highlightSelectedLine
                 gutterView.selectedLineHighlightColor = selectedLineHighlightColor
@@ -44,8 +44,11 @@ extension STTextView {
             return
         }
 
-        // gutter view floats on the edge
-        // the contentOffset is the adjustment to make it visible
+        // Coordinate system strategy:
+        // UIKit lacks AppKit's addFloatingSubview mechanism, so we manually position
+        // the gutter view using contentOffset to keep it visible during scrolling.
+        // Cell Y coordinates compensate by subtracting contentOffset.y to remain
+        // relative to the text layout coordinate space.
         gutterView.frame.origin.x = contentOffset.x
         gutterView.frame.origin.y = contentOffset.y
         gutterView.frame.size.height = contentView.frame.height
@@ -58,9 +61,11 @@ extension STTextView {
         guard let gutterView else {
             return
         }
-        
-        gutterView.containerView.subviews.forEach { v in
-            v.removeFromSuperview()
+
+        gutterView.containerView.subviews.compactMap {
+            $0 as? STGutterLineNumberCell
+        }.forEach {
+            $0.removeFromSuperview()
         }
 
         let lineTextAttributes: [NSAttributedString.Key: Any] = [
@@ -77,10 +82,9 @@ extension STTextView {
             if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
                 let lineNumber = 1
 
-                // Use typingAttributes because there's no content so we made up "1" with typing attributes
-                // that allow us to calculate baseline position.
+                // Use lineTextAttributes to calculate baseline position for empty document.
                 // Calculations in sync with position used by STTextLayoutFragment
-                let ctNumberLine = CTLineCreateWithAttributedString(NSAttributedString(string: "\(lineNumber)", attributes: typingAttributes))
+                let ctNumberLine = CTLineCreateWithAttributedString(NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes))
                 let baselineParagraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? defaultParagraphStyle
                 let baselineOffset = -(ctNumberLine.typographicHeight() * (baselineParagraphStyle.stLineHeightMultiple - 1.0) / 2)
 
@@ -206,6 +210,10 @@ extension STTextView {
                     var effectiveLineTextAttributes = lineTextAttributes
                     if highlightSelectedLine, isLineSelected, !selectedLineTextAttributes.isEmpty {
                         effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
+                    }
+
+                    if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                        effectiveLineTextAttributes[.paragraphStyle] = paragraphStyle
                     }
 
                     let numberCell = STGutterLineNumberCell(
