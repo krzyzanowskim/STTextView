@@ -108,10 +108,12 @@ extension STTextView {
                     numberCell.layer?.backgroundColor = gutterView.selectedLineHighlightColor.cgColor
                 }
 
+                // For empty documents, ignore bounce scrolling by treating scroll offset as 0
+                // Empty document fits in viewport, so any scroll is just bounce effect
                 numberCell.frame = CGRect(
                     origin: CGPoint(
                         x: 0,
-                        y: selectionFrame.origin.y - scrollView.contentView.bounds.minY - scrollView.contentInsets.top
+                        y: selectionFrame.origin.y - scrollView.contentInsets.top
                     ),
                     size: CGSize(
                         width: gutterView.containerView.frame.width,
