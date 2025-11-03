@@ -122,124 +122,67 @@ extension STTextView {
                 gutterView.containerView.addSubview(numberCell)
             }
         } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
-
-            let textElements = textContentManager.textElements(
+            // Calculate how many lines exist before the viewport
+            let textElementsBeforeViewport = textContentManager.textElements(
                 for: NSTextRange(
                     location: textLayoutManager.documentRange.location,
                     end: viewportRange.location
                 )!
             )
 
-            // if not empty document
             var requiredWidthFitText = gutterView.minimumThickness
-            let startLineIndex = textElements.count
+            let startLineIndex = textElementsBeforeViewport.count
             var linesCount = 0
-            textLayoutManager.enumerateTextLayoutFragments(in: viewportRange/*, options: .ensuresLayout*/) { layoutFragment in
+
+            // Enumerate all layout fragments in the viewport
+            textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
+                // Only show line numbers for the first line fragment or extra line fragments
                 for textLineFragment in layoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == textLineFragment) {
+                    let lineNumber = startLineIndex + linesCount + 1
+
+                    // Determine if this line is selected
                     let isLineSelected = STGutterCalculations.isLineSelected(
                         textLineFragment: textLineFragment,
                         layoutFragment: layoutFragment,
                         contentRangeInElement: contentRangeInElement,
                         textLayoutManager: textLayoutManager
                     )
-                    let lineNumber = startLineIndex + linesCount + 1
 
-                    // calculated values depends on the "isExtraLineFragment" condition
-                    var baselineYOffset: CGFloat = 0
-                    let locationForFirstCharacter: CGPoint
-                    let cellFrame: CGRect
+                    // Calculate positioning metrics
+                    let fragmentViewFrame = fragmentViewMap.object(forKey: layoutFragment)?.frame
+                    let (baselineYOffset, locationForFirstCharacter, cellFrame) = STGutterCalculations.calculateLineNumberMetrics(
+                        for: textLineFragment,
+                        in: layoutFragment,
+                        fragmentViewFrame: fragmentViewFrame
+                    )
 
-                    // The logic for extra line handling would use some cleanup
-                    // It apply workaround for FB15131180 invalid frame being reported
-                    // for the extra line fragment. The workaround is to calculate (adjust)
-                    // extra line fragment frame based on previous text line (from the same layout fragment)
-                    if layoutFragment.isExtraLineFragment {
-                        locationForFirstCharacter = STGutterCalculations.locationForFirstCharacter(
-                            in: layoutFragment,
-                            textLineFragment: textLineFragment,
-                            isExtraTextLineFragment: textLineFragment.isExtraLineFragment
-                        )
-
-                        if let paragraphStyle = STGutterCalculations.paragraphStyleForBaseline(
-                            in: layoutFragment,
-                            textLineFragment: textLineFragment,
-                            isExtraTextLineFragment: textLineFragment.isExtraLineFragment
-                        ) {
-                            let lineHeight = textLineFragment.isExtraLineFragment
-                                ? layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2].typographicBounds.height
-                                : textLineFragment.typographicBounds.height
-                            baselineYOffset = STGutterCalculations.calculateBaselineOffset(
-                                lineHeight: lineHeight,
-                                paragraphStyle: paragraphStyle
-                            )
-                        }
-
-                        // Don't use fragment view for extra line fragments - use calculated frame
-                        cellFrame = STGutterCalculations.calculateExtraLineFragmentFrame(
-                            layoutFragment: layoutFragment,
-                            textLineFragment: textLineFragment,
-                            isExtraTextLineFragment: textLineFragment.isExtraLineFragment
-                        ).pixelAligned
-                    } else {
-                        locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
-
-                        if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
-                            baselineYOffset = STGutterCalculations.calculateBaselineOffset(
-                                lineHeight: textLineFragment.typographicBounds.height,
-                                paragraphStyle: paragraphStyle
-                            )
-                        }
-
-                        // Look up the fragment view for accurate positioning (only for normal fragments)
-                        if let fragmentView = fragmentViewMap.object(forKey: layoutFragment) {
-                            // Use fragment view's actual frame for positioning
-                            cellFrame = CGRect(
-                                origin: CGPoint(
-                                    x: fragmentView.frame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                    y: fragmentView.frame.origin.y + textLineFragment.typographicBounds.origin.y
-                                ),
-                                size: CGSize(
-                                    width: fragmentView.frame.width,
-                                    height: fragmentView.frame.height
-                                )
-                            )
-                        } else {
-                            cellFrame = CGRect(
-                                origin: CGPoint(
-                                    x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
-                                ),
-                                size: CGSize(
-                                    width: layoutFragment.layoutFragmentFrame.width, // extend width to he fragment layout for the convenience of gutter
-                                    height: layoutFragment.layoutFragmentFrame.height
-                                )
-                            ).pixelAligned
-                        }
-                    }
-
+                    // Prepare text attributes
                     var effectiveLineTextAttributes = lineTextAttributes
                     if gutterView.highlightSelectedLine, isLineSelected, !selectedLineTextAttributes.isEmpty {
                         effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                     }
-
                     if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
                         effectiveLineTextAttributes[.paragraphStyle] = paragraphStyle
                     }
 
+                    // Create and configure line number cell
                     let numberCell = STGutterLineNumberCell(
                         firstBaseline: locationForFirstCharacter.y + baselineYOffset,
                         attributes: effectiveLineTextAttributes,
                         number: lineNumber
                     )
-
                     numberCell.insets = gutterView.insets
 
-                    if gutterView.highlightSelectedLine, isLineSelected, textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty, !textLayoutManager.insertionPointSelections.isEmpty {
+                    // Apply selection highlight if needed
+                    if gutterView.highlightSelectedLine, isLineSelected,
+                       textLayoutManager.textSelectionsRanges(.withoutInsertionPoints).isEmpty,
+                       !textLayoutManager.insertionPointSelections.isEmpty {
                         numberCell.layer?.backgroundColor = gutterView.selectedLineHighlightColor.cgColor
                     }
 
+                    // Position the cell
                     numberCell.frame = CGRect(
                         origin: CGPoint(
                             x: 0,

@@ -13,6 +13,119 @@ import STTextKitPlus
 
 package enum STGutterCalculations {
 
+    /// Calculate positioning metrics for a line number cell
+    /// - Parameters:
+    ///   - textLineFragment: The text line fragment to calculate metrics for
+    ///   - layoutFragment: The layout fragment containing the line
+    ///   - fragmentViewFrame: Optional frame of the rendered fragment view (for perfect alignment)
+    ///   - contentOffset: Content offset for coordinate adjustment (UIKit scrolling, .zero for AppKit)
+    /// - Returns: (baselineYOffset, locationForFirstCharacter, cellFrame)
+    package static func calculateLineNumberMetrics(
+        for textLineFragment: NSTextLineFragment,
+        in layoutFragment: NSTextLayoutFragment,
+        fragmentViewFrame: CGRect?,
+        contentOffset: CGPoint = .zero
+    ) -> (baselineYOffset: CGFloat, locationForFirstCharacter: CGPoint, cellFrame: CGRect) {
+
+        var baselineYOffset: CGFloat = 0
+        let locationForFirstCharacter: CGPoint
+        let cellFrame: CGRect
+
+        if layoutFragment.isExtraLineFragment {
+            // Extra line fragments require special handling due to FB15131180
+            // They don't have fragment views and need calculated positioning based on previous line
+            locationForFirstCharacter = STGutterCalculations.locationForFirstCharacter(
+                in: layoutFragment,
+                textLineFragment: textLineFragment,
+                isExtraTextLineFragment: textLineFragment.isExtraLineFragment
+            )
+
+            if let paragraphStyle = STGutterCalculations.paragraphStyleForBaseline(
+                in: layoutFragment,
+                textLineFragment: textLineFragment,
+                isExtraTextLineFragment: textLineFragment.isExtraLineFragment
+            ) {
+                let lineHeight = textLineFragment.isExtraLineFragment
+                    ? layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2].typographicBounds.height
+                    : textLineFragment.typographicBounds.height
+                baselineYOffset = STGutterCalculations.calculateBaselineOffset(
+                    lineHeight: lineHeight,
+                    paragraphStyle: paragraphStyle
+                )
+            }
+
+            let rawFrame = STGutterCalculations.calculateExtraLineFragmentFrame(
+                layoutFragment: layoutFragment,
+                textLineFragment: textLineFragment,
+                isExtraTextLineFragment: textLineFragment.isExtraLineFragment
+            )
+
+            #if canImport(AppKit) && !targetEnvironment(macCatalyst)
+            cellFrame = rawFrame.pixelAligned
+            #else
+            cellFrame = CGRect(
+                origin: CGPoint(
+                    x: rawFrame.origin.x,
+                    y: rawFrame.origin.y - contentOffset.y
+                ),
+                size: rawFrame.size
+            )
+            #endif
+
+        } else {
+            // Normal fragments: use fragment view frame if available, otherwise calculate
+            locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
+
+            if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                baselineYOffset = STGutterCalculations.calculateBaselineOffset(
+                    lineHeight: textLineFragment.typographicBounds.height,
+                    paragraphStyle: paragraphStyle
+                )
+            }
+
+            if let viewFrame = fragmentViewFrame {
+                // Use the actual rendered fragment view frame for perfect alignment
+                cellFrame = CGRect(
+                    origin: CGPoint(
+                        x: viewFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                        y: viewFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
+                    ),
+                    size: CGSize(
+                        width: viewFrame.width,
+                        height: viewFrame.height
+                    )
+                )
+            } else {
+                // Fallback to layout fragment frame if view not available yet
+                #if canImport(AppKit) && !targetEnvironment(macCatalyst)
+                cellFrame = CGRect(
+                    origin: CGPoint(
+                        x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                        y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
+                    ),
+                    size: CGSize(
+                        width: layoutFragment.layoutFragmentFrame.width,
+                        height: layoutFragment.layoutFragmentFrame.height
+                    )
+                ).pixelAligned
+                #else
+                cellFrame = CGRect(
+                    origin: CGPoint(
+                        x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                        y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
+                    ),
+                    size: CGSize(
+                        width: layoutFragment.layoutFragmentFrame.width,
+                        height: layoutFragment.layoutFragmentFrame.height
+                    )
+                )
+                #endif
+            }
+        }
+
+        return (baselineYOffset, locationForFirstCharacter, cellFrame)
+    }
+
     /// Calculate baseline Y offset based on paragraph style line height multiple
     package static func calculateBaselineOffset(
         lineHeight: CGFloat,
