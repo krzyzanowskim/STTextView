@@ -12,7 +12,10 @@ extension STTextView {
         set {
             if gutterView == nil, newValue == true {
                 let gutterView = STGutterView()
-                gutterView.frame.size.width = gutterView.minimumThickness
+                // estimate max gutter width
+                gutterView.frame.origin = .zero
+                gutterView.frame.size.width = max(gutterView.minimumThickness, CGFloat(textContentManager.length) / (1024 * 100))
+                gutterView.frame.size.height = contentView.bounds.height
                 gutterView.textColor = textColor
                 gutterView.selectedLineTextColor = textColor
                 gutterView.highlightSelectedLine = highlightSelectedLine
@@ -251,11 +254,19 @@ extension STTextView {
                 return true
             }
 
+            // FIXME: gutter width change affects contentView frame (in setFrameSize) layout that affects viewport layout
+            // (I'm being vague because I don't understand how).
+            // When viewport goes being the bounds, gutter width back to minimumThickness that breaks layout because
+            // one more layoutViewport() clear out the fragment cache used to restore viewport location
+            // TODO: gutter width should not adjust while scrolling/layout. It should adjust on content change.
+
             // adjust ruleThickness to fit the text based on last numberView
-            let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
-            if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width) {
-                gutterView.frame.size.width = newGutterWidth
-            }
+            // if textLayoutManager.textViewportLayoutController.viewportRange != nil {
+            //     let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
+            //     if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width) {
+            //         gutterView.frame.size.width = newGutterWidth
+            //     }
+            // }
         }
     }
 
