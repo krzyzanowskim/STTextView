@@ -205,7 +205,8 @@ open class STGutterView: NSView, NSDraggingSource {
                 marker.view.frame.size.width = max(self.frame.width * 0.6, minimumThickness)
                 marker.view.frame.size.height = lineNumberCell.textSize.height
                 marker.view.frame.origin.x = lineNumberCell.frame.size.width - marker.view.frame.size.width - 1.5 /* separator */
-                marker.view.frame.origin.y = lineNumberCell.frame.origin.y
+                // Center marker vertically on the line number text
+                marker.view.frame.origin.y = lineNumberCell.frame.origin.y + lineNumberCell.textVisualCenter - (marker.view.frame.size.height / 2)
                 markerContainerView.addSubview(marker.view)
             }
         }

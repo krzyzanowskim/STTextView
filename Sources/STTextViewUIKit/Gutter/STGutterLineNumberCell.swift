@@ -7,7 +7,9 @@ import STTextViewCommon
 final class STGutterLineNumberCell: UIView {
     /// Line number
     let lineNumber: Int
-    private let firstBaseline: CGFloat
+    let firstBaseline: CGFloat
+    /// Y position from cell top to the visual center of the line number text
+    let textVisualCenter: CGFloat
     private let ctLine: CTLine
     private let textWidth: CGFloat
     let textSize: CGSize
@@ -26,6 +28,16 @@ final class STGutterLineNumberCell: UIView {
         self.textWidth = ceil(CTLineGetBoundsWithOptions(ctLine, []).width)
 
         let bounds = CTLineGetBoundsWithOptions(ctLine, [])
+
+        // Get actual typographic metrics to calculate visual center
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil)
+
+        // Calculate visual center: baseline + (descent - ascent) / 2
+        // This gives us the Y position from cell top to the visual middle of the text
+        self.textVisualCenter = firstBaseline + (descent - ascent) / 2
+
         if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle {
             let lineHeight = floor(bounds.height * paragraphStyle.stLineHeightMultiple)
             self.textSize = CGSize(width: ceil(bounds.width), height: lineHeight)
