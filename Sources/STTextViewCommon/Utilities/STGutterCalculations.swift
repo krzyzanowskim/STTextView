@@ -13,6 +13,29 @@ import STTextKitPlus
 
 package enum STGutterCalculations {
 
+    /// Get visible fragment views from the map and sort by document order
+    /// - Parameters:
+    ///   - fragmentViewMap: Map of layout fragments to their rendered views
+    ///   - viewportRange: The visible text range in the viewport
+    /// - Returns: Array of (layoutFragment, fragmentView) tuples sorted by document position
+    package static func visibleFragmentViewsInViewport<FragmentView>(
+        fragmentViewMap: NSMapTable<NSTextLayoutFragment, FragmentView>,
+        viewportRange: NSTextRange
+    ) -> [(NSTextLayoutFragment, FragmentView)] {
+        (fragmentViewMap.keyEnumerator().allObjects as! [NSTextLayoutFragment])
+            .compactMap { layoutFragment -> (NSTextLayoutFragment, FragmentView)? in
+                guard let fragmentView = fragmentViewMap.object(forKey: layoutFragment),
+                      layoutFragment.rangeInElement.intersects(viewportRange)
+                else {
+                    return nil
+                }
+                return (layoutFragment, fragmentView)
+            }
+            .sorted { lhs, rhs in
+                lhs.0.rangeInElement.location.compare(rhs.0.rangeInElement.location) == .orderedAscending
+            }
+    }
+
     /// Calculate positioning metrics for a line number cell
     /// - Parameters:
     ///   - textLineFragment: The text line fragment to calculate metrics for

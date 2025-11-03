@@ -122,6 +122,16 @@ extension STTextView {
                 gutterView.containerView.addSubview(numberCell)
             }
         } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
+            // Get visible fragment views from the map and sort by document order
+            let visibleFragmentViews = STGutterCalculations.visibleFragmentViewsInViewport(
+                fragmentViewMap: fragmentViewMap,
+                viewportRange: viewportRange
+            )
+
+            guard !visibleFragmentViews.isEmpty else {
+                return
+            }
+
             // Calculate how many lines exist before the viewport
             let textElementsBeforeViewport = textContentManager.textElements(
                 for: NSTextRange(
@@ -134,8 +144,7 @@ extension STTextView {
             let startLineIndex = textElementsBeforeViewport.count
             var linesCount = 0
 
-            // Enumerate all layout fragments in the viewport
-            textLayoutManager.enumerateTextLayoutFragments(in: viewportRange) { layoutFragment in
+            for (layoutFragment, fragmentView) in visibleFragmentViews {
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                 // Only show line numbers for the first line fragment or extra line fragments
@@ -151,11 +160,11 @@ extension STTextView {
                     )
 
                     // Calculate positioning metrics
-                    let fragmentViewFrame = fragmentViewMap.object(forKey: layoutFragment)?.frame
+                    // Get the actual fragment view frame for pixel-perfect alignment
                     let (baselineYOffset, locationForFirstCharacter, cellFrame) = STGutterCalculations.calculateLineNumberMetrics(
                         for: textLineFragment,
                         in: layoutFragment,
-                        fragmentViewFrame: fragmentViewFrame
+                        fragmentViewFrame: fragmentView.frame
                     )
 
                     // Prepare text attributes
@@ -198,8 +207,6 @@ extension STTextView {
                     requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)
                     linesCount += 1
                 }
-
-                return true
             }
 
             // FIXME: gutter width change affects contentView frame (in setFrameSize) layout that affects viewport layout
