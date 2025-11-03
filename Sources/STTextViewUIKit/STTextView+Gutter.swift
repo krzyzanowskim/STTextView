@@ -82,9 +82,10 @@ extension STTextView {
             if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
                 let lineNumber = 1
 
-                // Use lineTextAttributes to calculate baseline position for empty document.
-                // Calculations in sync with position used by STTextLayoutFragment
-                let ctNumberLine = CTLineCreateWithAttributedString(NSAttributedString(string: "\(lineNumber)", attributes: lineTextAttributes))
+                // Use typingAttributes to calculate baseline position for empty document.
+                // The cell is sized for typingLineHeight, so baseline calculation should use typing font metrics
+                // to match where text baseline would be. Line number is still drawn with gutter font.
+                let ctNumberLine = CTLineCreateWithAttributedString(NSAttributedString(string: "\(lineNumber)", attributes: typingAttributes))
                 let baselineParagraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? defaultParagraphStyle
                 let baselineOffset = -(ctNumberLine.typographicHeight() * (baselineParagraphStyle.stLineHeightMultiple - 1.0) / 2)
 
