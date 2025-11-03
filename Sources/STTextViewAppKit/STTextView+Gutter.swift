@@ -180,7 +180,7 @@ extension STTextView {
                             layoutFragment: layoutFragment,
                             textLineFragment: textLineFragment,
                             isExtraTextLineFragment: textLineFragment.isExtraLineFragment
-                        )
+                        ).pixelAligned
                     } else {
                         locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
 
@@ -200,7 +200,7 @@ extension STTextView {
                                 width: layoutFragment.layoutFragmentFrame.width, // extend width to he fragment layout for the convenience of gutter
                                 height: layoutFragment.layoutFragmentFrame.height
                             )
-                        )
+                        ).pixelAligned
                     }
 
                     var effectiveLineTextAttributes = lineTextAttributes
