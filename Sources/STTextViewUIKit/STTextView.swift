@@ -1016,25 +1016,12 @@ import STTextViewCommon
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
                 for textLineFragment in layoutFragment.textLineFragments {
 
-                    func isLineSelected() -> Bool {
-                        textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
-                            var result = true
-                            if textLineFragment.isExtraLineFragment {
-                                let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
-                                result = result && c1
-                            } else {
-                                let c1 = contentRangeInElement.contains(selectionTextRange)
-                                let c2 = contentRangeInElement.intersects(selectionTextRange)
-                                let c3 = selectionTextRange.contains(contentRangeInElement)
-                                let c4 = selectionTextRange.intersects(contentRangeInElement)
-                                let c5 = contentRangeInElement.endLocation == selectionTextRange.location
-                                result = result && (c1 || c2 || c3 || c4 || c5)
-                            }
-                            return partialResult && result
-                        }
-                    }
-
-                    let isLineSelected = isLineSelected()
+                    let isLineSelected = STGutterCalculations.isLineSelected(
+                        textLineFragment: textLineFragment,
+                        layoutFragment: layoutFragment,
+                        contentRangeInElement: contentRangeInElement,
+                        textLayoutManager: textLayoutManager
+                    )
 
                     if isLineSelected {
                         let lineSelectionRectangle: CGRect
