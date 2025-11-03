@@ -4,6 +4,7 @@
 import UIKit
 import STTextKitPlus
 import CoreTextSwift
+import STTextViewCommon
 
 extension STTextView {
 
@@ -128,26 +129,12 @@ extension STTextView {
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                 for textLineFragment in layoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == textLineFragment) {
-
-                    func isLineSelected() -> Bool {
-                        textLayoutManager.textSelections.flatMap(\.textRanges).reduce(true) { partialResult, selectionTextRange in
-                            var result = true
-                            if textLineFragment.isExtraLineFragment {
-                                let c1 = layoutFragment.rangeInElement.endLocation == selectionTextRange.location
-                                result = result && c1
-                            } else {
-                                let c1 = contentRangeInElement.contains(selectionTextRange)
-                                let c2 = contentRangeInElement.intersects(selectionTextRange)
-                                let c3 = selectionTextRange.contains(contentRangeInElement)
-                                let c4 = selectionTextRange.intersects(contentRangeInElement)
-                                let c5 = contentRangeInElement.endLocation == selectionTextRange.location
-                                result = result && (c1 || c2 || c3 || c4 || c5)
-                            }
-                            return partialResult && result
-                        }
-                    }
-
-                    let isLineSelected = isLineSelected()
+                    let isLineSelected = STGutterCalculations.isLineSelected(
+                        textLineFragment: textLineFragment,
+                        layoutFragment: layoutFragment,
+                        contentRangeInElement: contentRangeInElement,
+                        textLayoutManager: textLayoutManager
+                    )
 
                     let lineNumber = startLineIndex + linesCount + 1
 
@@ -161,49 +148,47 @@ extension STTextView {
                     // for the extra line fragment. The workaround is to calculate (adjust)
                     // extra line fragment frame based on previous text line (from the same layout fragment)
                     if layoutFragment.isExtraLineFragment {
-                        if !textLineFragment.isExtraLineFragment {
-                            locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
+                        locationForFirstCharacter = STGutterCalculations.locationForFirstCharacter(
+                            in: layoutFragment,
+                            textLineFragment: textLineFragment,
+                            isExtraTextLineFragment: textLineFragment.isExtraLineFragment
+                        )
 
-                            if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
-                                baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
-                            }
-
-                            lineFragmentFrame = CGRect(
-                                origin: CGPoint(
-                                    x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
-                                ),
-                                size: CGSize(
-                                    width: textLineFragment.typographicBounds.width,
-                                    height: textLineFragment.typographicBounds.height
-                                )
-                            )
-                        } else {
-                            // Use values from the same layoutFragment but previous line, that is not extra line fragment.
-                            // Since this is extra line fragment, it is guaranteed that there is at least 2 line fragments in the layout fragment
-                            let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-                            locationForFirstCharacter = prevTextLineFragment.locationForCharacter(at: 0)
-
-                            if let paragraphStyle = prevTextLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
-                                baselineYOffset = -(prevTextLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
-                            }
-
-                            lineFragmentFrame = CGRect(
-                                origin: CGPoint(
-                                    x: layoutFragment.layoutFragmentFrame.origin.x + prevTextLineFragment.typographicBounds.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY - contentOffset.y
-                                ),
-                                size: CGSize(
-                                    width: textLineFragment.typographicBounds.width,
-                                    height: prevTextLineFragment.typographicBounds.height
-                                )
+                        if let paragraphStyle = STGutterCalculations.paragraphStyleForBaseline(
+                            in: layoutFragment,
+                            textLineFragment: textLineFragment,
+                            isExtraTextLineFragment: textLineFragment.isExtraLineFragment
+                        ) {
+                            let lineHeight = textLineFragment.isExtraLineFragment
+                                ? layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2].typographicBounds.height
+                                : textLineFragment.typographicBounds.height
+                            baselineYOffset = STGutterCalculations.calculateBaselineOffset(
+                                lineHeight: lineHeight,
+                                paragraphStyle: paragraphStyle
                             )
                         }
+
+                        let rawFrame = STGutterCalculations.calculateExtraLineFragmentFrame(
+                            layoutFragment: layoutFragment,
+                            textLineFragment: textLineFragment,
+                            isExtraTextLineFragment: textLineFragment.isExtraLineFragment
+                        )
+
+                        lineFragmentFrame = CGRect(
+                            origin: CGPoint(
+                                x: rawFrame.origin.x,
+                                y: rawFrame.origin.y - contentOffset.y
+                            ),
+                            size: rawFrame.size
+                        )
                     } else {
                         locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
 
                         if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
-                            baselineYOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
+                            baselineYOffset = STGutterCalculations.calculateBaselineOffset(
+                                lineHeight: textLineFragment.typographicBounds.height,
+                                paragraphStyle: paragraphStyle
+                            )
                         }
 
                         lineFragmentFrame = CGRect(
