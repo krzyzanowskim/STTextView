@@ -103,7 +103,7 @@ extension STTextView {
 
                 numberCell.frame = CGRect(
                     origin: CGPoint(
-                        x: frame.minX,
+                        x: 0,
                         y: selectionFrame.origin.y - contentOffset.y
                     ),
                     size: CGSize(
@@ -222,7 +222,7 @@ extension STTextView {
 
                     numberCell.frame = CGRect(
                         origin: CGPoint(
-                            x: frame.minX,
+                            x: 0,
                             y: lineFragmentFrame.origin.y
                         ),
                         size: CGSize(

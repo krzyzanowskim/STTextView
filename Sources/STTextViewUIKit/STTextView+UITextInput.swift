@@ -392,7 +392,7 @@ extension STTextView: UITextInput {
 
     public func closestPosition(to point: CGPoint) -> UITextPosition? {
         let eventPoint = point.moved(dx: -contentView.frame.origin.x)
-        if let position = textLayoutManager.location(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition {
+        if let position = textLayoutManager.caretLocation(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition {
             return position
         } else {
             return textLayoutManager.textSelectionNavigation.textSelections(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.first?.location.uiTextPosition
@@ -408,7 +408,7 @@ extension STTextView: UITextInput {
         let adjustedPoint = point.moved(dx: -contentView.frame.origin.x)
         
         // Attempt to find the location interacting at the point, constrained to the given range
-        let candidateLocation = textLayoutManager.location(
+        let candidateLocation = textLayoutManager.caretLocation(
             interactingAt: adjustedPoint,
             inContainerAt: range.textRange.location
         )
@@ -442,7 +442,7 @@ extension STTextView: UITextInput {
         let adjustedPoint = point.moved(dx: -contentView.frame.origin.x)
         
         // Get location at the point
-        guard let location = textLayoutManager.location(
+        guard let location = textLayoutManager.caretLocation(
             interactingAt: adjustedPoint,
             inContainerAt: textLayoutManager.documentRange.location
         ) else {
