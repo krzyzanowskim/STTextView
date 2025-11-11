@@ -206,6 +206,15 @@ extension STTextView {
                     requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)
                     linesCount += 1
                 }
+
+                // adjust ruleThickness to fit the text based on last numberView
+                if textLayoutManager.textViewportLayoutController.viewportRange != nil {
+                    let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
+                    if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne) && newGutterWidth > gutterView.frame.size.width {
+                        gutterView.frame.size.width = newGutterWidth
+                    }
+                }
+
             }
 
             // FIXME: gutter width change affects contentView frame (in setFrameSize) layout that affects viewport layout
