@@ -36,7 +36,7 @@ final class STGutterLineNumberCell: NSView {
         // Get actual typographic metrics to calculate visual center
         var ascent: CGFloat = 0
         var descent: CGFloat = 0
-        CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil)
+        let typographicsBoundsWidth = CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil)
 
         // Calculate visual center: baseline + (descent - ascent) / 2
         // This gives us the Y position from cell top to the visual middle of the text
@@ -44,12 +44,12 @@ final class STGutterLineNumberCell: NSView {
 
         if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle {
             let lineHeight = floor(ctLine.height() * paragraphStyle.stLineHeightMultiple)
-            self.textSize = CGSize(width: ceil(CTLineGetBoundsWithOptions(ctLine, []).size.width), height: lineHeight)
+            self.textSize = CGSize(width: ceil(typographicsBoundsWidth), height: lineHeight)
         } else {
-            self.textSize = CGSize(width: ceil(CTLineGetBoundsWithOptions(ctLine, []).size.width), height: ctLine.height())
+            self.textSize = CGSize(width: ceil(typographicsBoundsWidth), height: ctLine.height())
         }
 
-        super.init(frame: .zero)
+        super.init(frame: CGRect(origin: .zero, size: textSize))
         wantsLayer = true
         clipsToBounds = true
 

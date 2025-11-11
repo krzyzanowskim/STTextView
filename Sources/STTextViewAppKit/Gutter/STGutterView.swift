@@ -136,6 +136,10 @@ open class STGutterView: NSView, NSDraggingSource {
         CATiledLayer()
     }
 
+    public override func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
+        nil
+    }
+
     override init(frame: CGRect) {
         separatorView = STGutterSeparatorView(frame: frame)
         separatorView.autoresizingMask = [.width, .height]

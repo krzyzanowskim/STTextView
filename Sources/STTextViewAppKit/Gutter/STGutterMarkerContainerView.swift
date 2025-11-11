@@ -10,6 +10,10 @@ final class STGutterMarkerContainerView: NSView {
         CATiledLayer()
     }
 
+    override func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
+        nil
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         wantsLayer = true
