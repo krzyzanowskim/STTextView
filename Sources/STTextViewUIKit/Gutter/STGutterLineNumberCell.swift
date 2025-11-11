@@ -11,7 +11,6 @@ final class STGutterLineNumberCell: UIView {
     /// Y position from cell top to the visual center of the line number text
     let textVisualCenter: CGFloat
     private let ctLine: CTLine
-    private let textWidth: CGFloat
     let textSize: CGSize
     var insets: STRulerInsets = STRulerInsets()
 
@@ -25,27 +24,24 @@ final class STGutterLineNumberCell: UIView {
 
         let attributedString = NSAttributedString(string: "\(number)", attributes: attributes)
         self.ctLine = CTLineCreateWithAttributedString(attributedString)
-        self.textWidth = ceil(CTLineGetBoundsWithOptions(ctLine, []).width)
-
-        let bounds = CTLineGetBoundsWithOptions(ctLine, [])
 
         // Get actual typographic metrics to calculate visual center
         var ascent: CGFloat = 0
         var descent: CGFloat = 0
-        CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil)
+        let typographicsBoundsWidth = CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil)
 
         // Calculate visual center: baseline + (descent - ascent) / 2
         // This gives us the Y position from cell top to the visual middle of the text
         self.textVisualCenter = firstBaseline + (descent - ascent) / 2
 
         if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle {
-            let lineHeight = floor(bounds.height * paragraphStyle.stLineHeightMultiple)
-            self.textSize = CGSize(width: ceil(bounds.width), height: lineHeight)
+            let lineHeight = floor(ctLine.height() * paragraphStyle.stLineHeightMultiple)
+            self.textSize = CGSize(width: ceil(typographicsBoundsWidth), height: lineHeight)
         } else {
-            self.textSize = CGSize(width: ceil(bounds.width), height: bounds.height)
+            self.textSize = CGSize(width: ceil(typographicsBoundsWidth), height: ctLine.height())
         }
 
-        super.init(frame: .zero)
+        super.init(frame: CGRect(origin: .zero, size: textSize))
         clipsToBounds = true
         isOpaque = false
         isUserInteractionEnabled = false
@@ -57,7 +53,7 @@ final class STGutterLineNumberCell: UIView {
     }
 
     override var intrinsicContentSize: CGSize {
-        CGSize(width: textWidth + insets.trailing + insets.leading, height: 14)
+        CGSize(width: textSize.width + insets.horizontal, height: textSize.height)
     }
 
     override func draw(_ rect: CGRect) {
@@ -71,7 +67,7 @@ final class STGutterLineNumberCell: UIView {
         ctx.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
 
         // align to right
-        ctx.textPosition = CGPoint(x: frame.width - (textWidth + insets.trailing), y: firstBaseline)
+        ctx.textPosition = CGPoint(x: frame.width - (textSize.width + insets.trailing), y: firstBaseline)
         CTLineDraw(ctLine, ctx)
         ctx.restoreGState()
     }

@@ -30,10 +30,12 @@ class STGutterSeparatorView: UIView {
         }
 
         if drawSeparator {
+            context.saveGState()
             context.setLineWidth(1)
             context.setStrokeColor(separatorColor.cgColor)
             context.addLines(between: [CGPoint(x: frame.width - 0.5, y: 0), CGPoint(x: frame.width - 0.5, y: bounds.maxY) ])
             context.strokePath()
+            context.restoreGState()
         }
     }
 }
