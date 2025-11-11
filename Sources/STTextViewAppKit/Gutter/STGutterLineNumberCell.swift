@@ -70,7 +70,7 @@ final class STGutterLineNumberCell: NSView {
     }
 
     override var intrinsicContentSize: NSSize {
-        NSSize(width: textSize.width + insets.trailing + insets.leading, height: textSize.height)
+        NSSize(width: textSize.width + insets.horizontal, height: textSize.height)
     }
 
     override func draw(_ rect: CGRect) {

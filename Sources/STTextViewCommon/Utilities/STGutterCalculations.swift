@@ -106,16 +106,16 @@ package enum STGutterCalculations {
                 )
             }
 
-            if let viewFrame = fragmentViewFrame {
+            if let fragmentViewFrame {
                 // Use the actual rendered fragment view frame for perfect alignment
                 cellFrame = CGRect(
                     origin: CGPoint(
-                        x: viewFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                        y: viewFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
+                        x: fragmentViewFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                        y: fragmentViewFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
                     ),
                     size: CGSize(
-                        width: viewFrame.width,
-                        height: viewFrame.height
+                        width: fragmentViewFrame.width,
+                        height: fragmentViewFrame.height
                     )
                 )
             } else {
