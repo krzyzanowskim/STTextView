@@ -957,6 +957,11 @@ import AVFoundation
         super.prepareContent(in: rect)
 
         if !oldPreparedContentRect.isAlmostEqual(to: preparedContentRect) {
+            // I'm pretty sure there is a TextKit2 issue with the processing layout synchronously.
+            // It behaves as if it is always processed asynchronously in the background, and it can get clogged.
+            // Until the background processing does not finish all the work, the values returned by the API is just bananas.
+            // It automatically fixes itself after a while. I wish the API express how it works.
+            // https://mastodon.social/@krzyzanowskim/115532735501211715
             layoutViewport()
         }
     }
@@ -1272,7 +1277,6 @@ import AVFoundation
         super.layout()
 
         layoutViewport()
-
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)
         }

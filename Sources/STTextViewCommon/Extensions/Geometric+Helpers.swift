@@ -89,19 +89,19 @@ package extension CGPoint {
 }
 
 package extension CGRect {
-    func isAlmostEqual(to other: CGRect) -> Bool {
-        origin.isAlmostEqual(to: other.origin) && size.isAlmostEqual(to: other.size)
+    func isAlmostEqual(to other: CGRect, tolerance: CGFloat = CGFloat.ulpOfOne.squareRoot()) -> Bool {
+        origin.isAlmostEqual(to: other.origin, tolerance: tolerance) && size.isAlmostEqual(to: other.size, tolerance: tolerance)
     }
 }
 
 package extension CGPoint {
-    func isAlmostEqual(to other: CGPoint) -> Bool {
-        x.isAlmostEqual(to: other.x) && y.isAlmostEqual(to: other.y)
+    func isAlmostEqual(to other: CGPoint, tolerance: CGFloat = CGFloat.ulpOfOne.squareRoot()) -> Bool {
+        x.isAlmostEqual(to: other.x, tolerance: tolerance) && y.isAlmostEqual(to: other.y, tolerance: tolerance)
     }
 }
 
 package extension CGSize {
-    func isAlmostEqual(to other: CGSize) -> Bool {
-        width.isAlmostEqual(to: other.width) && height.isAlmostEqual(to: other.height)
+    func isAlmostEqual(to other: CGSize, tolerance: CGFloat = CGFloat.ulpOfOne.squareRoot()) -> Bool {
+        width.isAlmostEqual(to: other.width, tolerance: tolerance) && height.isAlmostEqual(to: other.height, tolerance: tolerance)
     }
 }
