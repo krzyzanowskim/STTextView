@@ -132,11 +132,6 @@ open class STGutterView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        backgroundColor = self.backgroundColor?.resolvedColor(with: traitCollection) ?? UIColor.systemBackground.resolvedColor(with: traitCollection)
-    }
-
     @objc private func handleTapGesture(_ sender: UIGestureRecognizer) {
         let eventPoint = sender.location(in: containerView)
         let cellView = containerView.subviews
