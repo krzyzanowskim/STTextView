@@ -13,51 +13,15 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 
 [TextKit 2](https://developer.apple.com/forums/tags/wwdc21-10061) was announced during [WWDC 2021](https://developer.apple.com/videos/play/wwdc2021/10061/) as a TextKit 1 replacement for text layout and whatnot. Apple announced that `NSTextView`, the view component specialized for text editing, will adopt TextKit 2 and provide support along TextKit 1 bit. As I started to learn more about `NSTextView` + TextKit2, I realized that as of today (Feb 2022), neither `NSTextView` nor TextKit 2 classes are fully functional. Along the way, I reported several bug reports to Apple requesting DTS (support tickets). Eventually, I got blocked by specific bugs that pushed me to start this project.
 
-## 📋 Platform Requirements
+## Platform Requirements
 
 - **macOS**: 12.0+
 - **iOS**: 16.0+
 - **Mac Catalyst**: 16.0+
-- **Swift**: 5.5+
-- **Xcode**: 14.0+
+- **Swift**: 5.7+
+- **Xcode**: 18.0+
 
-## 🏗️ Architecture Overview
-
-STTextView uses a modular architecture with platform-specific implementations:
-
-```
-STTextView (umbrella target)
-├── STTextViewCommon (shared code)
-├── STTextViewAppKit (macOS implementation)
-├── STTextViewUIKit (iOS/Catalyst implementation)
-├── STTextViewSwiftUI (SwiftUI wrappers)
-└── STObjCLandShim (Objective-C bridging)
-```
-
-### Core Components
-
-- **STTextView**: Main view that coordinates all components
-- **STContentView**: Renders text fragments and insertion point
-- **STSelectionView**: Handles selection overlays
-- **STGutterView**: Optional line numbers and markers
-- **STLineHighlightView**: Current line highlighting
-
-### TextKit 2 Integration
-
-Text layout is managed through custom TextKit 2 components:
-- **STTextLayoutManager**: Custom NSTextLayoutManager subclass
-- **STTextContentStorage**: NSTextContentStorage subclass with performance optimizations
-- **STTextLayoutFragment**: Custom fragment rendering
-
-### Performance Optimization
-
-STTextView implements a sophisticated layout optimization system to minimize unnecessary text layout passes:
-- Smart layout triggering with `needsTextLayout` tracking
-- Viewport bounds comparison to avoid redundant layouts
-- Immediate layout for content changes, deferred for view changes
-- Leverages TextKit 2's incremental layout capabilities
-
-## ✨ Features
+## Features
 
 - macOS text system integration
 - Performant Text editing
@@ -83,15 +47,15 @@ STTextView implements a sophisticated layout optimization system to minimize unn
   <video src="https://github.com/user-attachments/assets/e18c058b-8a58-47e0-a57c-a3b01f3d93db" width="90%" />
 </div>
 
-## 🤝 Support & Sponsors
+## Support & Sponsors
 
 The financial sustainability of the project is possible thanks to the ongoing contributions from our [GitHub Sponsors](https://github.com/sponsors/krzyzanowskim)
 
-## 🗓️ Roadmap
+## Roadmap
 
 **Suggest** or **vote** for new features: [Feature Requests](https://github.com/krzyzanowskim/STTextView/discussions/14)
 
-## 🚀 Getting Started
+## Getting Started
 
 `STTextView` is distributed using the [Swift Package Manager](https://www.swift.org/package-manager/). Install it in a project by adding it as a dependency in your `Package.swift` manifest or through “Package Dependencies” in Xcode project settings
 
@@ -103,72 +67,9 @@ let package = Package(
 )
 ```
 
-### Build & Test
-
-```bash
-# Build the library
-swift build
-
-# Run all tests
-swift test
-
-# Run specific platform tests
-swift test --filter STTextViewAppKitTests
-swift test --filter STTextViewUIKitTests
-
-# Build release version
-swift build -c release
-```
-
 ## Demo Application
 
 The demo applications [TextEdit](TextEdit) and [TextEdit.SwiftUI](TextEdit.SwiftUI) lets you explore the library.
-
-## Plugins
-
-Plugins in an STTextView component offer additional functionalities and customizations beyond the simple text display. They enhance the core capabilities of the text view by adding features such as syntax highlighting, word count tracking, and more. These plugins expand the STTextView's utility while maintaining a modular and adaptable software structure.
-
-- [Plugin-Neon](https://github.com/krzyzanowskim/STTextView-Plugin-Neon) Source Code Syntax Highlighting with [TreeSitter](https://tree-sitter.github.io/tree-sitter/) and [Neon](https://github.com/ChimeHQ/Neon).
-- [Plugin-TextFormation](https://github.com/krzyzanowskim/STTextView-Plugin-TextFormation) Typing completions with [TextFormation](https://github.com/ChimeHQ/TextFormation).
-- [Plugin-Annotations](https://github.com/krzyzanowskim/STTextView-Plugin-Annotations) Anchored annotations (eg. inlined error message)) plugin.
-- [Plugin-Template](https://github.com/krzyzanowskim/STTextView-Plugin-Template) Dummy plugin template repository ready to build new plugin.
-- ... [add more](https://github.com/topics/sttextview) plugins
-
-### Plugin Development
-
-To create a custom plugin:
-
-1. **Implement the STPlugin protocol**:
-```swift
-class MyPlugin: STPlugin {
-    func setUp(context: STPluginContext) {
-        // Initialize your plugin
-    }
-    
-    func tearDown() {
-        // Clean up resources
-    }
-}
-```
-
-2. **Use STPluginContext for host communication**:
-   - Access the text view and its properties
-   - Subscribe to text changes and events
-   - Modify text attributes and selections
-
-3. **Handle events via STPluginEvents**:
-   - Text changes
-   - Selection changes
-   - Layout updates
-   - View lifecycle events
-
-4. **Add the plugin to your text view**:
-```swift
-let plugin = MyPlugin()
-textView.addPlugin(plugin)
-```
-
-For a complete example, see the [Plugin-Template](https://github.com/krzyzanowskim/STTextView-Plugin-Template) repository.
 
 ## Usage
 
@@ -267,9 +168,83 @@ textView.isIncrementalSearchingEnabled = true
 textView.textFinder.incrementalSearchingShouldDimContentView = true
 ```
 
+## Plugins
+
+Plugins in an STTextView component offer additional functionalities and customizations beyond the simple text display. They enhance the core capabilities of the text view by adding features such as syntax highlighting, word count tracking, and more. These plugins expand the STTextView's utility while maintaining a modular and adaptable software structure.
+
+- [Plugin-Neon](https://github.com/krzyzanowskim/STTextView-Plugin-Neon) Source Code Syntax Highlighting with [TreeSitter](https://tree-sitter.github.io/tree-sitter/) and [Neon](https://github.com/ChimeHQ/Neon).
+- [Plugin-TextFormation](https://github.com/krzyzanowskim/STTextView-Plugin-TextFormation) Typing completions with [TextFormation](https://github.com/ChimeHQ/TextFormation).
+- [Plugin-Annotations](https://github.com/krzyzanowskim/STTextView-Plugin-Annotations) Anchored annotations (eg. inlined error message)) plugin.
+- [Plugin-Template](https://github.com/krzyzanowskim/STTextView-Plugin-Template) Dummy plugin template repository ready to build new plugin.
+- ... [add more](https://github.com/topics/sttextview) plugins
+
+### Plugin Development
+
+To create a custom plugin:
+
+1. **Implement the STPlugin protocol**:
+```swift
+class MyPlugin: STPlugin {
+    func setUp(context: STPluginContext) {
+        // Initialize your plugin
+    }
+    
+    func tearDown() {
+        // Clean up resources
+    }
+}
+```
+
+2. **Use STPluginContext for host communication**:
+   - Access the text view and its properties
+   - Subscribe to text changes and events
+   - Modify text attributes and selections
+
+3. **Handle events via STPluginEvents**:
+   - Text changes
+   - Selection changes
+   - Layout updates
+   - View lifecycle events
+
+4. **Add the plugin to your text view**:
+```swift
+let plugin = MyPlugin()
+textView.addPlugin(plugin)
+```
+
+For a complete example, see the [Plugin-Template](https://github.com/krzyzanowskim/STTextView-Plugin-Template) repository.
+
+## Architecture Overview
+
+STTextView uses a modular architecture with platform-specific implementations:
+
+```
+STTextView (umbrella target)
+├── STTextViewCommon (shared code)
+├── STTextViewAppKit (macOS implementation)
+├── STTextViewUIKit (iOS/Catalyst implementation)
+├── STTextViewSwiftUI (SwiftUI wrappers)
+└── STObjCLandShim (Objective-C bridging)
+```
+
+### Core Components
+
+- **STTextView**: Main view that coordinates all components
+- **STContentView**: Renders text fragments and insertion point
+- **STSelectionView**: Handles selection overlays
+- **STGutterView**: Optional line numbers and markers
+- **STLineHighlightView**: Current line highlighting
+
+### TextKit 2 Integration
+
+Text layout is managed through custom TextKit 2 components:
+- **STTextLayoutManager**: Custom NSTextLayoutManager subclass
+- **STTextContentStorage**: NSTextContentStorage subclass with performance optimizations
+- **STTextLayoutFragment**: Custom fragment rendering
+
 ## 🐛 TextKit 2 Bug Reports List
 
-List of **TextKit 2** issues and bugs related to NSTextView and the TextKit framework I reported to Apple so far:
+List of issues and bugs related to TextKit, NSTextView, AppKit, UIKit and related frameworks framework I reported to Apple so far:
 
 - FB9856587: TextKit2 unexpected additional line fragment for the last line
 - FB9925766: NSTextSelectionNavigation.deletionRanges only works at the end of the word
@@ -291,6 +266,7 @@ List of **TextKit 2** issues and bugs related to NSTextView and the TextKit fram
 - [FB15131180](https://gist.github.com/krzyzanowskim/510ecf8df259d779e22df8ad13c256c0): TextKit extra line frame is incorrect and does not respect layout fragment size (regression)
 - [FB17020435](https://gist.github.com/krzyzanowskim/da247e1a9f5f94f0e14a1e3047b86e59): enumerateCaretOffsetsInLineFragmentAtLocation:usingBlock: documentation is not accurate 
 - [FB19698121](https://gist.github.com/krzyzanowskim/4d831e0f44035b605768ff9d2a4c285e): TextKit 2 undocumented and unexpected behavior in textViewportLayoutControllerDidLayout
+- [FB21059465](https://gist.github.com/krzyzanowskim/d2c5d41b86096ccb19b110cf7a5514c8): NSScrollView horizontal floating subview does not respect insets 
 
 ... I'm aware that the list of issues is not complete. I managed to workaround most of the problems in STTextView.
 
