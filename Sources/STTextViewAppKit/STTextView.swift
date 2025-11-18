@@ -1288,8 +1288,8 @@ import AVFoundation
     open func sizeToFit() {
         let gutterWidth = gutterView?.frame.width ?? 0
 
-        // TODO: respect scrollview vertical scroll inset value
-        // let verticalScrollInset = scrollView?.contentInsets.verticalInsets ?? 0
+        let verticalContentInset = scrollView?.contentInsets.verticalInsets ?? 0
+        let horizontalContentInset = scrollView?.contentInsets.horizontalInsets ?? 0
 
         // Need to configure TextContainer before layout calculations
         var newTextContainerSize = textContainer.size
@@ -1357,7 +1357,7 @@ import AVFoundation
         } else if isHorizontallyResizable {
             // no wrap-text
             // limit width to fit the width of usage bounds
-            newFrame.size.width = max(visibleRect.width, usageBoundsForTextContainerSize.width - gutterWidth + textContainer.lineFragmentPadding)
+            newFrame.size.width = max(visibleRect.width - horizontalContentInset, usageBoundsForTextContainerSize.width - gutterWidth + textContainer.lineFragmentPadding)
         }
 
         if !isVerticallyResizable {
@@ -1366,7 +1366,7 @@ import AVFoundation
         } else if isVerticallyResizable {
             // expand
             // changes height to fit the height of its text
-            newFrame.size.height = max(visibleRect.height, usageBoundsForTextContainerSize.height)
+            newFrame.size.height = max(visibleRect.height - verticalContentInset, usageBoundsForTextContainerSize.height)
         }
 
         newFrame = newFrame.pixelAligned
