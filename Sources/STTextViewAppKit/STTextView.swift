@@ -1382,11 +1382,6 @@ import AVFoundation
         // contentView should always fill the entire STTextView
         contentView.frame.origin.x = gutterView?.frame.width ?? 0
         contentView.frame.size = newSize
-
-        // If gutter exists, layout it and adjust other subviews
-        if gutterView != nil {
-            layoutGutter()
-        }
     }
 
     internal func layoutViewport() {
