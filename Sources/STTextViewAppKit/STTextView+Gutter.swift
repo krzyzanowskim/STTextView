@@ -33,12 +33,12 @@ extension STTextView {
                     self.addSubview(gutterView)
                 }
                 self.gutterView = gutterView
-                needsViewportLayout = true
+                needsLayout = true
                 layoutGutter()
             } else if newValue == false, let gutterView {
                 gutterView.removeFromSuperview()
                 self.gutterView = nil
-                needsViewportLayout = true
+                needsLayout = true
                 layoutGutter()
             }
         }

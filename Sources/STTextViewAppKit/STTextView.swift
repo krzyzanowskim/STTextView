@@ -103,6 +103,7 @@ import AVFoundation
             // apply to the document
             if !textLayoutManager.documentRange.isEmpty {
                 addAttributes([.font: newValue], range: textLayoutManager.documentRange)
+                needsLayout = true
                 needsDisplay = true
             }
 
@@ -125,6 +126,7 @@ import AVFoundation
             // apply to the document
             if !textLayoutManager.documentRange.isEmpty {
                 addAttributes([.foregroundColor: newValue], range: textLayoutManager.documentRange)
+                needsLayout = true
                 needsDisplay = true
             }
 
@@ -298,7 +300,7 @@ import AVFoundation
             if textContainer.widthTracksTextView != newValue {
                 textContainer.widthTracksTextView = newValue
                 textContainer.size = _defaultTextContainerSize
-                needsViewportLayout = true
+                needsLayout = true
             }
         }
 
@@ -330,7 +332,7 @@ import AVFoundation
             if textContainer.heightTracksTextView != newValue {
                 textContainer.heightTracksTextView = newValue
                 textContainer.size = _defaultTextContainerSize
-                needsViewportLayout = true
+                needsLayout = true
             }
         }
 
@@ -582,15 +584,6 @@ import AVFoundation
     internal var needsScrollToSelection: Bool = false {
         didSet {
             if needsScrollToSelection {
-                needsLayout = true
-            }
-        }
-    }
-
-    /// A Boolean value indicating whether the view needs a viewport layout pass.
-    internal var needsViewportLayout: Bool = false {
-        didSet {
-            if needsViewportLayout {
                 needsLayout = true
             }
         }
@@ -1040,7 +1033,7 @@ import AVFoundation
         }
 
         if updateLayout, !textContentManager.hasEditingTransaction {
-            needsViewportLayout = true
+            needsLayout = true
         }
     }
 
@@ -1051,7 +1044,7 @@ import AVFoundation
         }
 
         if updateLayout, !textContentManager.hasEditingTransaction {
-            needsViewportLayout = true
+            needsLayout = true
         }
     }
 
@@ -1076,7 +1069,7 @@ import AVFoundation
         }
 
         if updateLayout, !textContentManager.hasEditingTransaction {
-            needsViewportLayout = true
+            needsLayout = true
         }
     }
 
@@ -1113,7 +1106,7 @@ import AVFoundation
         }
 
         if updateLayout, !textContentManager.hasEditingTransaction {
-            needsViewportLayout = true
+            needsLayout = true
         }
     }
 
@@ -1283,17 +1276,11 @@ import AVFoundation
     open override func layout() {
         super.layout()
 
-        // layoutViewport() is triggered by prepareContent(in:) when the viewport changes.
-        // Only call it here when we need to scroll to selection or viewport layout is explicitly requested.
-        if needsViewportLayout || needsScrollToSelection {
-            layoutViewport()
-        }
-
+        layoutViewport()
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)
         }
 
-        needsViewportLayout = false
         needsScrollToSelection = false
     }
 

@@ -18,7 +18,7 @@ extension STTextView {
         updateTypingAttributes(at: textRange.location)
 
         if updateLayout {
-            needsViewportLayout = true
+            needsLayout = true
         }
     }
 
