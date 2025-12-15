@@ -5,6 +5,10 @@ import SnapshotTesting
 
 // RECORD_MODE=1 swift test --filter GutterSnapshotTests
 
+// UserDefaults.standard.set("Always", forKey: "AppleShowScrollBars")
+// UserDefaults.standard.removeObject(forKey: "AppleShowScrollBars")
+// UserDefaults.standard.synchronize()
+
 @MainActor
 final class GutterSnapshotTests: XCTestCase {
 
@@ -14,6 +18,15 @@ final class GutterSnapshotTests: XCTestCase {
         NSAnimationContext.beginGrouping()
         NSAnimationContext.current.duration = 0
         NSAnimationContext.endGrouping()
+
+        // Ensure consistent scroll bar behavior across different system settings
+        UserDefaults.standard.set("Automatic", forKey: "AppleShowScrollBars")
+    }
+
+    override func tearDown() {
+        // Restore default scroll bar setting
+        UserDefaults.standard.removeObject(forKey: "AppleShowScrollBars")
+        super.tearDown()
     }
 
     // MARK: - Gutter Visibility Tests

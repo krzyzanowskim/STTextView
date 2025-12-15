@@ -14,6 +14,15 @@ final class STTextViewSnapshotTests: XCTestCase {
         NSAnimationContext.beginGrouping()
         NSAnimationContext.current.duration = 0
         NSAnimationContext.endGrouping()
+
+        // Ensure consistent scroll bar behavior across different system settings
+        UserDefaults.standard.set("Automatic", forKey: "AppleShowScrollBars")
+    }
+
+    override func tearDown() {
+        // Restore default scroll bar setting
+        UserDefaults.standard.removeObject(forKey: "AppleShowScrollBars")
+        super.tearDown()
     }
 
     // MARK: - Basic Text Rendering
