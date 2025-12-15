@@ -2,6 +2,7 @@
 import XCTest
 @testable import STTextViewAppKit
 
+@MainActor
 class ContentTests : XCTestCase {
 
     func testContentUpdate() {
