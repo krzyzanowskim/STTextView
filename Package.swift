@@ -13,7 +13,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/STTextKitPlus", from: "0.2.0"),
-        .package(url: "https://github.com/krzyzanowskim/CoreTextSwift", from: "0.2.0")
+        .package(url: "https://github.com/krzyzanowskim/CoreTextSwift", from: "0.2.0"),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.2")
     ],
     targets: [
         .target(
@@ -76,8 +77,10 @@ let package = Package(
         .testTarget(
             name: "STTextViewAppKitTests",
             dependencies: [
-                .target(name: "STTextViewAppKit", condition: .when(platforms: [.macOS]))
-            ]
+                .target(name: "STTextViewAppKit", condition: .when(platforms: [.macOS])),
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing")
+            ],
+            exclude: ["__Snapshots__"]
         ),
         .testTarget(
             name: "STTextViewUIKitTests",
