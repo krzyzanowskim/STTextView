@@ -287,7 +287,7 @@ final class GutterSnapshotTests: XCTestCase {
     }
 
     func testGutterWithManyLinesScrolled() {
-        let scrollView = STTextView.scrollableTextView(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
+        let scrollView = STTextView.scrollableTextView(frame: CGRect(x: 0, y: 0, width: 400, height: 300))
         let textView = scrollView.documentView as! STTextView
         textView.backgroundColor = .white
         textView.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
@@ -295,13 +295,50 @@ final class GutterSnapshotTests: XCTestCase {
 
 
         var lines: [String] = []
-        for i in 1...30 {
+        for i in 1...50 {
             lines.append("Line \(i): This is some content for line \(i)")
         }
         let text = lines.joined(separator: "\n")
 
         textView.insertText(text, replacementRange: textView.textSelection)
         textView.isGutterVisible = true
+
+        // Scroll down to show lines in the middle of the document
+        textView.layout()
+        let layoutManager = textView.textLayoutManager
+        // Scroll to around line 20
+        let targetLocation = textView.textContentManager.location(textView.textContentManager.documentRange.location, offsetBy: 400)
+        if let targetLocation = targetLocation {
+            textView.scrollToVisible(layoutManager.textSegmentFrame(at: targetLocation, type: .standard) ?? .zero)
+        }
+
+        assertSnapshot(of: scrollView, as: .image)
+    }
+
+    func testGutterWithContentLongerThanFrameAndExtraLineFragment() {
+        let scrollView = STTextView.scrollableTextView(frame: CGRect(x: 0, y: 0, width: 400, height: 300))
+        let textView = scrollView.documentView as! STTextView
+        textView.backgroundColor = .white
+        textView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
+        textView.textColor = .black
+        textView.highlightSelectedLine = true
+
+        // Show the gutter BEFORE inserting text
+        textView.isGutterVisible = true
+
+        var lines: [String] = []
+        for i in 1...18 {
+            lines.append("Line \(i): Content here")
+        }
+        // Add trailing newline to create an extra line fragment at the end
+        let text = lines.joined(separator: "\n") + "\n"
+
+        textView.text = text
+        textView.layout()
+
+        // Verify there's an extra line fragment at the end (indicated by trailing newline)
+        let string = textView.textContentManager.attributedString(in: nil)?.string ?? ""
+        XCTAssertTrue(string.hasSuffix("\n"), "Text should have trailing newline creating extra line fragment")
 
         assertSnapshot(of: scrollView, as: .image)
     }
