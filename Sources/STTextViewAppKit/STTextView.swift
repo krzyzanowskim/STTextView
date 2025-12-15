@@ -1374,6 +1374,8 @@ import AVFoundation
         // Don't shrink frame below scroll position - this would make scroll position invalid.
         // This can happen when usageBoundsForTextContainer resets during text changes and
         // fragment enumeration returns stale positions based on current viewport state.
+        // TODO: This is more of a workaround https://github.com/notepadhq/notepadexe-public/issues/46 than ultimate way to address the issue
+        // The issue is that resetting text after scroll to bottom reset the size to incorrect value
         if newFrame.size.height < frame.height {
             if let scrollView, scrollView.contentView.bounds.maxY > newFrame.size.height {
                 newFrame.size.height = frame.height
