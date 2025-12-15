@@ -1371,6 +1371,15 @@ import AVFoundation
 
         newFrame = newFrame.pixelAligned
 
+        // Don't shrink frame below scroll position - this would make scroll position invalid.
+        // This can happen when usageBoundsForTextContainer resets during text changes and
+        // fragment enumeration returns stale positions based on current viewport state.
+        if newFrame.size.height < frame.height {
+            if let scrollView, scrollView.contentView.bounds.maxY > newFrame.size.height {
+                newFrame.size.height = frame.height
+            }
+        }
+
         if !newFrame.size.isAlmostEqual(to: frame.size) {
             setFrameSize(newFrame.size) // layout()
         }
