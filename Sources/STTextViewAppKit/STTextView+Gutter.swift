@@ -60,7 +60,7 @@ extension STTextView {
 
 
     private func layoutGutterLineNumbers() {
-        guard let gutterView, let scrollView else {
+        guard let gutterView else {
             return
         }
 
