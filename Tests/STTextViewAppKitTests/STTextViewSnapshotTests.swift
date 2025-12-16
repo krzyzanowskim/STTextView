@@ -370,7 +370,6 @@ final class STTextViewSnapshotTests: XCTestCase {
         textView.setSelectedRange(NSRange(location: endOffset, length: 0))
         textView.layout()
 
-        let visibleRectBefore = textView.visibleRect
         let frameBefore = textView.frame
 
         // Type multiple characters at the end (simulating user typing)

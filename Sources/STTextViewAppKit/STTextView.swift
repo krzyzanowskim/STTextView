@@ -995,8 +995,6 @@ import AVFoundation
         default:
             return assertionFailure()
         }
-
-        textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
     }
 
     /// Sets the rendering attribute for the value and range you specify.
@@ -1365,7 +1363,7 @@ import AVFoundation
         } else if isVerticallyResizable {
             // expand
             // changes height to fit the height of its text
-            newFrame.size.height = usageBoundsForTextContainerSize.height
+            newFrame.size.height = max(visibleRect.height, usageBoundsForTextContainerSize.height)
         }
 
         newFrame = newFrame.pixelAligned
