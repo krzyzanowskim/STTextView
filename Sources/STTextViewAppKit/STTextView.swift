@@ -1341,15 +1341,12 @@ import AVFoundation
         // It is impossible to get the stable content size performantly: https://developer.apple.com/forums/thread/761364?answerId=799739022#799739022
         // textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
         var usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
-        let initialUsageBoundsHeight = usageBoundsForTextContainerSize.height
 
         // the enumerate seems to be faster than ensureLayout, but still estimated
         textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
             usageBoundsForTextContainerSize.height = layoutFragment.layoutFragmentFrame.maxY
             return false
         }
-
-        // DON'T resize container, it trigger another layout()!
 
         // Adjust self.frame to match textContainer.size used for layout
         var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
@@ -1372,21 +1369,6 @@ import AVFoundation
         }
 
         newFrame = newFrame.pixelAligned
-
-        // Skip resize when usageBoundsForTextContainer reports invalid height during text reset
-        if initialUsageBoundsHeight < typingLineHeight && frame.height > visibleRect.height {
-            return
-        }
-
-        // Adjust scroll position before shrinking frame to prevent content cutoff
-        if newFrame.size.height < frame.height {
-            if let scrollView, scrollView.contentView.bounds.maxY > newFrame.size.height {
-                let visibleHeight = scrollView.contentView.bounds.height
-                let maxValidScrollY = max(0, newFrame.size.height - visibleHeight)
-                let currentScrollX = scrollView.contentView.bounds.origin.x
-                scrollView.contentView.setBoundsOrigin(NSPoint(x: currentScrollX, y: maxValidScrollY))
-            }
-        }
 
         if !newFrame.size.isAlmostEqual(to: frame.size) {
             setFrameSize(newFrame.size) // layout()
