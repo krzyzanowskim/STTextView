@@ -1346,6 +1346,9 @@ import AVFoundation
             return false
         }
 
+        // FIXME: Mitigate a problem with "jumping" by never shrink and only grow
+        usageBoundsForTextContainerSize.height = max(frame.size.height, usageBoundsForTextContainerSize.height)
+
         // Adjust self.frame to match textContainer.size used for layout
         var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
         if !isHorizontallyResizable {
