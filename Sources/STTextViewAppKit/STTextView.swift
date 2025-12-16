@@ -356,6 +356,16 @@ import AVFoundation
     @MainActor @Invalidating(.layoutViewport)
     @objc dynamic open var highlightSelectedLine: Bool = false
 
+    /// Extra padding added below the text content.
+    ///
+    /// This padding creates a "scroll past end" area that allows users to scroll
+    /// beyond the last line of text. The padding is added to the frame height
+    /// and is accounted for in viewport relocation calculations.
+    ///
+    /// Default is `0` (no extra padding).
+    @MainActor
+    open var bottomPadding: CGFloat = 0
+
     /// Enable to show line numbers in the gutter.
     @MainActor @Invalidating(.layout)
     open var showsLineNumbers: Bool = false {
@@ -1370,6 +1380,9 @@ import AVFoundation
             // changes height to fit the height of its text
             newFrame.size.height = usageBoundsForTextContainerSize.height
         }
+
+        // Add bottom padding for "scroll past end" behavior
+        newFrame.size.height += bottomPadding
 
         newFrame = newFrame.pixelAligned
 

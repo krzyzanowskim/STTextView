@@ -54,7 +54,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        if let scrollView, let documentView = scrollView.documentView, scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
+        // Skip viewport relocation when bottomPadding is set, as the padding handles scroll-past-end
+        // and relocation can cause scroll position jumps during window resize.
+        if bottomPadding == 0,
+           let scrollView, let documentView = scrollView.documentView, scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
            let viewportRange = textViewportLayoutController.viewportRange,
            let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty
         {
@@ -74,7 +77,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 logger.debug("  Adjust viewport to anchor: \(suggestedAnchor)")
                 textViewportLayoutController.adjustViewport(byVerticalOffset: -offset)
             }
-        } else if textViewportLayoutController.viewportRange == nil {
+        } else if bottomPadding == 0, textViewportLayoutController.viewportRange == nil {
             logger.debug("Attempt to recovery last viewportRange from cache")
 
             // Restore last layout fragment from cached fragments
