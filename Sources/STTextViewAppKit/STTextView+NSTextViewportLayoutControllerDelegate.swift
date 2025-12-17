@@ -17,10 +17,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
         sizeToFit()
 
-        logger.debug("[SNOUT] willLayout: frame=\(NSStringFromRect(self.frame)), bottomPadding=\(self.bottomPadding)")
-        logger.debug("[SNOUT]   viewportBounds=\(NSStringFromRect(self.viewportBounds(for: textViewportLayoutController)))")
-        logger.debug("[SNOUT]   contentView.visibleRect=\(NSStringFromRect(self.contentView.visibleRect))")
-
         if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
             let viewportDebugView = NSView(frame: viewportBounds(for: textViewportLayoutController))
             viewportDebugView.clipsToBounds = true
@@ -45,7 +41,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         // textLayoutFragment.layoutFragmentFrame is calculated in `self` coordinates,
         // but we use it in contentViewportView coordinates. contentViewportView frame is offset by gutterWidth
         let layoutFragmentFrame = textLayoutFragment.layoutFragmentFrame
-        logger.debug("[SNOUT] configureFragment: frame=\(NSStringFromRect(layoutFragmentFrame))")
         let fragmentView: STTextLayoutFragmentView
         if let cachedFragmentView = fragmentViewMap.object(forKey: textLayoutFragment) {
             cachedFragmentView.layoutFragment = textLayoutFragment
@@ -66,9 +61,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        logger.debug("[SNOUT] didLayout: bottomPadding=\(self.bottomPadding), viewportRange=\(String(describing: textViewportLayoutController.viewportRange))")
-        logger.debug("[SNOUT]   frame=\(NSStringFromRect(self.frame)), contentViewportView.subviews.count=\(self.contentViewportView.subviews.count)")
-
         // Skip viewport relocation when bottomPadding is set.
         // The padding extends the frame beyond content, so relocation would fight with it.
         // Note: ensureLayout is called in willLayout before sizeToFit().
