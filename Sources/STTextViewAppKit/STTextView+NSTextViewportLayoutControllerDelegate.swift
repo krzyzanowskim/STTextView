@@ -8,20 +8,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         contentViewportView.subviews = []
-
-        // When bottomPadding is set, ensure full document layout BEFORE sizeToFit()
-        // so the frame calculation includes all content height.
-        //
-        // TODO: This calls ensureLayout on every layout pass (scroll, resize, edit).
-        // While ensureLayout is a no-op for already-laid-out content, it may still
-        // cause performance issues for very long documents. Consider optimizing by:
-        // - Only ensuring layout once per document content change
-        // - Only ensuring layout for the unlaid portion (viewportRange.end → documentRange.end)
-        // - Estimating content height without full layout
-        if bottomPadding > 0 {
-            textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
-        }
-
         sizeToFit()
 
         if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
@@ -68,12 +54,28 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        // Skip viewport relocation when bottomPadding is set.
-        // The padding extends the frame beyond content, so relocation would fight with it.
-        // Note: ensureLayout is called in willLayout before sizeToFit().
-        if bottomPadding > 0 {
-            // No-op: layout was ensured in willLayout
-        } else if let scrollView, let documentView = scrollView.documentView,
+        // When bottomPadding is set, ensure layout for unlaid content but skip viewport relocation.
+        // This gives us accurate content height without the scroll position fighting that relocation causes.
+        if bottomPadding > 0,
+           let viewportRange = textViewportLayoutController.viewportRange,
+           let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation),
+           !textRange.isEmpty
+        {
+            // Ensure layout for content beyond the viewport to get accurate height
+            textLayoutManager.ensureLayout(for: textRange)
+            var lastLineMaxY = textViewportLayoutController.viewportBounds.maxY
+            textLayoutManager.enumerateTextLayoutFragments(from: textRange.endLocation, options: [.reverse, .ensuresLayout]) { layoutFragment in
+                lastLineMaxY = layoutFragment.layoutFragmentFrame.maxY
+                return false
+            }
+
+            // Set frame to content height + padding (don't relocate viewport)
+            let newHeight = lastLineMaxY + bottomPadding
+            if !newHeight.isAlmostEqual(to: frame.height) {
+                setFrameSize(CGSize(width: frame.width, height: newHeight))
+            }
+        } else if bottomPadding == 0,
+                  let scrollView, let documentView = scrollView.documentView,
                   scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
                   let viewportRange = textViewportLayoutController.viewportRange,
                   let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty

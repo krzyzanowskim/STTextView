@@ -1381,9 +1381,6 @@ import AVFoundation
             newFrame.size.height = usageBoundsForTextContainerSize.height
         }
 
-        // Add bottom padding for "scroll past end" behavior
-        newFrame.size.height += bottomPadding
-
         newFrame = newFrame.pixelAligned
 
         // Skip resize when usageBoundsForTextContainer reports invalid height during text reset
