@@ -356,11 +356,11 @@ import AVFoundation
     @MainActor @Invalidating(.layoutViewport)
     @objc dynamic open var highlightSelectedLine: Bool = false
 
-    /// Extra padding added below the text content.
+    /// Extra padding below the text content for "scroll past end" behavior.
     ///
-    /// This padding creates a "scroll past end" area that allows users to scroll
-    /// beyond the last line of text. The padding is added to the frame height
-    /// and is accounted for in viewport relocation calculations.
+    /// When set to a value greater than 0:
+    /// - The padding is added to the frame height in `sizeToFit()`
+    /// - Viewport relocation logic is skipped to prevent scroll position jumps
     ///
     /// Default is `0` (no extra padding).
     @MainActor
@@ -1381,9 +1381,6 @@ import AVFoundation
             newFrame.size.height = usageBoundsForTextContainerSize.height
         }
 
-        // Add bottom padding for "scroll past end" behavior
-        newFrame.size.height += bottomPadding
-
         newFrame = newFrame.pixelAligned
 
         // Skip resize when usageBoundsForTextContainer reports invalid height during text reset
@@ -1391,14 +1388,11 @@ import AVFoundation
             return
         }
 
-        // Adjust scroll position before shrinking frame to prevent content cutoff
-        if newFrame.size.height < frame.height {
-            if let scrollView, scrollView.contentView.bounds.maxY > newFrame.size.height {
-                let visibleHeight = scrollView.contentView.bounds.height
-                let maxValidScrollY = max(0, newFrame.size.height - visibleHeight)
-                let currentScrollX = scrollView.contentView.bounds.origin.x
-                scrollView.contentView.setBoundsOrigin(NSPoint(x: currentScrollX, y: maxValidScrollY))
-            }
+        // Add bottom padding for "scroll past end" behavior.
+        // Added before comparison so we compare content+padding to content+padding,
+        // avoiding repeated setFrameSize calls.
+        if bottomPadding > 0 {
+            newFrame.size.height += bottomPadding
         }
 
         if !newFrame.size.isAlmostEqual(to: frame.size) {
