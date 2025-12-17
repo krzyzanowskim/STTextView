@@ -87,7 +87,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
                 logger.debug("  Adjust viewport to anchor: \(suggestedAnchor)")
                 textViewportLayoutController.adjustViewport(byVerticalOffset: -offset)
             }
-        } else if textViewportLayoutController.viewportRange == nil {
+        } else if bottomPadding == 0, textViewportLayoutController.viewportRange == nil {
             logger.debug("Attempt to recovery last viewportRange from cache")
 
             // Restore last layout fragment from cached fragments
