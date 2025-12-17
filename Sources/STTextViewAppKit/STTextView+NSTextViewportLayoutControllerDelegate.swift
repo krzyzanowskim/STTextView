@@ -11,6 +11,13 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
         // When bottomPadding is set, ensure full document layout BEFORE sizeToFit()
         // so the frame calculation includes all content height.
+        //
+        // TODO: This calls ensureLayout on every layout pass (scroll, resize, edit).
+        // While ensureLayout is a no-op for already-laid-out content, it may still
+        // cause performance issues for very long documents. Consider optimizing by:
+        // - Only ensuring layout once per document content change
+        // - Only ensuring layout for the unlaid portion (viewportRange.end → documentRange.end)
+        // - Estimating content height without full layout
         if bottomPadding > 0 {
             textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
         }
