@@ -366,6 +366,16 @@ import AVFoundation
     @MainActor
     open var bottomPadding: CGFloat = 0
 
+    /// Extra padding to the right of text content for accessory views.
+    ///
+    /// When set to a value greater than 0:
+    /// - The padding is added to the frame width in `sizeToFit()`
+    /// - Provides space for overlay views like annotation margins
+    ///
+    /// Default is `0` (no extra padding).
+    @MainActor
+    open var rightPadding: CGFloat = 0
+
     /// Enable to show line numbers in the gutter.
     @MainActor @Invalidating(.layout)
     open var showsLineNumbers: Bool = false {
@@ -1306,7 +1316,8 @@ import AVFoundation
         var newTextContainerSize = textContainer.size
         if !isHorizontallyResizable {
             // setup text container for wrap-text, need for layout
-            let proposedContentWidth = visibleRect.width - gutterWidth
+            // Subtract rightPadding so text wraps before the accessory view area
+            let proposedContentWidth = visibleRect.width - gutterWidth - rightPadding
             if !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
                 newTextContainerSize.width = proposedContentWidth
             }
@@ -1393,6 +1404,11 @@ import AVFoundation
         // avoiding repeated setFrameSize calls.
         if bottomPadding > 0 {
             newFrame.size.height += bottomPadding
+        }
+
+        // Add right padding for accessory views (e.g., annotation margins).
+        if rightPadding > 0 {
+            newFrame.size.width += rightPadding
         }
 
         if !newFrame.size.isAlmostEqual(to: frame.size) {
