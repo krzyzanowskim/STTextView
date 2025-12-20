@@ -1,6 +1,8 @@
 # STTextView Fork - Development Guide
 
-This is a fork of [STTextView](https://github.com/krzyzanowskim/STTextView) maintained for the story-builder project.
+**IMPORTANT:** This is a public repository. Do not reference private repositories, proprietary project names, or non-public technologies in documentation or commits.
+
+This is a fork of [STTextView](https://github.com/krzyzanowskim/STTextView) maintained by yunacaba with additional features.
 
 ## Custom Features
 
@@ -8,7 +10,7 @@ This fork adds custom properties not available in the upstream version:
 - **`bottomPadding`** - Controls scroll-past-end behavior (iOS and macOS)
 - **`rightPadding`** - Controls right margin space for accessory views (macOS)
 
-These properties are required by story-builder and must be maintained across updates.
+These properties are maintained for compatibility with downstream projects.
 
 ## Versioning Scheme
 
@@ -18,6 +20,8 @@ These properties are required by story-builder and must be maintained across upd
 - **Semantic versioning** - Breaking changes, new features, bug fixes
 - **Examples:** `100.0.0`, `100.1.0`, `101.0.0`
 - **Note:** The yunacaba fork maintains independent version numbers from upstream STTextView
+
+**Why 100.x.x?** Starting at version 100.0.0 avoids collisions with upstream versions (currently at 0.9.6) while maintaining SPM compatibility.
 
 ### Version Bump Guidelines
 
@@ -49,11 +53,11 @@ These properties are required by story-builder and must be maintained across upd
 
 **Standard flow (most changes):**
 1. Work on `dev` branch
-2. Test locally with story-builder using path-based dependency
+2. Test locally with downstream projects using path-based dependencies
 3. When ready, merge `dev` → `main`
-4. Create integration test PR in story-builder
+4. Create integration test PR in downstream projects
 5. If tests pass, create release tag
-6. Update story-builder to new version
+6. Update downstream projects to new version
 
 **Concurrent features (rare):**
 1. Create feature branch: `feature/descriptive-name`
@@ -127,24 +131,7 @@ See "Handling Concurrent Changes" section below for details.
 
 ### Integration Testing Before Release
 
-Before creating any release tag, run integration tests:
-
-1. **Create integration test branch in story-builder:**
-   ```bash
-   cd /Users/yuna/src/yunacaba/story-builder
-   git checkout -b test/sttv-integration-100.0.0
-
-   # Update Package.swift to point to main branch
-   # Edit apple/Packages/Snout/Package.swift:
-   .package(url: "https://github.com/yunacaba/STTextView", branch: "main")
-
-   git commit -am "test: Integration test for STTextView 100.0.0"
-   git push origin test/sttv-integration-100.0.0
-   ```
-
-2. **Let CI validate**
-3. **If CI passes** → Create release tag in STTextView
-4. **If CI fails** → Fix issues, update main, test again
+Before creating any release tag, run integration tests in downstream projects to ensure compatibility.
 
 ## Handling Concurrent Changes
 
@@ -162,13 +149,13 @@ git checkout -b feature/undo-redo main
 
 ### Testing Feature Branches
 
-In story-builder:
+In downstream projects, use branch-based or path-based dependencies:
 ```swift
 // Option 1: Branch-based
 .package(url: "https://github.com/yunacaba/STTextView", branch: "feature/text-selection")
 
 // Option 2: Local path (faster iteration)
-.package(path: "../../../../STTextView")  // Ensure STTextView is on correct branch
+.package(path: "../../../STTextView")  // Adjust path as needed
 ```
 
 ### Release Strategy for Concurrent Features
@@ -184,22 +171,19 @@ In story-builder:
 **Combined:**
 - Merge both to main → Tag 100.1.0
 
-## Local Development with story-builder
+## Local Development with Downstream Projects
 
 **Path-based dependency** for fast iteration:
 
 ```bash
-# In story-builder/apple/Packages/Snout/Package.swift
-.package(path: "../../../../STTextView")
+# In downstream project Package.swift
+.package(path: "../../../STTextView")
 
 # Make changes in STTextView
-# Test immediately in story-builder without tags/commits
-cd /Users/yuna/src/yunacaba/story-builder/apple
-task test-snout
-task test-app
+# Test immediately in downstream project without tags/commits
 ```
 
-**Important:** Revert to exact version pin before committing story-builder changes.
+**Important:** Revert to version pin before committing downstream changes.
 
 ## Upstream Sync
 
@@ -222,19 +206,19 @@ git merge upstream/main
 # Or rebase (cleaner history, but requires force push)
 git rebase upstream/main
 
-# Test thoroughly with story-builder
+# Test thoroughly with downstream projects
 # Create new release if successful
 ```
 
 ## Critical Dependencies
 
-story-builder depends on these custom properties:
+Downstream projects depend on these custom properties:
 - `bottomPadding` - **Must not be removed or renamed**
 - `rightPadding` - **Must not be removed or renamed**
 
 **Before any major refactoring:**
-1. Search for usages in story-builder
-2. Coordinate API changes with story-builder updates
+1. Search for usages in downstream projects
+2. Coordinate API changes with downstream updates
 3. Consider deprecation path for breaking changes
 
 ## License
