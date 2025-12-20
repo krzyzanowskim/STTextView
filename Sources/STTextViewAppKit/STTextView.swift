@@ -1317,8 +1317,10 @@ import AVFoundation
         if !isHorizontallyResizable {
             // setup text container for wrap-text, need for layout
             // Subtract rightPadding so text wraps before the accessory view area
-            let proposedContentWidth = visibleRect.width - gutterWidth - rightPadding
-            if !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
+            // Only apply when we have valid geometry (visibleRect.width > 0)
+            let baseWidth = visibleRect.width - gutterWidth
+            let proposedContentWidth = visibleRect.width > 0 ? baseWidth - rightPadding : baseWidth
+            if proposedContentWidth > 0 && !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
                 newTextContainerSize.width = proposedContentWidth
             }
         } else {
@@ -1407,7 +1409,8 @@ import AVFoundation
         }
 
         // Add right padding for accessory views (e.g., annotation margins).
-        if rightPadding > 0 {
+        // Only apply when we have valid geometry (visibleRect.width > 0).
+        if rightPadding > 0 && visibleRect.width > 0 {
             newFrame.size.width += rightPadding
         }
 
