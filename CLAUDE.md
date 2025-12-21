@@ -8,7 +8,6 @@ This is a fork of [STTextView](https://github.com/krzyzanowskim/STTextView) main
 
 This fork adds custom properties not available in the upstream version:
 - **`bottomPadding`** - Controls scroll-past-end behavior (iOS and macOS)
-- **`rightPadding`** - Controls right margin space for accessory views (macOS)
 
 These properties are maintained for compatibility with downstream projects.
 
@@ -214,7 +213,6 @@ git rebase upstream/main
 
 Downstream projects depend on these custom properties:
 - `bottomPadding` - **Must not be removed or renamed**
-- `rightPadding` - **Must not be removed or renamed**
 
 **Before any major refactoring:**
 1. Search for usages in downstream projects

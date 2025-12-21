@@ -139,16 +139,6 @@ import STTextViewCommon
     @MainActor
     open var bottomPadding: CGFloat = 0
 
-    /// Extra padding to the right of text content for accessory views.
-    ///
-    /// When set to a value greater than 0:
-    /// - The padding is added to the content width in `sizeToFit()`
-    /// - Provides space for overlay views like annotation margins
-    ///
-    /// Default is `0` (no extra padding).
-    @MainActor
-    open var rightPadding: CGFloat = 0
-
     /// Enable to show line numbers in the gutter.
     @Invalidating(.layout)
     public var showsLineNumbers: Bool = false {
@@ -712,8 +702,7 @@ import STTextViewCommon
         // For wrapped text, we need to configure container size BEFORE layout calculations
         if !isHorizontallyResizable {
             // Pre-configure text container width for wrapping mode
-            // Subtract rightPadding so text wraps before the accessory view area
-            let proposedContentWidth = visibleRectSize.width - gutterWidth - rightPadding
+            let proposedContentWidth = visibleRectSize.width - gutterWidth
             if !textContainer.size.width.isAlmostEqual(to: proposedContentWidth) {
                 var containerSize = textContainer.size
                 containerSize.width = proposedContentWidth
@@ -766,11 +755,6 @@ import STTextViewCommon
         // Add bottom padding for "scroll past end" behavior
         if bottomPadding > 0 {
             frameSize.height += bottomPadding
-        }
-
-        // Add right padding for accessory views (e.g., annotation margins)
-        if rightPadding > 0 {
-            frameSize.width += rightPadding
         }
 
         if !frame.size.isAlmostEqual(to: frameSize) {

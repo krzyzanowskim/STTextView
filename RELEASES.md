@@ -6,7 +6,6 @@ Initial versioned release of the yunacaba/STTextView fork.
 
 ### Features
 - Added `bottomPadding` property for scroll-past-end behavior (iOS and macOS)
-- Added `rightPadding` property for accessory view spacing (macOS)
 - Custom fork maintained by yunacaba
 
 ### Version Scheme
