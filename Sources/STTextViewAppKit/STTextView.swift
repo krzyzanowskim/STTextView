@@ -376,6 +376,33 @@ import AVFoundation
     @MainActor
     open var rightPadding: CGFloat = 0
 
+    /// Custom annotation decorations to render on text (underlines, backgrounds).
+    ///
+    /// Set this property to display decorations at specific character ranges.
+    /// Decorations are rendered efficiently, only drawing for visible text.
+    /// Setting this property triggers a redisplay of affected fragments.
+    ///
+    /// Example:
+    /// ```swift
+    /// textView.annotationDecorations = [
+    ///     STAnnotationDecoration(range: NSRange(location: 0, length: 10),
+    ///                            style: .wavyUnderline, color: .systemRed),
+    ///     STAnnotationDecoration(range: NSRange(location: 20, length: 5),
+    ///                            style: .background, color: .systemYellow.withAlphaComponent(0.3))
+    /// ]
+    /// ```
+    @MainActor
+    open var annotationDecorations: [STAnnotationDecoration] = [] {
+        didSet {
+            // Redisplay affected fragments
+            needsDisplay = true
+            contentViewportView.needsDisplay = true
+            for subview in contentViewportView.subviews {
+                subview.needsDisplay = true
+            }
+        }
+    }
+
     /// Enable to show line numbers in the gutter.
     @MainActor @Invalidating(.layout)
     open var showsLineNumbers: Bool = false {
