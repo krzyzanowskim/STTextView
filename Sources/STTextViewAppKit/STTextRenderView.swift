@@ -39,27 +39,28 @@ open class STTextRenderView: NSView {
     override open func layout() {
         // Calculate frame. Expand to the size of layout fragments in the asked range
         textLayoutManager.ensureLayout(for: textRange)
-        var frame: CGRect = textLayoutManager.typographicBounds(in: textRange)!
-        if clipsToContent {
-            textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
-                frame = CGRect(
-                    x: 0, y: 0,
-                    width: max(frame.size.width, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding),
-                    height: frame.size.height
-                )
-                return true
+
+        var frameWidth: CGFloat = 0
+        var frameHeight: CGFloat = 0
+
+        // Calculate width and height matching how draw() positions content
+        var originY: CGFloat = 0
+        textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
+            frameWidth = max(frameWidth, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding)
+
+            for textLineFragment in textLayoutFragment.textLineFragments {
+                // Line is drawn at originY, extends to originY + height
+                let lineBottom = originY + textLineFragment.typographicBounds.height
+                frameHeight = max(frameHeight, lineBottom)
+
+                // Move to next position (same as draw())
+                let diff = textLineFragment.typographicBounds.minY + textLineFragment.glyphOrigin.y
+                originY += diff
             }
-        } else {
-            textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
-                frame = CGRect(
-                    x: 0, y: 0,
-                    width: max(frame.size.width, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding),
-                    height: max(frame.size.height, textLayoutFragment.layoutFragmentFrame.maxY + textLayoutFragment.topMargin + textLayoutFragment.bottomMargin)
-                )
-                return true
-            }
+            return true
         }
-        self.frame = frame
+
+        self.frame = CGRect(x: 0, y: 0, width: frameWidth, height: frameHeight)
 
         super.layout()
     }
@@ -70,9 +71,7 @@ open class STTextRenderView: NSView {
     }
 
     open func image() -> NSImage? {
-        if needsLayout {
-            layout()
-        }
+        layoutSubtreeIfNeeded()
         return stImage()
     }
 
