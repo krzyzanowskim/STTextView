@@ -130,6 +130,15 @@ import STTextViewCommon
     @Invalidating(.layout)
     @objc dynamic open var highlightSelectedLine: Bool = false
 
+    /// Extra padding below the text content for "scroll past end" behavior.
+    ///
+    /// When set to a value greater than 0:
+    /// - The padding is added to the content height in `sizeToFit()`
+    ///
+    /// Default is `0` (no extra padding).
+    @MainActor
+    open var bottomPadding: CGFloat = 0
+
     /// Enable to show line numbers in the gutter.
     @Invalidating(.layout)
     public var showsLineNumbers: Bool = false {
@@ -728,7 +737,7 @@ import STTextViewCommon
 
         let usageBoundsForTextContainer = textLayoutManager.usageBoundsForTextContainer
 
-        let frameSize: CGSize
+        var frameSize: CGSize
         if isHorizontallyResizable {
             // no-wrapping
             frameSize = CGSize(
@@ -741,6 +750,11 @@ import STTextViewCommon
                 width: visibleRectSize.width - gutterWidth,
                 height: max(usageBoundsForTextContainer.size.height, visibleRectSize.height - verticalScrollInset)
             )
+        }
+
+        // Add bottom padding for "scroll past end" behavior
+        if bottomPadding > 0 {
+            frameSize.height += bottomPadding
         }
 
         if !frame.size.isAlmostEqual(to: frameSize) {
