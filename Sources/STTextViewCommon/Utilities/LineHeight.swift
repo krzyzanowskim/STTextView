@@ -9,6 +9,7 @@
 #endif
 
 package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
+    let kLineHeightAdjustment: CGFloat = 0.15
     /// Heavily inspired by WebKit
     var ascent = CTFontGetAscent(font)
     var descent = CTFontGetDescent(font)
@@ -18,7 +19,6 @@ package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
 
     if shouldUseAdjustment(familyName) {
         // Needs ascent adjustment
-        let kLineHeightAdjustment: CGFloat = 0.15
         ascent += round((ascent + descent) * kLineHeightAdjustment)
     }
 
