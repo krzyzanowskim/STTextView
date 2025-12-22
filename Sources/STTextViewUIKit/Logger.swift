@@ -4,4 +4,4 @@
 import Foundation
 import OSLog
 
-internal let logger = Logger(subsystem: "best.swift.sttextview", category: "STTextView")
+let logger = Logger(subsystem: "best.swift.sttextview", category: "STTextView")

@@ -27,9 +27,12 @@ public struct TextView: SwiftUI.View, TextViewModifier {
         public static let showLineNumbers = Options(rawValue: 1 << 2)
     }
 
-    @Environment(\.colorScheme) private var colorScheme
-    @Binding private var text: AttributedString
-    @Binding private var selection: NSRange?
+    @Environment(\.colorScheme)
+    private var colorScheme
+    @Binding
+    private var text: AttributedString
+    @Binding
+    private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
 
@@ -62,12 +65,17 @@ public struct TextView: SwiftUI.View, TextViewModifier {
 }
 
 private struct TextViewRepresentable: NSViewRepresentable {
-    @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.font) private var font
-    @Environment(\.lineSpacing) private var lineSpacing
+    @Environment(\.isEnabled)
+    private var isEnabled
+    @Environment(\.font)
+    private var font
+    @Environment(\.lineSpacing)
+    private var lineSpacing
 
-    @Binding private var text: AttributedString
-    @Binding private var selection: NSRange?
+    @Binding
+    private var text: AttributedString
+    @Binding
+    private var selection: NSRange?
     private let options: TextView.Options
     private var plugins: [any STPlugin]
 
@@ -167,10 +175,12 @@ private struct TextViewRepresentable: NSViewRepresentable {
     }
 
     class TextCoordinator: STTextViewDelegate {
-        @Binding var text: AttributedString
-        @Binding var selection: NSRange?
-        var isUpdating: Bool = false
-        var isUserEditing: Bool = false
+        @Binding
+        var text: AttributedString
+        @Binding
+        var selection: NSRange?
+        var isUpdating = false
+        var isUserEditing = false
 
         init(text: Binding<AttributedString>, selection: Binding<NSRange?>) {
             self._text = text

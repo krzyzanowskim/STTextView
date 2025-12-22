@@ -3,6 +3,4 @@
 
 import UIKit
 
-extension STTextView: UITextInteractionDelegate {
-
-}
+extension STTextView: UITextInteractionDelegate {}

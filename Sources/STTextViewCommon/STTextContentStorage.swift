@@ -2,20 +2,20 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 #endif
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 import STTextKitPlus
 
 open class STTextContentStorage: NSTextContentStorage {
 
-    open override func replaceContents(in range: NSTextRange, with textElements: [NSTextElement]?) {
+    override open func replaceContents(in range: NSTextRange, with textElements: [NSTextElement]?) {
         assert(hasEditingTransaction, "Not called inside performEditingTransaction")
 
-        guard let textStorage = textStorage,
+        guard let textStorage,
               let attributedTextElements = textElements?.compactMap({ $0 as? STAttributedTextElement })
         else {
             // Non-functional (FB9925647)

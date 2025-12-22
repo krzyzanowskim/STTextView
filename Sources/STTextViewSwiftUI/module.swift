@@ -1,9 +1,9 @@
 import Foundation
 
 #if os(macOS)
-@_exported import STTextViewSwiftUIAppKit
+    @_exported import STTextViewSwiftUIAppKit
 #endif
 
 #if os(iOS) || targetEnvironment(macCatalyst)
-@_exported import STTextViewSwiftUIUIKit
+    @_exported import STTextViewSwiftUIUIKit
 #endif

@@ -2,17 +2,17 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 #elseif canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 import STTextKitPlus
 
-extension NSTextLayoutFragment {
+public extension NSTextLayoutFragment {
 
     /// FB15131180 workaround: Extra line fragment's layoutFragmentFrame is miscalculated.
-    public var stTypographicBounds: CGRect {
+    var stTypographicBounds: CGRect {
         guard isExtraLineFragment else {
             return layoutFragmentFrame
         }
@@ -21,17 +21,17 @@ extension NSTextLayoutFragment {
         if let textParagraph = textElement as? NSTextParagraph,
            textParagraph.attributedString.length > 0 {
             #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-            if let font = textParagraph.attributedString.attribute(.font, at: 0, effectiveRange: nil) as? NSFont {
-                fallbackLineHeight = ceil(font.ascender - font.descender + font.leading)
-            } else {
-                fallbackLineHeight = 14
-            }
+                if let font = textParagraph.attributedString.attribute(.font, at: 0, effectiveRange: nil) as? NSFont {
+                    fallbackLineHeight = ceil(font.ascender - font.descender + font.leading)
+                } else {
+                    fallbackLineHeight = 14
+                }
             #elseif canImport(UIKit)
-            if let font = textParagraph.attributedString.attribute(.font, at: 0, effectiveRange: nil) as? UIFont {
-                fallbackLineHeight = ceil(font.ascender - font.descender + font.leading)
-            } else {
-                fallbackLineHeight = 14
-            }
+                if let font = textParagraph.attributedString.attribute(.font, at: 0, effectiveRange: nil) as? UIFont {
+                    fallbackLineHeight = ceil(font.ascender - font.descender + font.leading)
+                } else {
+                    fallbackLineHeight = 14
+                }
             #endif
         } else {
             fallbackLineHeight = 14
@@ -41,7 +41,7 @@ extension NSTextLayoutFragment {
     }
 
     /// FB15131180 workaround: Extra line fragment's layoutFragmentFrame is miscalculated.
-    public func stTypographicBounds(fallbackLineHeight: CGFloat) -> CGRect {
+    func stTypographicBounds(fallbackLineHeight: CGFloat) -> CGRect {
         guard isExtraLineFragment else {
             return layoutFragmentFrame
         }

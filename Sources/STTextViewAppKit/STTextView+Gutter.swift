@@ -14,7 +14,7 @@ extension STTextView {
     }
 
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    internal var isGutterVisible: Bool {
+    var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
                 let gutterView = STGutterView()
@@ -47,7 +47,7 @@ extension STTextView {
         }
     }
 
-    internal func layoutGutter() {
+    func layoutGutter() {
         guard let gutterView, textLayoutManager.textViewportLayoutController.viewportRange != nil else {
             return
         }
@@ -92,7 +92,7 @@ extension STTextView {
                 let baselineOffset = -(ctNumberLine.typographicHeight() * (baselineParagraphStyle.stLineHeightMultiple - 1.0) / 2)
 
                 var effectiveLineTextAttributes = lineTextAttributes
-                if gutterView.highlightSelectedLine/*, isLineSelected*/, !selectedLineTextAttributes.isEmpty {
+                if gutterView.highlightSelectedLine /* , isLineSelected */, !selectedLineTextAttributes.isEmpty {
                     effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                 }
 
@@ -214,7 +214,7 @@ extension STTextView {
             // adjust ruleThickness to fit the text based on last numberView
             if textLayoutManager.textViewportLayoutController.viewportRange != nil {
                 let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
-                if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne) && newGutterWidth > gutterView.frame.size.width {
+                if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne), newGutterWidth > gutterView.frame.size.width {
                     gutterView.frame.size.width = newGutterWidth
                 }
             }

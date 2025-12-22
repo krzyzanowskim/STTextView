@@ -5,7 +5,7 @@ import Cocoa
 
 class STGutterSeparatorView: NSView {
     @Invalidating(.display)
-    var drawSeparator: Bool = true
+    var drawSeparator = true
 
     @Invalidating(.display)
     var separatorColor = NSColor.separatorColor.withAlphaComponent(0.1)
@@ -25,7 +25,7 @@ class STGutterSeparatorView: NSView {
             context.saveGState()
             context.setLineWidth(1)
             context.setStrokeColor(separatorColor.cgColor)
-            context.addLines(between: [CGPoint(x: frame.width - 0.5, y: 0), CGPoint(x: frame.width - 0.5, y: bounds.maxY) ])
+            context.addLines(between: [CGPoint(x: frame.width - 0.5, y: 0), CGPoint(x: frame.width - 0.5, y: bounds.maxY)])
             context.strokePath()
             context.restoreGState()
         }

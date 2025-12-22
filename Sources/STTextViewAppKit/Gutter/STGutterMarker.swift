@@ -26,6 +26,7 @@ private class MarkerView: NSView {
         clipsToBounds = true
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

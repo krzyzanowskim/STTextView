@@ -7,62 +7,62 @@ import STTextKitPlus
 
 /// NSAccessibility
 extension STTextView {
-    open override func accessibilitySharedCharacterRange() -> NSRange {
+    override open func accessibilitySharedCharacterRange() -> NSRange {
         NSRange(textContentManager.documentRange, in: textContentManager)
     }
 }
 
 
 /// NSAccessibilityProtocol
-extension STTextView  {
+extension STTextView {
 
-    open override func isAccessibilityElement() -> Bool {
+    override open func isAccessibilityElement() -> Bool {
         true
     }
 
-    open override func isAccessibilityEnabled() -> Bool {
+    override open func isAccessibilityEnabled() -> Bool {
         isEditable || isSelectable
     }
 
-    open override func accessibilityRole() -> NSAccessibility.Role? {
+    override open func accessibilityRole() -> NSAccessibility.Role? {
         .textArea
     }
 
-    open override func accessibilityRoleDescription() -> String? {
+    override open func accessibilityRoleDescription() -> String? {
         NSAccessibility.Role.description(for: self)
     }
 
-    open override func accessibilityLabel() -> String? {
+    override open func accessibilityLabel() -> String? {
         NSLocalizedString("Text Editor", comment: "")
     }
 
-    open override func accessibilityNumberOfCharacters() -> Int {
+    override open func accessibilityNumberOfCharacters() -> Int {
         text?.count ?? 0
     }
 
-    open override func accessibilitySelectedText() -> String? {
+    override open func accessibilitySelectedText() -> String? {
         textLayoutManager.textSelectionsString()
     }
 
-    open override func setAccessibilitySelectedText(_ accessibilitySelectedText: String?) {
+    override open func setAccessibilitySelectedText(_ accessibilitySelectedText: String?) {
         self.replaceCharacters(in: selectedRange(), with: accessibilitySelectedText ?? "")
     }
 
-    open override func accessibilitySelectedTextRange() -> NSRange {
+    override open func accessibilitySelectedTextRange() -> NSRange {
         selectedRange()
     }
 
-    open override func setAccessibilitySelectedTextRanges(_ accessibilitySelectedTextRanges: [NSValue]?) {
+    override open func setAccessibilitySelectedTextRanges(_ accessibilitySelectedTextRanges: [NSValue]?) {
         for range in accessibilitySelectedTextRanges?.map(\.rangeValue) ?? [] {
             self.setSelectedRange(range)
         }
     }
 
-    open override func isAccessibilityFocused() -> Bool {
+    override open func isAccessibilityFocused() -> Bool {
         isFirstResponder && isSelectable
     }
 
-    open override func setAccessibilityFocused(_ accessibilityFocused: Bool) {
+    override open func setAccessibilityFocused(_ accessibilityFocused: Bool) {
         if !accessibilityFocused, isFirstResponder {
             window?.makeFirstResponder(nil)
         } else if accessibilityFocused {
@@ -71,11 +71,11 @@ extension STTextView  {
     }
 }
 
-extension STTextView  {
+extension STTextView {
 
     // NSAccessibilityStaticText
 
-    open override func accessibilityVisibleCharacterRange() -> NSRange {
+    override open func accessibilityVisibleCharacterRange() -> NSRange {
         if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
             return NSRange(viewportRange, in: textContentManager)
         }
@@ -83,7 +83,7 @@ extension STTextView  {
         return NSRange()
     }
 
-    open override func setAccessibilitySelectedTextRange(_ accessibilitySelectedTextRange: NSRange) {
+    override open func setAccessibilitySelectedTextRange(_ accessibilitySelectedTextRange: NSRange) {
         guard let textRange = NSTextRange(accessibilitySelectedTextRange, in: textContentManager) else {
             assertionFailure()
             return
@@ -91,15 +91,15 @@ extension STTextView  {
         setSelectedTextRange(textRange, updateLayout: true)
     }
 
-    open override func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
+    override open func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
         attributedSubstring(forProposedRange: range, actualRange: nil)
     }
 
-    open override func accessibilityValue() -> Any? {
+    override open func accessibilityValue() -> Any? {
         text
     }
 
-    open override func setAccessibilityValue(_ accessibilityValue: Any?) {
+    override open func setAccessibilityValue(_ accessibilityValue: Any?) {
         guard let string = accessibilityValue as? String else {
             return
         }
@@ -109,7 +109,7 @@ extension STTextView  {
 
     // NSAccessibilityNavigableStaticText
 
-    open override func accessibilityFrame(for range: NSRange) -> NSRect {
+    override open func accessibilityFrame(for range: NSRange) -> NSRect {
         guard let textRange = NSTextRange(range, in: textContentManager),
               let segmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard)
         else {
@@ -118,7 +118,7 @@ extension STTextView  {
         return window?.convertToScreen(contentView.convert(segmentFrame, to: nil)) ?? .zero
     }
 
-    open override func accessibilityLine(for index: Int) -> Int {
+    override open func accessibilityLine(for index: Int) -> Int {
         guard let location = textContentManager.location(at: index),
               let position = textContentManager.position(location)
         else {
@@ -127,7 +127,7 @@ extension STTextView  {
         return position.row
     }
 
-    open override func accessibilityRange(forLine line: Int) -> NSRange {
+    override open func accessibilityRange(forLine line: Int) -> NSRange {
         guard let location = textContentManager.location(line: line) else {
             return .notFound
         }
@@ -145,7 +145,7 @@ extension STTextView  {
         return NSRange(textElementRange, in: textContentManager)
     }
 
-    open override func accessibilityString(for range: NSRange) -> String? {
+    override open func accessibilityString(for range: NSRange) -> String? {
         attributedSubstring(forProposedRange: range, actualRange: nil)?.string
     }
 }

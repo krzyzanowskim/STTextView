@@ -17,7 +17,7 @@ open class STCompletionWindowController: NSWindowController {
         window?.isVisible ?? false
     }
 
-    public init<T: STCompletionViewControllerProtocol>(_ viewController: T) {
+    public init(_ viewController: some STCompletionViewControllerProtocol) {
         let contentViewController = viewController
 
         let window = STCompletionWindow(contentViewController: contentViewController)
@@ -42,12 +42,13 @@ open class STCompletionWindowController: NSWindowController {
         contentViewController.delegate = self
     }
 
-    required public init?(coder: NSCoder) {
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     @available(*, unavailable)
-    open override func showWindow(_ sender: Any?) {
+    override open func showWindow(_ sender: Any?) {
         super.showWindow(sender)
     }
 
@@ -56,16 +57,16 @@ open class STCompletionWindowController: NSWindowController {
     }
 
     public func showWindow(at origin: CGPoint, items: [any STCompletionItem], parent parentWindow: NSWindow) {
-        guard let window = window else { return }
+        guard let window else { return }
 
         if !isVisible {
             parentWindow.addChildWindow(window, ordered: .above)
 
-            _willCloseNotificationObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] notification in
+            _willCloseNotificationObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
                 self?.cleanupOnClose()
             }
 
-            _didResignKeyNotificationObserver = NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: parentWindow, queue: .main) { [weak self] notification in
+            _didResignKeyNotificationObserver = NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: parentWindow, queue: .main) { [weak self] _ in
                 self?.close()
             }
         }
@@ -78,7 +79,7 @@ open class STCompletionWindowController: NSWindowController {
         completionViewController.items.removeAll(keepingCapacity: true)
     }
 
-    open override func close() {
+    override open func close() {
         guard isVisible else { return }
         _willCloseNotificationObserver = nil
         _didResignKeyNotificationObserver = nil
@@ -92,11 +93,11 @@ public protocol STCompletionWindowDelegate: AnyObject {
 }
 
 extension STCompletionWindowController: STCompletionViewControllerDelegate {
-    public func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement) {
+    public func completionViewController(_ viewController: some STCompletionViewControllerProtocol, complete item: any STCompletionItem, movement: NSTextMovement) {
         delegate?.completionWindowController(self, complete: item, movement: movement)
     }
 
-    public func completionViewControllerCancel<T: STCompletionViewControllerProtocol>(_ viewController: T) {
+    public func completionViewControllerCancel(_ viewController: some STCompletionViewControllerProtocol) {
         delegate?.completionWindowControllerCancel(self)
     }
 }

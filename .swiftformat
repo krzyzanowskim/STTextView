@@ -1,0 +1,76 @@
+# SwiftFormat configuration for STTextView
+# Inferred from existing codebase conventions
+
+--strip-unused-args closure-only
+
+# Format version
+--swiftversion 5.9
+
+# Indentation
+--indent 4
+--tabwidth 4
+--smarttabs enabled
+--indentcase false
+--ifdef indent
+
+# Braces
+--allman false
+
+# Line wrapping
+--maxwidth 1000
+--wraparguments disabled
+--wrapparameters disabled
+--wrapcollections before-first
+--wrapconditions after-first
+--wrapreturntype if-multiline
+--wrapeffects if-multiline
+--closingparen balanced
+
+# Spacing
+--operatorfunc spaced
+--nospaceoperators
+--ranges spaced
+--typeattributes prev-line
+--varattributes prev-line
+--storedvarattrs prev-line
+--computedvarattrs prev-line
+
+# Blank lines
+--emptybraces no-space
+
+# Self
+--self insert
+--selfrequired
+
+# Semicolons
+--semicolons never
+
+# Trailing commas
+--commas inline
+
+# Void
+--voidtype void
+
+# Redundant
+--redundanttype inferred
+
+# Imports
+--importgrouping alpha
+
+# Header comments
+--header ignore
+
+# Exclude build artifacts and dependencies
+--exclude .build,Packages,TextEdit.SwiftUI,TextEdit.UIKit
+
+# Disabled rules (to preserve existing style)
+--disable blankLinesAtStartOfScope
+--disable blankLinesAtEndOfScope
+--disable consecutiveBlankLines
+--disable trailingCommas
+--disable sortImports
+--disable organizeDeclarations
+--disable wrapMultilineStatementBraces
+--disable redundantSelf
+--disable redundantReturn
+--disable redundantParens

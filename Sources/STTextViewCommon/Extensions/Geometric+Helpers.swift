@@ -4,18 +4,18 @@
 import CoreGraphics
 
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 #endif
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 package extension CGRect {
 
     #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-    typealias EdgeInsets = NSEdgeInsets
+        typealias EdgeInsets = NSEdgeInsets
     #else
-    typealias EdgeInsets = UIEdgeInsets
+        typealias EdgeInsets = UIEdgeInsets
     #endif
 
     enum Inset {
@@ -25,29 +25,29 @@ package extension CGRect {
         case bottom(CGFloat)
     }
 
-#if canImport(AppKit) && !targetEnvironment(macCatalyst)
-    func inset(by edgeInsets: EdgeInsets) -> CGRect {
-        var result = self
-        result.origin.x += edgeInsets.left
-        result.origin.y += edgeInsets.top
-        result.size.width -= edgeInsets.left + edgeInsets.right
-        result.size.height -= edgeInsets.top + edgeInsets.bottom
-        return result
-    }
-#endif
+    #if canImport(AppKit) && !targetEnvironment(macCatalyst)
+        func inset(by edgeInsets: EdgeInsets) -> CGRect {
+            var result = self
+            result.origin.x += edgeInsets.left
+            result.origin.y += edgeInsets.top
+            result.size.width -= edgeInsets.left + edgeInsets.right
+            result.size.height -= edgeInsets.top + edgeInsets.bottom
+            return result
+        }
+    #endif
 
     func inset(_ insets: Inset...) -> CGRect {
         var result = self
         for inset in insets {
             switch inset {
-                case .left(let value):
-                    result = self.inset(by: EdgeInsets(top: 0, left: value, bottom: 0, right: 0))
-                case .right(let value):
-                    result = self.inset(by: EdgeInsets(top: 0, left: 0, bottom: 0, right: value))
-                case .top(let value):
-                    result = self.inset(by: EdgeInsets(top: value, left: 0, bottom: 0, right: 0))
-                case .bottom(let value):
-                    result = self.inset(by: EdgeInsets(top: 0, left: 0, bottom: value, right: 0))
+            case let .left(value):
+                result = self.inset(by: EdgeInsets(top: 0, left: value, bottom: 0, right: 0))
+            case let .right(value):
+                result = self.inset(by: EdgeInsets(top: 0, left: 0, bottom: 0, right: value))
+            case let .top(value):
+                result = self.inset(by: EdgeInsets(top: value, left: 0, bottom: 0, right: 0))
+            case let .bottom(value):
+                result = self.inset(by: EdgeInsets(top: 0, left: 0, bottom: value, right: 0))
             }
         }
         return result

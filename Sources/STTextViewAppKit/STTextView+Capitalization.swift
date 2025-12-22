@@ -5,7 +5,7 @@ import AppKit
 
 extension STTextView {
 
-    open override func capitalizeWord(_ sender: Any?) {
+    override open func capitalizeWord(_ sender: Any?) {
         guard isEditable else {
             return
         }
@@ -30,7 +30,7 @@ extension STTextView {
 
     }
 
-    open override func lowercaseWord(_ sender: Any?) {
+    override open func lowercaseWord(_ sender: Any?) {
         guard isEditable else {
             return
         }
@@ -54,7 +54,7 @@ extension STTextView {
         }
     }
 
-    open override func uppercaseWord(_ sender: Any?) {
+    override open func uppercaseWord(_ sender: Any?) {
         guard isEditable else {
             return
         }

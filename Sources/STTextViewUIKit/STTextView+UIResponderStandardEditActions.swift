@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  STTextView+UIResponderStandardEditActions.swift
+//
 //
 //  Created by Marcin Krzyzanowski on 31/07/2024.
 //
@@ -11,14 +11,14 @@ import UIKit
 // UIResponderStandardEditActions
 extension STTextView {
 
-    @objc open override func copy(_ sender: Any?) {
-        if let selectedTextRange = selectedTextRange, let text = text(in: selectedTextRange) {
+    @objc override open func copy(_ sender: Any?) {
+        if let selectedTextRange, let text = text(in: selectedTextRange) {
             UIPasteboard.general.string = text
         }
     }
 
-    @objc open override func paste(_ sender: Any?) {
-        if let selectedTextRange = selectedTextRange, let string = UIPasteboard.general.string {
+    @objc override open func paste(_ sender: Any?) {
+        if let selectedTextRange, let string = UIPasteboard.general.string {
             inputDelegate?.selectionWillChange(self)
             replace(selectedTextRange, withText: string)
             inputDelegate?.selectionDidChange(self)
@@ -40,15 +40,15 @@ extension STTextView {
 //        super.pasteAndMatchStyle(sender)
 //    }
 
-    @objc open override func cut(_ sender: Any?) {
-        if let selectedTextRange = selectedTextRange, let text = text(in: selectedTextRange) {
+    @objc override open func cut(_ sender: Any?) {
+        if let selectedTextRange, let text = text(in: selectedTextRange) {
             UIPasteboard.general.string = text
             replace(selectedTextRange, withText: "")
         }
     }
 
-    @objc open override func delete(_ sender: Any?) {
-        if let selectedTextRange = selectedTextRange {
+    @objc override open func delete(_ sender: Any?) {
+        if let selectedTextRange {
             inputDelegate?.selectionWillChange(self)
             replace(selectedTextRange, withText: "")
             inputDelegate?.selectionDidChange(self)
@@ -74,8 +74,8 @@ extension STTextView {
     /// UIKit calls this method when the user selects the Select command from an editing menu.
     /// The command is used for the targeted selection of content in a view.
     /// For example, a text view uses this to select one or more words in the view and to display the selection interface.
-    @objc open override func select(_ sender: Any?) {
-        if let selectedTextRange = selectedTextRange {
+    @objc override open func select(_ sender: Any?) {
+        if let selectedTextRange {
             let positionSelection = NSTextSelection(range: selectedTextRange.nsTextRange, affinity: .downstream, granularity: .word)
 
             let destinationBackward = textLayoutManager.textSelectionNavigation.destinationSelection(
@@ -102,7 +102,7 @@ extension STTextView {
         }
     }
 
-    @objc open override func selectAll(_ sender: Any?) {
+    @objc override open func selectAll(_ sender: Any?) {
         guard isSelectable else {
             return
         }

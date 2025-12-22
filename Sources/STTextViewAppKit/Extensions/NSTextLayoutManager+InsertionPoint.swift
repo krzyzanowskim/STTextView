@@ -18,7 +18,7 @@ extension NSTextLayoutManager {
 
     /// Append insertion point.
     /// - Parameter point: A CGPoint that represents the location of the tap or click.
-    internal func appendInsertionPointSelection(interactingAt point: CGPoint) {
+    func appendInsertionPointSelection(interactingAt point: CGPoint) {
         // Insertion points are either the selections with a single empty range
         // or single selection with multiple empty ranges. Both cases are handled.
         // I didn't find an advantage of one approach over the other
@@ -31,5 +31,5 @@ extension NSTextLayoutManager {
             bounds: usageBoundsForTextContainer
         )
     }
-    
+
 }

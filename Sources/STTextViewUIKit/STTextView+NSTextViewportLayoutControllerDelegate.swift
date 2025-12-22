@@ -20,7 +20,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
         let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) ?? STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: textLayoutFragment.layoutFragmentFrame)
         // Adjust position
-        if !fragmentView.frame.isAlmostEqual(to: textLayoutFragment.layoutFragmentFrame)  {
+        if !fragmentView.frame.isAlmostEqual(to: textLayoutFragment.layoutFragmentFrame) {
             fragmentView.frame = textLayoutFragment.layoutFragmentFrame
             fragmentView.setNeedsLayout()
             fragmentView.setNeedsDisplay()
@@ -50,9 +50,9 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         // adjustViewportOffsetIfNeeded()
 
         if let viewportRange = textViewportLayoutController.viewportRange {
-           for events in plugins.events {
-               events.didLayoutViewportHandler?(viewportRange)
-           }
+            for events in plugins.events {
+                events.didLayoutViewportHandler?(viewportRange)
+            }
         }
     }
 }

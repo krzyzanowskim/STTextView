@@ -12,7 +12,7 @@ final class STGutterLineNumberCell: UIView {
     let textVisualCenter: CGFloat
     private let ctLine: CTLine
     let textSize: CGSize
-    var insets: STRulerInsets = STRulerInsets()
+    var insets = STRulerInsets()
 
     override var debugDescription: String {
         "\(super.debugDescription) (number: \(lineNumber))"

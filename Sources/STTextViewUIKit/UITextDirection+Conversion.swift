@@ -7,17 +7,17 @@ extension UITextDirection {
     var textSelectionNavigationDirection: NSTextSelectionNavigation.Direction {
         switch self.rawValue {
         case UITextLayoutDirection.right.rawValue:
-                .right
+            .right
         case UITextLayoutDirection.left.rawValue:
-                .left
+            .left
         case UITextLayoutDirection.up.rawValue:
-                .up
+            .up
         case UITextLayoutDirection.down.rawValue:
-                .down
+            .down
         case UITextStorageDirection.forward.rawValue:
-                .forward
+            .forward
         case UITextStorageDirection.backward.rawValue:
-                .backward
+            .backward
         default:
             NSTextSelectionNavigation.Direction(rawValue: self.rawValue)!
         }
@@ -45,9 +45,9 @@ extension UITextStorageDirection {
     var textSelectionNavigationDirection: NSTextSelectionNavigation.Direction {
         switch self {
         case .forward:
-                .forward
+            .forward
         case .backward:
-                .backward
+            .backward
         @unknown default:
             NSTextSelectionNavigation.Direction(rawValue: self.rawValue)!
         }

@@ -28,9 +28,9 @@ public extension STGutterViewDelegate {
 
 /// A gutter to the side of a scroll view's document view.
 open class STGutterView: UIView {
-    internal let separatorView: STGutterSeparatorView
-    internal let containerView: STGutterContainerView
-    internal let markerContainerView: STGutterMarkerContainerView
+    let separatorView: STGutterSeparatorView
+    let containerView: STGutterContainerView
+    let markerContainerView: STGutterMarkerContainerView
 
     /// Delegate
     weak var delegate: (any STGutterViewDelegate)?
@@ -44,7 +44,7 @@ open class STGutterView: UIView {
 
     /// The insets of the ruler view.
     @Invalidating(.display)
-    open var insets: STRulerInsets = STRulerInsets(leading: 4.0, trailing: 6.0)
+    open var insets = STRulerInsets(leading: 4.0, trailing: 6.0)
 
     /// Minimum thickness.
     @Invalidating(.layout)
@@ -66,7 +66,7 @@ open class STGutterView: UIView {
 
     /// A Boolean that controls whether the text view highlights the currently selected line. Default false.
     @Invalidating(.display)
-    open var highlightSelectedLine: Bool = false
+    open var highlightSelectedLine = false
 
     /// The background color of the highlighted line.
     @Invalidating(.display)
@@ -93,14 +93,15 @@ open class STGutterView: UIView {
     private(set) var markers: [STGutterMarker] = []
 
     /// A Boolean value that determines whether the markers functionality is in an enabled state. Default `false.`
-    open var areMarkersEnabled: Bool = false {
+    open var areMarkersEnabled = false {
         didSet {
             tapGestureRecognizer?.isEnabled = areMarkersEnabled
         }
     }
+
     private var tapGestureRecognizer: UIGestureRecognizer?
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         separatorView = STGutterSeparatorView(frame: frame)
         separatorView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
@@ -128,7 +129,7 @@ open class STGutterView: UIView {
     }
 
     @available(*, unavailable)
-    required public init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -169,7 +170,7 @@ open class STGutterView: UIView {
         }
     }
 
-    internal func layoutMarkers() {
+    func layoutMarkers() {
         for v in markerContainerView.subviews {
             v.removeFromSuperview()
         }

@@ -55,19 +55,19 @@ final class ViewController: NSViewController {
         // add link to occurences of STTextView
         do {
             let str = textView.text!
-            var currentRange = str.startIndex..<str.endIndex
+            var currentRange = str.startIndex ..< str.endIndex
             while let ocurrenceRange = str.range(of: "STTextView", range: currentRange) {
                 textView.addAttributes([.link: URL(string: "https://swift.best")! as NSURL], range: NSRange(ocurrenceRange, in: str))
-                currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
+                currentRange = ocurrenceRange.upperBound ..< currentRange.upperBound
             }
         }
 
         do {
             let str = textView.text!
-            var currentRange = str.startIndex..<str.endIndex
+            var currentRange = str.startIndex ..< str.endIndex
             while let ocurrenceRange = str.range(of: "vim", range: currentRange) {
                 textView.addAttributes([.cursor: NSCursor.operationNotAllowed], range: NSRange(ocurrenceRange, in: str))
-                currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
+                currentRange = ocurrenceRange.upperBound ..< currentRange.upperBound
             }
         }
 
@@ -88,7 +88,7 @@ final class ViewController: NSViewController {
             let attachmentString = NSAttributedString(attachment: attachment)
             textView.insertText(attachmentString, replacementRange: NSRange(location: 30, length: 0))
         }
-        
+
         // Insert interactive button attachment
         do {
             let buttonAttachment = InteractiveButtonAttachment()
@@ -109,11 +109,11 @@ final class ViewController: NSViewController {
         updateCompletionsInBackground()
     }
 
-    @IBAction func toggleTextWrapMode(_ sender: Any?) {
+    @IBAction func toggleTextWrapMode(_: Any?) {
         textView.isHorizontallyResizable.toggle()
     }
 
-    @IBAction func toggleInvisibles(_ sender: Any?) {
+    @IBAction func toggleInvisibles(_: Any?) {
         textView.showsInvisibleCharacters.toggle()
     }
 
@@ -122,7 +122,7 @@ final class ViewController: NSViewController {
         completionTask?.cancel()
     }
 
-    private var completionTask: Task<(), Never>?
+    private var completionTask: Task<Void, Never>?
 
     /// Update completion list with words
     private func updateCompletionsInBackground() {
@@ -146,11 +146,10 @@ final class ViewController: NSViewController {
                     lhs.localizedCaseInsensitiveCompare(rhs) == .orderedAscending
                 }
                 .map { word in
-                    let symbol: String
-                    if let firstCharacter = word.first, firstCharacter.isASCII, firstCharacter.isLetter {
-                        symbol = "\(word.first!.lowercased()).square"
+                    let symbol = if let firstCharacter = word.first, firstCharacter.isASCII, firstCharacter.isLetter {
+                        "\(word.first!.lowercased()).square"
                     } else {
-                        symbol = "note.text"
+                        "note.text"
                     }
 
                     return Completion.Item(id: UUID().uuidString, label: word.localizedCapitalized, symbolName: symbol, insertText: word)
@@ -163,15 +162,15 @@ final class ViewController: NSViewController {
 
 extension ViewController: STTextViewDelegate {
 
-    func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
+    func textView(_: STTextView, didChangeTextIn _: NSTextRange, replacementString _: String) {
         // Continous completion update disabled due to bad performance for large strings
         // updateCompletionsInBackground()
     }
-    
-    func textView(_ textView: STTextView, clickedOnAttachment attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
+
+    func textView(_ textView: STTextView, clickedOnAttachment attachment: NSTextAttachment, at _: any NSTextLocation) -> Bool {
         print("Clicked on attachment: \(attachment)")
         print("Selected range: \(textView.selectedRange())")
-        
+
         if attachment is InteractiveButtonAttachment {
             // Handle button click - this now works for both text-based and view-based clicks
             let alert = NSAlert()
@@ -188,20 +187,20 @@ extension ViewController: STTextViewDelegate {
         }
         return false
     }
-    
-    func textView(_ textView: STTextView, shouldAllowInteractionWith attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
+
+    func textView(_: STTextView, shouldAllowInteractionWith _: NSTextAttachment, at _: any NSTextLocation) -> Bool {
         // Allow interaction with all attachments
         return true
     }
 
     // Completion
     func textView(_ textView: STTextView, completionItemsAtLocation location: NSTextLocation) async -> [any STCompletionItem]? {
-        
+
         // fake delay
         // try? await Task.sleep(nanoseconds: UInt64.random(in: 0...1) * 1_000_000_000)
 
         var word: String?
-        textView.textLayoutManager.enumerateSubstrings(from: location, options: [.byWords, .reverse]) { substring, substringRange, enclosingRange, stop in
+        textView.textLayoutManager.enumerateSubstrings(from: location, options: [.byWords, .reverse]) { substring, _, _, stop in
             word = substring
             stop.pointee = true
         }
@@ -230,10 +229,10 @@ extension ViewController: STTextViewDelegate {
 private extension StringProtocol {
     func linesRanges() -> [Range<String.Index>] {
         var ranges: [Range<String.Index>] = []
-        let stringRange = startIndex..<endIndex
+        let stringRange = startIndex ..< endIndex
         var currentIndex = startIndex
         while currentIndex < stringRange.upperBound {
-            let lineRange = lineRange(for: currentIndex..<currentIndex)
+            let lineRange = lineRange(for: currentIndex ..< currentIndex)
             ranges.append(lineRange)
             if !stringRange.overlaps(lineRange) {
                 break
@@ -256,12 +255,13 @@ private class MyTextAttachmentViewProvider: NSTextAttachmentViewProvider {
     }
 
     override func attachmentBounds(
-        for attributes: [NSAttributedString.Key : Any],
-        location: any NSTextLocation,
-        textContainer: NSTextContainer?,
-        proposedLineFragment: CGRect,
-        position: CGPoint
-    ) -> CGRect {
+        for _: [NSAttributedString.Key: Any],
+        location _: any NSTextLocation,
+        textContainer _: NSTextContainer?,
+        proposedLineFragment _: CGRect,
+        position _: CGPoint
+    )
+        -> CGRect {
         self.view?.bounds ?? .zero
     }
 }
@@ -271,7 +271,8 @@ private class MyTextAttachment: NSTextAttachment {
         for parentView: NSView?,
         location: any NSTextLocation,
         textContainer: NSTextContainer?
-    ) -> NSTextAttachmentViewProvider? {
+    )
+        -> NSTextAttachmentViewProvider? {
         let viewProvider = MyTextAttachmentViewProvider(
             textAttachment: self,
             parentView: parentView,
@@ -295,12 +296,13 @@ private class InteractiveButtonAttachmentViewProvider: NSTextAttachmentViewProvi
     }
 
     override func attachmentBounds(
-        for attributes: [NSAttributedString.Key : Any],
-        location: any NSTextLocation,
-        textContainer: NSTextContainer?,
-        proposedLineFragment: CGRect,
-        position: CGPoint
-    ) -> CGRect {
+        for _: [NSAttributedString.Key: Any],
+        location _: any NSTextLocation,
+        textContainer _: NSTextContainer?,
+        proposedLineFragment _: CGRect,
+        position _: CGPoint
+    )
+        -> CGRect {
         return self.view?.bounds ?? CGRect(x: 0, y: 0, width: 80, height: 24)
     }
 }
@@ -310,7 +312,8 @@ private class InteractiveButtonAttachment: NSTextAttachment {
         for parentView: NSView?,
         location: any NSTextLocation,
         textContainer: NSTextContainer?
-    ) -> NSTextAttachmentViewProvider? {
+    )
+        -> NSTextAttachmentViewProvider? {
         let viewProvider = InteractiveButtonAttachmentViewProvider(
             textAttachment: self,
             parentView: parentView,

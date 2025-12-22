@@ -43,8 +43,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
         if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment,
-           textLayoutFragment.showsInvisibleCharacters != showsInvisibleCharacters
-        {
+           textLayoutFragment.showsInvisibleCharacters != showsInvisibleCharacters {
             textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
         }
 
@@ -62,7 +61,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         }
 
         // Adjust fragment view frame
-        if !fragmentView.frame.isAlmostEqual(to: layoutFragmentFrame.pixelAligned)  {
+        if !fragmentView.frame.isAlmostEqual(to: layoutFragmentFrame.pixelAligned) {
             fragmentView.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
             fragmentView.needsLayout = true
             fragmentView.needsDisplay = true
@@ -84,8 +83,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         // When scrolled to the end of the document, relocate viewport to ensure proper layout
         if let scrollView, let documentView = scrollView.documentView, scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
            let viewportRange = textViewportLayoutController.viewportRange,
-           let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty
-        {
+           let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty {
             logger.debug("Relocate viewport to the bottom")
             relocateViewport(to: textLayoutManager.documentRange.endLocation)
         }

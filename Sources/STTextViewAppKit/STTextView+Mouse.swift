@@ -6,7 +6,7 @@ import STTextKitPlus
 
 extension STTextView {
 
-    open override func mouseDown(with event: NSEvent) {
+    override open func mouseDown(with event: NSEvent) {
         guard (inputContext?.handleEvent(event) ?? false) == false else {
             return
         }
@@ -16,7 +16,7 @@ extension STTextView {
             return
         }
 
-        var handled: Bool = false
+        var handled = false
         let eventPoint = contentView.convert(event.locationInWindow, from: nil)
         let holdsShift = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.shift)
         let holdsControl = event.modifierFlags.intersection(.deviceIndependentFlagsMask).contains(.control)
@@ -24,7 +24,7 @@ extension STTextView {
 
         switch event.clickCount {
         case 1:
-            if !handled, holdsShift && holdsControl {
+            if !handled, holdsShift, holdsControl {
                 textLayoutManager.appendInsertionPointSelection(interactingAt: eventPoint)
                 updateTypingAttributes()
                 updateSelectedRangeHighlight()
@@ -35,15 +35,14 @@ extension STTextView {
             }
 
             if !handled, !holdsShift, !holdsOption, !holdsControl,
-               let interactionLocation = textLayoutManager.caretLocation(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)
-            {
+               let interactionLocation = textLayoutManager.caretLocation(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location) {
                 // Check for text attachment first
                 // Note: This handles clicks on the text attachment character, not direct clicks on attachment views
                 // Direct clicks on attachment views are handled by the attachment views themselves due to hitTest fix
                 if let attachmentAttributeValue = textLayoutManager.textAttributedString(at: interactionLocation)?.attribute(.attachment, at: 0, effectiveRange: nil) as? NSTextAttachment {
                     // First, select the attachment
                     selectAttachment(at: interactionLocation)
-                    
+
                     // Then call delegate methods
                     if delegateProxy.textView(self, shouldAllowInteractionWith: attachmentAttributeValue, at: interactionLocation) {
                         if !delegateProxy.textView(self, clickedOnAttachment: attachmentAttributeValue, at: interactionLocation) {
@@ -52,18 +51,18 @@ extension STTextView {
                         handled = true
                     }
                 }
-                
+
                 // Check for link if no attachment was handled
                 if !handled, let linkAttributeValue = textLayoutManager.textAttributedString(at: interactionLocation)?.attribute(.link, at: 0, effectiveRange: nil) {
                     // The value of this attribute is an NSURL object (preferred) or an NSString object. The default value of this property is nil, indicating no link.
                     let linkURL: URL? = switch linkAttributeValue {
-                        case let value as URL:
-                            value
-                        case let value as String:
-                            URL(string: value)
-                        default:
-                            nil
-                        }
+                    case let value as URL:
+                        value
+                    case let value as String:
+                        URL(string: value)
+                    default:
+                        nil
+                    }
 
                     if let linkURL {
                         if !self.delegateProxy.textView(self, clickedOnLink: linkAttributeValue, at: interactionLocation) {
@@ -94,8 +93,7 @@ extension STTextView {
             if let caretLocation = textLayoutManager.caretLocation(interactingAt: eventPoint, options: .allowOutside, inContainerAt: textLayoutManager.documentRange.location) {
                 textLayoutManager.textSelections = [NSTextSelection(caretLocation, affinity: .downstream)]
             } else if let interactionRange = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.last,
-                      interactionRange.location >= textLayoutManager.documentRange.endLocation
-            {
+                      interactionRange.location >= textLayoutManager.documentRange.endLocation {
                 // effective selection is end of the document
                 var lastTextLayoutFragment: NSTextLayoutFragment? = nil
                 textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: .reverse) { textLayoutFragment in
@@ -105,7 +103,7 @@ extension STTextView {
 
                 if let lastTextLayoutFragment, !lastTextLayoutFragment.isExtraLineFragment {
                     var lastLocation: (any NSTextLocation)? = nil
-                    textLayoutManager.enumerateCaretOffsetsInLineFragment(at: lastTextLayoutFragment.rangeInElement.location) { _, location, isLeading, stop in
+                    textLayoutManager.enumerateCaretOffsetsInLineFragment(at: lastTextLayoutFragment.rangeInElement.location) { _, location, isLeading, _ in
                         if isLeading {
                             lastLocation = location
                         }
@@ -132,7 +130,7 @@ extension STTextView {
         }
     }
 
-    open override func mouseUp(with event: NSEvent) {
+    override open func mouseUp(with event: NSEvent) {
         guard (inputContext?.handleEvent(event) ?? false) == false else {
             return
         }
@@ -141,7 +139,7 @@ extension STTextView {
         super.mouseUp(with: event)
     }
 
-    open override func mouseDragged(with event: NSEvent) {
+    override open func mouseDragged(with event: NSEvent) {
         guard (inputContext?.handleEvent(event) ?? false) == false else {
             return
         }
@@ -171,7 +169,7 @@ extension STTextView {
         }
     }
 
-    open override func mouseMoved(with event: NSEvent) {
+    override open func mouseMoved(with event: NSEvent) {
         guard (inputContext?.handleEvent(event) ?? false) == false else {
             return
         }
@@ -179,7 +177,7 @@ extension STTextView {
         super.mouseMoved(with: event)
     }
 
-    open override func rightMouseDown(with event: NSEvent) {
+    override open func rightMouseDown(with event: NSEvent) {
 
         if menu(for: event) != nil {
 
@@ -199,16 +197,16 @@ extension STTextView {
         super.rightMouseDown(with: event)
     }
 
-    open override func menu(for event: NSEvent) -> NSMenu? {
+    override open func menu(for event: NSEvent) -> NSMenu? {
         let proposedMenu = super.menu(for: event)?.copy() as? NSMenu
 
         // Disable context menu when adding an insertion point in mouseDown
-        if proposedMenu != nil, event.type == .leftMouseDown && event.modifierFlags.intersection(.deviceIndependentFlagsMask).isSuperset(of: [.shift, .control]) {
+        if proposedMenu != nil, event.type == .leftMouseDown, event.modifierFlags.intersection(.deviceIndependentFlagsMask).isSuperset(of: [.shift, .control]) {
             return nil
         }
 
         let point = contentView.convert(event.locationInWindow, from: nil)
-        if let proposedMenu = proposedMenu,
+        if let proposedMenu,
            let eventLocation = textLayoutManager.lineFragmentRange(for: point, inContainerAt: textLayoutManager.documentRange.location)?.location,
            let location = textLayoutManager.textSelectionNavigation.textSelections(interactingAt: point, inContainerAt: eventLocation, anchors: [], modifiers: [], selecting: false, bounds: textLayoutManager.usageBoundsForTextContainer).first?.textRanges.first?.location {
 

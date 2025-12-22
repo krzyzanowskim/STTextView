@@ -7,11 +7,11 @@ final class STTextSelectionRect: UITextSelectionRect {
     override var rect: CGRect {
         _rect
     }
-    
+
     override var writingDirection: NSWritingDirection {
         _writingDirection
     }
-    
+
     override var containsStart: Bool {
         _containsStart
     }

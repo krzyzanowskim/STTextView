@@ -5,7 +5,7 @@ import AppKit
 
 extension STTextView {
 
-    open override func insertLineBreak(_ sender: Any?) {
+    override open func insertLineBreak(_ sender: Any?) {
         guard let scalar = Unicode.Scalar(NSLineSeparatorCharacter) else {
             assertionFailure()
             return
@@ -14,7 +14,7 @@ extension STTextView {
         insertText(String(Character(scalar)), replacementRange: .notFound)
     }
 
-    open override func insertTab(_ sender: Any?) {
+    override open func insertTab(_ sender: Any?) {
         guard let scalar = Unicode.Scalar(NSTabCharacter) else {
             assertionFailure()
             return
@@ -22,7 +22,7 @@ extension STTextView {
         insertText(String(Character(scalar)), replacementRange: .notFound)
     }
 
-    open override func insertBacktab(_ sender: Any?) {
+    override open func insertBacktab(_ sender: Any?) {
         guard let scalar = Unicode.Scalar(NSBackTabCharacter) else {
             assertionFailure()
             return
@@ -30,11 +30,11 @@ extension STTextView {
         insertText(String(Character(scalar)), replacementRange: .notFound)
     }
 
-    open override func insertTabIgnoringFieldEditor(_ sender: Any?) {
+    override open func insertTabIgnoringFieldEditor(_ sender: Any?) {
         insertTab(sender)
     }
 
-    open override func insertParagraphSeparator(_ sender: Any?) {
+    override open func insertParagraphSeparator(_ sender: Any?) {
         guard let scalar = Unicode.Scalar(NSParagraphSeparatorCharacter) else {
             assertionFailure()
             return
@@ -42,7 +42,7 @@ extension STTextView {
         insertText(String(Character(scalar)), replacementRange: .notFound)
     }
 
-    open override func insertNewline(_ sender: Any?) {
+    override open func insertNewline(_ sender: Any?) {
         guard let scalar = Unicode.Scalar(NSNewlineCharacter) else {
             assertionFailure()
             return
@@ -53,11 +53,11 @@ extension STTextView {
         breakUndoCoalescing()
     }
 
-    open override func insertNewlineIgnoringFieldEditor(_ sender: Any?) {
+    override open func insertNewlineIgnoringFieldEditor(_ sender: Any?) {
         insertNewline(sender)
     }
 
-    open override func insertText(_ insertString: Any) {
+    override open func insertText(_ insertString: Any) {
         insertText(insertString, replacementRange: .notFound)
     }
 

@@ -12,7 +12,7 @@ final class STGutterLineNumberCell: NSView {
     let textVisualCenter: CGFloat
     private let ctLine: CTLine
     let textSize: CGSize
-    var insets: STRulerInsets = STRulerInsets()
+    var insets = STRulerInsets()
 
     override func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
         nil

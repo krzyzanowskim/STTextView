@@ -6,7 +6,7 @@ import AppKit
 // Gutter line number cells container
 final class STGutterContainerView: NSView {
 
-    public override func makeBackingLayer() -> CALayer {
+    override func makeBackingLayer() -> CALayer {
         CATiledLayer()
     }
 

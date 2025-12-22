@@ -4,6 +4,6 @@
 import AppKit
 
 public protocol STCompletionViewControllerDelegate: AnyObject {
-    func completionViewController<T: STCompletionViewControllerProtocol>(_ viewController: T, complete item: any STCompletionItem, movement: NSTextMovement)
-    func completionViewControllerCancel<T: STCompletionViewControllerProtocol>(_ viewController: T)
+    func completionViewController(_ viewController: some STCompletionViewControllerProtocol, complete item: any STCompletionItem, movement: NSTextMovement)
+    func completionViewControllerCancel(_ viewController: some STCompletionViewControllerProtocol)
 }

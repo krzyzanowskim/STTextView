@@ -15,7 +15,7 @@ extension STTextView {
 
     /// Performs all find oriented actions.
     /// Before OS X v10.7, the default action for these menu items was performFindPanelAction(_:)
-    @objc open override func performTextFinderAction(_ sender: Any?) {
+    @objc override open func performTextFinderAction(_ sender: Any?) {
         guard let menuItem = sender as? NSMenuItem,
               let action = NSTextFinder.Action(rawValue: menuItem.tag)
         else {
@@ -27,5 +27,5 @@ extension STTextView {
             textFinder.performAction(action)
         }
     }
-    
+
 }

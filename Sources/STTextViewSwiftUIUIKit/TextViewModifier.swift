@@ -4,12 +4,12 @@
 import Foundation
 import SwiftUI
 
-public protocol TextViewModifier: SwiftUI.View { }
+public protocol TextViewModifier: SwiftUI.View {}
 
-extension TextViewModifier {
+public extension TextViewModifier {
 
     /// Sets the default font for text in this view.
-    public func textViewFont(_ font: UIFont) -> TextViewEnvironmentModifier<Self, UIFont> {
+    func textViewFont(_ font: UIFont) -> TextViewEnvironmentModifier<Self, UIFont> {
         TextViewEnvironmentModifier(content: self, keyPath: \.font, value: font)
     }
 }
@@ -29,7 +29,7 @@ private struct FontEnvironmentKey: EnvironmentKey {
     static var defaultValue: UIFont = .preferredFont(forTextStyle: .body)
 }
 
-internal extension EnvironmentValues {
+extension EnvironmentValues {
     var font: UIFont {
         get { self[FontEnvironmentKey.self] }
         set { self[FontEnvironmentKey.self] = newValue }

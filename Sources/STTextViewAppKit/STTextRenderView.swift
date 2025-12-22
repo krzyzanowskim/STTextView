@@ -13,17 +13,17 @@ open class STTextRenderView: NSView {
     private let textLayoutManager: NSTextLayoutManager
     private let textRange: NSTextRange
 
-    public override var isFlipped: Bool {
-#if os(macOS)
-        true
-#else
-        false
-#endif
+    override public var isFlipped: Bool {
+        #if os(macOS)
+            true
+        #else
+            false
+        #endif
     }
 
-    public var clipsToContent: Bool = false
+    public var clipsToContent = false
 
-    open override var intrinsicContentSize: NSSize {
+    override open var intrinsicContentSize: NSSize {
         bounds.size
     }
 
@@ -36,7 +36,7 @@ open class STTextRenderView: NSView {
         needsLayout = true
     }
 
-    open override func layout() {
+    override open func layout() {
         // Calculate frame. Expand to the size of layout fragments in the asked range
         textLayoutManager.ensureLayout(for: textRange)
         var frame: CGRect = textLayoutManager.typographicBounds(in: textRange)!
@@ -64,6 +64,7 @@ open class STTextRenderView: NSView {
         super.layout()
     }
 
+    @available(*, unavailable)
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -75,7 +76,7 @@ open class STTextRenderView: NSView {
         return stImage()
     }
 
-    open override func draw(_ dirtyRect: NSRect) {
+    override open func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
 
         var originY: CGFloat = 0

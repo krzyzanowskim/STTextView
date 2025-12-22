@@ -2,10 +2,10 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 #endif
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 import STTextKitPlus
@@ -14,26 +14,26 @@ package class CoalescingUndoManager: UndoManager {
 
     private var lastRange: NSTextRange?
 
-    private var isCoalescing: Bool = false
+    private var isCoalescing = false
 
-    package override init() {
+    override package init() {
         super.init()
         #if os(macOS)
-        self.runLoopModes = [.default, .common, .eventTracking, .modalPanel]
+            self.runLoopModes = [.default, .common, .eventTracking, .modalPanel]
         #else
-        self.runLoopModes = [.default, .common, .tracking]
+            self.runLoopModes = [.default, .common, .tracking]
         #endif
         self.groupsByEvent = false
     }
 
-    package override func undo() {
+    override package func undo() {
         if isCoalescing {
             endCoalescing()
         }
         super.undo()
     }
 
-    package override func redo() {
+    override package func redo() {
         if isCoalescing {
             endCoalescing()
         }
@@ -48,7 +48,7 @@ package class CoalescingUndoManager: UndoManager {
             startCoalescing()
             return
         }
-        if !lastRange.intersects(range) && lastRange.endLocation != range.location {
+        if !lastRange.intersects(range), lastRange.endLocation != range.location {
             endCoalescing()
             startCoalescing()
         }

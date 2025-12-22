@@ -15,9 +15,9 @@ final class STTextLayoutFragmentView: NSView {
 
     override var isFlipped: Bool {
         #if os(macOS)
-        true
+            true
         #else
-        false
+            false
         #endif
     }
 
@@ -36,6 +36,7 @@ final class STTextLayoutFragmentView: NSView {
         needsDisplay = true
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -69,10 +70,10 @@ final class STTextLayoutFragmentView: NSView {
 
             if attachmentView.superview == nil {
                 addSubview(attachmentView)
-                
+
                 // Configure accessibility for attachment views
                 configureAccessibilityForAttachmentView(attachmentView, provider: attachmentViewProvider)
-                
+
                 // Set up attachment interaction bridge
                 if let textView = findParentTextView() {
                     attachmentView.setupAttachmentInteraction(
@@ -84,7 +85,7 @@ final class STTextLayoutFragmentView: NSView {
             }
         }
     }
-    
+
     private func findParentTextView() -> STTextView? {
         var currentView: NSView? = self
         while let parentView = currentView?.superview {
@@ -95,13 +96,13 @@ final class STTextLayoutFragmentView: NSView {
         }
         return nil
     }
-    
+
     private func configureAccessibilityForAttachmentView(_ attachmentView: NSView, provider: NSTextAttachmentViewProvider) {
         // Set up basic accessibility properties if not already configured
         if attachmentView.accessibilityRole() == nil {
             attachmentView.setAccessibilityRole(.image) // Default role, can be overridden
         }
-        
+
         if attachmentView.accessibilityLabel() == nil {
             // Try to get a meaningful label from the attachment
             if let textAttachment = provider.textAttachment {
@@ -114,7 +115,7 @@ final class STTextLayoutFragmentView: NSView {
                 }
             }
         }
-        
+
         // Ensure the view participates in accessibility
         attachmentView.setAccessibilityElement(true)
     }

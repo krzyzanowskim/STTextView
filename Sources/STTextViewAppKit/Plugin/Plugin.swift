@@ -1,7 +1,7 @@
 //  Created by Marcin Krzyzanowski
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
-internal struct Plugin {
+struct Plugin {
     let instance: any STPlugin
     var events: STPluginEvents?
 
@@ -11,7 +11,7 @@ internal struct Plugin {
     }
 }
 
-internal extension Array<Plugin> {
+extension [Plugin] {
     var events: [STPluginEvents] {
         compactMap(\.events)
     }

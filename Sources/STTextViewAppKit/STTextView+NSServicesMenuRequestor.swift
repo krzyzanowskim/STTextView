@@ -14,12 +14,14 @@ import STTextViewCommon
 extension STTextView: NSServicesMenuRequestor {
 
     /// The types this text view can read immediately from the pasteboard.
-    @objc open var readablePasteboardTypes: [NSPasteboard.PasteboardType] {
+    @objc
+    open var readablePasteboardTypes: [NSPasteboard.PasteboardType] {
         [.string, .init(rawValue: "NSStringPboardType"), .rtf, .init(rawValue: "NSRTFPboardType")]
     }
 
     /// The pasteboard types that can be provided from the current selection.
-    @objc open var writablePasteboardTypes: [NSPasteboard.PasteboardType] {
+    @objc
+    open var writablePasteboardTypes: [NSPasteboard.PasteboardType] {
         [.string, .init(rawValue: "NSStringPboardType"), .rtf, .init(rawValue: "NSRTFPboardType")]
     }
 
@@ -29,8 +31,7 @@ extension STTextView: NSServicesMenuRequestor {
         switch type.rawValue {
         case NSPasteboard.PasteboardType.string.rawValue, "NSStringPboardType":
             if pboard.canReadItem(withDataConformingToTypes: [UTType.plainText.identifier]),
-                let string = pboard.string(forType: type)
-            {
+               let string = pboard.string(forType: type) {
                 replaceCharacters(
                     in: textLayoutManager.textSelections.flatMap(\.textRanges),
                     with: string,
@@ -41,8 +42,7 @@ extension STTextView: NSServicesMenuRequestor {
             }
         case NSPasteboard.PasteboardType.rtf.rawValue, "NSRTFPboardType":
             if pboard.canReadItem(withDataConformingToTypes: [UTType.rtf.identifier]),
-               let attributedString = pboard.readObjects(forClasses: [NSAttributedString.self])?.first as? NSAttributedString
-            {
+               let attributedString = pboard.readObjects(forClasses: [NSAttributedString.self])?.first as? NSAttributedString {
                 replaceCharacters(
                     in: textLayoutManager.textSelections.flatMap(\.textRanges),
                     with: attributedString,
@@ -69,7 +69,7 @@ extension STTextView: NSServicesMenuRequestor {
 
         // If attachment content is plaintext, inline its `contents` in the output
         if attributedString.containsAttachments {
-            attributedString.enumerateAttribute(.attachment, in: attributedString.range, options: .reverse) { value, range, stop in
+            attributedString.enumerateAttribute(.attachment, in: attributedString.range, options: .reverse) { value, range, _ in
                 guard let attachment = value as? NSTextAttachment else {
                     return
                 }
@@ -77,8 +77,7 @@ extension STTextView: NSServicesMenuRequestor {
                 if attachment.image == nil,
                    let contents = attachment.contents,
                    let fileType = attachment.fileType,
-                   let uti = UTType(fileType), uti.isSubtype(of: .plainText)
-                {
+                   let uti = UTType(fileType), uti.isSubtype(of: .plainText) {
                     var string: String? {
                         switch uti {
                         case .utf8PlainText:
@@ -126,7 +125,7 @@ extension STTextView: NSServicesMenuRequestor {
     }
 
     /// Returns `self` if the text view can provide and accept the specified data types, or nil if it can't
-    @objc open override func validRequestor(forSendType sendType: NSPasteboard.PasteboardType?, returnType: NSPasteboard.PasteboardType?) -> Any? {
+    @objc override open func validRequestor(forSendType sendType: NSPasteboard.PasteboardType?, returnType: NSPasteboard.PasteboardType?) -> Any? {
         var sendOK = false
         var returnOK = false
 

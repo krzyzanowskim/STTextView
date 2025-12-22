@@ -10,7 +10,7 @@ extension STTextView {
     ///
     /// see ``NSStandardKeyBindingResponding``
     @MainActor
-    open override func complete(_ sender: Any?) {
+    override open func complete(_ sender: Any?) {
         let didPerformCompletion = performSyncCompletion()
         if !didPerformCompletion {
             _completionTask?.cancel()
@@ -35,7 +35,7 @@ extension STTextView {
     }
 
     @MainActor
-    open override func cancelOperation(_ sender: Any?) {
+    override open func cancelOperation(_ sender: Any?) {
         if let completionWindowController, completionWindowController.isVisible {
             cancelComplete(sender)
         } else {
@@ -116,7 +116,7 @@ extension STTextView: STCompletionWindowDelegate {
     public func completionWindowControllerCancel(_ windowController: STCompletionWindowController) {
         cancelComplete(windowController)
     }
-    
+
     public func completionWindowController(_ windowController: STCompletionWindowController, complete item: any STCompletionItem, movement: NSTextMovement) {
         delegateProxy.textView(self, insertCompletionItem: item)
     }

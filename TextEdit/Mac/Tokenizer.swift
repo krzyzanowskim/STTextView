@@ -19,7 +19,7 @@ class Tokenizer {
 
         return AsyncStream { continuation in
             var count = 0
-            tokenizer.enumerateTokens(in: string.startIndex..<string.endIndex) { tokenRange, attributes in
+            tokenizer.enumerateTokens(in: string.startIndex ..< string.endIndex) { tokenRange, attributes in
                 if !attributes.contains(.numeric) {
                     let token = String(string[tokenRange]).lowercased()
                     continuation.yield(Word(string: token))
