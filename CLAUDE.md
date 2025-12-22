@@ -4,11 +4,52 @@
 
 This is a fork of [STTextView](https://github.com/krzyzanowskim/STTextView) maintained by yunacaba with additional features.
 
+---
+
+## ⛔ CRITICAL RULES - READ FIRST
+
+### 1. NEVER Push Directly to Main
+
+**ALWAYS create a PR first.** No exceptions.
+
+```bash
+# ❌ NEVER DO THIS
+git checkout main
+git commit -m "some change"
+git push origin main
+
+# ✅ ALWAYS DO THIS
+git checkout -b fix/description-of-change
+git commit -m "fix: description"
+git push -u origin fix/description-of-change
+gh pr create --repo yunacaba/STTextView --title "fix: description" --body "..."
+# Wait for PR to be reviewed and merged
+```
+
+### 2. NEVER Auto-Apply Git Tags
+
+**NEVER run `git tag` and `git push origin <tag>` automatically.** Instead, after a PR is merged, provide the tagging commands for the user to run manually.
+
+```bash
+# ❌ NEVER DO THIS AUTOMATICALLY
+git tag 100.2.2
+git push origin 100.2.2
+
+# ✅ ALWAYS DO THIS - Provide commands for user to run:
+echo "PR merged. To create the release tag, run:"
+echo "  git checkout main && git pull"
+echo "  git tag 100.2.2"
+echo "  git push origin 100.2.2"
+```
+
+**Why?** Overwriting git tags breaks SPM package resolution. Once a tag is pushed, changing it causes checksum mismatches in downstream projects. Let the user verify and apply tags manually.
+
+---
+
 ## Custom Features
 
 This fork adds custom properties not available in the upstream version:
 - **`bottomPadding`** - Controls scroll-past-end behavior (iOS and macOS)
-- **`rightPadding`** - Controls right margin space for accessory views (macOS)
 
 These properties are maintained for compatibility with downstream projects.
 
@@ -214,7 +255,6 @@ git rebase upstream/main
 
 Downstream projects depend on these custom properties:
 - `bottomPadding` - **Must not be removed or renamed**
-- `rightPadding` - **Must not be removed or renamed**
 
 **Before any major refactoring:**
 1. Search for usages in downstream projects
