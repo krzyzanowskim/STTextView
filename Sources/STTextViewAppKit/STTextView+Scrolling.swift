@@ -79,6 +79,7 @@ extension STTextView {
     }
 
     open override func scrollToEndOfDocument(_ sender: Any?) {
+        relocateViewport(to: textLayoutManager.documentRange.endLocation)
         scroll(CGPoint(x: visibleRect.origin.x, y: frame.maxY))
     }
 }

@@ -4,11 +4,12 @@
 import CoreGraphics
 import Foundation
 
+// MARK: - CGRect Extensions
+
 extension CGRect {
 
     package var pixelAligned: CGRect {
         // https://developer.apple.com/library/archive/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/APIs/APIs.html#//apple_ref/doc/uid/TP40012302-CH5-SW9
-        // NSIntegralRectWithOptions(self, [.alignMinXOutward, .alignMinYOutward, .alignWidthOutward, .alignMaxYOutward])
         #if os(macOS) && !targetEnvironment(macCatalyst)
             NSIntegralRectWithOptions(self, AlignmentOptions.alignAllEdgesNearest)
         #elseif os(iOS) || targetEnvironment(macCatalyst)

@@ -10,9 +10,6 @@ import UIKit
 
 package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
     /// Heavily inspired by WebKit
-
-    let kLineHeightAdjustment: CGFloat = 0.15
-
     var ascent = CTFontGetAscent(font)
     var descent = CTFontGetDescent(font)
     var lineGap = CTFontGetLeading(font)
@@ -21,11 +18,12 @@ package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
 
     if shouldUseAdjustment(familyName) {
         // Needs ascent adjustment
+        let kLineHeightAdjustment: CGFloat = 0.15
         ascent += round((ascent + descent) * kLineHeightAdjustment);
     }
 
     // Compute line spacing before the line metrics hacks are applied.
-    var lineSpacing = round(ascent) + round(descent) + round(lineGap);
+    var lineSpacing = round(ascent + descent + lineGap);
 
     // Hack Hiragino line metrics to allow room for marked text underlines.
     if descent < 3, lineGap >= 3, familyName.hasPrefix("Hiragino") == true {

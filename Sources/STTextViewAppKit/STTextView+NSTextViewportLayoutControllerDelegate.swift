@@ -7,8 +7,7 @@ import STTextKitPlus
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        contentViewportView.subviews = []
-        sizeToFit()
+        lastUsedFragmentViews = Set(fragmentViewMap.objectEnumerator()?.allObjects as? [STTextLayoutFragmentView] ?? [])
 
         if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
             let viewportDebugView = NSView(frame: viewportBounds(for: textViewportLayoutController))
@@ -21,7 +20,25 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        contentView.visibleRect.union(preparedContentRect.insetBy(dx: gutterView?.frame.width ?? 0, dy: 0))
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let prepared = preparedContentRect.insetBy(dx: gutterWidth, dy: 0)
+        var visible = contentView.visibleRect
+
+        // Clamp negative origins to 0 (handles overscroll bounce)
+        if visible.minX < 0 {
+            visible.size.width += visible.minX
+            visible.origin.x = 0
+        }
+        if visible.minY < 0 {
+            visible.size.height += visible.minY
+            visible.origin.y = 0
+        }
+
+        if prepared.intersects(visible) {
+            return prepared.union(visible)
+        } else {
+            return visible
+        }
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
@@ -38,8 +55,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         if let cachedFragmentView = fragmentViewMap.object(forKey: textLayoutFragment) {
             cachedFragmentView.layoutFragment = textLayoutFragment
             fragmentView = cachedFragmentView
+            lastUsedFragmentViews.remove(cachedFragmentView)
         } else {
             fragmentView = STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: layoutFragmentFrame.pixelAligned)
+            fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
         }
 
         // Adjust fragment view frame
@@ -49,60 +68,26 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             fragmentView.needsDisplay = true
         }
 
-        contentViewportView.addSubview(fragmentView)
-        fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
+        if fragmentView.superview != contentViewportView {
+            contentViewportView.addSubview(fragmentView)
+        }
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
+        for staleView in lastUsedFragmentViews {
+            staleView.removeFromSuperview()
+        }
+        lastUsedFragmentViews.removeAll()
+
+        updateContentSizeIfNeeded()
+
+        // When scrolled to the end of the document, relocate viewport to ensure proper layout
         if let scrollView, let documentView = scrollView.documentView, scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
            let viewportRange = textViewportLayoutController.viewportRange,
            let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty
         {
-            logger.debug("Attempt to relocate viewport to the bottom")
-            textLayoutManager.ensureLayout(for: textRange)
-            var lastLineMaxY = textViewportLayoutController.viewportBounds.maxY
-            textLayoutManager.enumerateTextLayoutFragments(from: textRange.endLocation, options: [.reverse, .ensuresLayout]) { layoutFragment in
-                lastLineMaxY = layoutFragment.layoutFragmentFrame.maxY
-                return false // stop.
-            }
-
-            setFrameSize(CGSize(width: frame.width, height: lastLineMaxY))
-
-            let suggestedAnchor = textViewportLayoutController.relocateViewport(to: textRange.endLocation)
-            let offset = frame.height - suggestedAnchor
-            if !offset.isAlmostZero() {
-                logger.debug("  Adjust viewport to anchor: \(suggestedAnchor)")
-                textViewportLayoutController.adjustViewport(byVerticalOffset: -offset)
-            }
-        } else if textViewportLayoutController.viewportRange == nil {
-            logger.debug("Attempt to recovery last viewportRange from cache")
-
-            // Restore last layout fragment from cached fragments
-            let lastLayoutFragment = (fragmentViewMap.keyEnumerator().allObjects as! [NSTextLayoutFragment]).max { lhs, rhs in
-                lhs.layoutFragmentFrame.maxY < rhs.layoutFragmentFrame.maxY
-            }
-
-            guard let lastLayoutFragment else {
-                logger.debug("  failed to find last fragment from cache.")
-                return
-            }
-
-            let textRange = NSTextRange(location: lastLayoutFragment.rangeInElement.endLocation, end: textLayoutManager.documentRange.endLocation)!
-            textLayoutManager.ensureLayout(for: textRange)
-            var lastLineMaxY = textViewportLayoutController.viewportBounds.maxY
-            textLayoutManager.enumerateTextLayoutFragments(from: textRange.endLocation, options: [.reverse, .ensuresLayout]) { layoutFragment in
-                lastLineMaxY = layoutFragment.layoutFragmentFrame.maxY
-                return false // stop.
-            }
-
-            setFrameSize(CGSize(width: frame.width, height: lastLineMaxY))
-
-            let suggestedAnchor = textViewportLayoutController.relocateViewport(to: textRange.endLocation)
-            let offset = frame.height - suggestedAnchor
-            if !offset.isAlmostZero() {
-                logger.debug("  Adjust viewport to anchor: \(suggestedAnchor)")
-                textViewportLayoutController.adjustViewport(byVerticalOffset: -offset)
-            }
+            logger.debug("Relocate viewport to the bottom")
+            relocateViewport(to: textLayoutManager.documentRange.endLocation)
         }
 
         updateSelectedRangeHighlight()

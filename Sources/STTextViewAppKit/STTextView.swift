@@ -288,68 +288,57 @@ import AVFoundation
         }
     }
 
-    /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
-    ///
-    /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.
-    ///
-    /// - Note: If you set both `widthTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
-    ///
-    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
-    @objc public var widthTracksTextView: Bool {
-        set {
-            if textContainer.widthTracksTextView != newValue {
-                textContainer.widthTracksTextView = newValue
-                textContainer.size = _defaultTextContainerSize
-                needsLayout = true
-            }
-        }
-
-        get {
-            textContainer.widthTracksTextView
-        }
-    }
+    private var _isHorizontallyResizable: Bool = true
 
     /// A Boolean that controls whether the receiver changes its width to fit the width of its text.
+    ///
+    /// When `true` (default), text does not wrap and the view expands horizontally.
+    /// When `false`, text wraps at the view width.
     @objc public var isHorizontallyResizable: Bool {
         set {
-            widthTracksTextView = newValue
-        }
-
-        get {
-            widthTracksTextView
-        }
-    }
-
-    /// A Boolean that controls whether the text container adjusts the height of its bounding rectangle when its text view resizes.
-    ///
-    /// When the value of this property is `true`, the text container adjusts its height when the height of its text view changes. The default value of this property is `false`.
-    ///
-    /// - Note: If you set both `heightTracksTextView` and `isVerticallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
-    ///
-    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
-    @objc public var heightTracksTextView: Bool {
-        set {
-            if textContainer.heightTracksTextView != newValue {
-                textContainer.heightTracksTextView = newValue
-                textContainer.size = _defaultTextContainerSize
+            if _isHorizontallyResizable != newValue {
+                _isHorizontallyResizable = newValue
+                updateTextContainerSize()
                 needsLayout = true
             }
         }
 
         get {
-            textContainer.heightTracksTextView
+            _isHorizontallyResizable
         }
     }
 
+    /// NSTextView compatibility. Equivalent to `!isHorizontallyResizable`.
+    @available(*, deprecated, renamed: "isHorizontallyResizable")
+    @objc public var widthTracksTextView: Bool {
+        set { isHorizontallyResizable = !newValue }
+        get { !isHorizontallyResizable }
+    }
+
+    private var _isVerticallyResizable: Bool = true
+
     /// A Boolean that controls whether the receiver changes its height to fit the height of its text.
+    /// When `true` (default), the view expands vertically to fit content.
+    /// When `false`, content is clipped at the view height.
     @objc public var isVerticallyResizable: Bool {
         set {
-            heightTracksTextView = newValue
+            if _isVerticallyResizable != newValue {
+                _isVerticallyResizable = newValue
+                updateTextContainerSize()
+                needsLayout = true
+            }
         }
 
         get {
-            heightTracksTextView
+            _isVerticallyResizable
         }
+    }
+
+    /// NSTextView compatibility. Equivalent to `!isVerticallyResizable`.
+    @available(*, deprecated, renamed: "isVerticallyResizable")
+    @objc public var heightTracksTextView: Bool {
+        set { isVerticallyResizable = !newValue }
+        get { !isVerticallyResizable }
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line.
@@ -494,6 +483,7 @@ import AVFoundation
     internal let selectionView: STSelectionView
 
     internal var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
+    internal var lastUsedFragmentViews: Set<STTextLayoutFragmentView> = []
     private var _usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
     internal lazy var _speechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
@@ -589,6 +579,20 @@ import AVFoundation
         }
     }
 
+    internal var liveResizeLayoutSuppression: Bool = false
+    private var lastViewportBounds: CGRect = .zero
+    private var inLayout: Bool = false
+    private var needsRelayout: Bool = false
+
+    private var shouldUpdateLayout: Bool {
+        if liveResizeLayoutSuppression {
+            let controller = textLayoutManager.textViewportLayoutController
+            let newBounds = viewportBounds(for: controller)
+            return !newBounds.isAlmostEqual(to: lastViewportBounds)
+        }
+        return true
+    }
+
     open override var isFlipped: Bool {
         true
     }
@@ -650,8 +654,6 @@ import AVFoundation
         textContentManager = STTextContentStorage()
         textLayoutManager = STTextLayoutManager()
         textLayoutManager.textContainer = STTextContainer()
-        textLayoutManager.textContainer?.widthTracksTextView = false
-        textLayoutManager.textContainer?.heightTracksTextView = true
         textContentManager.addTextLayoutManager(textLayoutManager)
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
@@ -934,11 +936,16 @@ import AVFoundation
         // usageBoundsForTextContainer already includes lineFragmentPadding via STTextLayoutManager workaround
         let textSize = textLayoutManager.usageBoundsForTextContainer.size
         let gutterWidth = gutterView?.frame.width ?? 0
-        
+
         return NSSize(
             width: textSize.width + gutterWidth,
             height: textSize.height
         )
+    }
+
+    open override func updateConstraints() {
+        updateTextContainerSize()
+        super.updateConstraints()
     }
 
     open override class var isCompatibleWithResponsiveScrolling: Bool {
@@ -1268,15 +1275,62 @@ import AVFoundation
         self.prepareContent(in: visibleRect) // layoutViewport() on change
     }
 
+    open override func viewWillStartLiveResize() {
+        super.viewWillStartLiveResize()
+
+        let controller = textLayoutManager.textViewportLayoutController
+        if let viewportRange = controller.viewportRange {
+            let currentViewportBounds = controller.viewportBounds
+            let charCount = textContentManager.offset(
+                from: textContentManager.documentRange.location,
+                to: viewportRange.endLocation
+            )
+
+            let scrolledDown = currentViewportBounds.minY > currentViewportBounds.height * 0.7
+            let largeDocument = charCount >= 50_000
+
+            if scrolledDown || largeDocument {
+                liveResizeLayoutSuppression = true
+                lastViewportBounds = viewportBounds(for: controller)
+            }
+        }
+    }
+
     open override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
-        layoutViewport()
+
+        liveResizeLayoutSuppression = false
+        updateTextContainerSize()
+        needsLayout = true
     }
 
     open override func layout() {
         super.layout()
 
-        layoutViewport()
+        if shouldUpdateLayout {
+            inLayout = true
+            defer { inLayout = false }
+
+            // Convergence loop - max 5 iterations (like NSTextView)
+            // If layout triggers changes that require re-layout, needsRelayout is set
+            var iterations = 5
+            while iterations > 0 {
+                needsRelayout = false
+
+                layoutViewport()
+                lastViewportBounds = viewportBounds(for: textLayoutManager.textViewportLayoutController)
+
+                if !needsRelayout { break }
+                iterations -= 1
+            }
+
+            #if DEBUG
+            if iterations == 0 {
+                logger.warning("layout() failed to converge after 5 iterations")
+            }
+            #endif
+        }
+
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)
         }
@@ -1284,18 +1338,29 @@ import AVFoundation
         needsScrollToSelection = false
     }
 
-    /// Resizes the receiver to fit its text.
-    open func sizeToFit() {
+    internal func setNeedsLayoutSafe() {
+        if inLayout {
+            needsRelayout = true
+        } else if !needsLayout && !inLiveResize {
+            needsLayout = true
+        }
+    }
+
+    private var effectiveVisibleRect: CGRect {
+        visibleRect.isInfinite ? bounds : visibleRect
+    }
+
+    private func updateTextContainerSize(proposedSize: NSSize? = nil) {
+        guard !liveResizeLayoutSuppression else { return }
+
         let gutterWidth = gutterView?.frame.width ?? 0
+        let scrollerInset = proposedSize == nil ? (scrollView?.contentView.contentInsets.right ?? 0) : 0
+        let referenceSize = proposedSize ?? effectiveVisibleRect.size
 
-        let horizontalContentInset = scrollView?.contentInsets.horizontalInsets ?? 0
-
-        // Need to configure TextContainer before layout calculations
         var newTextContainerSize = textContainer.size
         if !isHorizontallyResizable {
-            // setup text container for wrap-text, need for layout
-            let proposedContentWidth = visibleRect.width - gutterWidth
-            if !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
+            let proposedContentWidth = referenceSize.width - gutterWidth - scrollerInset
+            if proposedContentWidth > 0 && !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
                 newTextContainerSize.width = proposedContentWidth
             }
         } else {
@@ -1303,8 +1368,8 @@ import AVFoundation
         }
 
         if !isVerticallyResizable {
-            let proposedContentHeight = visibleRect.height
-            if !newTextContainerSize.height.isAlmostEqual(to: proposedContentHeight) {
+            let proposedContentHeight = referenceSize.height
+            if proposedContentHeight > 0 && !newTextContainerSize.height.isAlmostEqual(to: proposedContentHeight) {
                 newTextContainerSize.height = proposedContentHeight
             }
         } else {
@@ -1313,9 +1378,13 @@ import AVFoundation
 
         if !textContainer.size.isAlmostEqual(to: newTextContainerSize) {
             textContainer.size = newTextContainerSize
-            logger.debug("\(#function) pre-configure textContainer.size \(newTextContainerSize.debugDescription)")
         }
-        
+    }
+
+    /// Resizes the receiver to fit its text.
+    open func sizeToFit() {
+        updateTextContainerSize()
+
         // Now perform layout with correct container size
         // Estimate `usageBoundsForTextContainer` size is based on performed layout.
         // If layout didn't happen for the whole document, it only cover
@@ -1335,41 +1404,26 @@ import AVFoundation
         // Asking for the end location result in estimated `usageBoundsForTextContainer`
         // that eventually get right as more and more layout happen (when scrolling)
 
-        // Estimated text container size to layout document
-        // It is impossible to get the stable content size performantly: https://developer.apple.com/forums/thread/761364?answerId=799739022#799739022
-        // textLayoutManager.ensureLayout(for: NSTextRange(location: textLayoutManager.documentRange.endLocation))
+        textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
+
         var usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
 
-        // the enumerate seems to be faster than ensureLayout, but still estimated
         textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-            usageBoundsForTextContainerSize.height = layoutFragment.layoutFragmentFrame.maxY
+            // FB15131180 workaround: use stTypographicBounds instead of layoutFragmentFrame
+            usageBoundsForTextContainerSize.height = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY
             return false
         }
 
-        // FIXME: Mitigate a problem with "jumping" by never shrink and only grow
-        usageBoundsForTextContainerSize.height = max(frame.size.height, usageBoundsForTextContainerSize.height)
-
-        // Adjust self.frame to match textContainer.size used for layout
         var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
         if !isHorizontallyResizable {
-            // wrap-text
             newFrame.size.width = textContainer.size.width
-        } else if isHorizontallyResizable {
-            // no wrap-text
-            // limit width to fit the width of usage bounds
-            newFrame.size.width = max(visibleRect.width - horizontalContentInset, usageBoundsForTextContainerSize.width - gutterWidth + textContainer.lineFragmentPadding)
         }
 
         if !isVerticallyResizable {
-            // limit-text
-            newFrame.size.height = usageBoundsForTextContainerSize.height
-        } else if isVerticallyResizable {
-            // expand
-            // changes height to fit the height of its text
-            newFrame.size.height = max(visibleRect.height, usageBoundsForTextContainerSize.height)
+            newFrame.size.height = frame.size.height
         }
 
-        newFrame = newFrame.pixelAligned
+        newFrame = backingAlignedRect(newFrame, options: .alignAllEdgesOutward)
 
         if !newFrame.size.isAlmostEqual(to: frame.size) {
             setFrameSize(newFrame.size) // layout()
@@ -1382,11 +1436,77 @@ import AVFoundation
         // contentView should always fill the entire STTextView
         contentView.frame.origin.x = gutterView?.frame.width ?? 0
         contentView.frame.size = newSize
+
+        updateTextContainerSize(proposedSize: newSize)
     }
 
     internal func layoutViewport() {
         // not matter what, the layoutViewport() is slow
         textLayoutManager.textViewportLayoutController.layoutViewport()
+    }
+
+    internal func updateContentSizeIfNeeded() {
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
+
+        var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
+
+        textLayoutManager.enumerateTextLayoutFragments(
+            from: textLayoutManager.documentRange.endLocation,
+            options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
+        ) { layoutFragment in
+            // FB15131180 workaround
+            estimatedSize.height = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY
+            return false
+        }
+
+        if !isHorizontallyResizable {
+            estimatedSize.width = effectiveVisibleRect.width - gutterWidth - scrollerInset
+        }
+
+        if !isVerticallyResizable {
+            estimatedSize.height = frame.height
+        }
+
+        estimatedSize.width += gutterWidth
+
+        if let scrollView {
+            estimatedSize.width = max(estimatedSize.width, scrollView.contentView.bounds.width - scrollerInset)
+        }
+
+        let newFrame = backingAlignedRect(
+            CGRect(origin: frame.origin, size: estimatedSize),
+            options: .alignAllEdgesOutward
+        )
+
+        if !newFrame.size.isAlmostEqual(to: frame.size) {
+            setFrameSize(newFrame.size)
+        }
+    }
+
+    internal func relocateViewport(to location: NSTextLocation) {
+        let textViewportLayoutController = textLayoutManager.textViewportLayoutController
+
+        let suggestedAnchor = textViewportLayoutController.relocateViewport(to: location)
+
+        var lastLineMaxY = suggestedAnchor
+        textLayoutManager.enumerateTextLayoutFragments(
+            from: location,
+            options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
+        ) { layoutFragment in
+            // FB15131180 workaround
+            lastLineMaxY = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY
+            return false
+        }
+
+        if !lastLineMaxY.isAlmostEqual(to: frame.height) {
+            setFrameSize(CGSize(width: frame.width, height: lastLineMaxY))
+        }
+
+        let offset = frame.height - suggestedAnchor
+        if !offset.isAlmostZero() {
+            textViewportLayoutController.adjustViewport(byVerticalOffset: -offset)
+        }
     }
 
     open func scrollRangeToVisible(_ range: NSRange) {
