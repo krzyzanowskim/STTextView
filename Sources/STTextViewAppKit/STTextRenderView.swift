@@ -44,9 +44,15 @@ open class STTextRenderView: NSView {
         var frameHeight: CGFloat = 0
 
         // Calculate width and height matching how draw() positions content
+        // When clipsToContent is true, draw() starts from y=0
+        // When clipsToContent is false, draw() uses layoutFragmentFrame.origin.y
         var originY: CGFloat = 0
         textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
             frameWidth = max(frameWidth, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding)
+
+            if !self.clipsToContent && originY == 0 {
+                originY = textLayoutFragment.layoutFragmentFrame.origin.y
+            }
 
             for textLineFragment in textLayoutFragment.textLineFragments {
                 // Line is drawn at originY, extends to originY + height

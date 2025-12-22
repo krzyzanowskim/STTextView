@@ -20,9 +20,18 @@ extension STTextView {
         }
 
         let rangeView = STTextRenderView(textLayoutManager: textLayoutManager, textRange: textRange)
+        rangeView.clipsToContent = true
         let draggingImage = rangeView.image()
 
-        let draggingFrame = gestureRecognizer.view?.convert(rangeView.frame, from: contentView) ?? rangeView.frame
+        // Get the actual position of the selection in the content view
+        var selectionOrigin = CGPoint.zero
+        textLayoutManager.enumerateTextSegments(in: textRange, type: .selection, options: []) { _, textSegmentFrame, _, _ in
+            selectionOrigin = textSegmentFrame.origin
+            return false // stop after first segment to get the origin
+        }
+
+        let draggingFrameInContentView = CGRect(origin: selectionOrigin, size: rangeView.frame.size)
+        let draggingFrame = gestureRecognizer.view?.convert(draggingFrameInContentView, from: contentView) ?? draggingFrameInContentView
 
         let draggingItem = NSDraggingItem(pasteboardWriter: selectionsAttributedString)
         draggingItem.setDraggingFrame(draggingFrame, contents: draggingImage)
