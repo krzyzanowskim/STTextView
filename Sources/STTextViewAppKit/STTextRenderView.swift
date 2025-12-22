@@ -3,6 +3,7 @@
 
 import AppKit
 import CoreGraphics
+import STTextViewCommon
 
 @available(*, deprecated, renamed: "STTextRenderView")
 public typealias STTextLayoutRangeView = STTextRenderView
@@ -101,17 +102,30 @@ open class STTextRenderView: NSView {
                     continue
                 }
 
-                textLineFragment.draw(at: origin, in: ctx)
+                // Apply lineHeightMultiple offset to match STTextLayoutFragment rendering
+                let paragraphStyle: NSParagraphStyle = if !textLineFragment.isExtraLineFragment,
+                                                          let lineParagraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                    lineParagraphStyle
+                } else {
+                    .default
+                }
+                let lineHeightOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
+
+                let drawOrigin = CGPoint(
+                    x: origin.x + textLineFragment.typographicBounds.origin.x,
+                    y: origin.y + textLineFragment.typographicBounds.origin.y + lineHeightOffset
+                )
+                textLineFragment.draw(at: drawOrigin, in: ctx)
 
                 // if textLineFragment contains textRange.location, cut off everything before it
                 if textLineFragmentRange.contains(textRange.location) {
                     let originOffset = textLineFragment.locationForCharacter(at: textLayoutManager.offset(from: textLineFragmentRange.location, to: textRange.location))
-                    ctx.clear(CGRect(x: origin.x, y: origin.y, width: originOffset.x, height: textLineFragment.typographicBounds.height))
+                    ctx.clear(CGRect(x: drawOrigin.x, y: drawOrigin.y, width: originOffset.x, height: textLineFragment.typographicBounds.height))
                 }
 
                 if textLineFragmentRange.contains(textRange.endLocation) {
                     let originOffset = textLineFragment.locationForCharacter(at: textLayoutManager.offset(from: textLineFragmentRange.location, to: textRange.endLocation))
-                    ctx.clear(CGRect(x: originOffset.x, y: origin.y, width: textLineFragment.typographicBounds.width - originOffset.x, height: textLineFragment.typographicBounds.height))
+                    ctx.clear(CGRect(x: drawOrigin.x + originOffset.x, y: drawOrigin.y, width: textLineFragment.typographicBounds.width - originOffset.x, height: textLineFragment.typographicBounds.height))
                     break
                 }
 
