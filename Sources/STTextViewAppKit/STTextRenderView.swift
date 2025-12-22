@@ -42,31 +42,18 @@ open class STTextRenderView: NSView {
         textLayoutManager.ensureLayout(for: textRange)
 
         var frameWidth: CGFloat = 0
-        var frameHeight: CGFloat = 0
+        var frameMinY: CGFloat = .greatestFiniteMagnitude
+        var frameMaxY: CGFloat = 0
 
-        // Calculate width and height matching how draw() positions content
-        // When clipsToContent is true, draw() starts from y=0
-        // When clipsToContent is false, draw() uses layoutFragmentFrame.origin.y
-        var originY: CGFloat = 0
         textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
-            frameWidth = max(frameWidth, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding)
-
-            if !self.clipsToContent && originY == 0 {
-                originY = textLayoutFragment.layoutFragmentFrame.origin.y
-            }
-
-            for textLineFragment in textLayoutFragment.textLineFragments {
-                // Line is drawn at originY, extends to originY + height
-                let lineBottom = originY + textLineFragment.typographicBounds.height
-                frameHeight = max(frameHeight, lineBottom)
-
-                // Move to next position (same as draw())
-                let diff = textLineFragment.typographicBounds.minY + textLineFragment.glyphOrigin.y
-                originY += diff
-            }
+            let fragmentFrame = textLayoutFragment.layoutFragmentFrame
+            frameWidth = max(frameWidth, fragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding)
+            frameMinY = min(frameMinY, fragmentFrame.minY)
+            frameMaxY = max(frameMaxY, fragmentFrame.maxY)
             return true
         }
 
+        let frameHeight = frameMaxY - (clipsToContent ? frameMinY : 0)
         self.frame = CGRect(x: 0, y: 0, width: frameWidth, height: frameHeight)
 
         super.layout()
@@ -85,17 +72,27 @@ open class STTextRenderView: NSView {
     override open func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
 
-        var originY: CGFloat = 0
+        // When clipsToContent is true, we need to offset all positions so content starts at y=0
+        var firstFragmentMinY: CGFloat?
+
         textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
-            // at what location start draw the line. the first character is at textRange.location
-            // I want to draw just a part of the line fragment, however I can only draw the whole line
-            // so remove/delete unnecessary part of the line
-            var origin =
-                if clipsToContent {
-                    CGPoint(x: textLayoutFragment.layoutFragmentFrame.origin.x, y: originY)
-                } else {
-                    textLayoutFragment.layoutFragmentFrame.origin
-                }
+            let fragmentFrame = textLayoutFragment.layoutFragmentFrame
+
+            // Track the first fragment's y position for clipsToContent offset
+            if firstFragmentMinY == nil {
+                firstFragmentMinY = fragmentFrame.minY
+            }
+
+            // Calculate the base origin for this layout fragment
+            let fragmentOrigin: CGPoint
+            if clipsToContent {
+                fragmentOrigin = CGPoint(
+                    x: fragmentFrame.origin.x,
+                    y: fragmentFrame.origin.y - (firstFragmentMinY ?? 0)
+                )
+            } else {
+                fragmentOrigin = fragmentFrame.origin
+            }
 
             for textLineFragment in textLayoutFragment.textLineFragments {
                 guard let textLineFragmentRange = textLineFragment.textRange(in: textLayoutFragment) else {
@@ -111,9 +108,10 @@ open class STTextRenderView: NSView {
                 }
                 let lineHeightOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
 
+                // Draw at fragment origin + line fragment's relative position (from typographicBounds.origin)
                 let drawOrigin = CGPoint(
-                    x: origin.x + textLineFragment.typographicBounds.origin.x,
-                    y: origin.y + textLineFragment.typographicBounds.origin.y + lineHeightOffset
+                    x: fragmentOrigin.x + textLineFragment.typographicBounds.origin.x,
+                    y: fragmentOrigin.y + textLineFragment.typographicBounds.origin.y + lineHeightOffset
                 )
                 textLineFragment.draw(at: drawOrigin, in: ctx)
 
@@ -128,12 +126,6 @@ open class STTextRenderView: NSView {
                     ctx.clear(CGRect(x: drawOrigin.x + originOffset.x, y: drawOrigin.y, width: textLineFragment.typographicBounds.width - originOffset.x, height: textLineFragment.typographicBounds.height))
                     break
                 }
-
-                // TODO: Position does not take RTL, Vertical into account
-                // let writingDirection = textLayoutManager.baseWritingDirection(at: textRange.location)
-                let diff = textLineFragment.typographicBounds.minY + textLineFragment.glyphOrigin.y
-                origin.y += diff
-                originY += diff
             }
 
             return true
