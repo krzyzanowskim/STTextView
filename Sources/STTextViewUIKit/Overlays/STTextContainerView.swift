@@ -3,7 +3,7 @@
 
 import UIKit
 
-final class STContentView: UIView {
+final class STTextContainerView: UIView {
 
     override class var layerClass: AnyClass {
         CATiledLayer.self

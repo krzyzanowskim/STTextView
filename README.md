@@ -230,7 +230,7 @@ STTextView (umbrella target)
 ### Core Components
 
 - **STTextView**: Main view that coordinates all components
-- **STContentView**: Renders text fragments and insertion point
+- **STTextContainerView**: Renders text fragments and insertion point
 - **STSelectionView**: Handles selection overlays
 - **STGutterView**: Optional line numbers and markers
 - **STLineHighlightView**: Current line highlighting

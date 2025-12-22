@@ -210,7 +210,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     var plugins: [Plugin] = []
 
     /// Content view. Layout fragments content.
-    let contentView: STContentView
+    let contentView: STTextContainerView
 
     /// Content frame. Layout fragments content frame.
     public var contentFrame: CGRect {
@@ -474,7 +474,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         isSelectable = true
         isEditable = true
 
-        contentView = STContentView()
+        contentView = STTextContainerView()
 
         lineHighlightView = STLineHighlightView()
         lineHighlightView.isHidden = true
@@ -783,6 +783,51 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         if !textContainer.size.isAlmostEqual(to: proposedSize) {
             textContainer.size = proposedSize
             logger.debug("textContainer.size (\(self.textContainer.size.width), \(self.textContainer.size.width)) \(#function)")
+        }
+    }
+
+    /// Lightweight content size update called after viewport layout.
+    ///
+    /// Unlike `sizeToFit()` which may trigger full document layout, this method
+    /// uses existing layout data to estimate content size.
+    func updateContentSizeIfNeeded() {
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let verticalScrollInset = contentInset.top + contentInset.bottom
+        let visibleRectSize = bounds.size
+
+        // Use existing layout data - don't force full document layout
+        var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
+
+        // FB15131180 workaround: get accurate height from last layout fragment
+        textLayoutManager.enumerateTextLayoutFragments(
+            from: textLayoutManager.documentRange.endLocation,
+            options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
+        ) { layoutFragment in
+            estimatedSize.height = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY
+            return false
+        }
+
+        // Calculate frame based on resize mode
+        let frameSize: CGSize
+        if isHorizontallyResizable {
+            // no-wrapping
+            frameSize = CGSize(
+                width: max(estimatedSize.width + gutterWidth + textContainer.lineFragmentPadding, visibleRectSize.width),
+                height: max(estimatedSize.height, visibleRectSize.height - verticalScrollInset)
+            )
+        } else {
+            // wrapping
+            frameSize = CGSize(
+                width: visibleRectSize.width,
+                height: max(estimatedSize.height, visibleRectSize.height - verticalScrollInset)
+            )
+        }
+
+        // Only update if changed
+        if !contentView.frame.size.isAlmostEqual(to: frameSize) {
+            contentView.frame.origin.x = gutterWidth
+            contentView.frame.size = frameSize
+            contentSize = frameSize
         }
     }
 
