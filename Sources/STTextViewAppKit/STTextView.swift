@@ -366,16 +366,6 @@ import AVFoundation
     @MainActor
     open var bottomPadding: CGFloat = 0
 
-    /// Extra padding to the right of text content for accessory views.
-    ///
-    /// When set to a value greater than 0:
-    /// - The padding is added to the frame width in `sizeToFit()`
-    /// - Provides space for overlay views like annotation margins
-    ///
-    /// Default is `0` (no extra padding).
-    @MainActor
-    open var rightPadding: CGFloat = 0
-
     /// Custom annotation decorations to render on text (underlines, backgrounds).
     ///
     /// Set this property to display decorations at specific character ranges.
@@ -1343,11 +1333,8 @@ import AVFoundation
         var newTextContainerSize = textContainer.size
         if !isHorizontallyResizable {
             // setup text container for wrap-text, need for layout
-            // Subtract rightPadding so text wraps before the accessory view area
-            // Only apply when we have valid geometry (visibleRect.width > 0)
-            let baseWidth = visibleRect.width - gutterWidth
-            let proposedContentWidth = visibleRect.width > 0 ? baseWidth - rightPadding : baseWidth
-            if proposedContentWidth > 0 && !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
+            let proposedContentWidth = visibleRect.width - gutterWidth
+            if !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
                 newTextContainerSize.width = proposedContentWidth
             }
         } else {
@@ -1433,12 +1420,6 @@ import AVFoundation
         // avoiding repeated setFrameSize calls.
         if bottomPadding > 0 {
             newFrame.size.height += bottomPadding
-        }
-
-        // Add right padding for accessory views (e.g., annotation margins).
-        // Only apply when we have valid geometry (visibleRect.width > 0).
-        if rightPadding > 0 && visibleRect.width > 0 {
-            newFrame.size.width += rightPadding
         }
 
         if !newFrame.size.isAlmostEqual(to: frame.size) {
