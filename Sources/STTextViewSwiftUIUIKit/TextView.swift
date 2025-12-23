@@ -22,7 +22,6 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     private let options: Options
     private let plugins: [any STPlugin]
     private let contentInsets: EdgeInsets?
-    private let isEditable: Bool?
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
@@ -31,21 +30,18 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     ///   - options: Editor options
     ///   - plugins: Editor plugins
     ///   - contentInsets: Custom content insets. When provided, disables automatic safe area adjustment.
-    ///   - isEditable: Whether the text view is editable. When nil, uses the SwiftUI environment's `isEnabled` value.
     public init(
         text: Binding<AttributedString>,
         selection: Binding<NSRange?> = .constant(nil),
         options: Options = [],
         plugins: [any STPlugin] = [],
-        contentInsets: EdgeInsets? = nil,
-        isEditable: Bool? = nil
+        contentInsets: EdgeInsets? = nil
     ) {
         _text = text
         _selection = selection
         self.options = options
         self.plugins = plugins
         self.contentInsets = contentInsets
-        self.isEditable = isEditable
     }
 
     public var body: some View {
@@ -54,8 +50,7 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             selection: $selection,
             options: options,
             plugins: plugins,
-            contentInsets: contentInsets,
-            isEditable: isEditable
+            contentInsets: contentInsets
         )
         .background(.background)
     }
@@ -64,6 +59,8 @@ public struct TextView: SwiftUI.View, TextViewModifier {
 private struct TextViewRepresentable: UIViewRepresentable {
     @Environment(\.isEnabled)
     private var isEnabled
+    @Environment(\.editMode)
+    private var editMode
     @Environment(\.font)
     private var font
     @Environment(\.lineSpacing)
@@ -78,20 +75,21 @@ private struct TextViewRepresentable: UIViewRepresentable {
     private let options: TextView.Options
     private var plugins: [any STPlugin]
     private let contentInsets: EdgeInsets?
-    private let isEditableOverride: Bool?
 
-    /// Resolved editable state: explicit parameter takes precedence over environment
+    /// Resolved editable state: EditMode takes precedence if set, otherwise falls back to isEnabled
     private var resolvedIsEditable: Bool {
-        isEditableOverride ?? isEnabled
+        if let editMode = editMode?.wrappedValue {
+            return editMode.isEditing
+        }
+        return isEnabled
     }
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], contentInsets: EdgeInsets? = nil, isEditable: Bool? = nil) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], contentInsets: EdgeInsets? = nil) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
         self.contentInsets = contentInsets
-        self.isEditableOverride = isEditable
     }
 
     func makeUIView(context: Context) -> STTextView {

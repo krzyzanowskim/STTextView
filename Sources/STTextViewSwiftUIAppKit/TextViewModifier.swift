@@ -18,12 +18,6 @@ public extension TextViewModifier {
     func textViewLineHeightMultiple(_ multiple: CGFloat) -> TextViewEnvironmentModifier<Self, CGFloat> {
         TextViewEnvironmentModifier(content: self, keyPath: \.lineHeightMultiple, value: multiple)
     }
-
-    /// Sets whether the text view is editable.
-    /// - Parameter isEditable: Whether the text view allows editing.
-    func textViewIsEditable(_ isEditable: Bool) -> TextViewEnvironmentModifier<Self, Bool> {
-        TextViewEnvironmentModifier(content: self, keyPath: \.textViewIsEditable, value: isEditable)
-    }
 }
 
 public struct TextViewEnvironmentModifier<Content: View, V>: View, TextViewModifier {
@@ -45,10 +39,6 @@ private struct LineHeightMultipleEnvironmentKey: EnvironmentKey {
     static var defaultValue: CGFloat = 1.0
 }
 
-private struct TextViewIsEditableEnvironmentKey: EnvironmentKey {
-    static var defaultValue: Bool? = nil
-}
-
 extension EnvironmentValues {
     var font: NSFont {
         get { self[FontEnvironmentKey.self] }
@@ -58,10 +48,5 @@ extension EnvironmentValues {
     var lineHeightMultiple: CGFloat {
         get { self[LineHeightMultipleEnvironmentKey.self] }
         set { self[LineHeightMultipleEnvironmentKey.self] = newValue }
-    }
-
-    var textViewIsEditable: Bool? {
-        get { self[TextViewIsEditableEnvironmentKey.self] }
-        set { self[TextViewIsEditableEnvironmentKey.self] = newValue }
     }
 }

@@ -20,7 +20,6 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
-    private let isEditable: Bool?
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
@@ -28,19 +27,16 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     ///   - selection: The current selection range
     ///   - options: Editor options
     ///   - plugins: Editor plugins
-    ///   - isEditable: Whether the text view is editable. When nil, uses the SwiftUI environment's `isEnabled` value.
     public init(
         text: Binding<AttributedString>,
         selection: Binding<NSRange?> = .constant(nil),
         options: Options = [],
-        plugins: [any STPlugin] = [],
-        isEditable: Bool? = nil
+        plugins: [any STPlugin] = []
     ) {
         _text = text
         _selection = selection
         self.options = options
         self.plugins = plugins
-        self.isEditable = isEditable
     }
 
     public var body: some View {
@@ -48,8 +44,7 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             text: $text,
             selection: $selection,
             options: options,
-            plugins: plugins,
-            isEditable: isEditable
+            plugins: plugins
         )
         .background(.background)
     }
@@ -71,19 +66,12 @@ private struct TextViewRepresentable: NSViewRepresentable {
     private var selection: NSRange?
     private let options: TextView.Options
     private var plugins: [any STPlugin]
-    private let isEditableOverride: Bool?
 
-    /// Resolved editable state: explicit parameter takes precedence over environment
-    private var resolvedIsEditable: Bool {
-        isEditableOverride ?? isEnabled
-    }
-
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], isEditable: Bool? = nil) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = []) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
-        self.isEditableOverride = isEditable
     }
 
     func makeNSView(context: Context) -> NSScrollView {
@@ -127,8 +115,8 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.addPlugin(plugin)
         }
 
-        textView.isEditable = resolvedIsEditable
-        textView.isSelectable = resolvedIsEditable
+        textView.isEditable = isEnabled
+        textView.isSelectable = isEnabled
 
         return scrollView
     }
@@ -147,12 +135,12 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.textSelection = selection
         }
 
-        if textView.isEditable != resolvedIsEditable {
-            textView.isEditable = resolvedIsEditable
+        if textView.isEditable != isEnabled {
+            textView.isEditable = isEnabled
         }
 
-        if textView.isSelectable != resolvedIsEditable {
-            textView.isSelectable = resolvedIsEditable
+        if textView.isSelectable != isEnabled {
+            textView.isSelectable = isEnabled
         }
 
         if textView.font != font {
