@@ -47,10 +47,6 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
   <video src="https://github.com/user-attachments/assets/e18c058b-8a58-47e0-a57c-a3b01f3d93db" width="90%" />
 </div>
 
-## Support & Sponsors
-
-The financial sustainability of the project is possible thanks to the ongoing contributions from our [GitHub Sponsors](https://github.com/sponsors/krzyzanowskim)
-
 ## Roadmap
 
 **Suggest** or **vote** for new features: [Feature Requests](https://github.com/krzyzanowskim/STTextView/discussions/14)
@@ -157,7 +153,7 @@ textView.highlightSelectedLine = true
 Add gutter with line numbers
 
 ```swift
-textView.showLineNumbers = true
+textView.showsLineNumbers = true
 textView.gutterView?.drawSeparator = true
 ```
 
