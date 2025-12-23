@@ -154,7 +154,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.isAutomaticSpellingCorrectionEnabled = !autocorrectionDisabled
         }
 
-        if options.contains(.wrapLines) != textView.isHorizontallyResizable {
+        if options.contains(.wrapLines) == textView.isHorizontallyResizable {
             textView.isHorizontallyResizable = !options.contains(.wrapLines)
         }
 

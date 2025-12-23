@@ -77,11 +77,14 @@ private struct TextViewRepresentable: UIViewRepresentable {
     private var plugins: [any STPlugin]
     private let contentInsets: EdgeInsets?
 
-    /// Resolved editable state: EditMode takes precedence if set, otherwise falls back to isEnabled
+    /// Resolved editable state: Only restrict editing when EditMode is explicitly active (in a List).
+    /// When EditMode is inactive or not set, fall back to isEnabled.
     private var resolvedIsEditable: Bool {
-        if let editMode = editMode?.wrappedValue {
-            return editMode.isEditing
+        if let editMode = editMode?.wrappedValue, editMode.isEditing {
+            // Only in active edit mode (e.g., List editing), follow the edit mode
+            return true
         }
+        // In all other cases (inactive, transient, or no edit mode), use isEnabled
         return isEnabled
     }
 
@@ -180,7 +183,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
             textView.autocorrectionType = expectedAutocorrectionType
         }
 
-        if options.contains(.wrapLines) != textView.isHorizontallyResizable {
+        if options.contains(.wrapLines) == textView.isHorizontallyResizable {
             textView.isHorizontallyResizable = !options.contains(.wrapLines)
             textView.setNeedsLayout()
         }

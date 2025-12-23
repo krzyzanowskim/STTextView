@@ -331,8 +331,10 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     @objc
     open dynamic var isEditable: Bool {
         didSet {
-            if isEditable != oldValue, !isEditable {
-                resignFirstResponder()
+            if isEditable != oldValue {
+                if !isEditable {
+                    resignFirstResponder()
+                }
                 updateEditableInteraction()
             }
         }
@@ -343,12 +345,13 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     @objc
     open dynamic var isSelectable: Bool {
         didSet {
-            if isSelectable != oldValue, !isSelectable {
-                resignFirstResponder()
+            if isSelectable != oldValue {
+                if !isSelectable {
+                    resignFirstResponder()
+                }
                 updateEditableInteraction()
             }
         }
-
     }
 
     /// The receiver’s default paragraph style.

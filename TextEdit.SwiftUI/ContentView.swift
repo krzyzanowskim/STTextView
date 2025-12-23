@@ -18,43 +18,45 @@ let textColor = Color.label
 struct ContentView: View {
     @State private var text: AttributedString = ""
     @State private var selection: NSRange?
-    @State private var counter = 0
     @State private var font = Font.monospacedSystemFont(ofSize: 0, weight: .medium)
+    @State private var wrapLines = true
+    @State private var showLineNumbers = false
+
+    private var options: TextView.Options {
+        var opts: TextView.Options = [.highlightSelectedLine]
+        if wrapLines { opts.insert(.wrapLines) }
+        if showLineNumbers { opts.insert(.showLineNumbers) }
+        return opts
+    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // this is fast
+        NavigationStack {
+            // Issue #91: Using .wrapLines and setting text attributes in onAppear
+            // previously caused an infinite loop. Now fixed.
             TextView(
                 text: $text,
                 selection: $selection,
-                options: [.wrapLines, .highlightSelectedLine, .showLineNumbers]
+                options: options
             )
             .textViewFont(font)
-
-            // Button("Modify") {
-            //     text.insert(AttributedString("\(counter)\n"), at: text.startIndex)
-            //     counter += 1
-            //      selection = NSRange(location: 0, length: 3)
-            // }
-
-            // SwiftUI is slow, I wouldn't use it
-            //
-            // SwiftUI.TextEditor(text: Binding(get: { String(text.characters) }, set: { text = AttributedString($0) }))
-            //    .font(.body)
-
-            HStack {
-                if let selection {
-                    Text("Location: \(selection.location)")
-                } else {
-                    Text("No selection")
+            .navigationTitle("STTextView")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItemGroup {
+                    Toggle(isOn: $wrapLines) {
+                        Label("Wrap Lines", systemImage: wrapLines ? "text.word.spacing" : "arrow.left.and.right.text.vertical")
+                    }
+                    Toggle(isOn: $showLineNumbers) {
+                        Label("Line Numbers", systemImage: showLineNumbers ? "list.number" : "list.bullet")
+                    }
                 }
-
-                Spacer()
             }
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
         }
         .onAppear {
+            // This triggers the issue #91 scenario:
+            // Setting text with attributes in onAppear with .wrapLines option
             loadContent()
         }
     }
