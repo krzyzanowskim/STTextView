@@ -67,6 +67,8 @@ private struct TextViewRepresentable: UIViewRepresentable {
     private var lineSpacing
     @Environment(\.lineHeightMultiple)
     private var lineHeightMultiple
+    @Environment(\.autocorrectionDisabled)
+    private var autocorrectionDisabled
 
     @Binding
     private var text: AttributedString
@@ -105,9 +107,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
             textView.defaultParagraphStyle = paragraphStyle
         }
 
-        if options.contains(.disableAutocorrection) {
-            textView.autocorrectionType = .no
-        }
+        textView.autocorrectionType = autocorrectionDisabled ? .no : .default
         if options.contains(.disableAutocapitalization) {
             textView.autocapitalizationType = .none
         }
@@ -171,6 +171,11 @@ private struct TextViewRepresentable: UIViewRepresentable {
             textView.font = font
             textView.gutterView?.font = font
             textView.setNeedsLayout()
+        }
+
+        let expectedAutocorrectionType: UITextAutocorrectionType = autocorrectionDisabled ? .no : .default
+        if textView.autocorrectionType != expectedAutocorrectionType {
+            textView.autocorrectionType = expectedAutocorrectionType
         }
 
         if options.contains(.wrapLines) != textView.isHorizontallyResizable {

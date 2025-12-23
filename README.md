@@ -88,12 +88,60 @@ struct ContentView: View {
         TextView(
             text: $text,
             selection: $selection,
-            options: [.wrapLines, .highlightSelectedLine],
+            options: [.wrapLines, .highlightSelectedLine, .showLineNumbers],
             plugins: [plugin1(), plugin2()]
         )
-        .textViewFont(.preferredFont(forTextStyle: .body))
+        .textViewFont(.monospacedSystemFont(ofSize: 14, weight: .regular))
+        .textViewLineHeightMultiple(1.2)
+        .autocorrectionDisabled()
     }
 }
+```
+
+#### Options
+
+| Option | iOS | macOS | Description |
+|--------|-----|-------|-------------|
+| `.wrapLines` | ✓ | ✓ | Wrap text to editor width |
+| `.highlightSelectedLine` | ✓ | ✓ | Highlight the current line |
+| `.showLineNumbers` | ✓ | ✓ | Show line numbers in gutter |
+| `.disableSmartQuotes` | ✓ | ✓ | Disable smart quote substitution |
+| `.disableAutocapitalization` | ✓ | — | Disable automatic capitalization |
+| `.disableSmartDashes` | ✓ | — | Disable smart dash substitution |
+| `.disableSmartInsertDelete` | ✓ | — | Disable smart insert/delete |
+| `.disableTextReplacement` | — | ✓ | Disable automatic text replacement |
+| `.disableTextCompletion` | — | ✓ | Disable automatic text completion |
+
+#### Modifiers
+
+```swift
+TextView(text: $text)
+    .textViewFont(.monospacedSystemFont(ofSize: 14, weight: .regular))
+    .textViewLineHeightMultiple(1.2)
+    .autocorrectionDisabled()  // Disable spelling correction
+    .disabled(!isEditable)  // Control editing via isEnabled environment
+```
+
+#### Edit Mode (iOS)
+
+On iOS, `TextView` respects the SwiftUI `EditMode` environment:
+
+```swift
+@State private var editMode: EditMode = .inactive
+
+TextView(text: $text)
+    .environment(\.editMode, $editMode)
+```
+
+#### Content Insets (iOS)
+
+Custom content insets with safe area handling:
+
+```swift
+TextView(
+    text: $text,
+    contentInsets: EdgeInsets(top: 20, leading: 16, bottom: 20, trailing: 16)
+)
 ```
 
 ### Create a TextView

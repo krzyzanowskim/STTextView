@@ -59,6 +59,8 @@ private struct TextViewRepresentable: NSViewRepresentable {
     private var lineSpacing
     @Environment(\.lineHeightMultiple)
     private var lineHeightMultiple
+    @Environment(\.autocorrectionDisabled)
+    private var autocorrectionDisabled
 
     @Binding
     private var text: AttributedString
@@ -89,9 +91,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.defaultParagraphStyle = paragraphStyle
         }
 
-        if options.contains(.disableAutocorrection) {
-            textView.isAutomaticSpellingCorrectionEnabled = false
-        }
+        textView.isAutomaticSpellingCorrectionEnabled = !autocorrectionDisabled
         if options.contains(.disableSmartQuotes) {
             textView.isAutomaticQuoteSubstitutionEnabled = false
         }
@@ -146,6 +146,10 @@ private struct TextViewRepresentable: NSViewRepresentable {
         if textView.font != font {
             textView.font = font
             textView.gutterView?.font = font
+        }
+
+        if textView.isAutomaticSpellingCorrectionEnabled == autocorrectionDisabled {
+            textView.isAutomaticSpellingCorrectionEnabled = !autocorrectionDisabled
         }
 
         if options.contains(.wrapLines) != textView.isHorizontallyResizable {
