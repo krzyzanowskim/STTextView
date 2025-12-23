@@ -242,7 +242,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
         }
 
         func textViewDidChangeSelection(_ notification: Notification) {
-            guard let textView = notification.object as? STTextView else {
+            guard !isUpdating, let textView = notification.object as? STTextView else {
                 return
             }
 
