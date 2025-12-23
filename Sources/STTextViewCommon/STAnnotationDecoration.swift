@@ -23,6 +23,18 @@ public enum STAnnotationStyle: Sendable {
   case background
 }
 
+/// Shape of the marker at the start of an annotation underline.
+public enum STAnnotationMarker: Sendable {
+  /// Filled circle.
+  case circle
+  /// Filled square.
+  case square
+  /// Filled triangle pointing right.
+  case triangle
+  /// Filled diamond.
+  case diamond
+}
+
 /// A decoration that marks a range of text with underlines or backgrounds.
 ///
 /// Annotation decorations are rendered efficiently by the text view,
@@ -44,6 +56,10 @@ public struct STAnnotationDecoration: Sendable {
   /// Line thickness for underlines, or corner radius for backgrounds.
   public let thickness: CGFloat
 
+  /// Shape of the marker at the start of underlines.
+  /// Ignored for background style.
+  public let marker: STAnnotationMarker
+
   /// Creates an annotation decoration.
   ///
   /// - Parameters:
@@ -52,17 +68,20 @@ public struct STAnnotationDecoration: Sendable {
   ///   - color: The decoration color
   ///   - verticalOffset: Vertical offset from baseline for underlines (default: 2)
   ///   - thickness: Line thickness for underlines, corner radius for backgrounds (default: 1.5)
+  ///   - marker: Shape of the start marker for underlines (default: .circle)
   public init(
     range: NSRange,
     style: STAnnotationStyle,
     color: STColor,
     verticalOffset: CGFloat = 2,
-    thickness: CGFloat = 1.5
+    thickness: CGFloat = 1.5,
+    marker: STAnnotationMarker = .circle
   ) {
     self.range = range
     self.style = style
     self.color = color
     self.verticalOffset = verticalOffset
     self.thickness = thickness
+    self.marker = marker
   }
 }

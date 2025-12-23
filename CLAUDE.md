@@ -85,26 +85,27 @@ These properties are maintained for compatibility with downstream projects.
 
 ## Branch Strategy
 
-- **`dev`** - Active development, fast iteration
-- **`feature/*`** - Long-running parallel features (rare)
-- **`main`** - Integration branch, always stable
+- **`main`** - Integration branch, always stable, releases are tagged here
+- **`yuna/*` or `feature/*`** - Feature branches for all development work
 - **Tags** - Releases (e.g., `100.0.0`, `100.1.0`)
+
+**Note:** We do NOT use a `dev` branch. All work happens on dedicated feature branches.
 
 ### Development Workflow
 
-**Standard flow (most changes):**
-1. Work on `dev` branch
-2. Test locally with downstream projects using path-based dependencies
-3. When ready, merge `dev` → `main`
-4. Create integration test PR in downstream projects
-5. If tests pass, create release tag
+**Standard flow (all changes):**
+1. Create a feature branch from `main`: `git checkout -b yuna/feature-name main`
+2. Develop and test locally with downstream projects using path-based dependencies
+3. When ready, create a Pull Request to merge into `main`
+4. After PR review/approval, merge to `main`
+5. Create release tag on `main`
 6. Update downstream projects to new version
 
-**Concurrent features (rare):**
-1. Create feature branch: `feature/descriptive-name`
-2. Develop and test independently
-3. Merge to `main` when ready
-4. Create release tag
+**Why feature branches instead of dev?**
+- Each feature/fix is isolated and can be reviewed independently
+- No risk of accidentally pushing incomplete work to a shared branch
+- PRs provide clear review points before merging to main
+- Easy to abandon or delay work without affecting other changes
 
 See "Handling Concurrent Changes" section below for details.
 
@@ -178,39 +179,37 @@ Before creating any release tag, run integration tests in downstream projects to
 
 ### Creating Feature Branches
 
-When working on multiple features in parallel:
+All work happens on feature branches. Multiple features can be developed in parallel:
 
 ```bash
 # Feature A
-git checkout -b feature/text-selection main
+git checkout -b yuna/text-selection main
 
 # Feature B (separate branch)
-git checkout -b feature/undo-redo main
+git checkout -b yuna/undo-redo main
 ```
 
 ### Testing Feature Branches
 
-In downstream projects, use branch-based or path-based dependencies:
+In downstream projects, use path-based dependencies for fast iteration:
 ```swift
-// Option 1: Branch-based
-.package(url: "https://github.com/yunacaba/STTextView", branch: "feature/text-selection")
-
-// Option 2: Local path (faster iteration)
+// Local path (recommended for development)
 .package(path: "../../../STTextView")  // Adjust path as needed
+
+// Or branch-based for CI testing
+.package(url: "https://github.com/yunacaba/STTextView", branch: "yuna/text-selection")
 ```
+
+**Important:** Always revert to version pin before merging downstream changes.
 
 ### Release Strategy for Concurrent Features
 
-**Sequential (recommended for rare concurrent work):**
-- Finish Feature A → Release 100.0.0
-- Then Feature B → Release 100.1.0
+**Sequential (typical):**
+- Merge Feature A PR → Release 100.1.0
+- Merge Feature B PR → Release 100.2.0
 
-**Cherry-pick:**
-- Feature A ready → Cherry-pick to main → Tag 100.0.0
-- Feature B ready → Cherry-pick to main → Tag 100.1.0
-
-**Combined:**
-- Merge both to main → Tag 100.1.0
+**Combined (if features are related):**
+- Merge both PRs to main → Tag 100.1.0
 
 ## Local Development with Downstream Projects
 
