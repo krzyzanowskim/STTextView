@@ -2,6 +2,7 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 //
 //  STGutterView
+//      |- UIVisualEffectView
 //      |- STGutterContainerView
 //      |- STGutterSeparatorView
 //          |-STGutterLineNumberCell
@@ -76,6 +77,24 @@ open class STGutterView: UIView {
     @Invalidating(.display)
     open var selectedLineTextColor: UIColor? = nil
 
+    open override var backgroundColor: UIColor? {
+        didSet {
+            if backgroundColor == nil, _backgroundEffectView == nil {
+                let backgroundEffect = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
+                backgroundEffect.frame = bounds
+                backgroundEffect.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                // insert subview to `self`. below other subviews.
+                self.insertSubview(backgroundEffect, at: 0)
+                self._backgroundEffectView = backgroundEffect
+            } else if backgroundColor != nil, _backgroundEffectView != nil {
+                _backgroundEffectView?.removeFromSuperview()
+                _backgroundEffectView = nil
+            }
+        }
+    }
+
+    private var _backgroundEffectView: UIVisualEffectView?
+
     /// The color of the separator.
     ///
     /// Needs ``drawSeparator`` to be set to `true`.
@@ -126,11 +145,24 @@ open class STGutterView: UIView {
         addGestureRecognizer(tapGestureRecognizer)
         self.tapGestureRecognizer = tapGestureRecognizer
         tapGestureRecognizer.isEnabled = areMarkersEnabled
+
+        updateBackgroundColor()
     }
 
     @available(*, unavailable)
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override open func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateBackgroundColor()
+        }
+    }
+
+    fileprivate func updateBackgroundColor() {
+        self.backgroundColor = backgroundColor
     }
 
     @objc private func handleTapGesture(_ sender: UIGestureRecognizer) {
