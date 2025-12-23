@@ -132,7 +132,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
 
     /// Enable to show line numbers in the gutter.
     @Invalidating(.layout)
-    public var showsLineNumbers = false {
+    open var showsLineNumbers = false {
         didSet {
             isGutterVisible = showsLineNumbers
         }
@@ -151,13 +151,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     /// Default is `UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)` to match UITextView.
     @Invalidating(.layout)
     @objc
-    open var textContainerInset: UIEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0) {
-        didSet {
-            if textContainerInset != oldValue {
-                setNeedsLayout()
-            }
-        }
-    }
+    open var textContainerInset: UIEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
 
     /// The highlight color of the selected line.
     ///
@@ -287,7 +281,8 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     public lazy var tokenizer: UITextInputTokenizer = STTextInputTokenizer(textLayoutManager)
 
     /// The text that the text view displays.
-    public var text: String? {
+    @objc
+    open var text: String? {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
@@ -310,7 +305,8 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     /// The styled text that the text view displays.
     ///
     /// Assigning a new value to this property also replaces the value of the `text` property with the same string data, albeit without any formatting information. In addition, the `font`, `textColor`, and `textAlignment` properties are updated to reflect the typing attributes of the text view.
-    public var attributedText: NSAttributedString? {
+    @objc
+    open var attributedText: NSAttributedString? {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
