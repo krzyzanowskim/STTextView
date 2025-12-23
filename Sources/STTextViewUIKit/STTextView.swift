@@ -145,6 +145,19 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         }
     }
 
+    /// The inset of the text container's layout area within the text view's content area.
+    ///
+    /// This property controls the padding between the scroll view's content area and the text container.
+    /// Default is `UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)` to match UITextView.
+    @objc
+    open var textContainerInset: UIEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0) {
+        didSet {
+            if textContainerInset != oldValue {
+                setNeedsLayout()
+            }
+        }
+    }
+
     /// The highlight color of the selected line.
     ///
     /// Note: Needs ``highlightSelectedLine`` to be set to `true`
@@ -697,6 +710,8 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         let gutterWidth = gutterView?.frame.width ?? 0
         let verticalScrollInset = contentInset.top + contentInset.bottom
         let visibleRectSize = self.bounds.size
+        let horizontalTextContainerInset = textContainerInset.left + textContainerInset.right
+        let verticalTextContainerInset = textContainerInset.top + textContainerInset.bottom
 
         // Now perform layout with correct container size
         // Estimate `usageBoundsForTextContainer` size is based on performed layout.
@@ -727,20 +742,20 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         let frameSize = if isHorizontallyResizable {
             // no-wrapping
             CGSize(
-                width: max(usageBoundsForTextContainer.size.width + gutterWidth + textContainer.lineFragmentPadding, visibleRectSize.width),
-                height: max(usageBoundsForTextContainer.size.height, visibleRectSize.height - verticalScrollInset)
+                width: max(usageBoundsForTextContainer.size.width + gutterWidth + textContainer.lineFragmentPadding + horizontalTextContainerInset, visibleRectSize.width),
+                height: max(usageBoundsForTextContainer.size.height + verticalTextContainerInset, visibleRectSize.height - verticalScrollInset)
             )
         } else {
             // wrapping
             CGSize(
                 width: visibleRectSize.width,
-                height: max(usageBoundsForTextContainer.size.height, visibleRectSize.height - verticalScrollInset)
+                height: max(usageBoundsForTextContainer.size.height + verticalTextContainerInset, visibleRectSize.height - verticalScrollInset)
             )
         }
 
         if !frame.size.isAlmostEqual(to: frameSize) {
             logger.debug("contentView.frame.size (\(frameSize.width), \(frameSize.height)) \(#function)")
-            self.contentView.frame.origin.x = gutterWidth
+            self.contentView.frame.origin = CGPoint(x: gutterWidth + textContainerInset.left, y: textContainerInset.top)
             self.contentView.frame.size = frameSize
             self.contentSize = frameSize
         }
@@ -754,6 +769,8 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         let gutterWidth = gutterView?.frame.width ?? 0
         let verticalScrollInset = contentInset.top + contentInset.bottom
         let visibleRectSize = bounds.size
+        let horizontalTextContainerInset = textContainerInset.left + textContainerInset.right
+        let verticalTextContainerInset = textContainerInset.top + textContainerInset.bottom
 
         // Use existing layout data - don't force full document layout
         var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
@@ -772,20 +789,20 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         if isHorizontallyResizable {
             // no-wrapping
             frameSize = CGSize(
-                width: max(estimatedSize.width + gutterWidth + textContainer.lineFragmentPadding, visibleRectSize.width),
-                height: max(estimatedSize.height, visibleRectSize.height - verticalScrollInset)
+                width: max(estimatedSize.width + gutterWidth + textContainer.lineFragmentPadding + horizontalTextContainerInset, visibleRectSize.width),
+                height: max(estimatedSize.height + verticalTextContainerInset, visibleRectSize.height - verticalScrollInset)
             )
         } else {
             // wrapping
             frameSize = CGSize(
                 width: visibleRectSize.width,
-                height: max(estimatedSize.height, visibleRectSize.height - verticalScrollInset)
+                height: max(estimatedSize.height + verticalTextContainerInset, visibleRectSize.height - verticalScrollInset)
             )
         }
 
         // Only update if changed
         if !contentView.frame.size.isAlmostEqual(to: frameSize) {
-            contentView.frame.origin.x = gutterWidth
+            contentView.frame.origin = CGPoint(x: gutterWidth + textContainerInset.left, y: textContainerInset.top)
             contentView.frame.size = frameSize
             contentSize = frameSize
         }
@@ -995,10 +1012,12 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     private func updateTextContainerSize() {
         let gutterWidth = gutterView?.frame.width ?? 0
         let referenceSize = bounds.size
+        let horizontalInsets = textContainerInset.left + textContainerInset.right
+        let verticalInsets = textContainerInset.top + textContainerInset.bottom
 
         var newTextContainerSize = textContainer.size
         if !isHorizontallyResizable {
-            let proposedContentWidth = referenceSize.width - gutterWidth
+            let proposedContentWidth = referenceSize.width - gutterWidth - horizontalInsets
             if proposedContentWidth > 0, !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
                 newTextContainerSize.width = proposedContentWidth
             }
@@ -1007,7 +1026,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         }
 
         if !isVerticallyResizable {
-            let proposedContentHeight = referenceSize.height
+            let proposedContentHeight = referenceSize.height - verticalInsets
             if proposedContentHeight > 0, !newTextContainerSize.height.isAlmostEqual(to: proposedContentHeight) {
                 newTextContainerSize.height = proposedContentHeight
             }

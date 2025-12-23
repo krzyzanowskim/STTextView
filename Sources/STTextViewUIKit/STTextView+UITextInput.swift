@@ -262,7 +262,7 @@ extension STTextView: UITextInput {
     /* Geometry used to provide, for example, a correction rect. */
 
     public func firstRect(for range: UITextRange) -> CGRect {
-        textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .standard)?.moved(dx: contentView.frame.origin.x) ?? .zero
+        textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .standard)?.moved(by: contentView.frame.origin) ?? .zero
     }
 
     public func caretRect(for position: UITextPosition) -> CGRect {
@@ -346,7 +346,7 @@ extension STTextView: UITextInput {
                 y: selectionFrame.origin.y,
                 width: max(2, selectionFrame.width),
                 height: typingLineHeight
-            ).moved(dx: contentView.frame.origin.x).pixelAligned
+            ).moved(by: contentView.frame.origin).pixelAligned
         }
 
         return .zero
@@ -376,7 +376,7 @@ extension STTextView: UITextInput {
             }
 
             result.append(STTextSelectionRect(
-                rect: textSegmentFrame.moved(dx: contentView.frame.origin.x),
+                rect: textSegmentFrame.moved(by: contentView.frame.origin),
                 writingDirection: baseWritingDirection(for: range.start, in: .forward),
                 containsStart: containsStart,
                 containsEnd: containsEnd,
@@ -390,7 +390,7 @@ extension STTextView: UITextInput {
     /* Hit testing. */
 
     public func closestPosition(to point: CGPoint) -> UITextPosition? {
-        let eventPoint = point.moved(dx: -contentView.frame.origin.x)
+        let eventPoint = point.moved(dx: -contentView.frame.origin.x, dy: -contentView.frame.origin.y)
         if let position = textLayoutManager.caretLocation(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition {
             return position
         } else {
@@ -404,7 +404,7 @@ extension STTextView: UITextInput {
         }
 
         // Convert point to account for content view offset
-        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x)
+        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x, dy: -contentView.frame.origin.y)
 
         // Attempt to find the location interacting at the point, constrained to the given range
         let candidateLocation = textLayoutManager.caretLocation(
@@ -438,7 +438,7 @@ extension STTextView: UITextInput {
     /// Returns the character or range of characters that is at a specified point in a document.
     public func characterRange(at point: CGPoint) -> UITextRange? {
         // Convert point to account for content view offset
-        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x)
+        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x, dy: -contentView.frame.origin.y)
 
         // Get location at the point
         guard let location = textLayoutManager.caretLocation(

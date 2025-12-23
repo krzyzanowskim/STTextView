@@ -49,8 +49,9 @@ extension STTextView {
         // the gutter view using contentOffset to keep it visible during scrolling.
         // Cell Y coordinates compensate by subtracting contentOffset.y to remain
         // relative to the text layout coordinate space.
+        // The gutter is positioned at the top inset to align with the text content.
         gutterView.frame.origin.x = contentOffset.x
-        gutterView.frame.origin.y = contentOffset.y
+        gutterView.frame.origin.y = contentOffset.y + textContainerInset.top
         gutterView.frame.size.height = contentView.frame.height
 
         layoutGutterLineNumbers()
