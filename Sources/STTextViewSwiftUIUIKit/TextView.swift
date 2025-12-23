@@ -7,18 +7,17 @@ import UIKit
 import STTextView
 import STTextViewSwiftUICommon
 
-/// This SwiftUI view can be used to view and edit rich text.
+/// A SwiftUI view for viewing and editing rich text.
 @MainActor @preconcurrency
 public struct TextView: SwiftUI.View, TextViewModifier {
 
     public typealias Options = TextViewOptions
 
-    @Environment(\.colorScheme)
-    private var colorScheme
-    @Binding
-    private var text: AttributedString
-    @Binding
-    private var selection: NSRange?
+    // Triggers re-render on appearance changes
+    @Environment(\.colorScheme) private var colorScheme
+
+    @Binding private var text: AttributedString
+    @Binding private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
     private let contentInsets: EdgeInsets?
@@ -223,10 +222,8 @@ private struct TextViewRepresentable: UIViewRepresentable {
     }
 
     class TextCoordinator: STTextViewDelegate {
-        @Binding
-        var text: AttributedString
-        @Binding
-        var selection: NSRange?
+        @Binding var text: AttributedString
+        @Binding var selection: NSRange?
         var isUpdating = false
         var isUserEditing = false
         var lastFont: UIFont?
@@ -237,14 +234,11 @@ private struct TextViewRepresentable: UIViewRepresentable {
         }
 
         func textViewDidChangeText(_ notification: Notification) {
-            guard let textView = notification.object as? STTextView else {
+            guard !isUpdating, let textView = notification.object as? STTextView else {
                 return
             }
-
-            if !isUpdating {
-                isUserEditing = true
-                text = AttributedString(textView.attributedText ?? NSAttributedString())
-            }
+            isUserEditing = true
+            text = AttributedString(textView.attributedText ?? NSAttributedString())
         }
 
         func textViewDidChangeSelection(_ notification: Notification) {
