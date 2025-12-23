@@ -12,6 +12,12 @@ public extension TextViewModifier {
     func textViewFont(_ font: UIFont) -> TextViewEnvironmentModifier<Self, UIFont> {
         TextViewEnvironmentModifier(content: self, keyPath: \.font, value: font)
     }
+
+    /// Sets the line height multiple for text in this view.
+    /// - Parameter multiple: The line height multiple. Values greater than 1.0 increase line spacing.
+    func textViewLineHeightMultiple(_ multiple: CGFloat) -> TextViewEnvironmentModifier<Self, CGFloat> {
+        TextViewEnvironmentModifier(content: self, keyPath: \.lineHeightMultiple, value: multiple)
+    }
 }
 
 public struct TextViewEnvironmentModifier<Content: View, V>: View, TextViewModifier {
@@ -29,9 +35,18 @@ private struct FontEnvironmentKey: EnvironmentKey {
     static var defaultValue: UIFont = .preferredFont(forTextStyle: .body)
 }
 
+private struct LineHeightMultipleEnvironmentKey: EnvironmentKey {
+    static var defaultValue: CGFloat = 1.0
+}
+
 extension EnvironmentValues {
     var font: UIFont {
         get { self[FontEnvironmentKey.self] }
         set { self[FontEnvironmentKey.self] = newValue }
+    }
+
+    var lineHeightMultiple: CGFloat {
+        get { self[LineHeightMultipleEnvironmentKey.self] }
+        set { self[LineHeightMultipleEnvironmentKey.self] = newValue }
     }
 }

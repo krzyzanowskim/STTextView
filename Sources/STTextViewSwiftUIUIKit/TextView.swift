@@ -22,7 +22,6 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     private let options: Options
     private let plugins: [any STPlugin]
     private let contentInsets: EdgeInsets?
-    private let lineHeightMultiple: CGFloat?
     private let isEditable: Bool?
 
     /// Create a text edit view with a certain text that uses a certain options.
@@ -32,7 +31,6 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     ///   - options: Editor options
     ///   - plugins: Editor plugins
     ///   - contentInsets: Custom content insets. When provided, disables automatic safe area adjustment.
-    ///   - lineHeightMultiple: The line height multiple. Default is 1.0. Values greater than 1.0 increase line spacing.
     ///   - isEditable: Whether the text view is editable. When nil, uses the SwiftUI environment's `isEnabled` value.
     public init(
         text: Binding<AttributedString>,
@@ -40,7 +38,6 @@ public struct TextView: SwiftUI.View, TextViewModifier {
         options: Options = [],
         plugins: [any STPlugin] = [],
         contentInsets: EdgeInsets? = nil,
-        lineHeightMultiple: CGFloat? = nil,
         isEditable: Bool? = nil
     ) {
         _text = text
@@ -48,7 +45,6 @@ public struct TextView: SwiftUI.View, TextViewModifier {
         self.options = options
         self.plugins = plugins
         self.contentInsets = contentInsets
-        self.lineHeightMultiple = lineHeightMultiple
         self.isEditable = isEditable
     }
 
@@ -59,7 +55,6 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             options: options,
             plugins: plugins,
             contentInsets: contentInsets,
-            lineHeightMultiple: lineHeightMultiple,
             isEditable: isEditable
         )
         .background(.background)
@@ -73,6 +68,8 @@ private struct TextViewRepresentable: UIViewRepresentable {
     private var font
     @Environment(\.lineSpacing)
     private var lineSpacing
+    @Environment(\.lineHeightMultiple)
+    private var lineHeightMultiple
 
     @Binding
     private var text: AttributedString
@@ -81,7 +78,6 @@ private struct TextViewRepresentable: UIViewRepresentable {
     private let options: TextView.Options
     private var plugins: [any STPlugin]
     private let contentInsets: EdgeInsets?
-    private let lineHeightMultiple: CGFloat?
     private let isEditableOverride: Bool?
 
     /// Resolved editable state: explicit parameter takes precedence over environment
@@ -89,13 +85,12 @@ private struct TextViewRepresentable: UIViewRepresentable {
         isEditableOverride ?? isEnabled
     }
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], contentInsets: EdgeInsets? = nil, lineHeightMultiple: CGFloat? = nil, isEditable: Bool? = nil) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], contentInsets: EdgeInsets? = nil, isEditable: Bool? = nil) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
         self.contentInsets = contentInsets
-        self.lineHeightMultiple = lineHeightMultiple
         self.isEditableOverride = isEditable
     }
 
@@ -106,7 +101,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
         textView.showsLineNumbers = options.contains(.showLineNumbers)
 
-        if let lineHeightMultiple {
+        if lineHeightMultiple != 1.0 {
             let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
             paragraphStyle.lineHeightMultiple = lineHeightMultiple
             textView.defaultParagraphStyle = paragraphStyle
