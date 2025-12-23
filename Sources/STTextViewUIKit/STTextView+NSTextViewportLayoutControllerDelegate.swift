@@ -7,12 +7,15 @@ import STTextKitPlus
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        let insets = adjustedContentInset
+        // Expand viewport bounds to include fragments slightly outside the visible area
+        // for smooth scrolling. Account for both adjustedContentInset and textContainerInset
+        // to ensure proper coverage of the text content area.
+        let scrollInsets = adjustedContentInset
         return CGRect(
-            x: bounds.origin.x - insets.left,
-            y: bounds.origin.y - insets.top,
+            x: bounds.origin.x,
+            y: bounds.origin.y - scrollInsets.top - textContainerInset.top,
             width: bounds.width,
-            height: bounds.height
+            height: bounds.height + scrollInsets.top + scrollInsets.bottom + textContainerInset.top + textContainerInset.bottom
         )
     }
 
