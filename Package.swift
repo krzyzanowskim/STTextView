@@ -58,15 +58,20 @@ let package = Package(
             ]
         ),
         .target(
+            name: "STTextViewSwiftUICommon"
+        ),
+        .target(
             name: "STTextViewSwiftUIAppKit",
             dependencies: [
-                .target(name: "STTextView")
+                .target(name: "STTextView"),
+                .target(name: "STTextViewSwiftUICommon")
             ]
         ),
         .target(
             name: "STTextViewSwiftUIUIKit",
             dependencies: [
-                .target(name: "STTextView")
+                .target(name: "STTextView"),
+                .target(name: "STTextViewSwiftUICommon")
             ]
         ),
         .target(

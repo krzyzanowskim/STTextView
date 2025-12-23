@@ -5,28 +5,13 @@ import Foundation
 import SwiftUI
 import UIKit
 import STTextView
+import STTextViewSwiftUICommon
 
 /// This SwiftUI view can be used to view and edit rich text.
 @MainActor @preconcurrency
 public struct TextView: SwiftUI.View, TextViewModifier {
 
-    @frozen
-    public struct Options: OptionSet {
-        public let rawValue: Int
-
-        public init(rawValue: Int) {
-            self.rawValue = rawValue
-        }
-
-        /// Breaks the text as needed to fit within the bounding box.
-        public static let wrapLines = Options(rawValue: 1 << 0)
-
-        /// Highlighted selected line
-        public static let highlightSelectedLine = Options(rawValue: 1 << 1)
-
-        /// Enable to show line numbers in the gutter.
-        public static let showLineNumbers = Options(rawValue: 1 << 2)
-    }
+    public typealias Options = TextViewOptions
 
     @Environment(\.colorScheme)
     private var colorScheme
@@ -93,6 +78,22 @@ private struct TextViewRepresentable: UIViewRepresentable {
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
         textView.showsLineNumbers = options.contains(.showLineNumbers)
+
+        if options.contains(.disableAutocorrection) {
+            textView.autocorrectionType = .no
+        }
+        if options.contains(.disableAutocapitalization) {
+            textView.autocapitalizationType = .none
+        }
+        if options.contains(.disableSmartQuotes) {
+            textView.smartQuotesType = .no
+        }
+        if options.contains(.disableSmartDashes) {
+            textView.smartDashesType = .no
+        }
+        if options.contains(.disableSmartInsertDelete) {
+            textView.smartInsertDeleteType = .no
+        }
 
         if options.contains(.showLineNumbers) {
             textView.gutterView?.font = textView.font
