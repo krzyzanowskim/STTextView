@@ -42,9 +42,11 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
+        var needsDisplay = false
         if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment,
            textLayoutFragment.showsInvisibleCharacters != showsInvisibleCharacters {
             textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
+            needsDisplay = true
         }
 
         // textLayoutFragment.layoutFragmentFrame is calculated in `self` coordinates,
@@ -64,6 +66,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         if !fragmentView.frame.isAlmostEqual(to: layoutFragmentFrame.pixelAligned) {
             fragmentView.frame = textLayoutFragment.layoutFragmentFrame.pixelAligned
             fragmentView.needsLayout = true
+            needsDisplay = true
+        }
+
+        if needsDisplay {
             fragmentView.needsDisplay = true
         }
 

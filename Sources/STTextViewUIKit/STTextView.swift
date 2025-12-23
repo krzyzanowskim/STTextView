@@ -149,6 +149,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     ///
     /// This property controls the padding between the scroll view's content area and the text container.
     /// Default is `UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)` to match UITextView.
+    @Invalidating(.layout)
     @objc
     open var textContainerInset: UIEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0) {
         didSet {

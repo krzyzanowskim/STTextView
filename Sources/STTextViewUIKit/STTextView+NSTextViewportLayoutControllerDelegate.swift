@@ -24,9 +24,11 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
+        var needsDisplay = false
         if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment,
            textLayoutFragment.showsInvisibleCharacters != showsInvisibleCharacters {
             textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
+            needsDisplay = true
         }
 
         let layoutFragmentFrame = textLayoutFragment.layoutFragmentFrame
@@ -43,6 +45,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         if !fragmentView.frame.isAlmostEqual(to: layoutFragmentFrame) {
             fragmentView.frame = layoutFragmentFrame
             fragmentView.setNeedsLayout()
+            needsDisplay = true
+        }
+
+        if needsDisplay {
             fragmentView.setNeedsDisplay()
         }
 
