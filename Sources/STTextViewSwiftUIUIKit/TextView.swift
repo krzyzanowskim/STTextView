@@ -21,22 +21,27 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
+    private let contentInsets: EdgeInsets?
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
     ///   - text: The attributed string content
+    ///   - selection: The current selection range
     ///   - options: Editor options
     ///   - plugins: Editor plugins
+    ///   - contentInsets: Custom content insets. When provided, disables automatic safe area adjustment.
     public init(
         text: Binding<AttributedString>,
         selection: Binding<NSRange?> = .constant(nil),
         options: Options = [],
-        plugins: [any STPlugin] = []
+        plugins: [any STPlugin] = [],
+        contentInsets: EdgeInsets? = nil
     ) {
         _text = text
         _selection = selection
         self.options = options
         self.plugins = plugins
+        self.contentInsets = contentInsets
     }
 
     public var body: some View {
@@ -44,7 +49,8 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             text: $text,
             selection: $selection,
             options: options,
-            plugins: plugins
+            plugins: plugins,
+            contentInsets: contentInsets
         )
         .background(.background)
     }
@@ -64,12 +70,14 @@ private struct TextViewRepresentable: UIViewRepresentable {
     private var selection: NSRange?
     private let options: TextView.Options
     private var plugins: [any STPlugin]
+    private let contentInsets: EdgeInsets?
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = []) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], contentInsets: EdgeInsets? = nil) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
+        self.contentInsets = contentInsets
     }
 
     func makeUIView(context: Context) -> STTextView {
@@ -106,6 +114,11 @@ private struct TextViewRepresentable: UIViewRepresentable {
 
         for plugin in plugins {
             textView.addPlugin(plugin)
+        }
+
+        if let contentInsets {
+            textView.contentInsetAdjustmentBehavior = .never
+            textView.contentInset = contentInsets.uiEdgeInsets(for: textView)
         }
 
         return textView
@@ -151,6 +164,10 @@ private struct TextViewRepresentable: UIViewRepresentable {
                 textView.gutterView?.textColor = .secondaryLabel
             }
             textView.setNeedsLayout()
+        }
+
+        if let contentInsets {
+            textView.contentInset = contentInsets.uiEdgeInsets(for: textView)
         }
 
         textView.layoutIfNeeded()
@@ -208,6 +225,18 @@ private struct TextViewRepresentable: UIViewRepresentable {
             selection = textView.textSelection
         }
 
+    }
+}
+
+// MARK: - EdgeInsets to UIEdgeInsets Conversion
+
+private extension EdgeInsets {
+    /// Converts SwiftUI EdgeInsets to UIKit UIEdgeInsets, respecting layout direction.
+    func uiEdgeInsets(for view: UIView) -> UIEdgeInsets {
+        let layoutDirection = view.effectiveUserInterfaceLayoutDirection
+        let left = (layoutDirection == .rightToLeft) ? trailing : leading
+        let right = (layoutDirection == .rightToLeft) ? leading : trailing
+        return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
     }
 }
 
