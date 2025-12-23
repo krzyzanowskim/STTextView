@@ -225,6 +225,15 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     /// Line highlight view.
     let lineHighlightView: STLineHighlightView
 
+    /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
+    var needsScrollToSelection = false {
+        didSet {
+            if needsScrollToSelection {
+                setNeedsLayout()
+            }
+        }
+    }
+
     var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     var lastUsedFragmentViews: Set<STTextLayoutFragmentView> = []
 
@@ -965,6 +974,8 @@ open class STTextView: UIScrollView, STTextViewProtocol {
 
         inputDelegate?.textDidChange(self)
         delegateProxy.textViewDidChangeText(notification)
+
+        needsScrollToSelection = true
     }
 
     /// Informs the receiver that it should begin coalescing successive typing operations in a new undo grouping
@@ -996,6 +1007,12 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     override open func layoutSubviews() {
         super.layoutSubviews()
         layoutText()
+
+        // Scroll to selection if needed (equivalent to UITextView's _scrollToSelectionIfNeeded)
+        if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
+            scrollToVisible(textRange, type: .standard)
+        }
+        needsScrollToSelection = false
     }
 
     /// Performs text layout including container sizing, viewport layout, and related updates.

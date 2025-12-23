@@ -32,11 +32,8 @@ extension STTextView: UITextInput {
             updateSelectedLineHighlight()
             layoutGutter()
 
-            if let newValue, var rect = self.selectionRects(for: newValue).last?.rect {
-                rect.size.height = max(rect.size.height, contentScaleFactor)
-                rect.size.width = max(rect.size.width, contentScaleFactor)
-                scrollRectToVisible(rect, animated: true)
-            }
+            // Defer scroll to layout pass (like UITextView's _scrollToSelectionIfNeeded)
+            needsScrollToSelection = true
         }
     }
 
