@@ -1,5 +1,48 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- [macOS] Add snapshot tests for STTextView gutter rendering with various configurations
+- [iOS] Add background blur effect to STGutterView when backgroundColor is nil
+- [SwiftUI] Add environment-based lineHeightMultiple support in text views
+- [SwiftUI] Add support for configurable lineHeightMultiple in TextView
+- [SwiftUI/iOS] Add support for custom contentInsets to TextView
+- [SwiftUI] Add showLineNumbers option and autocorrectionDisabled modifier to TextView
+- [Shared] Expose contentFrame property to Plugins SPI
+
+### Changed
+- [iOS] Rename STContentView to STTextContainerView and add lightweight content size update
+- [iOS] Optimize text view layout fragment rendering by reusing existing views
+- [iOS] Adjust layout to respect textContainerInset in STTextView
+- [iOS] Adjust viewportBounds to account for textContainerInset for better fragment coverage
+- [iOS] Improve viewport bounds calculation to account for adjustedContentInset
+- [iOS] Refactor gutter width adjustment logic to reduce redundant checks and improve layout stability
+- [iOS] Make text, attributedText, and showsLineNumbers properties open and objc
+- [macOS] Improve layout and drawing logic for STTextRenderView with clipsToContent support
+- [macOS] Improve STTextRenderView layout to match actual rendering behavior
+- [macOS] Improve selection image frame and origin during drag-and-drop
+- [macOS] Adjust line fragment drawing position to account for line height multiple offset
+- [macOS] Refactor STTextView layout system for improved viewport stability and accuracy
+- [AppKit & UIKit] Ensure fragment views are marked for display when layout or rendering changes occur
+- [SwiftUI] Refactor TextView options into shared TextViewOptions struct and extend platform support
+- [SwiftUI] Refactor TextView view and coordinator for cleaner bindings and guard logic
+- [SwiftUI] Optimize font updates in TextView by caching last applied font
+- [Shared] Enable SwiftFormat with customized configuration and makefile tasks
+- [Shared] Update platform and toolchain requirements
+- Refactor README to consolidate and simplify SwiftUI usage documentation
+
+### Fixed
+- [iOS] Fix gutter alignment to scroll only vertically and remain fixed horizontally
+- [iOS] Defer scrolling to selection until layoutSubviews for better layout consistency
+- [macOS] Fix text view jumping by allowing growth of height but preventing shrinkage
+- [macOS] Fix dynamic height adjustment and layout behavior in STTextView
+- [macOS] Fix text view shrinkage and scroll issues when editing or resetting large documents
+- [macOS] Fix layout issue for gutter view with NSScrollView content insets
+- [macOS] Prevent text view from resizing below current scroll position
+- [SwiftUI] Fix .wrapLines option logic and improve UI toggles and editable state handling
+- [SwiftUI] Prevent selection change handling when isUpdating is true in TextViewRepresentable
+
 ## [2.2.8] - 2025-11-11
 
 ### Changed
