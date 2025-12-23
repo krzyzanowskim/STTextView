@@ -22,6 +22,7 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     private let options: Options
     private let plugins: [any STPlugin]
     private let contentInsets: EdgeInsets?
+    private let lineHeightMultiple: CGFloat?
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
@@ -30,18 +31,21 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     ///   - options: Editor options
     ///   - plugins: Editor plugins
     ///   - contentInsets: Custom content insets. When provided, disables automatic safe area adjustment.
+    ///   - lineHeightMultiple: The line height multiple. Default is 1.0. Values greater than 1.0 increase line spacing.
     public init(
         text: Binding<AttributedString>,
         selection: Binding<NSRange?> = .constant(nil),
         options: Options = [],
         plugins: [any STPlugin] = [],
-        contentInsets: EdgeInsets? = nil
+        contentInsets: EdgeInsets? = nil,
+        lineHeightMultiple: CGFloat? = nil
     ) {
         _text = text
         _selection = selection
         self.options = options
         self.plugins = plugins
         self.contentInsets = contentInsets
+        self.lineHeightMultiple = lineHeightMultiple
     }
 
     public var body: some View {
@@ -50,7 +54,8 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             selection: $selection,
             options: options,
             plugins: plugins,
-            contentInsets: contentInsets
+            contentInsets: contentInsets,
+            lineHeightMultiple: lineHeightMultiple
         )
         .background(.background)
     }
@@ -71,13 +76,15 @@ private struct TextViewRepresentable: UIViewRepresentable {
     private let options: TextView.Options
     private var plugins: [any STPlugin]
     private let contentInsets: EdgeInsets?
+    private let lineHeightMultiple: CGFloat?
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], contentInsets: EdgeInsets? = nil) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], contentInsets: EdgeInsets? = nil, lineHeightMultiple: CGFloat? = nil) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
         self.contentInsets = contentInsets
+        self.lineHeightMultiple = lineHeightMultiple
     }
 
     func makeUIView(context: Context) -> STTextView {
@@ -86,6 +93,12 @@ private struct TextViewRepresentable: UIViewRepresentable {
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
         textView.showsLineNumbers = options.contains(.showLineNumbers)
+
+        if let lineHeightMultiple {
+            let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+            paragraphStyle.lineHeightMultiple = lineHeightMultiple
+            textView.defaultParagraphStyle = paragraphStyle
+        }
 
         if options.contains(.disableAutocorrection) {
             textView.autocorrectionType = .no

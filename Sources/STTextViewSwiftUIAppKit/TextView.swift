@@ -20,22 +20,27 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
+    private let lineHeightMultiple: CGFloat?
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
     ///   - text: The attributed string content
+    ///   - selection: The current selection range
     ///   - options: Editor options
     ///   - plugins: Editor plugins
+    ///   - lineHeightMultiple: The line height multiple. Default is 1.0. Values greater than 1.0 increase line spacing.
     public init(
         text: Binding<AttributedString>,
         selection: Binding<NSRange?> = .constant(nil),
         options: Options = [],
-        plugins: [any STPlugin] = []
+        plugins: [any STPlugin] = [],
+        lineHeightMultiple: CGFloat? = nil
     ) {
         _text = text
         _selection = selection
         self.options = options
         self.plugins = plugins
+        self.lineHeightMultiple = lineHeightMultiple
     }
 
     public var body: some View {
@@ -43,7 +48,8 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             text: $text,
             selection: $selection,
             options: options,
-            plugins: plugins
+            plugins: plugins,
+            lineHeightMultiple: lineHeightMultiple
         )
         .background(.background)
     }
@@ -63,12 +69,14 @@ private struct TextViewRepresentable: NSViewRepresentable {
     private var selection: NSRange?
     private let options: TextView.Options
     private var plugins: [any STPlugin]
+    private let lineHeightMultiple: CGFloat?
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = []) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], lineHeightMultiple: CGFloat? = nil) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
+        self.lineHeightMultiple = lineHeightMultiple
     }
 
     func makeNSView(context: Context) -> NSScrollView {
@@ -79,6 +87,12 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
         textView.showsLineNumbers = options.contains(.showLineNumbers)
         textView.textSelection = NSRange()
+
+        if let lineHeightMultiple {
+            let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+            paragraphStyle.lineHeightMultiple = lineHeightMultiple
+            textView.defaultParagraphStyle = paragraphStyle
+        }
 
         if options.contains(.disableAutocorrection) {
             textView.isAutomaticSpellingCorrectionEnabled = false
