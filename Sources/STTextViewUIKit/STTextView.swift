@@ -221,6 +221,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     let lineHighlightView: STLineHighlightView
 
     var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
+    var lastUsedFragmentViews: Set<STTextLayoutFragmentView> = []
 
     /// The delegate for all text views sharing the same layout manager.
     public weak var textDelegate: (any STTextViewDelegate)? {

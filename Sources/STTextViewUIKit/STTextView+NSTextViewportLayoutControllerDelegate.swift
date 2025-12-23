@@ -11,31 +11,42 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        // TODO: update difference, not all layers
-        for subview in contentView.subviews.filter({ $0 is STTextLayoutFragmentView }) {
-            subview.removeFromSuperview()
-        }
+        lastUsedFragmentViews = Set(fragmentViewMap.objectEnumerator()?.allObjects as? [STTextLayoutFragmentView] ?? [])
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
-        let fragmentView = fragmentViewMap.object(forKey: textLayoutFragment) ?? STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: textLayoutFragment.layoutFragmentFrame)
-        // Adjust position
-        if !fragmentView.frame.isAlmostEqual(to: textLayoutFragment.layoutFragmentFrame) {
-            fragmentView.frame = textLayoutFragment.layoutFragmentFrame
+        if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment,
+           textLayoutFragment.showsInvisibleCharacters != showsInvisibleCharacters {
+            textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
+        }
+
+        let layoutFragmentFrame = textLayoutFragment.layoutFragmentFrame
+        let fragmentView: STTextLayoutFragmentView
+        if let cachedFragmentView = fragmentViewMap.object(forKey: textLayoutFragment) {
+            fragmentView = cachedFragmentView
+            lastUsedFragmentViews.remove(cachedFragmentView)
+        } else {
+            fragmentView = STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: layoutFragmentFrame)
+            fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
+        }
+
+        // Adjust fragment view frame
+        if !fragmentView.frame.isAlmostEqual(to: layoutFragmentFrame) {
+            fragmentView.frame = layoutFragmentFrame
             fragmentView.setNeedsLayout()
             fragmentView.setNeedsDisplay()
         }
 
-        if let textLayoutFragment = textLayoutFragment as? STTextLayoutFragment {
-            textLayoutFragment.showsInvisibleCharacters = showsInvisibleCharacters
-            fragmentView.setNeedsDisplay()
+        if fragmentView.superview != contentView {
+            contentView.addSubview(fragmentView)
         }
-
-        contentView.addSubview(fragmentView)
-        fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
+        for staleView in lastUsedFragmentViews {
+            staleView.removeFromSuperview()
+        }
+        lastUsedFragmentViews.removeAll()
         // Avoid updating content size during bounce animation as it resets contentSize
         // which cancels the bounce per openradar.appspot.com/8045239
         let isBouncing = (contentOffset.y < -contentInset.top || contentOffset.y > max(0, contentSize.height - bounds.height + contentInset.bottom))
