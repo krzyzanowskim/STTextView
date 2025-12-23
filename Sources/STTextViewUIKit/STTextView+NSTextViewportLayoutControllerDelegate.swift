@@ -7,7 +7,13 @@ import STTextKitPlus
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        bounds.inset(dy: -64)
+        let insets = adjustedContentInset
+        return CGRect(
+            x: bounds.origin.x - insets.left,
+            y: bounds.origin.y - insets.top,
+            width: bounds.width,
+            height: bounds.height
+        )
     }
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
