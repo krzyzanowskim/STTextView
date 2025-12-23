@@ -45,13 +45,11 @@ extension STTextView {
         }
 
         // Coordinate system strategy:
-        // UIKit lacks AppKit's addFloatingSubview mechanism, so we manually position
-        // the gutter view using contentOffset to keep it visible during scrolling.
-        // Cell Y coordinates compensate by subtracting contentOffset.y to remain
-        // relative to the text layout coordinate space.
-        // The gutter is positioned at the top inset to align with the text content.
+        // The gutter is positioned to scroll with the content in the Y direction (same as content view)
+        // but floats in the X direction (stays at contentOffset.x to remain visible during horizontal scroll).
+        // This ensures line numbers always align with their corresponding text lines.
         gutterView.frame.origin.x = contentOffset.x
-        gutterView.frame.origin.y = contentOffset.y + textContainerInset.top
+        gutterView.frame.origin.y = textContainerInset.top
         gutterView.frame.size.height = contentView.frame.height
 
         layoutGutterLineNumbers()
@@ -110,7 +108,7 @@ extension STTextView {
                 numberCell.frame = CGRect(
                     origin: CGPoint(
                         x: 0,
-                        y: selectionFrame.origin.y - contentOffset.y
+                        y: selectionFrame.origin.y
                     ),
                     size: CGSize(
                         width: gutterView.containerView.frame.width,
@@ -160,11 +158,12 @@ extension STTextView {
 
                     // Calculate positioning metrics
                     // Get the actual fragment view frame for pixel-perfect alignment
+                    // Pass .zero for contentOffset since gutter now scrolls with content (no compensation needed)
                     let (baselineYOffset, locationForFirstCharacter, lineFragmentFrame) = STGutterCalculations.calculateLineNumberMetrics(
                         for: textLineFragment,
                         in: layoutFragment,
                         fragmentViewFrame: fragmentView.frame,
-                        contentOffset: contentOffset
+                        contentOffset: .zero
                     )
 
                     // Prepare text attributes
