@@ -115,6 +115,8 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.addPlugin(plugin)
         }
 
+        context.coordinator.lastFont = textView.font
+
         textView.isEditable = isEnabled
         textView.isSelectable = isEnabled
 
@@ -143,7 +145,8 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.isSelectable = isEnabled
         }
 
-        if textView.font != font {
+        if font != context.coordinator.lastFont {
+            context.coordinator.lastFont = font
             textView.font = font
             textView.gutterView?.font = font
         }
@@ -195,6 +198,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
         var selection: NSRange?
         var isUpdating = false
         var isUserEditing = false
+        var lastFont: NSFont?
 
         init(text: Binding<AttributedString>, selection: Binding<NSRange?>) {
             self._text = text

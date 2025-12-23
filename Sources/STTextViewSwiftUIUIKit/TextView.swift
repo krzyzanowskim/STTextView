@@ -139,6 +139,8 @@ private struct TextViewRepresentable: UIViewRepresentable {
             textView.contentInset = contentInsets.uiEdgeInsets(for: textView)
         }
 
+        context.coordinator.lastFont = textView.font
+
         textView.isEditable = resolvedIsEditable
         textView.isSelectable = resolvedIsEditable
 
@@ -167,7 +169,8 @@ private struct TextViewRepresentable: UIViewRepresentable {
             textView.setNeedsLayout()
         }
 
-        if textView.font != font {
+        if font != context.coordinator.lastFont {
+            context.coordinator.lastFont = font
             textView.font = font
             textView.gutterView?.font = font
             textView.setNeedsLayout()
@@ -226,6 +229,7 @@ private struct TextViewRepresentable: UIViewRepresentable {
         var selection: NSRange?
         var isUpdating = false
         var isUserEditing = false
+        var lastFont: UIFont?
 
         init(text: Binding<AttributedString>, selection: Binding<NSRange?>) {
             self._text = text
