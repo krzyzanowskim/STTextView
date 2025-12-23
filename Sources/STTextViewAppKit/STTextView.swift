@@ -1329,36 +1329,43 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
     override open func layout() {
         super.layout()
-
-        if shouldUpdateLayout {
-            inLayout = true
-            defer { inLayout = false }
-
-            // Convergence loop - max 5 iterations (like NSTextView)
-            // If layout triggers changes that require re-layout, needsRelayout is set
-            var iterations = 5
-            while iterations > 0 {
-                needsRelayout = false
-
-                layoutViewport()
-                lastViewportBounds = viewportBounds(for: textLayoutManager.textViewportLayoutController)
-
-                if !needsRelayout { break }
-                iterations -= 1
-            }
-
-            #if DEBUG
-                if iterations == 0 {
-                    logger.warning("layout() failed to converge after 5 iterations")
-                }
-            #endif
-        }
+        layoutText()
 
         if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
             scrollToVisible(textRange, type: .standard)
         }
 
         needsScrollToSelection = false
+    }
+
+    /// Performs text layout including container sizing, viewport layout, and related updates.
+    private func layoutText() {
+        guard shouldUpdateLayout else { return }
+
+        inLayout = true
+        defer { inLayout = false }
+
+        updateTextContainerSize()
+
+        // Convergence loop - max 5 iterations (like NSTextView)
+        // If layout triggers changes that require re-layout, needsRelayout is set
+        var iterations = 5
+        while iterations > 0 {
+            needsRelayout = false
+
+            // not matter what, the layoutViewport() is slow
+            textLayoutManager.textViewportLayoutController.layoutViewport()
+            lastViewportBounds = viewportBounds(for: textLayoutManager.textViewportLayoutController)
+
+            if !needsRelayout { break }
+            iterations -= 1
+        }
+
+        #if DEBUG
+            if iterations == 0 {
+                logger.warning("layoutText() failed to converge after 5 iterations")
+            }
+        #endif
     }
 
     func setNeedsLayoutSafe() {

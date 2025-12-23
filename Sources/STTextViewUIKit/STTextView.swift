@@ -64,73 +64,65 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         }
     }
 
-    /// A Boolean that controls whether the text container adjusts the width of its bounding rectangle when its text view resizes.
-    ///
-    /// When the value of this property is `true`, the text container adjusts its width when the width of its text view changes. The default value of this property is `false`.
-    ///
-    /// - Note: If you set both `widthTracksTextView` and `isHorizontallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
-    ///
-    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
-    @objc
-    public var widthTracksTextView: Bool {
-        set {
-            if textContainer.widthTracksTextView != newValue {
-                textContainer.widthTracksTextView = newValue
-                textContainer.size = NSTextContainer().size
-
-                setNeedsLayout()
-                setNeedsDisplay()
-            }
-        }
-
-        get {
-            textContainer.widthTracksTextView
-        }
-    }
+    private var _isHorizontallyResizable = true
+    private lazy var _defaultTextContainerSize: CGSize = NSTextContainer().size
 
     /// A Boolean that controls whether the receiver changes its width to fit the width of its text.
+    ///
+    /// When `true` (default), text does not wrap and the view expands horizontally.
+    /// When `false`, text wraps at the view width.
     @objc
     public var isHorizontallyResizable: Bool {
         set {
-            widthTracksTextView = newValue
-        }
-
-        get {
-            widthTracksTextView
-        }
-    }
-
-    /// When the value of this property is `true`, the text container adjusts its height when the height of its text view changes. The default value of this property is `false`.
-    ///
-    /// - Note: If you set both `heightTracksTextView` and `isVerticallyResizable` up to resize automatically in the same dimension, your application can get trapped in an infinite loop.
-    ///
-    /// - SeeAlso: [Tracking the Size of a Text View](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/TextStorageLayer/Tasks/TrackingSize.html#//apple_ref/doc/uid/20000927-CJBBIAAF)
-    @objc
-    public var heightTracksTextView: Bool {
-        set {
-            if textContainer.heightTracksTextView != newValue {
-                textContainer.heightTracksTextView = newValue
-
+            if _isHorizontallyResizable != newValue {
+                _isHorizontallyResizable = newValue
+                updateTextContainerSize()
                 setNeedsLayout()
                 setNeedsDisplay()
             }
         }
 
         get {
-            textContainer.heightTracksTextView
+            _isHorizontallyResizable
         }
     }
 
+    /// NSTextContainer compatibility. Equivalent to `!isHorizontallyResizable`.
+    @available(*, deprecated, renamed: "isHorizontallyResizable")
+    @objc
+    public var widthTracksTextView: Bool {
+        set { isHorizontallyResizable = !newValue }
+        get { !isHorizontallyResizable }
+    }
+
+    private var _isVerticallyResizable = true
+
     /// A Boolean that controls whether the receiver changes its height to fit the height of its text.
+    ///
+    /// When `true` (default), the view expands vertically to fit content.
+    /// When `false`, content is clipped at the view height.
     @objc
     public var isVerticallyResizable: Bool {
         set {
-            heightTracksTextView = newValue
+            if _isVerticallyResizable != newValue {
+                _isVerticallyResizable = newValue
+                updateTextContainerSize()
+                setNeedsLayout()
+                setNeedsDisplay()
+            }
         }
 
         get {
-            heightTracksTextView
+            _isVerticallyResizable
         }
+    }
+
+    /// NSTextContainer compatibility. Equivalent to `!isVerticallyResizable`.
+    @available(*, deprecated, renamed: "isVerticallyResizable")
+    @objc
+    public var heightTracksTextView: Bool {
+        set { isVerticallyResizable = !newValue }
+        get { !isVerticallyResizable }
     }
 
     /// A Boolean that controls whether the text view highlights the currently selected line. Default false.
@@ -467,8 +459,6 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         textLayoutManager = STTextLayoutManager()
 
         textLayoutManager.textContainer = NSTextContainer()
-        textLayoutManager.textContainer?.widthTracksTextView = false
-        textLayoutManager.textContainer?.heightTracksTextView = true
         textContentManager.addTextLayoutManager(textLayoutManager)
         textContentManager.primaryTextLayoutManager = textLayoutManager
 
@@ -702,21 +692,11 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     }
 
     override open func sizeToFit() {
+        updateTextContainerSize()
+
         let gutterWidth = gutterView?.frame.width ?? 0
         let verticalScrollInset = contentInset.top + contentInset.bottom
         let visibleRectSize = self.bounds.size
-
-        // For wrapped text, we need to configure container size BEFORE layout calculations
-        if !isHorizontallyResizable {
-            // Pre-configure text container width for wrapping mode
-            let proposedContentWidth = visibleRectSize.width - gutterWidth
-            if !textContainer.size.width.isAlmostEqual(to: proposedContentWidth) {
-                var containerSize = textContainer.size
-                containerSize.width = proposedContentWidth
-                textContainer.size = containerSize
-                logger.debug("Pre-configured textContainer.size.width \(proposedContentWidth) for wrapping \(#function)")
-            }
-        }
 
         // Now perform layout with correct container size
         // Estimate `usageBoundsForTextContainer` size is based on performed layout.
@@ -753,7 +733,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         } else {
             // wrapping
             CGSize(
-                width: visibleRectSize.width - gutterWidth,
+                width: visibleRectSize.width,
                 height: max(usageBoundsForTextContainer.size.height, visibleRectSize.height - verticalScrollInset)
             )
         }
@@ -763,27 +743,6 @@ open class STTextView: UIScrollView, STTextViewProtocol {
             self.contentView.frame.origin.x = gutterWidth
             self.contentView.frame.size = frameSize
             self.contentSize = frameSize
-        }
-
-        // Final container size configuration (handles vertical resizing and any adjustments)
-        _configureTextContainerSize()
-    }
-
-    // Update textContainer width to match textview width if track textview width
-    // widthTracksTextView = true
-    private func _configureTextContainerSize() {
-        var proposedSize = textContainer.size
-        if !isHorizontallyResizable {
-            proposedSize.width = contentSize.width // - _textContainerInset.width * 2
-        }
-
-        if !isVerticallyResizable {
-            proposedSize.height = contentSize.height // - _textContainerInset.height * 2
-        }
-
-        if !textContainer.size.isAlmostEqual(to: proposedSize) {
-            textContainer.size = proposedSize
-            logger.debug("textContainer.size (\(self.textContainer.size.width), \(self.textContainer.size.width)) \(#function)")
         }
     }
 
@@ -1019,15 +978,46 @@ open class STTextView: UIScrollView, STTextViewProtocol {
 
     override open func layoutSubviews() {
         super.layoutSubviews()
-        layoutViewport()
+        layoutText()
     }
 
-    private func layoutViewport() {
+    /// Performs text layout including container sizing, viewport layout, and related updates.
+    private func layoutText() {
+        updateTextContainerSize()
+
         // layoutViewport does not handle properly layout range
         // for far jump it tries to layout everything starting at location 0
         // even though viewport range is properly calculated.
         // No known workaround.
         textLayoutManager.textViewportLayoutController.layoutViewport()
+    }
+
+    private func updateTextContainerSize() {
+        let gutterWidth = gutterView?.frame.width ?? 0
+        let referenceSize = bounds.size
+
+        var newTextContainerSize = textContainer.size
+        if !isHorizontallyResizable {
+            let proposedContentWidth = referenceSize.width - gutterWidth
+            if proposedContentWidth > 0, !newTextContainerSize.width.isAlmostEqual(to: proposedContentWidth) {
+                newTextContainerSize.width = proposedContentWidth
+            }
+        } else {
+            newTextContainerSize.width = _defaultTextContainerSize.width
+        }
+
+        if !isVerticallyResizable {
+            let proposedContentHeight = referenceSize.height
+            if proposedContentHeight > 0, !newTextContainerSize.height.isAlmostEqual(to: proposedContentHeight) {
+                newTextContainerSize.height = proposedContentHeight
+            }
+        } else {
+            newTextContainerSize.height = _defaultTextContainerSize.height
+        }
+
+        if !textContainer.size.isAlmostEqual(to: newTextContainerSize) {
+            textContainer.size = newTextContainerSize
+        }
     }
 
     // Update selected line highlight layer

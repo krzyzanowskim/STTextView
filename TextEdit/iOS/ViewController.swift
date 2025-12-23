@@ -14,6 +14,7 @@ class ViewController: UIViewController {
 
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.isHorizontallyResizable = false
         textView.highlightSelectedLine = true
         textView.textDelegate = self
 
@@ -66,7 +67,7 @@ class ViewController: UIViewController {
     }
 
     @objc func toggleTextWrapMode(_: Any?) {
-        textView.widthTracksTextView.toggle()
+        textView.isHorizontallyResizable.toggle()
     }
 
     @IBAction func toggleInvisibles(_: Any?) {
