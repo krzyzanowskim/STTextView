@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.3.0] - 2025-12-23
 
 ### Added
 - [macOS] Add snapshot tests for STTextView gutter rendering with various configurations
