@@ -199,7 +199,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         .accessibilityFont,
         .accessibilityForegroundColor,
         .backgroundColor,
-        .baselineOffset,
         .underlineColor,
         .underlineStyle,
         .accessibilityUnderline,

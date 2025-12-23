@@ -403,7 +403,6 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         .writingDirection,
         .textEffect,
         .backgroundColor,
-        .baselineOffset,
         .underlineColor,
         .underlineStyle
     ]
