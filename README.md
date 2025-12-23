@@ -15,11 +15,11 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 
 ## Platform Requirements
 
-- **macOS**: 12.0+
+- **macOS**: 14.0+
 - **iOS**: 16.0+
 - **Mac Catalyst**: 16.0+
-- **Swift**: 5.7+
-- **Xcode**: 18.0+
+- **Swift**: 5.9+
+- **Xcode**: 26.0+
 
 ## Features
 
@@ -62,7 +62,7 @@ The financial sustainability of the project is possible thanks to the ongoing co
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "2.0.0")
+        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "2.2.0")
     ]
 )
 ```
