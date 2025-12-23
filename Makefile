@@ -1,7 +1,7 @@
 .PHONY: changelog format format-check
 
 changelog:
-	git-cliff -o CHANGELOG.md
+	GITHUB_TOKEN=$$(gh auth token) git-cliff -o CHANGELOG.md
 
 format:
 	swiftformat .

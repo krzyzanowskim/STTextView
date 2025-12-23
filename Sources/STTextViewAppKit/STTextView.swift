@@ -497,6 +497,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     let contentViewportView: STContentViewportView
 
     /// Content frame. Layout fragments content frame.
+    @_spi(Plugins)
     public var contentFrame: CGRect {
         contentView.frame
     }

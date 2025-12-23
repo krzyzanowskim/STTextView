@@ -213,6 +213,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     let contentView: STTextContainerView
 
     /// Content frame. Layout fragments content frame.
+    @_spi(Plugins)
     public var contentFrame: CGRect {
         contentView.frame
     }
