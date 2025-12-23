@@ -206,30 +206,15 @@ extension STTextView {
                     requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)
                     linesCount += 1
                 }
-
-                // adjust ruleThickness to fit the text based on last numberView
-                if textLayoutManager.textViewportLayoutController.viewportRange != nil {
-                    let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
-                    if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne), newGutterWidth > gutterView.frame.size.width {
-                        gutterView.frame.size.width = newGutterWidth
-                    }
-                }
-
             }
 
-            // FIXME: gutter width change affects contentView frame (in setFrameSize) layout that affects viewport layout
-            // (I'm being vague because I don't understand how).
-            // When viewport goes being the bounds, gutter width back to minimumThickness that breaks layout because
-            // one more layoutViewport() clear out the fragment cache used to restore viewport location
-            // TODO: gutter width should not adjust while scrolling/layout. It should adjust on content change.
-
             // adjust ruleThickness to fit the text based on last numberView
-            // if textLayoutManager.textViewportLayoutController.viewportRange != nil {
-            //     let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
-            //     if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width) {
-            //         gutterView.frame.size.width = newGutterWidth
-            //     }
-            // }
+            if textLayoutManager.textViewportLayoutController.viewportRange != nil {
+                let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
+                if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne), newGutterWidth > gutterView.frame.size.width {
+                    gutterView.frame.size.width = newGutterWidth
+                }
+            }
         }
     }
 
