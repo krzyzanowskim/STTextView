@@ -44,12 +44,19 @@ final class STTextLayoutFragmentView: NSView {
     override func draw(_ dirtyRect: CGRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         context.saveGState()
+
+        // Collect annotation segments once (single enumeration)
+        let annotationSegments = collectAnnotationSegments(in: dirtyRect)
+
         // Draw backgrounds first (behind text)
-        drawAnnotationBackgrounds(dirtyRect, in: context)
+        drawAnnotationBackgrounds(annotationSegments.backgrounds, in: context)
+
         layoutFragment.draw(at: .zero, in: context)
         drawSpellCheckerAttributes(dirtyRect, in: context)
+
         // Draw underlines after text
-        drawAnnotationUnderlines(dirtyRect, in: context)
+        drawAnnotationUnderlines(annotationSegments.underlines, in: context)
+
         context.restoreGState()
     }
 
@@ -165,66 +172,71 @@ final class STTextLayoutFragmentView: NSView {
 
     // MARK: - Annotation Drawing
 
-    /// Shared logic for getting decorations that intersect this fragment.
-    /// The block receives (decoration, frame, decorationIndex, isFirstSegment) where:
-    /// - decorationIndex is for tracking which decoration this is
-    /// - isFirstSegment is true only for the very first segment of the decoration
-    private func enumerateAnnotationSegments(
-        matching filter: (STAnnotationStyle) -> Bool,
-        in dirtyRect: CGRect,
-        using block: (STAnnotationDecoration, CGRect, Int, Bool) -> Void
-    ) {
+    /// Segments collected from annotation attributes.
+    private struct AnnotationSegments {
+        var backgrounds: [(STAnnotationRenderAttribute, CGRect)] = []
+        var underlines: [(STAnnotationRenderAttribute, CGRect)] = []
+    }
+
+    /// Collect annotation segments from text storage attributes.
+    ///
+    /// Reads annotation render attributes directly from the NSAttributedString,
+    /// eliminating the need for a separate decorations array. This method
+    /// enumerates attributes once and categorizes segments by style.
+    private func collectAnnotationSegments(in dirtyRect: CGRect) -> AnnotationSegments {
         guard let textLayoutManager = layoutFragment.textLayoutManager,
-              let textContentManager = textLayoutManager.textContentManager,
-              let textView = findParentTextView(),
-              !textView.annotationDecorations.isEmpty else {
-            return
+              let textContentManager = textLayoutManager.textContentManager as? NSTextContentStorage,
+              let textStorage = textContentManager.textStorage else {
+            return AnnotationSegments()
         }
+
+        var segments = AnnotationSegments()
 
         // Get the fragment's range in the document
         let fragmentRange = layoutFragment.rangeInElement
-
-        // Convert fragment range to NSRange for comparison
         let documentRange = textContentManager.documentRange
+
+        // Convert fragment range to NSRange
         let fragmentStart = textContentManager.offset(from: documentRange.location, to: fragmentRange.location)
         let fragmentEnd = textContentManager.offset(from: documentRange.location, to: fragmentRange.endLocation)
         let fragmentNSRange = NSRange(location: fragmentStart, length: fragmentEnd - fragmentStart)
 
-        // Decorations are sorted by range.location, so we can exit early
-        var decorationIndex = 0
-        for decoration in textView.annotationDecorations {
-            // Early exit: if decoration starts after fragment ends, no more can intersect
-            if decoration.range.location >= fragmentNSRange.location + fragmentNSRange.length {
-                break
+        guard fragmentNSRange.length > 0, fragmentNSRange.location + fragmentNSRange.length <= textStorage.length else {
+            return segments
+        }
+
+        // Enumerate annotation render attributes in this fragment's range
+        textStorage.enumerateAttribute(
+            STAnnotationRenderKey,
+            in: fragmentNSRange,
+            options: []
+        ) { value, attrRange, _ in
+            guard let box = value as? STAnnotationRenderAttributeBox else {
+                return
             }
 
-            // Filter by style type
-            guard filter(decoration.style) else { continue }
+            let renderAttr = box.attribute
 
-            // Check if this decoration intersects with the fragment's range
-            let intersectionRange = NSIntersectionRange(fragmentNSRange, decoration.range)
-            guard intersectionRange.length > 0 else {
-                decorationIndex += 1
-                continue
+            // attrRange is the full attribute range, which may extend beyond fragmentNSRange
+            // We need to use the intersection for proper segment enumeration
+            guard let intersectionRange = fragmentNSRange.intersection(attrRange),
+                  intersectionRange.length > 0 else {
+                return
             }
 
-            // Convert NSRange back to NSTextRange for the intersection
+            // Convert intersection range to NSTextRange for segment enumeration
             guard let startLocation = textContentManager.location(documentRange.location, offsetBy: intersectionRange.location),
                   let endLocation = textContentManager.location(startLocation, offsetBy: intersectionRange.length),
                   let textRange = NSTextRange(location: startLocation, end: endLocation) else {
-                decorationIndex += 1
-                continue
+                return
             }
 
-            let currentIndex = decorationIndex
-            // Check if this fragment contains the very start of the decoration
-            let decorationStartsInThisFragment = decoration.range.location >= fragmentNSRange.location &&
-                decoration.range.location < fragmentNSRange.location + fragmentNSRange.length
-            var isFirstSegment = decorationStartsInThisFragment
-
             // Get the frame for this text segment
-            textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: []) { _, segmentFrame, _, _ in
-                // Convert to fragment-local coordinates (subtract fragment origin for both X and Y)
+            // Note: segmentFrame is in the text container's coordinate space
+            textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: []) { segmentTextRange, segmentFrame, baselinePosition, _ in
+                // Convert from text container coordinates to fragment-local coordinates
+                // The view is positioned at layoutFragmentFrame.origin in the text container,
+                // so we subtract the fragment origin to get view-local coordinates
                 let localFrame = CGRect(
                     x: segmentFrame.origin.x - layoutFragment.layoutFragmentFrame.origin.x,
                     y: segmentFrame.origin.y - layoutFragment.layoutFragmentFrame.origin.y,
@@ -237,131 +249,102 @@ final class STTextLayoutFragmentView: NSView {
                     return true
                 }
 
-                block(decoration, localFrame, currentIndex, isFirstSegment)
-                isFirstSegment = false  // Only first segment gets the marker
+                // Categorize by style
+                if renderAttr.style == .background {
+                    segments.backgrounds.append((renderAttr, localFrame))
+                } else {
+                    segments.underlines.append((renderAttr, localFrame))
+                }
+
                 return true
             }
-
-            decorationIndex += 1
         }
+
+        return segments
     }
 
-    private func drawAnnotationBackgrounds(_ dirtyRect: CGRect, in context: CGContext) {
+    private func drawAnnotationBackgrounds(_ segments: [(STAnnotationRenderAttribute, CGRect)], in context: CGContext) {
         context.saveGState()
 
-        enumerateAnnotationSegments(matching: { $0 == .background }, in: dirtyRect) { decoration, localFrame, _, _ in
-            context.setFillColor(decoration.color.cgColor)
+        for (renderAttr, localFrame) in segments {
+            context.setFillColor(renderAttr.color.cgColor)
             let bgRect = localFrame.insetBy(dx: 0, dy: -1)
-            let path = NSBezierPath(roundedRect: bgRect, xRadius: decoration.thickness, yRadius: decoration.thickness)
+            let path = NSBezierPath(roundedRect: bgRect, xRadius: renderAttr.thickness, yRadius: renderAttr.thickness)
             path.fill()
         }
 
         context.restoreGState()
     }
 
-    private func drawAnnotationUnderlines(_ dirtyRect: CGRect, in context: CGContext) {
+    private func drawAnnotationUnderlines(_ segments: [(STAnnotationRenderAttribute, CGRect)], in context: CGContext) {
         context.saveGState()
 
-        enumerateAnnotationSegments(matching: { $0 != .background }, in: dirtyRect) { decoration, localFrame, _, isFirstSegment in
-            // Use decoration's properties instead of hardcoded values
-            let underlineY = localFrame.maxY + decoration.verticalOffset
-            let markerSize = max(6, decoration.thickness * 4)  // Proportional to thickness, minimum 6pt
+        for (renderAttr, localFrame) in segments {
+            let underlineY = localFrame.maxY + renderAttr.verticalOffset
+            context.setStrokeColor(renderAttr.color.cgColor)
 
-            // Draw underline based on style
-            context.setStrokeColor(decoration.color.cgColor)
-            context.setLineWidth(decoration.thickness)
+            // TODO: Implement marker rendering (renderAttr.marker)
 
-            switch decoration.style {
+            switch renderAttr.style {
             case .solidUnderline:
-                context.move(to: CGPoint(x: localFrame.minX, y: underlineY))
-                context.addLine(to: CGPoint(x: localFrame.maxX, y: underlineY))
-                context.strokePath()
-
+                drawSolidUnderline(at: localFrame, y: underlineY, thickness: renderAttr.thickness, in: context)
             case .dashedUnderline:
-                context.setLineDash(phase: 0, lengths: [decoration.thickness * 3, decoration.thickness * 2])
-                context.move(to: CGPoint(x: localFrame.minX, y: underlineY))
-                context.addLine(to: CGPoint(x: localFrame.maxX, y: underlineY))
-                context.strokePath()
-                context.setLineDash(phase: 0, lengths: [])  // Reset
-
+                drawDashedUnderline(at: localFrame, y: underlineY, thickness: renderAttr.thickness, in: context)
             case .dottedUnderline:
-                context.setLineCap(.round)
-                context.setLineDash(phase: 0, lengths: [0, decoration.thickness * 2.5])
-                context.move(to: CGPoint(x: localFrame.minX, y: underlineY))
-                context.addLine(to: CGPoint(x: localFrame.maxX, y: underlineY))
-                context.strokePath()
-                context.setLineDash(phase: 0, lengths: [])  // Reset
-                context.setLineCap(.butt)
-
+                drawDottedUnderline(at: localFrame, y: underlineY, thickness: renderAttr.thickness, in: context)
             case .wavyUnderline:
-                let path = NSBezierPath()
-                let amplitude: CGFloat = decoration.thickness
-                let wavelength: CGFloat = decoration.thickness * 4
-                var x = localFrame.minX
-                path.move(to: CGPoint(x: x, y: underlineY))
-                var up = true
-                while x < localFrame.maxX {
-                    let nextX = min(x + wavelength / 2, localFrame.maxX)
-                    let controlY = underlineY + (up ? -amplitude : amplitude)
-                    path.curve(to: CGPoint(x: nextX, y: underlineY),
-                               controlPoint1: CGPoint(x: x + wavelength / 4, y: controlY),
-                               controlPoint2: CGPoint(x: nextX - wavelength / 4, y: controlY))
-                    x = nextX
-                    up.toggle()
-                }
-                path.lineWidth = decoration.thickness
-                path.stroke()
-
+                drawWavyUnderline(at: localFrame, y: underlineY, thickness: renderAttr.thickness, in: context)
             case .background:
-                break  // Handled in drawAnnotationBackgrounds
-            }
-
-            // Only draw marker at the very start of the annotation
-            guard isFirstSegment else { return }
-
-            context.setFillColor(decoration.color.cgColor)
-            let markerX = localFrame.minX
-            let markerY = underlineY
-
-            switch decoration.marker {
-            case .circle:
-                let rect = CGRect(
-                    x: markerX - markerSize / 2,
-                    y: markerY - markerSize / 2,
-                    width: markerSize,
-                    height: markerSize
-                )
-                context.fillEllipse(in: rect)
-
-            case .square:
-                let rect = CGRect(
-                    x: markerX - markerSize / 2,
-                    y: markerY - markerSize / 2,
-                    width: markerSize,
-                    height: markerSize
-                )
-                context.fill(rect)
-
-            case .triangle:
-                let halfSize = markerSize / 2
-                context.move(to: CGPoint(x: markerX - halfSize, y: markerY - halfSize))
-                context.addLine(to: CGPoint(x: markerX + halfSize, y: markerY))
-                context.addLine(to: CGPoint(x: markerX - halfSize, y: markerY + halfSize))
-                context.closePath()
-                context.fillPath()
-
-            case .diamond:
-                let halfSize = markerSize / 2
-                context.move(to: CGPoint(x: markerX, y: markerY - halfSize))
-                context.addLine(to: CGPoint(x: markerX + halfSize, y: markerY))
-                context.addLine(to: CGPoint(x: markerX, y: markerY + halfSize))
-                context.addLine(to: CGPoint(x: markerX - halfSize, y: markerY))
-                context.closePath()
-                context.fillPath()
+                break // Handled in drawAnnotationBackgrounds
             }
         }
 
         context.restoreGState()
+    }
+
+    private func drawSolidUnderline(at rect: CGRect, y: CGFloat, thickness: CGFloat, in context: CGContext) {
+        let path = NSBezierPath()
+        path.lineWidth = thickness
+        path.move(to: CGPoint(x: rect.minX, y: y))
+        path.line(to: CGPoint(x: rect.maxX, y: y))
+        path.stroke()
+    }
+
+    private func drawDashedUnderline(at rect: CGRect, y: CGFloat, thickness: CGFloat, in context: CGContext) {
+        let path = NSBezierPath()
+        path.lineWidth = thickness
+        path.setLineDash([4, 2], count: 2, phase: 0)
+        path.move(to: CGPoint(x: rect.minX, y: y))
+        path.line(to: CGPoint(x: rect.maxX, y: y))
+        path.stroke()
+    }
+
+    private func drawDottedUnderline(at rect: CGRect, y: CGFloat, thickness: CGFloat, in context: CGContext) {
+        let path = NSBezierPath()
+        path.lineWidth = thickness
+        path.lineCapStyle = .round
+        path.setLineDash([1, 3], count: 2, phase: 0)
+        path.move(to: CGPoint(x: rect.minX, y: y))
+        path.line(to: CGPoint(x: rect.maxX, y: y))
+        path.stroke()
+    }
+
+    private func drawWavyUnderline(at rect: CGRect, y: CGFloat, thickness: CGFloat, in context: CGContext) {
+        let wavelength: CGFloat = 4
+        let amplitude: CGFloat = 1.5
+        let path = NSBezierPath()
+        path.lineWidth = thickness
+
+        var x = rect.minX
+        path.move(to: CGPoint(x: x, y: y))
+
+        while x < rect.maxX {
+            let waveY = y + amplitude * sin((x - rect.minX) / wavelength * .pi * 2)
+            path.line(to: CGPoint(x: x, y: waveY))
+            x += 1
+        }
+
+        path.stroke()
     }
 
 }

@@ -23,18 +23,6 @@ public enum STAnnotationStyle: Sendable {
   case background
 }
 
-/// Shape of the marker at the start of an annotation underline.
-public enum STAnnotationMarker: Sendable {
-  /// Filled circle.
-  case circle
-  /// Filled square.
-  case square
-  /// Filled triangle pointing right.
-  case triangle
-  /// Filled diamond.
-  case diamond
-}
-
 /// A decoration that marks a range of text with underlines or backgrounds.
 ///
 /// Annotation decorations are rendered efficiently by the text view,
