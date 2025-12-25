@@ -3,6 +3,7 @@
 
 import AppKit
 import CoreGraphics
+import STTextViewCommon
 
 @available(*, deprecated, renamed: "STTextRenderView")
 public typealias STTextLayoutRangeView = STTextRenderView
@@ -13,17 +14,17 @@ open class STTextRenderView: NSView {
     private let textLayoutManager: NSTextLayoutManager
     private let textRange: NSTextRange
 
-    public override var isFlipped: Bool {
-#if os(macOS)
-        true
-#else
-        false
-#endif
+    override public var isFlipped: Bool {
+        #if os(macOS)
+            true
+        #else
+            false
+        #endif
     }
 
-    public var clipsToContent: Bool = false
+    public var clipsToContent = false
 
-    open override var intrinsicContentSize: NSSize {
+    override open var intrinsicContentSize: NSSize {
         bounds.size
     }
 
@@ -36,84 +37,95 @@ open class STTextRenderView: NSView {
         needsLayout = true
     }
 
-    open override func layout() {
+    override open func layout() {
         // Calculate frame. Expand to the size of layout fragments in the asked range
         textLayoutManager.ensureLayout(for: textRange)
-        var frame: CGRect = textLayoutManager.typographicBounds(in: textRange)!
-        if clipsToContent {
-            textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
-                frame = CGRect(
-                    x: 0, y: 0,
-                    width: max(frame.size.width, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding),
-                    height: frame.size.height
-                )
-                return true
-            }
-        } else {
-            textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
-                frame = CGRect(
-                    x: 0, y: 0,
-                    width: max(frame.size.width, textLayoutFragment.layoutFragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding),
-                    height: max(frame.size.height, textLayoutFragment.layoutFragmentFrame.maxY + textLayoutFragment.topMargin + textLayoutFragment.bottomMargin)
-                )
-                return true
-            }
+
+        var frameWidth: CGFloat = 0
+        var frameMinY: CGFloat = .greatestFiniteMagnitude
+        var frameMaxY: CGFloat = 0
+
+        textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
+            let fragmentFrame = textLayoutFragment.layoutFragmentFrame
+            frameWidth = max(frameWidth, fragmentFrame.maxX + textLayoutFragment.leadingPadding + textLayoutFragment.trailingPadding)
+            frameMinY = min(frameMinY, fragmentFrame.minY)
+            frameMaxY = max(frameMaxY, fragmentFrame.maxY)
+            return true
         }
-        self.frame = frame
+
+        let frameHeight = frameMaxY - (clipsToContent ? frameMinY : 0)
+        self.frame = CGRect(x: 0, y: 0, width: frameWidth, height: frameHeight)
 
         super.layout()
     }
 
+    @available(*, unavailable)
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     open func image() -> NSImage? {
-        if needsLayout {
-            layout()
-        }
+        layoutSubtreeIfNeeded()
         return stImage()
     }
 
-    open override func draw(_ dirtyRect: NSRect) {
+    override open func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
 
-        var originY: CGFloat = 0
+        // When clipsToContent is true, we need to offset all positions so content starts at y=0
+        var firstFragmentMinY: CGFloat?
+
         textLayoutManager.enumerateTextLayoutFragments(in: textRange) { textLayoutFragment in
-            // at what location start draw the line. the first character is at textRange.location
-            // I want to draw just a part of the line fragment, however I can only draw the whole line
-            // so remove/delete unnecessary part of the line
-            var origin =
-                if clipsToContent {
-                    CGPoint(x: textLayoutFragment.layoutFragmentFrame.origin.x, y: originY)
-                } else {
-                    textLayoutFragment.layoutFragmentFrame.origin
-                }
+            let fragmentFrame = textLayoutFragment.layoutFragmentFrame
+
+            // Track the first fragment's y position for clipsToContent offset
+            if firstFragmentMinY == nil {
+                firstFragmentMinY = fragmentFrame.minY
+            }
+
+            // Calculate the base origin for this layout fragment
+            let fragmentOrigin: CGPoint
+            if clipsToContent {
+                fragmentOrigin = CGPoint(
+                    x: fragmentFrame.origin.x,
+                    y: fragmentFrame.origin.y - (firstFragmentMinY ?? 0)
+                )
+            } else {
+                fragmentOrigin = fragmentFrame.origin
+            }
 
             for textLineFragment in textLayoutFragment.textLineFragments {
                 guard let textLineFragmentRange = textLineFragment.textRange(in: textLayoutFragment) else {
                     continue
                 }
 
-                textLineFragment.draw(at: origin, in: ctx)
+                // Apply lineHeightMultiple offset to match STTextLayoutFragment rendering
+                let paragraphStyle: NSParagraphStyle = if !textLineFragment.isExtraLineFragment,
+                                                          let lineParagraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                    lineParagraphStyle
+                } else {
+                    .default
+                }
+                let lineHeightOffset = -(textLineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
+
+                // Draw at fragment origin + line fragment's relative position (from typographicBounds.origin)
+                let drawOrigin = CGPoint(
+                    x: fragmentOrigin.x + textLineFragment.typographicBounds.origin.x,
+                    y: fragmentOrigin.y + textLineFragment.typographicBounds.origin.y + lineHeightOffset
+                )
+                textLineFragment.draw(at: drawOrigin, in: ctx)
 
                 // if textLineFragment contains textRange.location, cut off everything before it
                 if textLineFragmentRange.contains(textRange.location) {
                     let originOffset = textLineFragment.locationForCharacter(at: textLayoutManager.offset(from: textLineFragmentRange.location, to: textRange.location))
-                    ctx.clear(CGRect(x: origin.x, y: origin.y, width: originOffset.x, height: textLineFragment.typographicBounds.height))
+                    ctx.clear(CGRect(x: drawOrigin.x, y: drawOrigin.y, width: originOffset.x, height: textLineFragment.typographicBounds.height))
                 }
 
                 if textLineFragmentRange.contains(textRange.endLocation) {
                     let originOffset = textLineFragment.locationForCharacter(at: textLayoutManager.offset(from: textLineFragmentRange.location, to: textRange.endLocation))
-                    ctx.clear(CGRect(x: originOffset.x, y: origin.y, width: textLineFragment.typographicBounds.width - originOffset.x, height: textLineFragment.typographicBounds.height))
+                    ctx.clear(CGRect(x: drawOrigin.x + originOffset.x, y: drawOrigin.y, width: textLineFragment.typographicBounds.width - originOffset.x, height: textLineFragment.typographicBounds.height))
                     break
                 }
-
-                // TODO: Position does not take RTL, Vertical into account
-                // let writingDirection = textLayoutManager.baseWritingDirection(at: textRange.location)
-                let diff = textLineFragment.typographicBounds.minY + textLineFragment.glyphOrigin.y
-                origin.y += diff
-                originY += diff
             }
 
             return true

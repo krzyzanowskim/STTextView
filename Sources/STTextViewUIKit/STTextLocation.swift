@@ -3,7 +3,7 @@
 
 import UIKit
 
-internal class STTextLocation: UITextPosition {
+class STTextLocation: UITextPosition {
     let location: NSTextLocation
 
     override var debugDescription: String {
@@ -15,7 +15,7 @@ internal class STTextLocation: UITextPosition {
     }
 }
 
-internal extension NSTextLocation {
+extension NSTextLocation {
     var uiTextPosition: STTextLocation {
         STTextLocation(location: self)
     }

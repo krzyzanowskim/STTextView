@@ -24,11 +24,11 @@ final class STSelectionView: NSView {
     }
 
     override var isFlipped: Bool {
-#if os(macOS)
-        true
-#else
-        false
-#endif
+        #if os(macOS)
+            true
+        #else
+            false
+        #endif
     }
 
     override func viewDidChangeEffectiveAppearance() {

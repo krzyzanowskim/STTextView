@@ -27,7 +27,7 @@ extension NSTextLayoutManager {
     ///   - range: The location at which to start the enumeration.
     ///   - reverse: Whether to start the enumeration from the end of the range.
     ///   - block: A closure you provide to determine if the enumeration finishes early.
-    func enumerateRenderingAttributes(in range: NSTextRange, reverse: Bool, using block: (NSTextLayoutManager, [NSAttributedString.Key : Any], NSTextRange) -> Bool) {
+    func enumerateRenderingAttributes(in range: NSTextRange, reverse: Bool, using block: (NSTextLayoutManager, [NSAttributedString.Key: Any], NSTextRange) -> Bool) {
         enumerateRenderingAttributes(from: range.location, reverse: reverse) { textLayoutManager, attributes, textRange in
             let shouldContinue = textRange.location < range.endLocation
             if !shouldContinue {

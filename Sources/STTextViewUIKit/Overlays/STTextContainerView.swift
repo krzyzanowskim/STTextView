@@ -3,7 +3,7 @@
 
 import UIKit
 
-final class STContentView: UIView {
+final class STTextContainerView: UIView {
 
     override class var layerClass: AnyClass {
         CATiledLayer.self
@@ -15,6 +15,7 @@ final class STContentView: UIView {
         isUserInteractionEnabled = false
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

@@ -18,7 +18,8 @@ enum Completion {
 }
 
 private struct ItemView: View {
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.colorScheme)
+    var colorScheme
 
     let label: String
     let symbolName: String

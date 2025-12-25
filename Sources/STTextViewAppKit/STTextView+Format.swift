@@ -16,15 +16,14 @@ extension STTextView {
             return
         }
 
-        let selectionRanges = textLayoutManager.textSelections.flatMap(\.textRanges).filter({ !$0.isEmpty })
+        let selectionRanges = textLayoutManager.textSelections.flatMap(\.textRanges).filter { !$0.isEmpty }
 
         // If there is a selection and
         // the first character of the selected range
         // has any form of underline on it
         // then underline is removed
         if let location = selectionRanges.first?.location,
-           textContentManager.attributes(at: location).contains(where: { $0.key == .underlineStyle })
-        {
+           textContentManager.attributes(at: location).contains(where: { $0.key == .underlineStyle }) {
             for textRange in selectionRanges {
                 removeAttribute(.underlineStyle, range: textRange)
                 removeAttribute(.underlineColor, range: textRange)

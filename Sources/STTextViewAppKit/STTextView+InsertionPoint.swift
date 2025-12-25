@@ -19,7 +19,7 @@ extension STTextView {
             // rewrite it to lines
             var textSelectionFrames: [CGRect] = []
             for selectionTextRange in insertionPointsRanges {
-                textLayoutManager.enumerateTextSegments(in: selectionTextRange, type: .standard) { textSegmentRange, textSegmentFrame, baselinePosition, textContainer in
+                textLayoutManager.enumerateTextSegments(in: selectionTextRange, type: .standard) { textSegmentRange, textSegmentFrame, _, _ in
                     if let textSegmentRange {
                         let documentRange = textLayoutManager.documentRange
                         guard !documentRange.isEmpty else {
@@ -60,8 +60,7 @@ extension STTextView {
                                     )
                                 )
                             } else if let prevLocation = textLayoutManager.location(textSegmentRange.endLocation, offsetBy: -1),
-                                      let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation)
-                            {
+                                      let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation) {
                                 // Get insertion point height from the last-to-end (last) line fragment location
                                 // since we're at the end location at this point.
                                 textSelectionFrames.append(
@@ -103,14 +102,13 @@ extension STTextView {
                     insertionView.frame = insertionViewFrame
                 } else {
                     // add new views that exedes existing views
-                    var textInsertionIndicator: any STInsertionPointIndicatorProtocol
-                    if let customTextInsertionIndicator = self.delegateProxy.textViewInsertionPointView(self, frame: CGRect(origin: .zero, size: insertionViewFrame.size)) {
-                        textInsertionIndicator = customTextInsertionIndicator
+                    let textInsertionIndicator: any STInsertionPointIndicatorProtocol = if let customTextInsertionIndicator = self.delegateProxy.textViewInsertionPointView(self, frame: CGRect(origin: .zero, size: insertionViewFrame.size)) {
+                        customTextInsertionIndicator
                     } else {
                         if #available(macOS 14, *) {
-                            textInsertionIndicator = STTextInsertionIndicatorNew(frame: CGRect(origin: .zero, size: insertionViewFrame.size))
+                            STTextInsertionIndicatorNew(frame: CGRect(origin: .zero, size: insertionViewFrame.size))
                         } else {
-                            textInsertionIndicator = STTextInsertionIndicatorOld(frame: CGRect(origin: .zero, size: insertionViewFrame.size))
+                            STTextInsertionIndicatorOld(frame: CGRect(origin: .zero, size: insertionViewFrame.size))
                         }
                     }
 
@@ -151,7 +149,7 @@ extension STTextView {
 @available(macOS 14.0, *)
 private class STTextInsertionIndicatorNew: NSTextInsertionIndicator, STInsertionPointIndicatorProtocol {
     // NSTextInsertionIndicator start as visible (blinking)
-    private var _isVisible: Bool = true
+    private var _isVisible = true
 
     override init(frame frameRect: CGRect) {
         super.init(frame: frameRect)
@@ -187,7 +185,7 @@ private class STTextInsertionIndicatorNew: NSTextInsertionIndicator, STInsertion
         }
     }
 
-    open override var isFlipped: Bool {
+    override open var isFlipped: Bool {
         true
     }
 }
@@ -220,7 +218,7 @@ private class STTextInsertionIndicatorOld: NSView, STInsertionPointIndicatorProt
             return
         }
 
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.isHidden.toggle()
         }
     }
@@ -231,7 +229,7 @@ private class STTextInsertionIndicatorOld: NSView, STInsertionPointIndicatorProt
         timer = nil
     }
 
-    open override var isFlipped: Bool {
+    override open var isFlipped: Bool {
         true
     }
 

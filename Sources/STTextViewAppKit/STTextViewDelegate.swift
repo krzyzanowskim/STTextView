@@ -44,7 +44,7 @@ public protocol STTextViewDelegate: AnyObject {
     func textView(_ textView: STTextView, menu: NSMenu, for event: NSEvent, at location: any NSTextLocation) -> NSMenu?
 
     // MARK: Clicking and Pasting
-    
+
     /// Sent after the user clicks a link.
     /// - Parameters:
     ///   - textView: The text view sending the message.
@@ -52,7 +52,7 @@ public protocol STTextViewDelegate: AnyObject {
     ///   - location: The location where the click occurred.
     /// - Returns: true if the click was handled; otherwise, false to allow the next responder to handle it.
     func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool
-    
+
     /// Sent after the user clicks on a text attachment.
     /// - Parameters:
     ///   - textView: The text view sending the message.
@@ -60,7 +60,7 @@ public protocol STTextViewDelegate: AnyObject {
     ///   - location: The location where the click occurred.
     /// - Returns: true if the click was handled; otherwise, false to allow default handling.
     func textView(_ textView: STTextView, clickedOnAttachment attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool
-    
+
     /// Determines whether the text view should allow interaction with a text attachment.
     /// - Parameters:
     ///   - textView: The text view sending the message.
@@ -116,13 +116,9 @@ public extension STTextViewDelegate {
         true
     }
 
-    func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
+    func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {}
 
-    }
-
-    func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
-
-    }
+    func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {}
 
     func textView(_ view: STTextView, menu: NSMenu, for event: NSEvent, at location: any NSTextLocation) -> NSMenu? {
         menu
@@ -137,9 +133,7 @@ public extension STTextViewDelegate {
         nil
     }
 
-    func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem) {
-        
-    }
+    func textView(_ textView: STTextView, insertCompletionItem item: any STCompletionItem) {}
 
     func textViewCompletionViewController(_ textView: STTextView) -> any STCompletionViewControllerProtocol {
         STCompletionViewController()
@@ -164,11 +158,11 @@ public extension STTextViewDelegate {
         // }
         false
     }
-    
+
     func textView(_ textView: STTextView, clickedOnAttachment attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
         false
     }
-    
+
     func textView(_ textView: STTextView, shouldAllowInteractionWith attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
         true
     }

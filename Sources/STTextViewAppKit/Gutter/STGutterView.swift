@@ -29,9 +29,9 @@ public extension STGutterViewDelegate {
 
 /// A gutter to the side of a scroll view’s document view.
 open class STGutterView: NSView, NSDraggingSource {
-    internal let separatorView: STGutterSeparatorView
-    internal let containerView: STGutterContainerView
-    internal let markerContainerView: STGutterMarkerContainerView
+    let separatorView: STGutterSeparatorView
+    let containerView: STGutterContainerView
+    let markerContainerView: STGutterMarkerContainerView
 
     private var _draggingMarker: STGutterMarker?
     private var _isDragging = false
@@ -49,7 +49,7 @@ open class STGutterView: NSView, NSDraggingSource {
 
     /// The insets of the ruler view.
     @Invalidating(.display)
-    open var insets: STRulerInsets = STRulerInsets(leading: 4.0, trailing: 6.0)
+    open var insets = STRulerInsets(leading: 4.0, trailing: 6.0)
 
     /// Minimum thickness.
     @Invalidating(.layout)
@@ -71,10 +71,10 @@ open class STGutterView: NSView, NSDraggingSource {
 
     /// A Boolean that controls whether the text view highlights the currently selected line. Default false.
     @MainActor @Invalidating(.display)
-    open var highlightSelectedLine: Bool = false
+    open var highlightSelectedLine = false
 
     @Invalidating(.display, .background)
-    internal var backgroundColor: NSColor? = nil {
+    var backgroundColor: NSColor? = nil {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
             if backgroundColor == nil, _backgroundEffectView == nil {
@@ -91,11 +91,12 @@ open class STGutterView: NSView, NSDraggingSource {
             }
         }
     }
+
     private var _backgroundEffectView: NSVisualEffectView?
 
     /// The background color of the highlighted line.
     @Invalidating(.display)
-    open var selectedLineHighlightColor: NSColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
+    open var selectedLineHighlightColor = NSColor.selectedTextBackgroundColor.withAlphaComponent(0.25)
 
     /// The text color of the highlighted line numbers.
     @Invalidating(.display)
@@ -118,25 +119,25 @@ open class STGutterView: NSView, NSDraggingSource {
     private(set) var markers: [STGutterMarker] = []
 
     /// A Boolean value that determines whether the markers functionality is in an enabled state. Default `false.`
-    open var areMarkersEnabled: Bool = false
+    open var areMarkersEnabled = false
 
-    public override var isOpaque: Bool {
+    override public var isOpaque: Bool {
         false
     }
 
-    open override var isFlipped: Bool {
+    override open var isFlipped: Bool {
         true
     }
 
-    open override var allowsVibrancy: Bool {
+    override open var allowsVibrancy: Bool {
         true
     }
 
-    public override func makeBackingLayer() -> CALayer {
+    override public func makeBackingLayer() -> CALayer {
         CATiledLayer()
     }
 
-    public override func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
+    override public func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
         nil
     }
 
@@ -163,11 +164,11 @@ open class STGutterView: NSView, NSDraggingSource {
     }
 
     @available(*, unavailable)
-    required public init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    open override func viewDidChangeEffectiveAppearance() {
+    override open func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
             guard let self else { return }
@@ -175,7 +176,7 @@ open class STGutterView: NSView, NSDraggingSource {
         }
     }
 
-    open override func layout() {
+    override open func layout() {
         super.layout()
 
         // Workaround
@@ -209,7 +210,7 @@ open class STGutterView: NSView, NSDraggingSource {
         }
     }
 
-    internal func layoutMarkers() {
+    func layoutMarkers() {
         for v in markerContainerView.subviews {
             v.removeFromSuperviewWithoutNeedingDisplay()
         }
@@ -230,7 +231,7 @@ open class STGutterView: NSView, NSDraggingSource {
         }
     }
 
-    open override func mouseDown(with event: NSEvent) {
+    override open func mouseDown(with event: NSEvent) {
         defer {
             _isDragging = false
         }
@@ -252,7 +253,7 @@ open class STGutterView: NSView, NSDraggingSource {
     }
 
 
-    open override func mouseUp(with event: NSEvent) {
+    override open func mouseUp(with event: NSEvent) {
         defer {
             _didMouseDownAddMarker = false
             _isDragging = false
@@ -274,7 +275,7 @@ open class STGutterView: NSView, NSDraggingSource {
         super.mouseUp(with: event)
     }
 
-    public override func mouseDragged(with event: NSEvent) {
+    override public func mouseDragged(with event: NSEvent) {
         defer {
             _isDragging = true
         }
@@ -286,7 +287,7 @@ open class STGutterView: NSView, NSDraggingSource {
                 .first { $0.frame.contains(eventPoint) }
 
             let tapOnMark = markerContainerView.subviews.contains(where: { $0.frame.contains(markerContainerView.convert(event.locationInWindow, from: nil)) })
-            if !_isDragging, tapOnMark, !_didMouseDownAddMarker , let lineNumberCell, let marker = marker(lineNumber: lineNumberCell.lineNumber) {
+            if !_isDragging, tapOnMark, !_didMouseDownAddMarker, let lineNumberCell, let marker = marker(lineNumber: lineNumberCell.lineNumber) {
                 let pasteboardItem = NSPasteboardItem()
                 pasteboardItem.setString("", forType: .string)
                 let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)

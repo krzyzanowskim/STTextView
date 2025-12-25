@@ -2,10 +2,10 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 #endif
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 import Foundation
@@ -84,15 +84,15 @@ package enum STGutterCalculations {
             )
 
             #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-            cellFrame = rawFrame.pixelAligned
+                cellFrame = rawFrame.pixelAligned
             #else
-            cellFrame = CGRect(
-                origin: CGPoint(
-                    x: rawFrame.origin.x,
-                    y: rawFrame.origin.y - contentOffset.y
-                ),
-                size: rawFrame.size
-            )
+                cellFrame = CGRect(
+                    origin: CGPoint(
+                        x: rawFrame.origin.x,
+                        y: rawFrame.origin.y - contentOffset.y
+                    ),
+                    size: rawFrame.size
+                )
             #endif
 
         } else {
@@ -121,27 +121,27 @@ package enum STGutterCalculations {
             } else {
                 // Fallback to layout fragment frame if view not available yet
                 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-                cellFrame = CGRect(
-                    origin: CGPoint(
-                        x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                        y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
-                    ),
-                    size: CGSize(
-                        width: layoutFragment.layoutFragmentFrame.width,
-                        height: layoutFragment.layoutFragmentFrame.height
-                    )
-                ).pixelAligned
+                    cellFrame = CGRect(
+                        origin: CGPoint(
+                            x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                            y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
+                        ),
+                        size: CGSize(
+                            width: layoutFragment.layoutFragmentFrame.width,
+                            height: layoutFragment.layoutFragmentFrame.height
+                        )
+                    ).pixelAligned
                 #else
-                cellFrame = CGRect(
-                    origin: CGPoint(
-                        x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                        y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
-                    ),
-                    size: CGSize(
-                        width: layoutFragment.layoutFragmentFrame.width,
-                        height: layoutFragment.layoutFragmentFrame.height
+                    cellFrame = CGRect(
+                        origin: CGPoint(
+                            x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                            y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
+                        ),
+                        size: CGSize(
+                            width: layoutFragment.layoutFragmentFrame.width,
+                            height: layoutFragment.layoutFragmentFrame.height
+                        )
                     )
-                )
                 #endif
             }
         }

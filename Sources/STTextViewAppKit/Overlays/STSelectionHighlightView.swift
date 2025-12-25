@@ -12,25 +12,25 @@ final class STSelectionHighlightView: NSView {
     }
 
     override var isFlipped: Bool {
-#if os(macOS)
-        true
-#else
-        false
-#endif
+        #if os(macOS)
+            true
+        #else
+            false
+        #endif
     }
-    
+
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
         clipsToBounds = true
         layer?.backgroundColor = backgroundColor?.cgColor
     }
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError()
     }
-    
+
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in

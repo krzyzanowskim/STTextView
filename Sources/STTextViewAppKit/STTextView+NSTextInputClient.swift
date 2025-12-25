@@ -46,7 +46,7 @@ extension STTextView: NSTextInputClient {
             // it comes with unexpected NSUnderlineColorAttributeName with a clear color that makes it not visible
             // probably it should be more sophisticated to care about the clear underline and do something about
             // but I don't really know how to test this scenario, hence remove clear underline
-            attributedString.removeAttribute(.underlineColor, range:  NSRange(location: 0, length: attributedString.length))
+            attributedString.removeAttribute(.underlineColor, range: NSRange(location: 0, length: attributedString.length))
 
             let attrs = typingAttributes.merging(markedTextAttributes) { (_, new) in new }
             attributedString.addAttributes(attrs, range: NSRange(location: 0, length: attributedString.length))
@@ -59,9 +59,9 @@ extension STTextView: NSTextInputClient {
             return
         }
 
-#if DEBUG
-        logger.debug("\(#function) \(attributedMarkedString.string), selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
-#endif
+        #if DEBUG
+            logger.debug("\(#function) \(attributedMarkedString.string), selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
+        #endif
 
         if replacementRange.location != NSNotFound {
             if markedText == nil {
@@ -177,7 +177,7 @@ extension STTextView: NSTextInputClient {
         }
 
         var rect: CGRect = .zero
-        textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: .rangeNotRequired) { _, textSegmentFrame, baselinePosition, textContainer in
+        textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: .rangeNotRequired) { _, textSegmentFrame, _, _ in
             rect = window!.convertToScreen(contentView.convert(textSegmentFrame, to: nil))
             return false
         }
@@ -227,7 +227,7 @@ extension STTextView: NSTextInputClient {
 }
 
 
-private extension Optional<UndoManager> {
+private extension UndoManager? {
     func withoutUndoRegistration(_ action: () -> Void) {
         let temporaryDisableUndoRegistration = self?.isUndoRegistrationEnabled == true
 

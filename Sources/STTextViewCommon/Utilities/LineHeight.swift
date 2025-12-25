@@ -2,17 +2,15 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 #endif
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
-    /// Heavily inspired by WebKit
-
     let kLineHeightAdjustment: CGFloat = 0.15
-
+    /// Heavily inspired by WebKit
     var ascent = CTFontGetAscent(font)
     var descent = CTFontGetDescent(font)
     var lineGap = CTFontGetLeading(font)
@@ -21,11 +19,11 @@ package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
 
     if shouldUseAdjustment(familyName) {
         // Needs ascent adjustment
-        ascent += round((ascent + descent) * kLineHeightAdjustment);
+        ascent += round((ascent + descent) * kLineHeightAdjustment)
     }
 
     // Compute line spacing before the line metrics hacks are applied.
-    var lineSpacing = round(ascent) + round(descent) + round(lineGap);
+    var lineSpacing = round(ascent + descent + lineGap)
 
     // Hack Hiragino line metrics to allow room for marked text underlines.
     if descent < 3, lineGap >= 3, familyName.hasPrefix("Hiragino") == true {
@@ -33,13 +31,13 @@ package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
         descent = 3
     }
 
-#if os(iOS) || targetEnvironment(macCatalyst)
-    let adjustment = shouldUseAdjustment(familyName) ? ceil(ascent + descent) * kLineHeightAdjustment : 0
-    lineGap = ceil(lineGap)
-    lineSpacing = ceil(ascent) + adjustment + ceil(descent) + lineGap
-    ascent = ceil((ascent + adjustment))
-    descent = ceil(descent)
-#endif
+    #if os(iOS) || targetEnvironment(macCatalyst)
+        let adjustment = shouldUseAdjustment(familyName) ? ceil(ascent + descent) * kLineHeightAdjustment : 0
+        lineGap = ceil(lineGap)
+        lineSpacing = ceil(ascent) + adjustment + ceil(descent) + lineGap
+        ascent = ceil((ascent + adjustment))
+        descent = ceil(descent)
+    #endif
 
     return lineSpacing
 }

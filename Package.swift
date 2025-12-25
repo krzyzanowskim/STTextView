@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "STTextView",
-    platforms: [.macOS(.v12), .iOS(.v16), .macCatalyst(.v16)],
+    platforms: [.macOS(.v14), .iOS(.v16), .macCatalyst(.v16)],
     products: [
         .library(
             name: "STTextView",
@@ -13,8 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/STTextKitPlus", from: "0.2.0"),
-        .package(url: "https://github.com/krzyzanowskim/CoreTextSwift", from: "0.2.0"),
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.2")
+        .package(url: "https://github.com/krzyzanowskim/CoreTextSwift", from: "0.2.0")
     ],
     targets: [
         .target(
@@ -59,15 +58,20 @@ let package = Package(
             ]
         ),
         .target(
+            name: "STTextViewSwiftUICommon"
+        ),
+        .target(
             name: "STTextViewSwiftUIAppKit",
             dependencies: [
-                .target(name: "STTextView")
+                .target(name: "STTextView"),
+                .target(name: "STTextViewSwiftUICommon")
             ]
         ),
         .target(
             name: "STTextViewSwiftUIUIKit",
             dependencies: [
-                .target(name: "STTextView")
+                .target(name: "STTextView"),
+                .target(name: "STTextViewSwiftUICommon")
             ]
         ),
         .target(
@@ -77,10 +81,8 @@ let package = Package(
         .testTarget(
             name: "STTextViewAppKitTests",
             dependencies: [
-                .target(name: "STTextViewAppKit", condition: .when(platforms: [.macOS])),
-                .product(name: "SnapshotTesting", package: "swift-snapshot-testing")
-            ],
-            exclude: ["__Snapshots__"]
+                .target(name: "STTextViewAppKit", condition: .when(platforms: [.macOS]))
+            ]
         ),
         .testTarget(
             name: "STTextViewUIKitTests",

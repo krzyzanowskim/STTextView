@@ -80,7 +80,7 @@ extension STTextView: NSTextCheckingClient {
 
         // add (apply) spellcheck attributes from rendering attributes where annotations are saved
         let offset = textContentManager.offset(from: textLayoutManager.documentRange.location, to: actualTextRange.location)
-        textLayoutManager.enumerateRenderingAttributes(in: actualTextRange, reverse: false) { textLayoutManager, attrs, attrTextRange in
+        textLayoutManager.enumerateRenderingAttributes(in: actualTextRange, reverse: false) { _, attrs, attrTextRange in
             for spellcheckAttributeKey in attrs.keys.filter({ textCheckingController.validAnnotations().contains($0) }) {
                 guard let value = attrs[spellcheckAttributeKey],
                       let loc = textContentManager.location(attrTextRange.location, offsetBy: -offset),
@@ -111,7 +111,7 @@ extension STTextView: NSTextCheckingClient {
     // The range should be adjusted according to the standard range adjustment policy.
     //
     // Has no effect if the adjusted range has zero length.
-    public func setAnnotations(_ annotations: [NSAttributedString.Key : String], range: NSRange) {
+    public func setAnnotations(_ annotations: [NSAttributedString.Key: String], range: NSRange) {
         guard range.length > 0 else {
             return
         }
@@ -119,7 +119,7 @@ extension STTextView: NSTextCheckingClient {
         addRenderingAnnotations(annotations, range: range)
     }
 
-    public func addAnnotations(_ annotations: [NSAttributedString.Key : String], range: NSRange) {
+    public func addAnnotations(_ annotations: [NSAttributedString.Key: String], range: NSRange) {
         addRenderingAnnotations(annotations, range: range)
     }
 
@@ -162,62 +162,63 @@ extension STTextView: NSTextCheckingClient {
 
 }
 
-extension STTextView {
+public extension STTextView {
 
-    @objc public var spellCheckerDocumentTag: Int {
+    @objc
+    var spellCheckerDocumentTag: Int {
         textCheckingController.spellCheckerDocumentTag
     }
 
-    @objc public func checkTextInDocument(_ sender: Any?) {
+    @objc func checkTextInDocument(_ sender: Any?) {
         textCheckingController.checkTextInDocument(sender)
     }
 
-    @objc public func checkTextInSelection(_ sender: Any?) {
+    @objc func checkTextInSelection(_ sender: Any?) {
         textCheckingController.checkTextInSelection(sender)
     }
 
-    @objc public func checkText(in range: NSRange, types checkingTypes: NSTextCheckingTypes, options: [NSSpellChecker.OptionKey : Any] = [:]) {
+    @objc func checkText(in range: NSRange, types checkingTypes: NSTextCheckingTypes, options: [NSSpellChecker.OptionKey: Any] = [:]) {
         textCheckingController.checkText(in: range, types: checkingTypes, options: options)
     }
 
-    @objc public func checkSpelling(_ sender: Any?) {
+    @objc func checkSpelling(_ sender: Any?) {
         textCheckingController.checkSpelling(sender)
     }
 
-    @objc public func toggleContinuousSpellChecking(_ sender: Any?) {
+    @objc func toggleContinuousSpellChecking(_ sender: Any?) {
         isContinuousSpellCheckingEnabled.toggle()
         NSSpellChecker.shared.updatePanels()
     }
 
-    @objc public func toggleGrammarChecking(_ sender: Any?) {
+    @objc func toggleGrammarChecking(_ sender: Any?) {
         isGrammarCheckingEnabled.toggle()
         NSSpellChecker.shared.updatePanels()
     }
 
-    @objc public func toggleAutomaticSpellingCorrection(_ sender: Any?) {
+    @objc func toggleAutomaticSpellingCorrection(_ sender: Any?) {
         isAutomaticSpellingCorrectionEnabled.toggle()
         NSSpellChecker.shared.updatePanels()
     }
 
-    @objc public func toggleAutomaticTextCompletion(_ sender: Any?) {
+    @objc func toggleAutomaticTextCompletion(_ sender: Any?) {
         isAutomaticTextCompletionEnabled.toggle()
         NSSpellChecker.shared.updatePanels()
     }
 
-    @objc public func toggleAutomaticQuoteSubstitution(_ sender: Any?) {
+    @objc func toggleAutomaticQuoteSubstitution(_ sender: Any?) {
         isAutomaticQuoteSubstitutionEnabled.toggle()
         NSSpellChecker.shared.updatePanels()
     }
 
-    @objc public func showGuessPanel(_ sender: Any?) {
+    @objc func showGuessPanel(_ sender: Any?) {
         textCheckingController.showGuessPanel(sender)
     }
 
-    @objc public func orderFrontSubstitutionsPanel(_ sender: Any?) {
+    @objc func orderFrontSubstitutionsPanel(_ sender: Any?) {
         textCheckingController.orderFrontSubstitutionsPanel(sender)
     }
 
-    @objc func considerTextChecking(for range: NSRange) {
+    @objc internal func considerTextChecking(for range: NSRange) {
         textCheckingController.considerTextChecking(for: range)
     }
 
@@ -226,7 +227,7 @@ extension STTextView {
 extension STTextView {
 
     /// To be called after text is changed.
-    internal func textCheckingDidChangeText(in range: NSRange) {
+    func textCheckingDidChangeText(in range: NSRange) {
 
         // Doesn't seem to trigger anything
         textCheckingController.didChangeText(in: range)
@@ -254,7 +255,8 @@ extension STTextView {
 
 extension STTextView: NSTextInputTraits {
 
-    @objc public var spellCheckingType: NSTextInputTraitType {
+    @objc
+    public var spellCheckingType: NSTextInputTraitType {
         get {
             isContinuousSpellCheckingEnabled ? .yes : .no
         }
@@ -263,7 +265,8 @@ extension STTextView: NSTextInputTraits {
         }
     }
 
-    @objc public var autocorrectionType: NSTextInputTraitType {
+    @objc
+    public var autocorrectionType: NSTextInputTraitType {
         get {
             isAutomaticSpellingCorrectionEnabled ? .yes : .no
         }
@@ -272,7 +275,8 @@ extension STTextView: NSTextInputTraits {
         }
     }
 
-    @objc public var grammarCheckingType: NSTextInputTraitType {
+    @objc
+    public var grammarCheckingType: NSTextInputTraitType {
         get {
             isGrammarCheckingEnabled ? .yes : .no
         }
@@ -282,7 +286,8 @@ extension STTextView: NSTextInputTraits {
         }
     }
 
-    @objc public var textCompletionType: NSTextInputTraitType {
+    @objc
+    public var textCompletionType: NSTextInputTraitType {
         get {
             isAutomaticTextCompletionEnabled ? .yes : .no
         }
@@ -292,7 +297,8 @@ extension STTextView: NSTextInputTraits {
         }
     }
 
-    @objc public var textReplacementType: NSTextInputTraitType {
+    @objc
+    public var textReplacementType: NSTextInputTraitType {
         get {
             isAutomaticTextReplacementEnabled ? .yes : .no
         }
@@ -302,7 +308,8 @@ extension STTextView: NSTextInputTraits {
         }
     }
 
-    @objc public var smartQuotesType: NSTextInputTraitType {
+    @objc
+    public var smartQuotesType: NSTextInputTraitType {
         get {
             isAutomaticQuoteSubstitutionEnabled ? .yes : .no
         }

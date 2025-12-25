@@ -2,10 +2,10 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 #endif
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 import STTextKitPlus
@@ -40,7 +40,7 @@ package extension NSTextLayoutManager {
                 return
             }
 
-            if let substring = substring {
+            if let substring {
                 output += substring
             }
         }
@@ -49,7 +49,7 @@ package extension NSTextLayoutManager {
 
     func textSelectionsRanges(_ options: TextSelectionRangesOptions = .withInsertionPoints) -> [NSTextRange] {
         if options.contains(.withoutInsertionPoints) {
-            return textSelections.flatMap(\.textRanges).filter({ !$0.isEmpty }).sorted(by: { $0.location < $1.location })
+            return textSelections.flatMap(\.textRanges).filter { !$0.isEmpty }.sorted(by: { $0.location < $1.location })
         } else {
             return textSelections.flatMap(\.textRanges).sorted(by: { $0.location < $1.location })
         }

@@ -1,16 +1,16 @@
 #if os(macOS)
-import XCTest
-@testable import STTextViewAppKit
+    import XCTest
+    @testable import STTextViewAppKit
 
-class TextViewTests : XCTestCase {
+    class TextViewTests: XCTestCase {
 
-    func testInitialSelection() {
-        let nstv = NSTextView()
-        let sttv = STTextView()
+        func testInitialSelection() {
+            let nstv = NSTextView()
+            let sttv = STTextView()
 
-        XCTAssertEqual(nstv.selectedRange(), sttv.textSelection)
+            XCTAssertEqual(nstv.selectedRange(), sttv.textSelection)
+        }
+
     }
-
-}
 
 #endif

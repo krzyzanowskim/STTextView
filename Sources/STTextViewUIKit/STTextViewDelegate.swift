@@ -36,7 +36,7 @@ public protocol STTextViewDelegate: AnyObject {
     func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String)
 
     // MARK: Clicking and Pasting
-    
+
     /// Sent after the user clicks a link.
     /// - Parameters:
     ///   - textView: The text view sending the message.
@@ -70,13 +70,9 @@ public extension STTextViewDelegate {
         true
     }
 
-    func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
+    func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {}
 
-    }
-
-    func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
-
-    }
+    func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {}
 
     func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool {
         false

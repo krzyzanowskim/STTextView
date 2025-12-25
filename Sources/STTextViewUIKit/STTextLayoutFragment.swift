@@ -6,7 +6,7 @@ import STObjCLandShim
 
 final class STTextLayoutFragment: NSTextLayoutFragment {
     private let defaultParagraphStyle: NSParagraphStyle
-    var showsInvisibleCharacters: Bool = false
+    var showsInvisibleCharacters = false
 
     init(textElement: NSTextElement, range rangeInElement: NSTextRange?, paragraphStyle: NSParagraphStyle) {
         self.defaultParagraphStyle = paragraphStyle
@@ -42,40 +42,38 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
 
         context.saveGState()
 
-#if USE_FONT_SMOOTHING_STYLE
-        // This seems to be available at least on 10.8 and later. The only reference to it is in
-        // WebKit. This causes text to render just a little lighter, which looks nicer.
-        let useThinStrokes = true // shouldSmooth
-        var savedFontSmoothingStyle: Int32 = 0
+        #if USE_FONT_SMOOTHING_STYLE
+            // This seems to be available at least on 10.8 and later. The only reference to it is in
+            // WebKit. This causes text to render just a little lighter, which looks nicer.
+            let useThinStrokes = true // shouldSmooth
+            var savedFontSmoothingStyle: Int32 = 0
 
-        if useThinStrokes {
-            context.setShouldSmoothFonts(true)
-            savedFontSmoothingStyle = STContextGetFontSmoothingStyle(context)
-            STContextSetFontSmoothingStyle(context, 16)
-        }
-#endif
+            if useThinStrokes {
+                context.setShouldSmoothFonts(true)
+                savedFontSmoothingStyle = STContextGetFontSmoothingStyle(context)
+                STContextSetFontSmoothingStyle(context, 16)
+            }
+        #endif
 
         for lineFragment in textLineFragments {
             // Determine paragraph style. Either from the fragment string or default for the text view
             // the ExtraLineFragment doesn't have information about typing attributes hence layout manager uses a default values - not from text view
-            let paragraphStyle: NSParagraphStyle
-            if !lineFragment.isExtraLineFragment,
-               let lineParagraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
-            {
-                paragraphStyle = lineParagraphStyle
+            let paragraphStyle: NSParagraphStyle = if !lineFragment.isExtraLineFragment,
+                                                      let lineParagraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+                lineParagraphStyle
             } else {
-                paragraphStyle = self.defaultParagraphStyle
+                self.defaultParagraphStyle
             }
 
             let offset = -(lineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
             lineFragment.draw(at: point.moved(dx: lineFragment.typographicBounds.origin.x, dy: lineFragment.typographicBounds.origin.y + offset), in: context)
         }
 
-#if USE_FONT_SMOOTHING_STYLE
-        if (useThinStrokes) {
-            STContextSetFontSmoothingStyle(context, savedFontSmoothingStyle);
-        }
-#endif
+        #if USE_FONT_SMOOTHING_STYLE
+            if (useThinStrokes) {
+                STContextSetFontSmoothingStyle(context, savedFontSmoothingStyle)
+            }
+        #endif
 
         if showsInvisibleCharacters {
             drawInvisibles(at: point, in: context)
@@ -85,7 +83,7 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
     }
 
     private func drawInvisibles(at point: CGPoint, in context: CGContext) {
-        guard let textLayoutManager = textLayoutManager else {
+        guard let textLayoutManager else {
             return
         }
 
@@ -114,18 +112,18 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
                 }
 
                 let symbol: Character = switch character {
-                case 0x0020: "\u{00B7}"  // • Space
-                case 0x0009: "\u{00BB}"  // » Tab
-                case 0x000A: "\u{00AC}"  // ¬ Line Feed
-                case 0x000D: "\u{21A9}"  // ↩ Carriage Return
-                case 0x00A0: "\u{235F}"  // ⎵ Non-Breaking Space
-                case 0x200B: "\u{205F}"  // ⸱ Zero Width Space
-                case 0x200C: "\u{200C}"  // ‌ Zero Width Non-Joiner
-                case 0x200D: "\u{200D}"  // ‍ Zero Width Joiner
-                case 0x2060: "\u{205F}"  //   Word Joiner
-                case 0x2028: "\u{23CE}"  // ⏎ Line Separator
-                case 0x2029: "\u{00B6}"  // ¶ Paragraph Separator
-                default: "\u{00B7}"  // • Default symbol for unspecified whitespace
+                case 0x0020: "\u{00B7}" // • Space
+                case 0x0009: "\u{00BB}" // » Tab
+                case 0x000A: "\u{00AC}" // ¬ Line Feed
+                case 0x000D: "\u{21A9}" // ↩ Carriage Return
+                case 0x00A0: "\u{235F}" // ⎵ Non-Breaking Space
+                case 0x200B: "\u{205F}" // ⸱ Zero Width Space
+                case 0x200C: "\u{200C}" // ‌ Zero Width Non-Joiner
+                case 0x200D: "\u{200D}" // ‍ Zero Width Joiner
+                case 0x2060: "\u{205F}" //   Word Joiner
+                case 0x2028: "\u{23CE}" // ⏎ Line Separator
+                case 0x2029: "\u{00B6}" // ¶ Paragraph Separator
+                default: "\u{00B7}" // • Default symbol for unspecified whitespace
                 }
 
                 let symbolString = String(symbol)

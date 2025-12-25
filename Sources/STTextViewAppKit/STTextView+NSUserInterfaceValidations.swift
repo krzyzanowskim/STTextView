@@ -26,7 +26,7 @@ extension STTextView: NSUserInterfaceValidations {
             let result = allowsUndo ? undoManager?.canUndo ?? false : false
 
             // NSWindow does that like this, here (as debugged)
-            if let undoManager = undoManager {
+            if let undoManager {
                 (item as? NSMenuItem)?.title = undoManager.undoMenuItemTitle
             }
 
@@ -35,7 +35,7 @@ extension STTextView: NSUserInterfaceValidations {
             let result = allowsUndo ? undoManager?.canRedo ?? false : false
 
             // NSWindow does that like this, here (as debugged)
-            if let undoManager = undoManager {
+            if let undoManager {
                 (item as? NSMenuItem)?.title = undoManager.redoMenuItemTitle
             }
             return result

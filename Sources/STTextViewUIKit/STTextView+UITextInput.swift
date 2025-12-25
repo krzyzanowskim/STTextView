@@ -32,11 +32,8 @@ extension STTextView: UITextInput {
             updateSelectedLineHighlight()
             layoutGutter()
 
-            if let newValue, var rect = self.selectionRects(for: newValue).last?.rect {
-                rect.size.height = max(rect.size.height, contentScaleFactor)
-                rect.size.width = max(rect.size.width, contentScaleFactor)
-                scrollRectToVisible(rect, animated: true)
-            }
+            // Defer scroll to layout pass (like UITextView's _scrollToSelectionIfNeeded)
+            needsScrollToSelection = true
         }
     }
 
@@ -138,7 +135,7 @@ extension STTextView: UITextInput {
 
         let positionSelection = NSTextSelection(position.location, affinity: .downstream)
         var destination: NSTextSelection? = positionSelection
-        for _ in 0..<offset {
+        for _ in 0 ..< offset {
             destination = textLayoutManager.textSelectionNavigation.destinationSelection(
                 for: destination ?? positionSelection,
                 direction: direction.textSelectionNavigationDirection,
@@ -150,7 +147,7 @@ extension STTextView: UITextInput {
 
         return destination?.textRanges.first?.location.uiTextPosition
     }
-    
+
     /* Simple evaluation of positions */
 
     /// Returns how one text position compares to another text position.
@@ -178,9 +175,9 @@ extension STTextView: UITextInput {
         guard let range = range as? STTextLocationRange else {
             return nil
         }
-        
+
         let textRange = range.textRange
-        
+
         // Return the appropriate position based on the direction
         switch direction {
         case .left, .up:
@@ -210,9 +207,9 @@ extension STTextView: UITextInput {
         guard let textLocation = position as? STTextLocation else {
             return nil
         }
-        
+
         let location = textLocation.location
-        
+
         // Find the other endpoint based on direction
         switch direction {
         case .left, .up:
@@ -230,7 +227,7 @@ extension STTextView: UITextInput {
         @unknown default:
             return nil
         }
-        
+
         return nil
     }
 
@@ -262,7 +259,7 @@ extension STTextView: UITextInput {
     /* Geometry used to provide, for example, a correction rect. */
 
     public func firstRect(for range: UITextRange) -> CGRect {
-        textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .standard)?.moved(dx: contentView.frame.origin.x) ?? .zero
+        textLayoutManager.textSegmentFrame(in: range.nsTextRange, type: .standard)?.moved(by: contentView.frame.origin) ?? .zero
     }
 
     public func caretRect(for position: UITextPosition) -> CGRect {
@@ -272,7 +269,7 @@ extension STTextView: UITextInput {
 
         // rewrite it to lines
         var textSelectionFrames: [CGRect] = []
-        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: textLocation.location), type: .standard) { textSegmentRange, textSegmentFrame, baselinePosition, textContainer in
+        textLayoutManager.enumerateTextSegments(in: NSTextRange(location: textLocation.location), type: .standard) { textSegmentRange, textSegmentFrame, _, _ in
             if let textSegmentRange {
                 let documentRange = textLayoutManager.documentRange
                 guard !documentRange.isEmpty else {
@@ -313,8 +310,7 @@ extension STTextView: UITextInput {
                             )
                         )
                     } else if let prevLocation = textLayoutManager.location(textSegmentRange.endLocation, offsetBy: -1),
-                              let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation)
-                    {
+                              let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation) {
                         // Get insertion point height from the last-to-end (last) line fragment location
                         // since we're at the end location at this point.
                         textSelectionFrames.append(
@@ -347,7 +343,7 @@ extension STTextView: UITextInput {
                 y: selectionFrame.origin.y,
                 width: max(2, selectionFrame.width),
                 height: typingLineHeight
-            ).moved(dx: contentView.frame.origin.x).pixelAligned
+            ).moved(by: contentView.frame.origin).pixelAligned
         }
 
         return .zero
@@ -360,7 +356,7 @@ extension STTextView: UITextInput {
         }
 
         var result: [UITextSelectionRect] = []
-        textLayoutManager.enumerateTextSegments(in: range.nsTextRange, type: .selection, options: .upstreamAffinity) { (textSegmentRange, textSegmentFrame, _, _)in
+        textLayoutManager.enumerateTextSegments(in: range.nsTextRange, type: .selection, options: .upstreamAffinity) { (textSegmentRange, textSegmentFrame, _, _) in
 
             var containsStart: Bool {
                 if let textSegmentRange, textSegmentRange.location == range.textRange.location {
@@ -377,7 +373,7 @@ extension STTextView: UITextInput {
             }
 
             result.append(STTextSelectionRect(
-                rect: textSegmentFrame.moved(dx: contentView.frame.origin.x),
+                rect: textSegmentFrame.moved(by: contentView.frame.origin),
                 writingDirection: baseWritingDirection(for: range.start, in: .forward),
                 containsStart: containsStart,
                 containsEnd: containsEnd,
@@ -391,7 +387,7 @@ extension STTextView: UITextInput {
     /* Hit testing. */
 
     public func closestPosition(to point: CGPoint) -> UITextPosition? {
-        let eventPoint = point.moved(dx: -contentView.frame.origin.x)
+        let eventPoint = point.moved(dx: -contentView.frame.origin.x, dy: -contentView.frame.origin.y)
         if let position = textLayoutManager.caretLocation(interactingAt: eventPoint, inContainerAt: textLayoutManager.documentRange.location)?.uiTextPosition {
             return position
         } else {
@@ -403,35 +399,35 @@ extension STTextView: UITextInput {
         guard let range = range as? STTextLocationRange else {
             return nil
         }
-        
+
         // Convert point to account for content view offset
-        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x)
-        
+        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x, dy: -contentView.frame.origin.y)
+
         // Attempt to find the location interacting at the point, constrained to the given range
         let candidateLocation = textLayoutManager.caretLocation(
             interactingAt: adjustedPoint,
             inContainerAt: range.textRange.location
         )
-        
+
         guard let candidateLocation else {
             return nil
         }
-        
+
         // If the location is within the range, return it
         if range.textRange.contains(candidateLocation) {
             return candidateLocation.uiTextPosition
         }
-        
+
         // If not within range, return the closest endpoint of the range
         let startLocation = range.textRange.location
         let endLocation = range.textRange.endLocation
-        
+
         // Calculate distance to start and end of range
         let distanceToStart = textContentManager.offset(from: candidateLocation, to: startLocation)
         let distanceToEnd = textContentManager.offset(from: candidateLocation, to: endLocation)
-        
+
         // Return the closest endpoint
-        return abs(distanceToStart) < abs(distanceToEnd) 
+        return abs(distanceToStart) < abs(distanceToEnd)
             ? startLocation.uiTextPosition
             : endLocation.uiTextPosition
     }
@@ -439,8 +435,8 @@ extension STTextView: UITextInput {
     /// Returns the character or range of characters that is at a specified point in a document.
     public func characterRange(at point: CGPoint) -> UITextRange? {
         // Convert point to account for content view offset
-        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x)
-        
+        let adjustedPoint = point.moved(dx: -contentView.frame.origin.x, dy: -contentView.frame.origin.y)
+
         // Get location at the point
         guard let location = textLayoutManager.caretLocation(
             interactingAt: adjustedPoint,
@@ -448,18 +444,18 @@ extension STTextView: UITextInput {
         ) else {
             return nil
         }
-        
+
         // Check if we can get a text layout fragment at this location
         guard let fragment = textLayoutManager.textLayoutFragment(for: location) else {
             return nil
         }
-        
+
         // Get the element range that contains this location
         guard let elementRange = fragment.textElement?.elementRange else {
             // Fallback to extending the position by one character
             return characterRange(byExtending: location.uiTextPosition, in: .right)
         }
-        
+
         // Get the range for the character at the location
         if let nextLocation = textLayoutManager.location(location, offsetBy: 1),
            nextLocation <= elementRange.endLocation {

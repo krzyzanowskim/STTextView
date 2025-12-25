@@ -14,5 +14,5 @@ public struct STRulerInsets: Equatable {
         self.leading = leading
         self.trailing = trailing
     }
-    
+
 }

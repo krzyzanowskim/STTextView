@@ -9,7 +9,7 @@ import UIKit
 
 extension STTextView {
 
-    open override var undoManager: UndoManager? {
+    override open var undoManager: UndoManager? {
         guard allowsUndo else {
             return nil
         }

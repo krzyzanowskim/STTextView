@@ -12,13 +12,12 @@ extension NSTextContentManager {
             return [:]
         }
 
-        let effectiveLocation: NSTextLocation
-        if location == documentRange.location {
-            effectiveLocation = location
+        let effectiveLocation: NSTextLocation = if location == documentRange.location {
+            location
         } else if location == documentRange.endLocation {
-            effectiveLocation = self.location(location, offsetBy: -1) ?? location
+            self.location(location, offsetBy: -1) ?? location
         } else {
-            effectiveLocation = location
+            location
         }
 
         // requires non-empty range

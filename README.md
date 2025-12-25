@@ -15,11 +15,11 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
 
 ## Platform Requirements
 
-- **macOS**: 12.0+
+- **macOS**: 14.0+
 - **iOS**: 16.0+
 - **Mac Catalyst**: 16.0+
-- **Swift**: 5.7+
-- **Xcode**: 18.0+
+- **Swift**: 5.9+
+- **Xcode**: 26.0+
 
 ## Features
 
@@ -47,10 +47,6 @@ The component is mainly developed to serve [Swift Studio](https://swiftstudio.ap
   <video src="https://github.com/user-attachments/assets/e18c058b-8a58-47e0-a57c-a3b01f3d93db" width="90%" />
 </div>
 
-## Support & Sponsors
-
-The financial sustainability of the project is possible thanks to the ongoing contributions from our [GitHub Sponsors](https://github.com/sponsors/krzyzanowskim)
-
 ## Roadmap
 
 **Suggest** or **vote** for new features: [Feature Requests](https://github.com/krzyzanowskim/STTextView/discussions/14)
@@ -62,7 +58,7 @@ The financial sustainability of the project is possible thanks to the ongoing co
 ```swift
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "2.0.0")
+        .package(url: "https://github.com/krzyzanowskim/STTextView", from: "2.2.0")
     ]
 )
 ```
@@ -72,33 +68,6 @@ let package = Package(
 The demo applications [TextEdit](TextEdit) and [TextEdit.SwiftUI](TextEdit.SwiftUI) lets you explore the library.
 
 ## Usage
-
-### SwiftUI
-
-The `TextView` is a [SwiftUI](https://developer.apple.com/xcode/swiftui/) view that wraps the STTextView.
-
-* Support for rich text (attributed string)
-* Faster than SwiftUI.TextEdit (https://twitter.com/krzyzanowskim/status/1677628085217243137)
-
-```swift
-import STTextViewSwiftUI
-
-struct ContentView: View {
-
-    @State private var text = AttributedString("Hello World!")
-    @State private var selection: NSRange?
-
-    var body: some View {
-        TextView(
-            text: $text,
-            selection: $selection,
-            options: [.wrapLines, .highlightSelectedLine],
-            plugins: [plugin1(), plugin2()]
-        )
-        .textViewFont(.preferredFont(forTextStyle: .body))
-    }
-}
-```
 
 ### Create a TextView
 
@@ -157,7 +126,7 @@ textView.highlightSelectedLine = true
 Add gutter with line numbers
 
 ```swift
-textView.showLineNumbers = true
+textView.showsLineNumbers = true
 textView.gutterView?.drawSeparator = true
 ```
 
@@ -166,6 +135,24 @@ textView.gutterView?.drawSeparator = true
 ```swift
 textView.isIncrementalSearchingEnabled = true
 textView.textFinder.incrementalSearchingShouldDimContentView = true
+```
+
+### SwiftUI
+
+```swift
+import STTextViewSwiftUI
+
+struct ContentView: View {
+    @State private var text = AttributedString("Hello World!")
+
+    var body: some View {
+        TextView(
+            text: $text,
+            options: [.wrapLines, .highlightSelectedLine, .showLineNumbers]
+        )
+        .textViewFont(.monospacedSystemFont(ofSize: 14, weight: .regular))
+    }
+}
 ```
 
 ## Plugins
@@ -230,7 +217,7 @@ STTextView (umbrella target)
 ### Core Components
 
 - **STTextView**: Main view that coordinates all components
-- **STContentView**: Renders text fragments and insertion point
+- **STTextContainerView**: Renders text fragments and insertion point
 - **STSelectionView**: Handles selection overlays
 - **STGutterView**: Optional line numbers and markers
 - **STLineHighlightView**: Current line highlighting

@@ -9,7 +9,7 @@ import AppKit
 /// STInsertionPointView
 ///      |---textInsertionIndicator (STInsertionPointIndicatorProtocol)
 ///
-internal class STInsertionPointView: NSView {
+class STInsertionPointView: NSView {
     private let textInsertionIndicator: any STInsertionPointIndicatorProtocol
 
     override var isFlipped: Bool {
@@ -26,7 +26,8 @@ internal class STInsertionPointView: NSView {
         }
     }
 
-    required public init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 

@@ -6,7 +6,7 @@ import AppKit
 extension STTextView: NSColorChanging {
 
     public func changeColor(_ colorPanel: NSColorPanel?) {
-        guard isEditable, let colorPanel = colorPanel else {
+        guard isEditable, let colorPanel else {
             return
         }
 

@@ -7,7 +7,7 @@ import SwiftUI
 open class STCompletionViewController: NSViewController, STCompletionViewControllerProtocol {
 
     public weak var delegate: STCompletionViewControllerDelegate?
-    private(set) public var tableView: NSTableView!
+    public private(set) var tableView: NSTableView!
     private var _scrollView: NSScrollView!
 
     open var items: [any STCompletionItem] = [] {
@@ -19,7 +19,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
 
     private var _eventMonitor: Any?
 
-    open override func loadView() {
+    override open func loadView() {
         view = NSView(frame: .zero)
         view.autoresizingMask = [.width, .height]
         view.wantsLayer = true
@@ -44,7 +44,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         self._scrollView = scrollView
     }
 
-    open override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         _scrollView.automaticallyAdjustsContentInsets = false
         _scrollView.contentInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
@@ -87,11 +87,11 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         insertCompletion(movement: .other)
     }
 
-    open override func viewDidAppear() {
+    override open func viewDidAppear() {
         super.viewDidAppear()
 
         _eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event -> NSEvent? in
-            guard let self = self else { return nil }
+            guard let self else { return nil }
 
             if let characters = event.characters {
                 for c in characters {
@@ -117,7 +117,7 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         }
     }
 
-    open override func viewDidDisappear() {
+    override open func viewDidDisappear() {
         super.viewDidDisappear()
 
         if let eventMonitor = _eventMonitor {
@@ -126,19 +126,19 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         _eventMonitor = nil
     }
 
-    open override func insertTab(_ sender: Any?) {
+    override open func insertTab(_ sender: Any?) {
         self.insertCompletion(movement: .tab)
     }
 
-    open override func insertLineBreak(_ sender: Any?) {
+    override open func insertLineBreak(_ sender: Any?) {
         self.insertCompletion(movement: .return)
     }
 
-    open override func insertNewline(_ sender: Any?) {
+    override open func insertNewline(_ sender: Any?) {
         self.insertCompletion(movement: .return)
     }
 
-    open override func cancelOperation(_ sender: Any?) {
+    override open func cancelOperation(_ sender: Any?) {
         delegate?.completionViewControllerCancel(self)
     }
 
@@ -183,10 +183,11 @@ private class STTableRowView: NSTableRowView {
         super.init(frame: .zero)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func drawSelection(in dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
         if isSelected {
@@ -207,9 +208,7 @@ private extension NSUserInterfaceItemIdentifier {
 }
 
 private final class NoKnobScroller: NSScroller {
-    override func drawKnobSlot(in slotRect: NSRect, highlight flag: Bool) {
-
-    }
+    override func drawKnobSlot(in slotRect: NSRect, highlight flag: Bool) {}
 
     override class var isCompatibleWithOverlayScrollers: Bool {
         true

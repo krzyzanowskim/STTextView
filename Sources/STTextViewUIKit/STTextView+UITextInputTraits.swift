@@ -3,6 +3,4 @@
 
 import UIKit
 
-extension STTextView: UITextInputTraits {
-
-}
+extension STTextView: UITextInputTraits {}

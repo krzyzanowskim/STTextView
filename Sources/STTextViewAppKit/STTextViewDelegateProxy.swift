@@ -104,11 +104,11 @@ class STTextViewDelegateProxy: STTextViewDelegate {
     func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool {
         source?.textView(textView, clickedOnLink: link, at: location) ?? false
     }
-    
+
     func textView(_ textView: STTextView, clickedOnAttachment attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
         source?.textView(textView, clickedOnAttachment: attachment, at: location) ?? false
     }
-    
+
     func textView(_ textView: STTextView, shouldAllowInteractionWith attachment: NSTextAttachment, at location: any NSTextLocation) -> Bool {
         source?.textView(textView, shouldAllowInteractionWith: attachment, at: location) ?? true
     }

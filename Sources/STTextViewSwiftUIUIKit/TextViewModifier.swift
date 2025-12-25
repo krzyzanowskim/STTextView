@@ -4,13 +4,19 @@
 import Foundation
 import SwiftUI
 
-public protocol TextViewModifier: SwiftUI.View { }
+public protocol TextViewModifier: SwiftUI.View {}
 
-extension TextViewModifier {
+public extension TextViewModifier {
 
     /// Sets the default font for text in this view.
-    public func textViewFont(_ font: UIFont) -> TextViewEnvironmentModifier<Self, UIFont> {
+    func textViewFont(_ font: UIFont) -> TextViewEnvironmentModifier<Self, UIFont> {
         TextViewEnvironmentModifier(content: self, keyPath: \.font, value: font)
+    }
+
+    /// Sets the line height multiple for text in this view.
+    /// - Parameter multiple: The line height multiple. Values greater than 1.0 increase line spacing.
+    func textViewLineHeightMultiple(_ multiple: CGFloat) -> TextViewEnvironmentModifier<Self, CGFloat> {
+        TextViewEnvironmentModifier(content: self, keyPath: \.lineHeightMultiple, value: multiple)
     }
 }
 
@@ -29,9 +35,18 @@ private struct FontEnvironmentKey: EnvironmentKey {
     static var defaultValue: UIFont = .preferredFont(forTextStyle: .body)
 }
 
-internal extension EnvironmentValues {
+private struct LineHeightMultipleEnvironmentKey: EnvironmentKey {
+    static var defaultValue: CGFloat = 1.0
+}
+
+extension EnvironmentValues {
     var font: UIFont {
         get { self[FontEnvironmentKey.self] }
         set { self[FontEnvironmentKey.self] = newValue }
+    }
+
+    var lineHeightMultiple: CGFloat {
+        get { self[LineHeightMultipleEnvironmentKey.self] }
+        set { self[LineHeightMultipleEnvironmentKey.self] = newValue }
     }
 }

@@ -1,8 +1,130 @@
 # Changelog
 
-## [2.2.0] - 2025-09-05
+## [2.3.0] - 2025-12-23
+
+### Added
+- [macOS] Add snapshot tests for STTextView gutter rendering with various configurations
+- [iOS] Add background blur effect to STGutterView when backgroundColor is nil
+- [SwiftUI] Add environment-based lineHeightMultiple support in text views
+- [SwiftUI] Add support for configurable lineHeightMultiple in TextView
+- [SwiftUI/iOS] Add support for custom contentInsets to TextView
+- [SwiftUI] Add showLineNumbers option and autocorrectionDisabled modifier to TextView
+- [Shared] Expose contentFrame property to Plugins SPI
 
 ### Changed
+- [iOS] Rename STContentView to STTextContainerView and add lightweight content size update
+- [iOS] Optimize text view layout fragment rendering by reusing existing views
+- [iOS] Adjust layout to respect textContainerInset in STTextView
+- [iOS] Adjust viewportBounds to account for textContainerInset for better fragment coverage
+- [iOS] Improve viewport bounds calculation to account for adjustedContentInset
+- [iOS] Refactor gutter width adjustment logic to reduce redundant checks and improve layout stability
+- [iOS] Make text, attributedText, and showsLineNumbers properties open and objc
+- [macOS] Improve layout and drawing logic for STTextRenderView with clipsToContent support
+- [macOS] Improve STTextRenderView layout to match actual rendering behavior
+- [macOS] Improve selection image frame and origin during drag-and-drop
+- [macOS] Adjust line fragment drawing position to account for line height multiple offset
+- [macOS] Refactor STTextView layout system for improved viewport stability and accuracy
+- [AppKit & UIKit] Ensure fragment views are marked for display when layout or rendering changes occur
+- [SwiftUI] Refactor TextView options into shared TextViewOptions struct and extend platform support
+- [SwiftUI] Refactor TextView view and coordinator for cleaner bindings and guard logic
+- [SwiftUI] Optimize font updates in TextView by caching last applied font
+- [Shared] Enable SwiftFormat with customized configuration and makefile tasks
+- [Shared] Update platform and toolchain requirements
+- Refactor README to consolidate and simplify SwiftUI usage documentation
+
+### Fixed
+- [iOS] Fix gutter alignment to scroll only vertically and remain fixed horizontally
+- [iOS] Defer scrolling to selection until layoutSubviews for better layout consistency
+- [macOS] Fix text view jumping by allowing growth of height but preventing shrinkage
+- [macOS] Fix dynamic height adjustment and layout behavior in STTextView
+- [macOS] Fix text view shrinkage and scroll issues when editing or resetting large documents
+- [macOS] Fix layout issue for gutter view with NSScrollView content insets
+- [macOS] Prevent text view from resizing below current scroll position
+- [SwiftUI] Fix .wrapLines option logic and improve UI toggles and editable state handling
+- [SwiftUI] Prevent selection change handling when isUpdating is true in TextViewRepresentable
+
+## [2.2.8] - 2025-11-11
+
+### Changed
+- Adjust gutter width dynamically to fit line number text when viewport is visible
+- Refine line number cell sizing and fix separator view rendering context
+- Disable implicit layer animations in gutter views and improve gutter width handling
+- Refactor gutter rendering for improved consistency and code clarity
+- Fix gutter highlight position by clamping negative scroll offset
+- Optimize gutter rendering by using sorted visible fragment views
+- Refactor line selection logic to use STGutterCalculations.isLineSelected
+
+## [2.2.7] - 2025-11-03
+
+### Changed
+- Refactor gutter line number rendering into shared utility function
+- Improve gutter rendering by using layout fragment data instead of view-based mapping
+- Sort visible fragment views by document order instead of vertical position
+
+## [2.2.6] - 2025-11-03
+
+### Changed
+- Use fragment view frame for accurate gutter positioning of line numbers
+- Apply pixel alignment to line fragment rectangles in gutter rendering
+- Align marker views with visually centered line number text in gutter
+- Fix baseline alignment for empty document by using typingAttributes for metrics
+- Improve gutter view rendering and line number alignment in STTextView
+- Fix gutter positioning and use caret location API in UITextInput methods
+- Refactor gutter calculation logic into shared STGutterCalculations utility
+- Refactor gutter width calculation to avoid layout issues during scrolling
+- Adopt system text cursor in custom text views on macOS 14 and above
+- Enable CATiledLayer backing for STContentViewportView
+- Use CATiledLayer as backing layer for gutter-related views for better performance
+- Use CATiledLayer as backing layer for STGutterView and STContentView
+- Render gutterView as floating when possible by adding it to the scroll view
+
+## [2.2.5] - 2025-11-01
+
+### Changed
+- Update to STTextKitPlus 0.2.0 and replace usage of location(...) with caretLocation(...)
+- Improve double-click word selection to handle end-of-document cases
+- Refine text selection granularity and rename local variable for clarity
+- Fix range comparison to exclude end location in substring and attribute enumeration
+- Enable vertical bounce in UITextView for improved scrolling experience
+
+## [2.2.4] - 2025-10-23
+
+### Changed
+- Avoid layout suppression during bounce in layoutSubviews; move bounce check to didLayout
+- Avoid layoutSubviews updates during bounce animations to preserve scroll behavior
+- Fix line number gutter rendering and updating in both SwiftUI and UIKit text views
+- Refactor gutter architecture with separate container views and improved marker layout
+
+## [2.2.3] - 2025-10-14
+
+### Changed
+- Improve closestPosition(to:) fallback behavior when no layout location is found
+- Extend willChangeTextHandler to include replacementString parameter
+
+## [2.2.2] - 2025-10-14
+
+### Changed
+- Add NSRange-based replaceCharacters methods and undo coalescing support
+- Expand willChangeTextHandler to include replacement string parameter
+- Adjust trailing inset of gutter view from 4.0 to 6.0 for improved layout spacing
+- Adjust marker view positioning and dragging frame in STGutterView
+- Enable drag and drop to rearrange or remove gutter markers in STGutterView
+- Improve gutter marker alignment and line number cell height calculations
+- Simplify and replace custom SVG path for gutter marker indicator
+- Refine gutter layout and marker appearance for better alignment and visibility
+- Refactor gutter integration to support standalone layout and improve viewport handling
+- Set scroll view background color to gridColor and update row highlight fill color
+
+## [2.2.1] - 2025-10-01
+
+### Changed
+- Improve scrolling perf. Prevent recreating completion window
+- Ensure gutter layout updates when toggling gutterVisibility property
+
+## [2.2.0] - 2025-09-04
+
+### Changed
+- Update CHANGELOG. Release 2.2.0
 - Fix attachment view positioning by setting full frame and skipping zero-sized frames
 - Refactor textAttributedString(at:) to use textRange(for:enclosing:) instead of manual range creation
 - Fix overflow check when detecting scroll position in layout controller delegate

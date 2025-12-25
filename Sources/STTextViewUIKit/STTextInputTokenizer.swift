@@ -75,7 +75,7 @@ final class STTextInputTokenizer: NSObject, UITextInputTokenizer {
         else {
             return false
         }
-        
+
         var r: UITextRange? {
             switch granularity {
             case .character, .line, .paragraph, .sentence, .word:

@@ -14,6 +14,7 @@ class ViewController: UIViewController {
 
         let textView = STTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.isHorizontallyResizable = false
         textView.highlightSelectedLine = true
         textView.textDelegate = self
 
@@ -49,31 +50,31 @@ class ViewController: UIViewController {
 
         // add link to occurences of STTextView
         if let str = textView.text {
-            var currentRange = str.startIndex..<str.endIndex
+            var currentRange = str.startIndex ..< str.endIndex
             while let ocurrenceRange = str.range(of: "STTextView", range: currentRange) {
                 textView.addAttributes([.link: URL(string: "https://swift.best")! as NSURL], range: NSRange(ocurrenceRange, in: str))
-                currentRange = ocurrenceRange.upperBound..<currentRange.upperBound
+                currentRange = ocurrenceRange.upperBound ..< currentRange.upperBound
             }
         }
 
         //  Insert attachment image using NSTextAttachmentViewProvider
         do {
-             let attachment = MyTextAttachment()
-             let attachmentString = NSAttributedString(attachment: attachment)
-             textView.insertText(attachmentString, replacementRange: NSRange(location: 30, length: 0))
+            let attachment = MyTextAttachment()
+            let attachmentString = NSAttributedString(attachment: attachment)
+            textView.insertText(attachmentString, replacementRange: NSRange(location: 30, length: 0))
         }
 
     }
 
-    @objc func toggleTextWrapMode(_ sender: Any?) {
-        textView.widthTracksTextView.toggle()
+    @objc func toggleTextWrapMode(_: Any?) {
+        textView.isHorizontallyResizable.toggle()
     }
 
-    @IBAction func toggleInvisibles(_ sender: Any?) {
+    @IBAction func toggleInvisibles(_: Any?) {
         textView.showsInvisibleCharacters.toggle()
     }
 
-    @IBAction func toggleRuler(_ sender: Any?) {
+    @IBAction func toggleRuler(_: Any?) {
         textView.showsLineNumbers.toggle()
     }
 
@@ -81,31 +82,21 @@ class ViewController: UIViewController {
 
 extension ViewController: STTextViewDelegate {
 
-    func textViewWillChangeText(_ notification: Notification) {
+    func textViewWillChangeText(_: Notification) {}
 
-    }
+    func textViewDidChangeText(_: Notification) {}
 
-    func textViewDidChangeText(_ notification: Notification) {
+    func textViewDidChangeSelection(_: Notification) {}
 
-    }
-
-    func textViewDidChangeSelection(_ notification: Notification) {
-
-    }
-
-    func textView(_ textView: STTextView, shouldChangeTextIn affectedCharRange: NSTextRange, replacementString: String?) -> Bool {
+    func textView(_: STTextView, shouldChangeTextIn _: NSTextRange, replacementString _: String?) -> Bool {
         true
     }
 
-    func textView(_ textView: STTextView, willChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
+    func textView(_: STTextView, willChangeTextIn _: NSTextRange, replacementString _: String) {}
 
-    }
+    func textView(_: STTextView, didChangeTextIn _: NSTextRange, replacementString _: String) {}
 
-    func textView(_ textView: STTextView, didChangeTextIn affectedCharRange: NSTextRange, replacementString: String) {
-
-    }
-
-    func textView(_ textView: STTextView, clickedOnLink link: Any, at location: any NSTextLocation) -> Bool {
+    func textView(_: STTextView, clickedOnLink _: Any, at _: any NSTextLocation) -> Bool {
         false
     }
 
@@ -123,12 +114,13 @@ private class MyTextAttachmentViewProvider: NSTextAttachmentViewProvider {
     }
 
     override func attachmentBounds(
-        for attributes: [NSAttributedString.Key : Any],
-        location: any NSTextLocation,
-        textContainer: NSTextContainer?,
-        proposedLineFragment: CGRect,
-        position: CGPoint
-    ) -> CGRect {
+        for _: [NSAttributedString.Key: Any],
+        location _: any NSTextLocation,
+        textContainer _: NSTextContainer?,
+        proposedLineFragment _: CGRect,
+        position _: CGPoint
+    )
+        -> CGRect {
         self.view?.bounds ?? .zero
     }
 }
@@ -138,7 +130,8 @@ private class MyTextAttachment: NSTextAttachment {
         for parentView: UIView?,
         location: any NSTextLocation,
         textContainer: NSTextContainer?
-    ) -> NSTextAttachmentViewProvider? {
+    )
+        -> NSTextAttachmentViewProvider? {
         let viewProvider = MyTextAttachmentViewProvider(
             textAttachment: self,
             parentView: parentView,

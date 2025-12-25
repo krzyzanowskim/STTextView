@@ -2,10 +2,10 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 #endif
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 /// A common public interface for TextView
@@ -29,7 +29,7 @@ package protocol STTextViewProtocol {
     var isVerticallyResizable: Bool { get set }
 
     var highlightSelectedLine: Bool { get set }
-    var selectedLineHighlightColor: Color { get set}
+    var selectedLineHighlightColor: Color { get set }
 
     var showsLineNumbers: Bool { get set }
     var showsInvisibleCharacters: Bool { get set }

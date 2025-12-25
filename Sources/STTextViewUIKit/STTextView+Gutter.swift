@@ -9,7 +9,7 @@ import STTextViewCommon
 extension STTextView {
 
     /// A Boolean value that controls whether the scroll view enclosing text views sharing the receiver’s layout manager displays the ruler.
-    internal var isGutterVisible: Bool {
+    var isGutterVisible: Bool {
         set {
             if gutterView == nil, newValue == true {
                 let gutterView = STGutterView()
@@ -39,18 +39,17 @@ extension STTextView {
         }
     }
 
-    internal func layoutGutter() {
+    func layoutGutter() {
         guard let gutterView, textLayoutManager.textViewportLayoutController.viewportRange != nil else {
             return
         }
 
         // Coordinate system strategy:
-        // UIKit lacks AppKit's addFloatingSubview mechanism, so we manually position
-        // the gutter view using contentOffset to keep it visible during scrolling.
-        // Cell Y coordinates compensate by subtracting contentOffset.y to remain
-        // relative to the text layout coordinate space.
+        // The gutter is positioned to scroll with the content in the Y direction (same as content view)
+        // but floats in the X direction (stays at contentOffset.x to remain visible during horizontal scroll).
+        // This ensures line numbers always align with their corresponding text lines.
         gutterView.frame.origin.x = contentOffset.x
-        gutterView.frame.origin.y = contentOffset.y
+        gutterView.frame.origin.y = textContainerInset.top
         gutterView.frame.size.height = contentView.frame.height
 
         layoutGutterLineNumbers()
@@ -109,7 +108,7 @@ extension STTextView {
                 numberCell.frame = CGRect(
                     origin: CGPoint(
                         x: 0,
-                        y: selectionFrame.origin.y - contentOffset.y
+                        y: selectionFrame.origin.y
                     ),
                     size: CGSize(
                         width: gutterView.containerView.frame.width,
@@ -159,11 +158,12 @@ extension STTextView {
 
                     // Calculate positioning metrics
                     // Get the actual fragment view frame for pixel-perfect alignment
+                    // Pass .zero for contentOffset since gutter now scrolls with content (no compensation needed)
                     let (baselineYOffset, locationForFirstCharacter, lineFragmentFrame) = STGutterCalculations.calculateLineNumberMetrics(
                         for: textLineFragment,
                         in: layoutFragment,
                         fragmentViewFrame: fragmentView.frame,
-                        contentOffset: contentOffset
+                        contentOffset: .zero
                     )
 
                     // Prepare text attributes
@@ -206,30 +206,15 @@ extension STTextView {
                     requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)
                     linesCount += 1
                 }
-
-                // adjust ruleThickness to fit the text based on last numberView
-                if textLayoutManager.textViewportLayoutController.viewportRange != nil {
-                    let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
-                    if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne) && newGutterWidth > gutterView.frame.size.width {
-                        gutterView.frame.size.width = newGutterWidth
-                    }
-                }
-
             }
 
-            // FIXME: gutter width change affects contentView frame (in setFrameSize) layout that affects viewport layout
-            // (I'm being vague because I don't understand how).
-            // When viewport goes being the bounds, gutter width back to minimumThickness that breaks layout because
-            // one more layoutViewport() clear out the fragment cache used to restore viewport location
-            // TODO: gutter width should not adjust while scrolling/layout. It should adjust on content change.
-
             // adjust ruleThickness to fit the text based on last numberView
-            // if textLayoutManager.textViewportLayoutController.viewportRange != nil {
-            //     let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
-            //     if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width) {
-            //         gutterView.frame.size.width = newGutterWidth
-            //     }
-            // }
+            if textLayoutManager.textViewportLayoutController.viewportRange != nil {
+                let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
+                if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne), newGutterWidth > gutterView.frame.size.width {
+                    gutterView.frame.size.width = newGutterWidth
+                }
+            }
         }
     }
 

@@ -18,9 +18,9 @@ final class YankingManager {
         case deleteToEndOfParagraph
     }
 
-    private var index: Int = 0
+    private var index = 0
     private var buffer: [String]
-    private var yanking: Bool = false
+    private var yanking = false
     private var lastDeleteAction: DeleteAction?
 
     init() {
