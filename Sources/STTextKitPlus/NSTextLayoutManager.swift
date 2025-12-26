@@ -172,7 +172,12 @@ extension NSTextLayoutManager {
         // but the click was far to the RIGHT of the first caret position,
         // we probably clicked past the end of the previous wrapped line.
         // Return the end of that previous line with upstream affinity.
+        //
+        // Skip this logic for empty lines (where first and last offset are the same),
+        // as clicking anywhere on an empty line should place the caret on that line.
+        let lineHasContent = lastOffset - (firstCaretOffset ?? lastOffset) > 1
         if let firstOffset = firstCaretOffset,
+           lineHasContent, // Only apply wrapped line logic if line has actual text content
            result == lineFragmentRange.location, // We landed at line start
            point.x > firstOffset + 50, // Click is significantly to the right of line start
            let prevCharLocation = textContentManager?.location(lineFragmentRange.location, offsetBy: -1),
@@ -194,7 +199,8 @@ extension NSTextLayoutManager {
         }
 
         // Determine if clicking past the end of text on this line
-        let clickedPastLineEnd = point.x > lastOffset
+        // Only apply this for lines with actual content - empty lines should just return the position on that line
+        let clickedPastLineEnd = lineHasContent && point.x > lastOffset
 
         if clickedPastLineEnd {
             // To place caret at the END of this visual line (after trailing spaces),
