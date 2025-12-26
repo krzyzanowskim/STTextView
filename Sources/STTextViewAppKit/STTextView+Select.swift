@@ -473,6 +473,21 @@ extension STTextView {
     ) {
         guard isSelectable else { return }
 
+        // For simple clicks (not extending, not dragging), use caretLocation which has
+        // the fix for wrapped line end clicks. For extend/drag, use Apple's textSelections.
+        // Use .allowOutside so clicks past line ends are handled rather than returning nil.
+        if !extending && !isDragging && anchors.isEmpty {
+            if let (caretLoc, affinity) = textLayoutManager.caretLocationWithAffinity(interactingAt: point, inContainerAt: location) {
+                textLayoutManager.textSelections = [NSTextSelection(caretLoc, affinity: affinity)]
+                updateTypingAttributes()
+                updateSelectedRangeHighlight()
+                updateSelectedLineHighlight()
+                layoutGutter()
+                needsDisplay = true
+                return
+            }
+        }
+
         var modifiers: NSTextSelectionNavigation.Modifier = []
         if extending {
             modifiers.insert(.extend)
