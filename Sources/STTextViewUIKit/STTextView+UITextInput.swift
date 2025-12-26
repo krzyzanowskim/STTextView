@@ -297,15 +297,23 @@ extension STTextView: UITextInput {
                     if let layoutFragment = textLayoutManager.extraLineTextLayoutFragment() {
                         // at least 2 lines guaranteed at this point
                         let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
+
+                        // Get paragraph style from previous line for consistent line height
+                        let paragraphStyle = prevTextLineFragment.attributedString.attribute(
+                            .paragraphStyle, at: 0, effectiveRange: nil
+                        ) as? NSParagraphStyle ?? .default
+                        let lineHeightMultiple = paragraphStyle.stLineHeightMultiple
+                        let scaledHeight = prevTextLineFragment.typographicBounds.height * lineHeightMultiple
+
                         textSelectionFrames.append(
                             CGRect(
                                 origin: CGPoint(
                                     x: textSegmentFrame.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY * lineHeightMultiple
                                 ),
                                 size: CGSize(
                                     width: textSegmentFrame.width,
-                                    height: prevTextLineFragment.typographicBounds.height
+                                    height: scaledHeight
                                 )
                             )
                         )
@@ -313,6 +321,11 @@ extension STTextView: UITextInput {
                               let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation) {
                         // Get insertion point height from the last-to-end (last) line fragment location
                         // since we're at the end location at this point.
+                        let paragraphStyle = prevTextLineFragment.attributedString.attribute(
+                            .paragraphStyle, at: 0, effectiveRange: nil
+                        ) as? NSParagraphStyle ?? .default
+                        let scaledHeight = prevTextLineFragment.typographicBounds.height * paragraphStyle.stLineHeightMultiple
+
                         textSelectionFrames.append(
                             CGRect(
                                 origin: CGPoint(
@@ -321,7 +334,7 @@ extension STTextView: UITextInput {
                                 ),
                                 size: CGSize(
                                     width: textSegmentFrame.width,
-                                    height: prevTextLineFragment.typographicBounds.height
+                                    height: scaledHeight
                                 )
                             )
                         )

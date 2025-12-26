@@ -1227,17 +1227,22 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                         } else {
                             // Workaround for FB15131180
                             let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                            lineFragmentFrame.size.height = prevTextLineFragment.typographicBounds.height
 
+                            // Get paragraph style from previous line for consistent line height
+                            let paragraphStyle = prevTextLineFragment.attributedString.attribute(
+                                .paragraphStyle, at: 0, effectiveRange: nil
+                            ) as? NSParagraphStyle ?? .default
+                            let scaledHeight = prevTextLineFragment.typographicBounds.height * paragraphStyle.stLineHeightMultiple
+
+                            // Use extra line fragment's own Y position (already includes lineSpacing + paragraphSpacing)
                             lineSelectionRectangle = CGRect(
                                 origin: CGPoint(
                                     x: selectionView.bounds.minX,
-                                    y: lineFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
                                 ),
                                 size: CGSize(
                                     width: selectionView.bounds.width,
-                                    height: lineFragmentFrame.height
+                                    height: scaledHeight
                                 )
                             )
                         }
