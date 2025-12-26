@@ -100,6 +100,8 @@ open class STTextRenderView: NSView {
                 }
 
                 // Apply lineHeightMultiple offset to match STTextLayoutFragment rendering
+                // TODO: This only handles lineHeightMultiple, not minimumLineHeight/maximumLineHeight.
+                // May need to use stEffectiveLineMetrics for fixed line heights.
                 let paragraphStyle: NSParagraphStyle = if !textLineFragment.isExtraLineFragment,
                                                           let lineParagraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
                     lineParagraphStyle

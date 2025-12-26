@@ -1149,33 +1149,34 @@ open class STTextView: UIScrollView, STTextViewProtocol {
                         let lineSelectionRectangle: CGRect
 
                         if !textLineFragment.isExtraLineFragment {
-                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                            lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
+                            // Get paragraph style for consistent line height calculation
+                            let metrics = textLineFragment.stEffectiveLineMetrics
 
                             lineSelectionRectangle = CGRect(
                                 origin: CGPoint(
                                     x: 0,
-                                    y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.minY + metrics.yOffset
                                 ),
                                 size: CGSize(
                                     width: contentView.bounds.size.width,
-                                    height: lineFragmentFrame.height
+                                    height: metrics.height
                                 )
                             )
                         } else {
                             // Workaround for FB15131180
                             let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                            lineFragmentFrame.size.height = prevTextLineFragment.typographicBounds.height
+
+                            // Get paragraph style from previous line for consistent line height
+                            let scaledHeight = prevTextLineFragment.stEffectiveLineHeight
 
                             lineSelectionRectangle = CGRect(
                                 origin: CGPoint(
                                     x: 0,
-                                    y: lineFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
                                 ),
                                 size: CGSize(
                                     width: contentView.bounds.width,
-                                    height: lineFragmentFrame.height
+                                    height: scaledHeight
                                 )
                             )
                         }

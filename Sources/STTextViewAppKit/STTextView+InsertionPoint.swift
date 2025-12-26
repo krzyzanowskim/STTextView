@@ -54,12 +54,10 @@ extension STTextView {
                                 let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
                                 let extraLineFragment = layoutFragment.textLineFragments.last!
 
-                                // Get paragraph style from previous line for consistent line height
-                                let paragraphStyle = prevTextLineFragment.attributedString.attribute(
-                                    .paragraphStyle, at: 0, effectiveRange: nil
-                                ) as? NSParagraphStyle ?? .default
-                                let lineHeightMultiple = paragraphStyle.stLineHeightMultiple
-                                let scaledHeight = prevTextLineFragment.typographicBounds.height * lineHeightMultiple
+                                // Get paragraph style from previous line for consistent line height.
+                                // Note: Extra line fragments don't need yOffset adjustment because their
+                                // Y position is calculated from the layout fragment frame, not textSegmentFrame.
+                                let scaledHeight = prevTextLineFragment.stEffectiveLineHeight
 
                                 // Use extra line fragment's own Y position (already includes lineSpacing + paragraphSpacing)
                                 textSelectionFrames.append(
@@ -78,10 +76,7 @@ extension STTextView {
                                       let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation) {
                                 // Get insertion point height from the last-to-end (last) line fragment location
                                 // since we're at the end location at this point.
-                                let paragraphStyle = prevTextLineFragment.attributedString.attribute(
-                                    .paragraphStyle, at: 0, effectiveRange: nil
-                                ) as? NSParagraphStyle ?? .default
-                                let scaledHeight = prevTextLineFragment.typographicBounds.height * paragraphStyle.stLineHeightMultiple
+                                let scaledHeight = prevTextLineFragment.stEffectiveLineHeight
 
                                 textSelectionFrames.append(
                                     CGRect(
@@ -99,10 +94,26 @@ extension STTextView {
                             return false
                         }
 
-                        // Regular where segment frame is correct
-                        textSelectionFrames.append(
-                            textSegmentFrame
-                        )
+                        // Regular content line - use paragraph style's effective line height for consistent sizing
+                        if let textLineFragment = textLayoutManager.textLineFragment(at: textSegmentRange.location) {
+                            let metrics = textLineFragment.stEffectiveLineMetrics
+
+                            textSelectionFrames.append(
+                                CGRect(
+                                    origin: CGPoint(
+                                        x: textSegmentFrame.origin.x,
+                                        y: textSegmentFrame.origin.y + metrics.yOffset
+                                    ),
+                                    size: CGSize(
+                                        width: textSegmentFrame.width,
+                                        height: metrics.height
+                                    )
+                                )
+                            )
+                        } else {
+                            // Fallback to segment frame if line fragment not available
+                            textSelectionFrames.append(textSegmentFrame)
+                        }
                     }
                     return true
                 }

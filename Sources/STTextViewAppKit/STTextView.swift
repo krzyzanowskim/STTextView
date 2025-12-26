@@ -1211,17 +1211,17 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                         let lineSelectionRectangle: CGRect
 
                         if !textLineFragment.isExtraLineFragment {
-                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                            lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
+                            // Get paragraph style for consistent line height calculation
+                            let metrics = textLineFragment.stEffectiveLineMetrics
 
                             lineSelectionRectangle = CGRect(
                                 origin: CGPoint(
                                     x: selectionView.bounds.minX,
-                                    y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
+                                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.minY + metrics.yOffset
                                 ),
                                 size: CGSize(
                                     width: selectionView.bounds.width,
-                                    height: lineFragmentFrame.height
+                                    height: metrics.height
                                 )
                             )
                         } else {
@@ -1229,10 +1229,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                             let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
 
                             // Get paragraph style from previous line for consistent line height
-                            let paragraphStyle = prevTextLineFragment.attributedString.attribute(
-                                .paragraphStyle, at: 0, effectiveRange: nil
-                            ) as? NSParagraphStyle ?? .default
-                            let scaledHeight = prevTextLineFragment.typographicBounds.height * paragraphStyle.stLineHeightMultiple
+                            let scaledHeight = prevTextLineFragment.stEffectiveLineHeight
 
                             // Use extra line fragment's own Y position (already includes lineSpacing + paragraphSpacing)
                             lineSelectionRectangle = CGRect(

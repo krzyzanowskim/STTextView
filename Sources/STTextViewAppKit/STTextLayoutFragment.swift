@@ -57,6 +57,8 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
         for lineFragment in textLineFragments {
             // Determine paragraph style. Either from the fragment string or default for the text view
             // the ExtraLineFragment doesn't have information about typing attributes hence layout manager uses a default values - not from text view
+            // TODO: This only handles lineHeightMultiple, not minimumLineHeight/maximumLineHeight.
+            // May need to use stEffectiveLineMetrics for fixed line heights.
             let paragraphStyle: NSParagraphStyle = if !lineFragment.isExtraLineFragment,
                                                       let lineParagraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
                 lineParagraphStyle

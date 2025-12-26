@@ -150,6 +150,8 @@ package enum STGutterCalculations {
     }
 
     /// Calculate baseline Y offset based on paragraph style line height multiple
+    // TODO: This only handles lineHeightMultiple, not minimumLineHeight/maximumLineHeight.
+    // May need to use stEffectiveLineMetrics for fixed line heights.
     package static func calculateBaselineOffset(
         lineHeight: CGFloat,
         paragraphStyle: NSParagraphStyle
