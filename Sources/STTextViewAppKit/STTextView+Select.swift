@@ -473,6 +473,21 @@ extension STTextView {
     ) {
         guard isSelectable else { return }
 
+        // For simple clicks (not extending, not dragging), use caretLocationWithAffinity
+        // which correctly positions the caret at end-of-wrapped-lines with upstream affinity.
+        // For extend/drag operations, use Apple's textSelections.
+        if !extending && !isDragging && anchors.isEmpty {
+            if let (caretLoc, affinity) = textLayoutManager.caretLocationWithAffinity(interactingAt: point, inContainerAt: location) {
+                textLayoutManager.textSelections = [NSTextSelection(caretLoc, affinity: affinity)]
+                updateTypingAttributes()
+                updateSelectedRangeHighlight()
+                updateSelectedLineHighlight()
+                layoutGutter()
+                needsDisplay = true
+                return
+            }
+        }
+
         var modifiers: NSTextSelectionNavigation.Modifier = []
         if extending {
             modifiers.insert(.extend)

@@ -7,19 +7,24 @@ import STTextKitPlus
 
 extension STTextView {
 
-    /// Updates the insertion point’s location and optionally restarts the blinking cursor timer.
+    /// Updates the insertion point's location and optionally restarts the blinking cursor timer.
     public func updateInsertionPointStateAndRestartTimer() {
         // Hide insertion point layers
         if shouldDrawInsertionPoint {
-            let insertionPointsRanges = textLayoutManager.insertionPointSelections.flatMap(\.textRanges).filter(\.isEmpty)
+            let insertionPointSelections = textLayoutManager.insertionPointSelections
+            let insertionPointsRanges = insertionPointSelections.flatMap(\.textRanges).filter(\.isEmpty)
             guard !insertionPointsRanges.isEmpty else {
                 return
             }
 
+            // Check if any selection has upstream affinity (for proper end-of-wrapped-line positioning)
+            let hasUpstreamAffinity = insertionPointSelections.contains { $0.affinity == .upstream }
+            let segmentOptions: NSTextLayoutManager.SegmentOptions = hasUpstreamAffinity ? .upstreamAffinity : []
+
             // rewrite it to lines
             var textSelectionFrames: [CGRect] = []
             for selectionTextRange in insertionPointsRanges {
-                textLayoutManager.enumerateTextSegments(in: selectionTextRange, type: .standard) { textSegmentRange, textSegmentFrame, _, _ in
+                textLayoutManager.enumerateTextSegments(in: selectionTextRange, type: .standard, options: segmentOptions) { textSegmentRange, textSegmentFrame, _, _ in
                     if let textSegmentRange {
                         let documentRange = textLayoutManager.documentRange
                         guard !documentRange.isEmpty else {

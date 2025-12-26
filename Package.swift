@@ -12,7 +12,6 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/STTextKitPlus", from: "0.2.0"),
         .package(url: "https://github.com/krzyzanowskim/CoreTextSwift", from: "0.2.0")
     ],
     targets: [
@@ -26,7 +25,7 @@ let package = Package(
         .target(
             name: "STTextViewCommon",
             dependencies: [
-                .product(name: "STTextKitPlus", package: "STTextKitPlus")
+                .target(name: "STTextKitPlus")
             ]
         ),
         .target(
@@ -34,7 +33,7 @@ let package = Package(
             dependencies: [
                 .target(name: "STTextViewCommon"),
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.macOS])),
-                .product(name: "STTextKitPlus", package: "STTextKitPlus"),
+                .target(name: "STTextKitPlus"),
                 .product(name: "CoreTextSwift", package: "CoreTextSwift")
             ]
         ),
@@ -43,7 +42,7 @@ let package = Package(
             dependencies: [
                 .target(name: "STTextViewCommon"),
                 .target(name: "STObjCLandShim", condition: .when(platforms: [.iOS, .macCatalyst])),
-                .product(name: "STTextKitPlus", package: "STTextKitPlus"),
+                .target(name: "STTextKitPlus"),
                 .product(name: "CoreTextSwift", package: "CoreTextSwift")
             ],
             swiftSettings: [
@@ -77,6 +76,9 @@ let package = Package(
         .target(
             name: "STObjCLandShim",
             publicHeadersPath: "include"
+        ),
+        .target(
+            name: "STTextKitPlus"
         ),
         .testTarget(
             name: "STTextViewAppKitTests",
