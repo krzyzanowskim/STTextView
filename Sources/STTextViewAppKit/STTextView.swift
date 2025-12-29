@@ -650,10 +650,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     var scrollView: NSScrollView? {
-        guard let result = enclosingScrollView, result.documentView == self else {
-            return nil
-        }
-        return result
+        enclosingScrollView
     }
 
     /// A dragging selection anchor
