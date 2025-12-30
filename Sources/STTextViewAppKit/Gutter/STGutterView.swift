@@ -172,7 +172,10 @@ open class STGutterView: NSView, NSDraggingSource {
         super.viewDidChangeEffectiveAppearance()
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
             guard let self else { return }
-            updateBackgroundColor()
+            backgroundColor = self.backgroundColor
+            textColor = self.textColor
+            selectedLineTextColor = self.selectedLineTextColor
+            selectedLineHighlightColor = self.selectedLineHighlightColor
         }
     }
 
