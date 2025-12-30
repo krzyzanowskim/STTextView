@@ -38,6 +38,7 @@ extension STTextView: NSServicesMenuRequestor {
                     useTypingAttributes: true,
                     allowsTypingCoalescing: false
                 )
+                updateTypingAttributes()
                 return true
             }
         case NSPasteboard.PasteboardType.rtf.rawValue, "NSRTFPboardType":
@@ -48,6 +49,7 @@ extension STTextView: NSServicesMenuRequestor {
                     with: attributedString,
                     allowsTypingCoalescing: false
                 )
+                updateTypingAttributes()
                 return true
             }
         default:
