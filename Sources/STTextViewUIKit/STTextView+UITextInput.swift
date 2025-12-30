@@ -55,6 +55,7 @@ extension STTextView: UITextInput {
         if shouldChangeText(in: textRange, replacementString: text) {
             inputDelegate?.selectionWillChange(self)
             replaceCharacters(in: textRange, with: text, useTypingAttributes: true, allowsTypingCoalescing: true)
+            updateTypingAttributes()
             inputDelegate?.selectionDidChange(self)
         }
     }

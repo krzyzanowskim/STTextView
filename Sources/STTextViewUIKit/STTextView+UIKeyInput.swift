@@ -14,6 +14,7 @@ extension STTextView: UIKeyInput {
         if shouldChangeText(in: textRanges, replacementString: text) {
             inputDelegate?.selectionWillChange(self)
             replaceCharacters(in: textRanges, with: text, useTypingAttributes: true, allowsTypingCoalescing: true)
+            updateTypingAttributes()
             inputDelegate?.selectionDidChange(self)
         }
     }
