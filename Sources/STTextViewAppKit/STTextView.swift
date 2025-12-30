@@ -384,6 +384,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     open dynamic var backgroundColor: NSColor? = nil {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
+            gutterView?.backgroundColor = backgroundColor
         }
     }
 
