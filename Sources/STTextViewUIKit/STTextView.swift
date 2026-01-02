@@ -785,11 +785,13 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
 
         // FB15131180 workaround: get accurate height from last layout fragment
+        // Use max() to avoid reducing height when lazy layout hasn't reached the end
+        // of document yet (the enumeration may find an earlier fragment, not the true last one)
         textLayoutManager.enumerateTextLayoutFragments(
             from: textLayoutManager.documentRange.endLocation,
             options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
         ) { layoutFragment in
-            estimatedSize.height = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY
+            estimatedSize.height = max(estimatedSize.height, layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY)
             return false
         }
 

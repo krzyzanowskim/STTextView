@@ -90,7 +90,6 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         if let scrollView, let documentView = scrollView.documentView, scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
            let viewportRange = textViewportLayoutController.viewportRange,
            let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty {
-            logger.debug("Relocate viewport to the bottom")
             relocateViewport(to: textLayoutManager.documentRange.endLocation)
         }
 

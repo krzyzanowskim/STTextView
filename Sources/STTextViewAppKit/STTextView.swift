@@ -1382,7 +1382,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     private func updateTextContainerSize(proposedSize: NSSize? = nil) {
-        guard !liveResizeLayoutSuppression else { return }
+        guard !liveResizeLayoutSuppression else {
+            return
+        }
 
         let gutterWidth = gutterView?.frame.width ?? 0
         let scrollerInset = proposedSize == nil ? (scrollView?.contentView.contentInsets.right ?? 0) : 0
@@ -1441,7 +1443,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
             // FB15131180 workaround: use stTypographicBounds instead of layoutFragmentFrame
-            usageBoundsForTextContainerSize.height = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY
+            // Use max() for safety in case enumeration doesn't find the true last fragment
+            let typoBounds = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight)
+            usageBoundsForTextContainerSize.height = max(usageBoundsForTextContainerSize.height, typoBounds.maxY)
             return false
         }
 
@@ -1486,8 +1490,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             from: textLayoutManager.documentRange.endLocation,
             options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
         ) { layoutFragment in
-            // FB15131180 workaround
-            estimatedSize.height = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY
+            // FB15131180 workaround: use max() to avoid reducing height when lazy layout
+            // hasn't reached the end of document yet (the enumeration may find an earlier
+            // fragment, not the true last one)
+            let typoBounds = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight)
+            estimatedSize.height = max(estimatedSize.height, typoBounds.maxY)
             return false
         }
 
