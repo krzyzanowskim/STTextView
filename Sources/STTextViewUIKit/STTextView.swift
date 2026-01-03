@@ -538,7 +538,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
 
             NotificationCenter.default.post(textViewNotification)
             self.delegateProxy.textViewDidChangeSelection(textViewNotification)
-            // NSAccessibility.post(element: self, notification: .selectedTextChanged)
+            self.postAccessibilitySelectedTextChangedNotification()
         }
     }
 
