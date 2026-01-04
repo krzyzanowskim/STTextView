@@ -67,6 +67,12 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     private var _isHorizontallyResizable = true
     private lazy var _defaultTextContainerSize: CGSize = NSTextContainer().size
 
+    /// Backing storage for accessibility textual context.
+    internal var _accessibilityTextualContext: UIAccessibilityTextualContext?
+
+    /// Backing storage for accessibility identifier.
+    internal var _accessibilityIdentifier: String?
+
     /// A Boolean that controls whether the receiver changes its width to fit the width of its text.
     ///
     /// When `true` (default), text does not wrap and the view expands horizontally.

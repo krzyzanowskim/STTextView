@@ -58,6 +58,73 @@ extension STTextView {
         }
         set { }
     }
+
+    /// The textual context of the text view, which helps VoiceOver
+    /// understand how to interpret and pronounce the text content.
+    ///
+    /// For source code editors, use `.sourceCode` to have VoiceOver
+    /// announce punctuation and special characters more explicitly.
+    /// For general text editing, use `.wordProcessing`.
+    ///
+    /// - Note: When set to `.sourceCode`, VoiceOver will pronounce
+    ///   characters like brackets, semicolons, and operators.
+    override open var accessibilityTextualContext: UIAccessibilityTextualContext? {
+        get {
+            _accessibilityTextualContext
+        }
+        set {
+            _accessibilityTextualContext = newValue
+        }
+    }
+
+    /// Activates the text view when VoiceOver user double-taps.
+    ///
+    /// For editable text views, this makes the view become first responder
+    /// and shows the keyboard.
+    ///
+    /// - Returns: `true` if the activation was handled, `false` otherwise.
+    override open func accessibilityActivate() -> Bool {
+        if isEditable {
+            let didBecomeFirstResponder = becomeFirstResponder()
+            if didBecomeFirstResponder {
+                UIAccessibility.post(
+                    notification: .announcement,
+                    argument: NSLocalizedString("Editing", comment: "Accessibility announcement when editing begins")
+                )
+            }
+            return didBecomeFirstResponder
+        }
+        return false
+    }
+
+    /// A string that identifies the element for UI testing.
+    ///
+    /// Use this property to assign a unique identifier to the text view
+    /// for use with UI automation testing frameworks like XCTest.
+    ///
+    /// Example:
+    /// ```swift
+    /// textView.accessibilityIdentifier = "editor.mainTextView"
+    /// ```
+    override open var accessibilityIdentifier: String? {
+        get {
+            _accessibilityIdentifier
+        }
+        set {
+            _accessibilityIdentifier = newValue
+        }
+    }
+
+    /// Indicates whether the text view responds to user interaction.
+    ///
+    /// Returns `true` if the text view is either editable or selectable,
+    /// helping VoiceOver understand that this element can be interacted with.
+    override open var accessibilityRespondsToUserInteraction: Bool {
+        get {
+            isEditable || isSelectable
+        }
+        set { }
+    }
 }
 
 // MARK: - UIAccessibilityReadingContent
