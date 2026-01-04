@@ -125,6 +125,96 @@ extension STTextView {
         }
         set { }
     }
+
+    /// Scrolls the text view content in response to VoiceOver three-finger swipe gestures.
+    ///
+    /// This method enables VoiceOver users to navigate through the text content
+    /// using three-finger swipes. After scrolling, it announces the new position
+    /// to provide context about the current location in the document.
+    ///
+    /// - Parameter direction: The direction to scroll.
+    /// - Returns: `true` if the scroll was performed, `false` if scrolling
+    ///   in that direction is not possible.
+    override open func accessibilityScroll(_ direction: UIAccessibilityScrollDirection) -> Bool {
+        let viewportHeight = bounds.height
+        let viewportWidth = bounds.width
+        let maxOffsetY = max(0, contentSize.height - viewportHeight)
+        let maxOffsetX = max(0, contentSize.width - viewportWidth)
+
+        var newOffset = contentOffset
+        var didScroll = false
+
+        switch direction {
+        case .up:
+            // Scroll content down (show earlier content)
+            if contentOffset.y > 0 {
+                newOffset.y = max(0, contentOffset.y - viewportHeight)
+                didScroll = true
+            }
+        case .down:
+            // Scroll content up (show later content)
+            if contentOffset.y < maxOffsetY {
+                newOffset.y = min(maxOffsetY, contentOffset.y + viewportHeight)
+                didScroll = true
+            }
+        case .left:
+            // Scroll content right (show earlier content horizontally)
+            if contentOffset.x > 0 {
+                newOffset.x = max(0, contentOffset.x - viewportWidth)
+                didScroll = true
+            }
+        case .right:
+            // Scroll content left (show later content horizontally)
+            if contentOffset.x < maxOffsetX {
+                newOffset.x = min(maxOffsetX, contentOffset.x + viewportWidth)
+                didScroll = true
+            }
+        case .previous, .next:
+            // Handle as vertical scrolling
+            if direction == .previous && contentOffset.y > 0 {
+                newOffset.y = max(0, contentOffset.y - viewportHeight)
+                didScroll = true
+            } else if direction == .next && contentOffset.y < maxOffsetY {
+                newOffset.y = min(maxOffsetY, contentOffset.y + viewportHeight)
+                didScroll = true
+            }
+        @unknown default:
+            return false
+        }
+
+        if didScroll {
+            setContentOffset(newOffset, animated: true)
+
+            // Announce new position
+            let announcement = accessibilityScrollStatusMessage(for: newOffset)
+            UIAccessibility.post(notification: .pageScrolled, argument: announcement)
+        }
+
+        return didScroll
+    }
+
+    /// Generates a status message describing the current scroll position.
+    ///
+    /// - Parameter offset: The current content offset.
+    /// - Returns: A localized string describing the scroll position.
+    private func accessibilityScrollStatusMessage(for offset: CGPoint) -> String {
+        let totalHeight = contentSize.height
+        let viewportHeight = bounds.height
+
+        guard totalHeight > viewportHeight else {
+            return NSLocalizedString("All content visible", comment: "Accessibility scroll status when all content fits")
+        }
+
+        // Calculate approximate page position
+        let totalPages = Int(ceil(totalHeight / viewportHeight))
+        let currentPage = Int(floor(offset.y / viewportHeight)) + 1
+
+        let format = NSLocalizedString(
+            "Page %d of %d",
+            comment: "Accessibility scroll status showing current page"
+        )
+        return String(format: format, currentPage, totalPages)
+    }
 }
 
 // MARK: - UIAccessibilityReadingContent
