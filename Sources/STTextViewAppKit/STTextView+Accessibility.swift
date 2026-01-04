@@ -165,9 +165,9 @@ extension STTextView {
     }
 
     override open func accessibilityRange(forLine line: Int) -> NSRange {
-        // Enumerate visual lines (layout fragments) to find the correct line range
         var currentLine = 0
         var result: NSRange = .notFound
+        let nsString = (text ?? "") as NSString
 
         textLayoutManager.enumerateTextLayoutFragments(
             from: textContentManager.documentRange.location,
@@ -176,17 +176,14 @@ extension STTextView {
             for textLineFragment in layoutFragment.textLineFragments {
                 if currentLine == line {
                     if let lineRange = textLineFragment.textRange(in: layoutFragment) {
-                        var nsRange = NSRange(lineRange, in: textContentManager)
+                        result = NSRange(lineRange, in: textContentManager)
 
                         // Include trailing newline if present (per Apple docs)
-                        if let nextLocation = textContentManager.location(lineRange.endLocation, offsetBy: 1),
-                           let charRange = NSTextRange(location: lineRange.endLocation, end: nextLocation),
-                           let substring = textContentManager.attributedString(in: charRange)?.string,
-                           substring == "\n" {
-                            nsRange.length += 1
+                        let endIndex = result.upperBound
+                        if endIndex < nsString.length,
+                           nsString.character(at: endIndex) == unichar(0x0A) {
+                            result.length += 1
                         }
-
-                        result = nsRange
                     }
                     return false
                 }
