@@ -37,7 +37,7 @@ extension STTextView {
     }
 
     override open func accessibilityNumberOfCharacters() -> Int {
-        text?.count ?? 0
+        text?.utf16.count ?? 0
     }
 
     override open func accessibilitySelectedText() -> String? {
@@ -156,5 +156,39 @@ extension STTextView {
 
     override open func accessibilityString(for range: NSRange) -> String? {
         attributedSubstring(forProposedRange: range, actualRange: nil)?.string
+    }
+
+    override open func accessibilityRange(for point: NSPoint) -> NSRange {
+        guard let window else {
+            return .notFound
+        }
+
+        // Convert from screen coordinates to content view coordinates
+        let windowPoint = window.convertPoint(fromScreen: point)
+        let viewPoint = contentView.convert(windowPoint, from: nil)
+
+        // Find the text location at this point
+        guard let location = textLayoutManager.caretLocation(
+            interactingAt: viewPoint,
+            inContainerAt: textLayoutManager.documentRange.location
+        ) else {
+            return .notFound
+        }
+
+        // Get the character range at this location (single character)
+        let characterIndex = textContentManager.offset(
+            from: textContentManager.documentRange.location,
+            to: location
+        )
+
+        guard characterIndex != NSNotFound else {
+            return .notFound
+        }
+
+        // Return range for a single character at this position
+        // If at end of document, return empty range at that position
+        let documentLength = text?.utf16.count ?? 0
+        let length = (characterIndex < documentLength) ? 1 : 0
+        return NSRange(location: characterIndex, length: length)
     }
 }
