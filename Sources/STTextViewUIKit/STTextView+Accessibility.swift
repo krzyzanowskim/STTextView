@@ -408,16 +408,13 @@ extension STTextView {
 
     /// Posts an accessibility notification when the text selection changes.
     ///
-    /// Note: UIKit doesn't have a direct equivalent to macOS's `selectedTextChanged` notification.
-    /// We use `layoutChanged` to notify VoiceOver that the content has changed and it should
-    /// re-read the current focus position.
+    /// This notifies assistive technologies that the selection has changed.
+    /// VoiceOver will re-read the current focus position and announce the selected text if any.
+    ///
+    /// - Note: UIKit doesn't have a direct equivalent to macOS's `selectedTextChanged`
+    ///   notification. We use `.layoutChanged` which causes assistive technologies
+    ///   to re-evaluate the element and announce relevant changes.
     func postAccessibilitySelectedTextChangedNotification() {
         UIAccessibility.post(notification: .layoutChanged, argument: self)
-    }
-
-    /// Posts an accessibility announcement notification.
-    /// - Parameter message: The message to announce to VoiceOver users.
-    func postAccessibilityAnnouncement(_ message: String) {
-        UIAccessibility.post(notification: .announcement, argument: message)
     }
 }
