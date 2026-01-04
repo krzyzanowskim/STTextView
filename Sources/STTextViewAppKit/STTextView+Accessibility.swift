@@ -78,6 +78,25 @@ extension STTextView {
             window?.makeFirstResponder(self)
         }
     }
+
+    override open func isAccessibilityEdited() -> Bool {
+        undoManager?.canUndo ?? false
+    }
+
+    override open func accessibilityInsertionPointLineNumber() -> Int {
+        let insertionPoint = selectedRange().location
+        return accessibilityLine(for: insertionPoint)
+    }
+
+    override open func accessibilityHelp() -> String? {
+        if isEditable {
+            return NSLocalizedString("Type to enter text.", comment: "Accessibility help for editable text view")
+        } else if isSelectable {
+            return NSLocalizedString("Text is selectable but not editable.", comment: "Accessibility help for selectable text view")
+        } else {
+            return NSLocalizedString("Read-only text content.", comment: "Accessibility help for read-only text view")
+        }
+    }
 }
 
 extension STTextView {
