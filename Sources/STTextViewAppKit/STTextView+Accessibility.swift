@@ -88,6 +88,15 @@ extension STTextView {
         return accessibilityLine(for: insertionPoint)
     }
 
+    override open func setAccessibilityInsertionPointLineNumber(_ accessibilityInsertionPointLineNumber: Int) {
+        let lineRange = accessibilityRange(forLine: accessibilityInsertionPointLineNumber)
+        guard lineRange.location != NSNotFound else {
+            return
+        }
+        // Place insertion point at the beginning of the line
+        setAccessibilitySelectedTextRange(NSRange(location: lineRange.location, length: 0))
+    }
+
     override open func accessibilityHelp() -> String? {
         if isEditable {
             return NSLocalizedString("Type to enter text.", comment: "Accessibility help for editable text view")
@@ -156,21 +165,37 @@ extension STTextView {
     }
 
     override open func accessibilityRange(forLine line: Int) -> NSRange {
-        guard let location = textContentManager.location(line: line) else {
-            return .notFound
+        // Enumerate visual lines (layout fragments) to find the correct line range
+        var currentLine = 0
+        var result: NSRange = .notFound
+
+        textLayoutManager.enumerateTextLayoutFragments(
+            from: textContentManager.documentRange.location,
+            options: [.ensuresLayout]
+        ) { layoutFragment in
+            for textLineFragment in layoutFragment.textLineFragments {
+                if currentLine == line {
+                    if let lineRange = textLineFragment.textRange(in: layoutFragment) {
+                        var nsRange = NSRange(lineRange, in: textContentManager)
+
+                        // Include trailing newline if present (per Apple docs)
+                        if let nextLocation = textContentManager.location(lineRange.endLocation, offsetBy: 1),
+                           let charRange = NSTextRange(location: lineRange.endLocation, end: nextLocation),
+                           let substring = textContentManager.attributedString(in: charRange)?.string,
+                           substring == "\n" {
+                            nsRange.length += 1
+                        }
+
+                        result = nsRange
+                    }
+                    return false
+                }
+                currentLine += 1
+            }
+            return true
         }
 
-        var textElement: NSTextElement?
-        textContentManager.enumerateTextElements(from: location) { element in
-            textElement = element
-            return false
-        }
-
-        guard let textElement, let textElementRange = textElement.elementRange else {
-            return .notFound
-        }
-
-        return NSRange(textElementRange, in: textContentManager)
+        return result
     }
 
     override open func accessibilityString(for range: NSRange) -> String? {
