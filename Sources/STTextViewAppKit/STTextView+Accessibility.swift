@@ -52,6 +52,15 @@ extension STTextView {
         selectedRange()
     }
 
+    override open func accessibilitySelectedTextRanges() -> [NSValue]? {
+        let ranges = textLayoutManager.textSelections
+            .flatMap(\.textRanges)
+            .map { NSRange($0, in: textContentManager) }
+            .map { NSValue(range: $0) }
+
+        return ranges.isEmpty ? nil : ranges
+    }
+
     override open func setAccessibilitySelectedTextRanges(_ accessibilitySelectedTextRanges: [NSValue]?) {
         for range in accessibilitySelectedTextRanges?.map(\.rangeValue) ?? [] {
             self.setSelectedRange(range)

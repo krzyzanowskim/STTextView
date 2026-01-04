@@ -1587,6 +1587,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         delegateProxy.textViewDidChangeText(notification)
         _yankingManager.textChanged()
 
+        NSAccessibility.post(element: self, notification: .valueChanged)
+
         needsScrollToSelection = true
         needsDisplay = true
     }
