@@ -15,14 +15,7 @@ extension STTextView {
 
     override open var accessibilityTraits: UIAccessibilityTraits {
         get {
-            var traits: UIAccessibilityTraits = []
-            if isEditable {
-                // For editable text views, use staticText trait
-                // The text input system handles editing-specific behaviors
-                traits.insert(.staticText)
-            } else {
-                traits.insert(.staticText)
-            }
+            var traits: UIAccessibilityTraits = [.staticText]
             if !isEditable && !isSelectable {
                 traits.insert(.notEnabled)
             }
@@ -124,6 +117,20 @@ extension STTextView {
             isEditable || isSelectable
         }
         set { }
+    }
+
+    /// Handles the VoiceOver two-finger Z gesture (escape/back).
+    ///
+    /// If the text view is first responder (editing), this resigns first responder
+    /// to dismiss the keyboard and exit editing mode.
+    ///
+    /// - Returns: `true` if the escape action was handled, `false` otherwise.
+    override open func accessibilityPerformEscape() -> Bool {
+        if isFirstResponder {
+            resignFirstResponder()
+            return true
+        }
+        return false
     }
 
     /// Scrolls the text view content in response to VoiceOver three-finger swipe gestures.
