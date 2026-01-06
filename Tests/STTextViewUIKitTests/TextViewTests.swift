@@ -6,7 +6,9 @@
 
         func testInitialState() {
             let textView = STTextView()
-            XCTAssertNil(textView.selectedTextRange)
+            // A newly created STTextView has a zero-length selection (caret) at the document start
+            XCTAssertNotNil(textView.selectedTextRange)
+            XCTAssertTrue(textView.selectedTextRange?.isEmpty == true)
         }
 
         func testTextDelegate1() {
