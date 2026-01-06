@@ -2,7 +2,8 @@ name: Tests
 
 on:
   push:
-    branches: [main]
+    tags:
+      - '*'
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -40,4 +41,4 @@ jobs:
           xcode-version: '26.1'
 
       - name: Build and Test
-        run: xcodebuild test -scheme STTextView -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' -parallel-testing-enabled YES
+        run: xcodebuild test -scheme STTextViewUIKitTests -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' -parallel-testing-enabled YES
