@@ -1449,7 +1449,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             return false
         }
 
+        let gutterWidth = gutterView?.frame.width ?? 0
         var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
+        newFrame.size.width += gutterWidth
+
         if !isHorizontallyResizable {
             newFrame.size.width = textContainer.size.width
         }
