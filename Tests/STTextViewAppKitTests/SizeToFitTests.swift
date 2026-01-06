@@ -708,6 +708,73 @@
             XCTAssertLessThan(stTextView.frame.height, 30)
         }
 
+        // MARK: - Gutter (Line Numbers) Tests
+
+        @MainActor
+        func testSizeToFitIncludesGutterWidth() {
+            // Test that sizeToFit() includes gutter width when line numbers are shown
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.isVerticallyResizable = true
+            stTextView.isHorizontallyResizable = true
+            stTextView.showsLineNumbers = false
+            stTextView.setString("This is a long line of text for testing gutter width")
+            stTextView.sizeToFit()
+
+            let frameWidthWithoutGutter = stTextView.frame.width
+
+            // Now enable line numbers
+            stTextView.showsLineNumbers = true
+            stTextView.sizeToFit()
+
+            let frameWidthWithGutter = stTextView.frame.width
+            let gutterWidth = stTextView.gutterView?.frame.width ?? 0
+
+            XCTAssertGreaterThan(gutterWidth, 0, "Gutter should have non-zero width when line numbers are shown")
+            XCTAssertGreaterThan(frameWidthWithGutter, frameWidthWithoutGutter, "Frame should be wider with gutter")
+            XCTAssertEqual(frameWidthWithGutter, frameWidthWithoutGutter + gutterWidth, accuracy: 1.0, "Frame width should include gutter width")
+        }
+
+        @MainActor
+        func testSizeToFitMatchesIntrinsicContentSizeWithGutter() {
+            // Test that sizeToFit() produces a frame consistent with intrinsicContentSize
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.isVerticallyResizable = true
+            stTextView.isHorizontallyResizable = true
+            stTextView.showsLineNumbers = true
+            stTextView.setString("This is a long line of text that should expand horizontally")
+            stTextView.sizeToFit()
+
+            let intrinsicWidth = stTextView.intrinsicContentSize.width
+            let frameWidth = stTextView.frame.width
+
+            XCTAssertEqual(frameWidth, intrinsicWidth, accuracy: 1.0, "sizeToFit() frame width should match intrinsicContentSize width")
+        }
+
+        @MainActor
+        func testSizeToFitWithGutterAndLongContent() {
+            // Test horizontal scrolling scenario: long content with line numbers enabled
+            let longLine = String(repeating: "x", count: 200) // Very long line
+            
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 300, height: 100)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.isVerticallyResizable = true
+            stTextView.isHorizontallyResizable = true
+            stTextView.showsLineNumbers = true
+            stTextView.setString(longLine)
+            stTextView.sizeToFit()
+
+            let gutterWidth = stTextView.gutterView?.frame.width ?? 0
+            let textWidth = stTextView.textLayoutManager.usageBoundsForTextContainer.width
+
+            // Frame should be at least text width + gutter width
+            XCTAssertGreaterThanOrEqual(stTextView.frame.width, textWidth + gutterWidth - 1, "Frame should include both text content and gutter")
+        }
+
     }
 
 #endif
