@@ -217,6 +217,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
     }
 
+    /// Resets typing attributes to default values.
+    open func resetTypingAttributes() {
+        _typingAttributes = [:]
+    }
+
     func typingAttributes(at startLocation: NSTextLocation) -> [NSAttributedString.Key: Any] {
         if textLayoutManager.documentRange.isEmpty {
             return _defaultTypingAttributes
