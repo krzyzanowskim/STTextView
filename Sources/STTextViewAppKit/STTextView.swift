@@ -260,6 +260,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
+            _typingAttributes = [:]
             setString(newValue)
 
             if let prevLocation {
@@ -283,6 +284,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
+            _typingAttributes = [:]
             setString(newValue)
 
             if let prevLocation {
