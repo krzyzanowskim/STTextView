@@ -293,7 +293,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
-            _typingAttributes = [:]
+            resetTypingAttributes()
             setString(newValue)
 
             if let prevLocation {
@@ -318,7 +318,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         set {
             let prevLocation = textLayoutManager.insertionPointLocations.first
 
-            _typingAttributes = [:]
+            resetTypingAttributes()
             setString(newValue)
 
             if let prevLocation {
