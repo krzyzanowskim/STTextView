@@ -121,6 +121,12 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
         return scrollView
     }
+    
+    func sizeThatFits(_ proposal: ProposedViewSize, nsView: NSScrollView, context: Context) -> CGSize? {
+        let width = proposal.width ?? nsView.frame.size.width
+        let height = proposal.height ?? nsView.frame.size.height
+        return CGSize(width: width, height: height)
+    }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
         let textView = scrollView.documentView as! STTextView
