@@ -446,7 +446,7 @@ private class STCustomGutterContainerView: NSView {
     init() {
         super.init(frame: .zero)
         wantsLayer = true
-        // clipsToBounds intentionally left false to allow overhang
+        // clipsToBounds left as default (false)
     }
 
     @available(*, unavailable)
