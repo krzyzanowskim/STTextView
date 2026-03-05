@@ -174,17 +174,18 @@ private struct CustomGutterLineView: View {
     }
 
     /// Plain word count number — tappable to activate breakpoint.
+    /// Uses fixed-width frame so the bookmark icon stays in place
+    /// regardless of whether a count is shown.
     private var wordCountLabel: some View {
-        Group {
-            if wordCount > 0 {
-                Text("\(wordCount)")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .onTapGesture {
-                        breakpointLines.insert(lineNumber)
-                    }
+        Text(wordCount > 0 ? "\(wordCount)" : "")
+            .font(.system(size: 14, weight: .medium, design: .rounded))
+            .foregroundStyle(.secondary)
+            .frame(minWidth: 18, alignment: .trailing)
+            .onTapGesture {
+                if wordCount > 0 {
+                    breakpointLines.insert(lineNumber)
+                }
             }
-        }
     }
 
     /// Overhanging breakpoint badge using the Union shape from the Figma design.
