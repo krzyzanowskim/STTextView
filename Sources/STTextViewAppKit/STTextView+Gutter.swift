@@ -336,14 +336,27 @@ extension STTextView {
 
                 let lineView = lineViewForID(lineID, in: container, provider: provider, lineNumber: lineNumber, lineContent: lineContent)
 
-                // Position using fragmentView.frame directly — NOT cellFrame from
-                // STGutterCalculations which adds typographicBounds.origin.y offset.
-                // That offset is needed for baseline-aligned line number text, but
-                // shifts NSHostingView content down. Fragment view frame gives exact
-                // visual bounds of the text line in document coordinates.
+                // Size the line view to just the first visual line of this paragraph.
+                // fragmentView.frame.size.height spans the entire wrapped paragraph — using it
+                // causes NSHostingView content to render at the bottom of a tall frame rather
+                // than the top, because NSHostingView is non-flipped inside our flipped container.
+                // For extra line fragments, typographicBounds.height may be invalid (FB15131180);
+                // fall back to the previous line fragment's height or typingLineHeight.
+                let lineHeight: CGFloat
+                if textLineFragment.isExtraLineFragment {
+                    if layoutFragment.textLineFragments.count >= 2 {
+                        let prevLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
+                        lineHeight = prevLineFragment.typographicBounds.height
+                    } else {
+                        lineHeight = typingLineHeight
+                    }
+                } else {
+                    lineHeight = textLineFragment.typographicBounds.height
+                }
+
                 lineView.frame = CGRect(
                     origin: CGPoint(x: 0, y: fragmentView.frame.origin.y),
-                    size: CGSize(width: customGutterWidth, height: fragmentView.frame.size.height)
+                    size: CGSize(width: customGutterWidth, height: lineHeight)
                 ).pixelAligned
 
                 linesCount += 1
