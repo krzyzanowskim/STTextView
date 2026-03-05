@@ -322,13 +322,6 @@ extension STTextView {
                 let lineID = Self.gutterLineViewID(for: lineNumber)
                 visibleIDs.insert(lineID)
 
-                // Calculate the cell frame for this line (same positioning as line number cells)
-                let (_, _, cellFrame) = STGutterCalculations.calculateLineNumberMetrics(
-                    for: textLineFragment,
-                    in: layoutFragment,
-                    fragmentViewFrame: fragmentView.frame
-                )
-
                 // Extract the paragraph text content, trimming the trailing newline
                 let lineContent: String
                 if let paragraph = layoutFragment.textElement as? NSTextParagraph {
@@ -342,9 +335,15 @@ extension STTextView {
                 }
 
                 let lineView = lineViewForID(lineID, in: container, provider: provider, lineNumber: lineNumber, lineContent: lineContent)
+
+                // Position using fragmentView.frame directly — NOT cellFrame from
+                // STGutterCalculations which adds typographicBounds.origin.y offset.
+                // That offset is needed for baseline-aligned line number text, but
+                // shifts NSHostingView content down. Fragment view frame gives exact
+                // visual bounds of the text line in document coordinates.
                 lineView.frame = CGRect(
-                    origin: CGPoint(x: 0, y: cellFrame.origin.y),
-                    size: CGSize(width: customGutterWidth, height: cellFrame.size.height)
+                    origin: CGPoint(x: 0, y: fragmentView.frame.origin.y),
+                    size: CGSize(width: customGutterWidth, height: fragmentView.frame.size.height)
                 ).pixelAligned
 
                 linesCount += 1
@@ -418,7 +417,9 @@ extension STTextView {
         separator.identifier = Self.gutterSeparatorID
         separator.wantsLayer = true
         separator.layer?.backgroundColor = separatorColor.cgColor
-        container.addSubview(separator)
+        // Add behind line views so overhanging content (e.g. breakpoint badges)
+        // draws in front of the separator, not behind it.
+        container.addSubview(separator, positioned: .below, relativeTo: container.subviews.first)
     }
 }
 

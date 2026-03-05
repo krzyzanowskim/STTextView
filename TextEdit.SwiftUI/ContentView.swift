@@ -20,14 +20,14 @@ struct ContentView: View {
     @State private var selection: NSRange?
     @State private var font = Font.monospacedSystemFont(ofSize: 0, weight: .medium)
     @State private var wrapLines = true
-    @State private var showLineNumbers = false
+    @State private var showLineNumbers = true
     @State private var showCustomGutter = false
 
     /// Tracks which lines have bookmarks toggled on (by 1-based line number).
-    @State private var bookmarkedLines: Set<Int> = []
+    @State private var bookmarkedLines: Set<Int> = [3]
 
     /// Tracks which lines have breakpoints active (by 1-based line number).
-    @State private var breakpointLines: Set<Int> = []
+    @State private var breakpointLines: Set<Int> = [4]
 
     private var options: TextView.Options {
         var opts: TextView.Options = [.highlightSelectedLine]
@@ -170,6 +170,7 @@ private struct CustomGutterLineView: View {
         .padding(.trailing, 4)
         .padding(.leading, 2)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+        .background(.clear)
     }
 
     /// Plain word count number — tappable to activate breakpoint.
