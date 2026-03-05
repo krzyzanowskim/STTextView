@@ -379,6 +379,12 @@ extension STTextView {
 
         let lineView = provider(lineNumber, lineContent)
         lineView.identifier = id
+
+        // Allow content (e.g. breakpoint badges) to extend beyond the
+        // line view bounds. NSHostingView clips by default on macOS.
+        lineView.clipsToBounds = false
+        lineView.layer?.masksToBounds = false
+
         // Add to container BEFORE setting frame so the NSHostingView
         // has a window and can properly lay out its SwiftUI content.
         container.addSubview(lineView)

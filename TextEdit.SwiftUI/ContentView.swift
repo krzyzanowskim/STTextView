@@ -189,8 +189,9 @@ private struct CustomGutterLineView: View {
 
     /// Breakpoint badge using the Union shape from the Figma design.
     /// Text uses same font/frame as wordCountLabel so the number doesn't jump.
-    /// Shape tip reaches the separator (offset compensates trailing padding)
-    /// but stays within gutter bounds.
+    /// Shape overhangs past the gutter separator to demonstrate that custom
+    /// gutter content can extend beyond gutter bounds when needed.
+    /// Activated by tapping the word count number.
     private var breakpointBadge: some View {
         Text(wordCount > 0 ? "\(wordCount)" : "")
             .font(.system(size: 14, weight: .medium, design: .rounded))
@@ -200,8 +201,8 @@ private struct CustomGutterLineView: View {
                 BreakpointShape()
                     .fill(SwiftUI.Color.accentColor)
                     .frame(width: 28, height: 15)
-                    .shadow(color: .black.opacity(0.15), radius: 1, x: 1, y: 1)
-                    .offset(x: 4) // tip reaches separator (compensates trailing padding)
+                    .shadow(color: .black.opacity(0.25), radius: 2, x: 1, y: 1)
+                    .offset(x: 8) // overhang past gutter separator
             }
             .onTapGesture {
                 breakpointLines.remove(lineNumber)
