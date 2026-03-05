@@ -233,9 +233,19 @@ extension STTextView {
 
     // MARK: - Custom Gutter Line Views
 
+    /// Identifier prefix for custom gutter line views.
+    private static let gutterLineViewIDPrefix = "stgutter-line-"
+
+    /// Identifier for the trailing separator view inside the custom gutter container.
+    private static let gutterSeparatorID = NSUserInterfaceItemIdentifier("stgutter-separator")
+
     /// Positions custom gutter line views provided by ``gutterLineViewProvider``.
     /// Creates the container view lazily as a floating subview, then enumerates
     /// visible lines to create and position one NSView per paragraph.
+    ///
+    /// Views are cached by line number (via `tag`) and reused across layout passes
+    /// so that interactive SwiftUI content (buttons, gestures) inside NSHostingViews
+    /// keeps working. Views are only recreated when the line's content or state changes.
     private func layoutCustomGutterLineViews() {
         guard let provider = gutterLineViewProvider, customGutterWidth > 0 else {
             return
@@ -261,19 +271,23 @@ extension STTextView {
         container.frame.size.height = contentView.bounds.height
         container.layer?.backgroundColor = customGutterBackgroundColor?.cgColor
 
-        // Remove old line views (and separator — it gets re-added at the end)
-        container.subviews.forEach { $0.removeFromSuperviewWithoutNeedingDisplay() }
+        // Track which line numbers are currently visible so we can prune stale views
+        var visibleIDs = Set<NSUserInterfaceItemIdentifier>()
 
         // Empty document — show a single view for line 1
         if textLayoutManager.documentRange.isEmpty {
             if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
-                let lineView = provider(1, "")
+                let lineID = Self.gutterLineViewID(for: 1)
+                visibleIDs.insert(lineID)
+
+                let lineView = lineViewForID(lineID, in: container, provider: provider, lineNumber: 1, lineContent: "")
                 lineView.frame = CGRect(
                     origin: CGPoint(x: 0, y: selectionFrame.origin.y),
                     size: CGSize(width: customGutterWidth, height: typingLineHeight)
                 ).pixelAligned
-                container.addSubview(lineView)
             }
+            pruneStaleLineViews(in: container, keeping: visibleIDs)
+            addCustomGutterSeparator(to: container)
             return
         }
 
@@ -305,6 +319,8 @@ extension STTextView {
             // One custom view per paragraph (first text line fragment or extra line fragment)
             for textLineFragment in layoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == textLineFragment) {
                 let lineNumber = startLineIndex + linesCount + 1
+                let lineID = Self.gutterLineViewID(for: lineNumber)
+                visibleIDs.insert(lineID)
 
                 // Calculate the cell frame for this line (same positioning as line number cells)
                 let (_, _, cellFrame) = STGutterCalculations.calculateLineNumberMetrics(
@@ -325,23 +341,70 @@ extension STTextView {
                     lineContent = ""
                 }
 
-                let lineView = provider(lineNumber, lineContent)
+                let lineView = lineViewForID(lineID, in: container, provider: provider, lineNumber: lineNumber, lineContent: lineContent)
                 lineView.frame = CGRect(
                     origin: CGPoint(x: 0, y: cellFrame.origin.y),
                     size: CGSize(width: customGutterWidth, height: cellFrame.size.height)
                 ).pixelAligned
-                container.addSubview(lineView)
 
                 linesCount += 1
             }
         }
 
+        // Remove views for lines that scrolled out of the viewport
+        pruneStaleLineViews(in: container, keeping: visibleIDs)
+
         // Draw trailing separator on top of all line views
         addCustomGutterSeparator(to: container)
     }
 
-    /// Adds a vertical separator line on the trailing edge of the custom gutter container.
+    /// Creates an identifier for a custom gutter line view at the given line number.
+    private static func gutterLineViewID(for lineNumber: Int) -> NSUserInterfaceItemIdentifier {
+        NSUserInterfaceItemIdentifier(gutterLineViewIDPrefix + "\(lineNumber)")
+    }
+
+    /// Returns (or creates) a gutter line view for the given identifier.
+    /// Always recreates the view from the provider to pick up captured SwiftUI state,
+    /// but adds to the container first so the NSHostingView has a window before layout.
+    private func lineViewForID(
+        _ id: NSUserInterfaceItemIdentifier,
+        in container: NSView,
+        provider: (Int, String) -> NSView,
+        lineNumber: Int,
+        lineContent: String
+    ) -> NSView {
+        // Remove existing view for this line — it captured stale state
+        if let existing = container.subviews.first(where: { $0.identifier == id }) {
+            existing.removeFromSuperviewWithoutNeedingDisplay()
+        }
+
+        let lineView = provider(lineNumber, lineContent)
+        lineView.identifier = id
+        // Add to container BEFORE setting frame so the NSHostingView
+        // has a window and can properly lay out its SwiftUI content.
+        container.addSubview(lineView)
+
+        return lineView
+    }
+
+    /// Removes gutter line views whose identifiers are not in the `keeping` set.
+    private func pruneStaleLineViews(in container: NSView, keeping visibleIDs: Set<NSUserInterfaceItemIdentifier>) {
+        for subview in container.subviews where subview.identifier != nil {
+            guard let id = subview.identifier else { continue }
+            let isLineView = id.rawValue.hasPrefix(Self.gutterLineViewIDPrefix)
+            if isLineView && !visibleIDs.contains(id) {
+                subview.removeFromSuperviewWithoutNeedingDisplay()
+            }
+        }
+    }
+
+    /// Adds (or updates) a vertical separator line on the trailing edge of the custom gutter container.
     private func addCustomGutterSeparator(to container: NSView) {
+        // Remove existing separator
+        if let existing = container.subviews.first(where: { $0.identifier == Self.gutterSeparatorID }) {
+            existing.removeFromSuperviewWithoutNeedingDisplay()
+        }
+
         guard let separatorColor = customGutterSeparatorColor, customGutterSeparatorWidth > 0 else {
             return
         }
@@ -352,6 +415,7 @@ extension STTextView {
             width: customGutterSeparatorWidth,
             height: container.bounds.height
         ))
+        separator.identifier = Self.gutterSeparatorID
         separator.wantsLayer = true
         separator.layer?.backgroundColor = separatorColor.cgColor
         container.addSubview(separator)
@@ -362,6 +426,8 @@ extension STTextView {
 
 /// Flipped container view for custom gutter line views.
 /// Uses flipped coordinates (top-to-bottom) to match document layout.
+/// Does NOT clip to bounds so that per-line views can overhang past
+/// the gutter edge (e.g. breakpoint badges with shadows).
 private class STCustomGutterContainerView: NSView {
 
     override var isFlipped: Bool {
@@ -372,10 +438,6 @@ private class STCustomGutterContainerView: NSView {
         false
     }
 
-    override func makeBackingLayer() -> CALayer {
-        CATiledLayer()
-    }
-
     override func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
         nil
     }
@@ -383,7 +445,7 @@ private class STCustomGutterContainerView: NSView {
     init() {
         super.init(frame: .zero)
         wantsLayer = true
-        clipsToBounds = true
+        // clipsToBounds intentionally left false to allow overhang
     }
 
     @available(*, unavailable)
