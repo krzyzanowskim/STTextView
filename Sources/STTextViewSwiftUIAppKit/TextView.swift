@@ -19,11 +19,6 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     @Binding private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
-    private let gutterWidth: CGFloat
-    private let gutterLineViewFactory: ((Int, String) -> NSView)?
-    private let gutterBackgroundColor: NSColor?
-    private let gutterSeparatorColor: NSColor?
-    private let gutterSeparatorWidth: CGFloat
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
@@ -41,18 +36,58 @@ public struct TextView: SwiftUI.View, TextViewModifier {
         _selection = selection
         self.options = options
         self.plugins = plugins
-        self.gutterWidth = 0
-        self.gutterLineViewFactory = nil
-        self.gutterBackgroundColor = nil
-        self.gutterSeparatorColor = nil
-        self.gutterSeparatorWidth = 0
     }
 
-    /// Create a text edit view with a custom gutter that displays a SwiftUI view per line.
-    ///
-    /// Each visible line in the editor gets its own gutter view, positioned to fill the
-    /// full line height (including spacing). The view builder receives the 1-based line
-    /// number and the text content of that line.
+    public var body: some View {
+        TextViewRepresentable(
+            text: $text,
+            selection: $selection,
+            options: options,
+            plugins: plugins
+        )
+        .background(.background)
+    }
+}
+
+// MARK: - Text View With Custom Gutter
+
+/// A SwiftUI text editor view with a custom per-line gutter.
+///
+/// Each visible line in the editor gets its own SwiftUI gutter view,
+/// positioned to fill the full line height (including spacing).
+/// The view builder receives the 1-based line number and the plain-text
+/// content of that line.
+///
+/// Usage:
+/// ```swift
+/// TextViewWithGutter(
+///     text: $text,
+///     gutterWidth: 64,
+///     gutterContent: { lineNumber, lineContent in
+///         Text("\(lineNumber)")
+///     }
+/// )
+/// .gutterBackground(NSColor.controlBackgroundColor)
+/// .gutterSeparator(color: .separatorColor, width: 1)
+/// ```
+@MainActor @preconcurrency
+public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewModifier {
+
+    public typealias Options = TextViewOptions
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.gutterBackgroundColor) private var envGutterBackgroundColor
+    @Environment(\.gutterSeparatorColor) private var envGutterSeparatorColor
+    @Environment(\.gutterSeparatorWidth) private var envGutterSeparatorWidth
+
+    @Binding private var text: AttributedString
+    @Binding private var selection: NSRange?
+    private let options: Options
+    private let plugins: [any STPlugin]
+    private let gutterWidth: CGFloat
+    private let gutterLineViewFactory: (Int, String) -> NSView
+
+    /// Create a text editor with a custom per-line gutter.
     ///
     /// - Parameters:
     ///   - text: The attributed string content
@@ -60,19 +95,13 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     ///   - options: Editor options
     ///   - plugins: Editor plugins
     ///   - gutterWidth: Width reserved for the custom gutter area (in points)
-    ///   - gutterBackgroundColor: Background color for the gutter container (optional)
-    ///   - gutterSeparatorColor: Color of the trailing vertical separator (optional, nil hides it)
-    ///   - gutterSeparatorWidth: Width of the trailing separator in points (default 2)
-    ///   - gutterContent: A view builder called with `(lineNumber, lineContent)` for each visible line
-    public init<GutterContent: View>(
+    ///   - gutterContent: A view builder called for each visible line with `(lineNumber, lineContent)`
+    public init(
         text: Binding<AttributedString>,
         selection: Binding<NSRange?> = .constant(nil),
         options: Options = [],
         plugins: [any STPlugin] = [],
         gutterWidth: CGFloat,
-        gutterBackgroundColor: NSColor? = nil,
-        gutterSeparatorColor: NSColor? = nil,
-        gutterSeparatorWidth: CGFloat = 2,
         @ViewBuilder gutterContent: @escaping (_ lineNumber: Int, _ lineContent: String) -> GutterContent
     ) {
         _text = text
@@ -80,12 +109,8 @@ public struct TextView: SwiftUI.View, TextViewModifier {
         self.options = options
         self.plugins = plugins
         self.gutterWidth = gutterWidth
-        self.gutterBackgroundColor = gutterBackgroundColor
-        self.gutterSeparatorColor = gutterSeparatorColor
-        self.gutterSeparatorWidth = gutterSeparatorWidth
         self.gutterLineViewFactory = { lineNumber, lineContent in
-            let hostingView = NSHostingView(rootView: gutterContent(lineNumber, lineContent))
-            return hostingView
+            NSHostingView(rootView: gutterContent(lineNumber, lineContent))
         }
     }
 
@@ -97,13 +122,69 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             plugins: plugins,
             gutterWidth: gutterWidth,
             gutterLineViewFactory: gutterLineViewFactory,
-            gutterBackgroundColor: gutterBackgroundColor,
-            gutterSeparatorColor: gutterSeparatorColor,
-            gutterSeparatorWidth: gutterSeparatorWidth
+            gutterBackgroundColor: envGutterBackgroundColor,
+            gutterSeparatorColor: envGutterSeparatorColor,
+            gutterSeparatorWidth: envGutterSeparatorWidth
         )
         .background(.background)
     }
 }
+
+// MARK: - Gutter Style Modifiers
+
+/// Environment key for custom gutter background color.
+private struct GutterBackgroundColorKey: EnvironmentKey {
+    static let defaultValue: NSColor? = nil
+}
+
+/// Environment key for custom gutter separator color.
+private struct GutterSeparatorColorKey: EnvironmentKey {
+    static let defaultValue: NSColor? = nil
+}
+
+/// Environment key for custom gutter separator width.
+private struct GutterSeparatorWidthKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 2
+}
+
+extension EnvironmentValues {
+    var gutterBackgroundColor: NSColor? {
+        get { self[GutterBackgroundColorKey.self] }
+        set { self[GutterBackgroundColorKey.self] = newValue }
+    }
+
+    var gutterSeparatorColor: NSColor? {
+        get { self[GutterSeparatorColorKey.self] }
+        set { self[GutterSeparatorColorKey.self] = newValue }
+    }
+
+    var gutterSeparatorWidth: CGFloat {
+        get { self[GutterSeparatorWidthKey.self] }
+        set { self[GutterSeparatorWidthKey.self] = newValue }
+    }
+}
+
+public extension TextViewModifier {
+
+    /// Sets the background color for the custom gutter area.
+    func gutterBackground(_ color: NSColor?) -> TextViewEnvironmentModifier<Self, NSColor?> {
+        TextViewEnvironmentModifier(content: self, keyPath: \.gutterBackgroundColor, value: color)
+    }
+
+    /// Sets the trailing separator for the custom gutter area.
+    /// - Parameters:
+    ///   - color: Color of the vertical separator line (nil hides it)
+    ///   - width: Width of the separator in points (default 2)
+    func gutterSeparator(color: NSColor?, width: CGFloat = 2) -> TextViewEnvironmentModifier<TextViewEnvironmentModifier<Self, NSColor?>, CGFloat> {
+        TextViewEnvironmentModifier(
+            content: TextViewEnvironmentModifier(content: self, keyPath: \.gutterSeparatorColor, value: color),
+            keyPath: \.gutterSeparatorWidth,
+            value: width
+        )
+    }
+}
+
+// MARK: - NSViewRepresentable
 
 private struct TextViewRepresentable: NSViewRepresentable {
     @Environment(\.isEnabled)
