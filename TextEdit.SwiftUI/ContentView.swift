@@ -95,38 +95,14 @@ struct ContentView: View {
                 CustomGutterLineView(
                     lineNumber: lineNumber,
                     lineContent: lineContent,
-                    isBookmarked: bookmarkedLines.contains(lineNumber),
-                    hasBreakpoint: breakpointLines.contains(lineNumber),
-                    onToggleBookmark: {
-                        toggleBookmark(lineNumber)
-                    },
-                    onToggleBreakpoint: {
-                        toggleBreakpoint(lineNumber)
-                    }
+                    bookmarkedLines: $bookmarkedLines,
+                    breakpointLines: $breakpointLines
                 )
             }
         )
         .gutterBackground(NSColor(srgbRed: 0.992, green: 0.984, blue: 0.969, alpha: 1))
         .gutterSeparator(color: NSColor(srgbRed: 0.75, green: 0.75, blue: 0.75, alpha: 0.5), width: 1)
         .textViewFont(font)
-    }
-
-    // MARK: - Actions
-
-    private func toggleBookmark(_ lineNumber: Int) {
-        if bookmarkedLines.contains(lineNumber) {
-            bookmarkedLines.remove(lineNumber)
-        } else {
-            bookmarkedLines.insert(lineNumber)
-        }
-    }
-
-    private func toggleBreakpoint(_ lineNumber: Int) {
-        if breakpointLines.contains(lineNumber) {
-            breakpointLines.remove(lineNumber)
-        } else {
-            breakpointLines.insert(lineNumber)
-        }
     }
 
     private func loadContent() {
@@ -143,15 +119,19 @@ struct ContentView: View {
 /// Per-line gutter view demonstrating word count, toggleable bookmark, and
 /// an overhanging breakpoint indicator activated by tapping the number.
 ///
+/// Uses `@Binding` to parent state sets instead of action closures — this
+/// avoids `@MainActor` closure type conflicts with Xcode preview thunking.
+///
 /// The breakpoint badge intentionally extends past the gutter's trailing edge
 /// to demonstrate that custom gutter content can overhang when needed.
 private struct CustomGutterLineView: View {
     let lineNumber: Int
     let lineContent: String
-    let isBookmarked: Bool
-    let hasBreakpoint: Bool
-    let onToggleBookmark: () -> Void
-    let onToggleBreakpoint: () -> Void
+    @Binding var bookmarkedLines: Set<Int>
+    @Binding var breakpointLines: Set<Int>
+
+    private var isBookmarked: Bool { bookmarkedLines.contains(lineNumber) }
+    private var hasBreakpoint: Bool { breakpointLines.contains(lineNumber) }
 
     /// Number of whitespace-separated words on this line.
     private var wordCount: Int {
@@ -165,7 +145,13 @@ private struct CustomGutterLineView: View {
             Spacer(minLength: 0)
 
             // Bookmark icon — toggles between outline and filled on click
-            Button(action: onToggleBookmark) {
+            Button {
+                if isBookmarked {
+                    bookmarkedLines.remove(lineNumber)
+                } else {
+                    bookmarkedLines.insert(lineNumber)
+                }
+            } label: {
                 Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                     .font(.system(size: 9))
                     .foregroundStyle(isBookmarked ? SwiftUI.Color.orange : SwiftUI.Color.secondary.opacity(0.5))
@@ -191,7 +177,9 @@ private struct CustomGutterLineView: View {
                 Text("\(wordCount)")
                     .font(.system(size: 14, weight: .regular, design: .rounded))
                     .foregroundStyle(.secondary)
-                    .onTapGesture(perform: onToggleBreakpoint)
+                    .onTapGesture {
+                        breakpointLines.insert(lineNumber)
+                    }
             }
         }
     }
@@ -211,7 +199,9 @@ private struct CustomGutterLineView: View {
                     .shadow(color: .black.opacity(0.25), radius: 3, x: 1, y: 1)
             )
             .offset(x: 8) // Overhang past gutter edge
-            .onTapGesture(perform: onToggleBreakpoint)
+            .onTapGesture {
+                breakpointLines.remove(lineNumber)
+            }
     }
 }
 
