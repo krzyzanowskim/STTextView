@@ -142,35 +142,34 @@ private struct CustomGutterLineView: View {
     }
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 6) {
             Spacer(minLength: 0)
 
+            // Bookmark icon — always visible, independent of breakpoint state
+            Button {
+                if isBookmarked {
+                    bookmarkedLines.remove(lineNumber)
+                } else {
+                    bookmarkedLines.insert(lineNumber)
+                }
+            } label: {
+                Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                    .font(.system(size: 11))
+                    .foregroundStyle(isBookmarked ? SwiftUI.Color.orange : SwiftUI.Color.secondary.opacity(0.5))
+            }
+            .buttonStyle(.plain)
+
+            // Word count or breakpoint badge — breakpoint overlays the
+            // same fixed-width slot so the number doesn't jump.
             if hasBreakpoint {
-                // Breakpoint replaces entire row content with overhanging badge
                 breakpointBadge
             } else {
-                // Bookmark icon — toggles between outline and filled on click
-                Button {
-                    if isBookmarked {
-                        bookmarkedLines.remove(lineNumber)
-                    } else {
-                        bookmarkedLines.insert(lineNumber)
-                    }
-                } label: {
-                    Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                        .font(.system(size: 11))
-                        .foregroundStyle(isBookmarked ? SwiftUI.Color.orange : SwiftUI.Color.secondary.opacity(0.5))
-                }
-                .buttonStyle(.plain)
-
-                // Word count number — tapping activates breakpoint
                 wordCountLabel
             }
         }
         .padding(.trailing, 4)
         .padding(.leading, 2)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-        .background(.clear)
     }
 
     /// Plain word count number — tappable to activate breakpoint.
@@ -189,20 +188,20 @@ private struct CustomGutterLineView: View {
     }
 
     /// Overhanging breakpoint badge using the Union shape from the Figma design.
-    /// The pointed-right tab shape extends ~8pt past the gutter edge to
-    /// demonstrate that custom gutter content can overhang when needed.
-    /// Drop shadow adds depth. Tappable to deactivate.
+    /// Text uses same font/frame as wordCountLabel so the number doesn't jump.
+    /// The 28×15 shape extends rightward past the gutter separator.
     private var breakpointBadge: some View {
-        Text("\(wordCount > 0 ? wordCount : lineNumber)")
-            .font(.system(size: 11, weight: .semibold, design: .rounded))
+        Text(wordCount > 0 ? "\(wordCount)" : "")
+            .font(.system(size: 14, weight: .medium, design: .rounded))
             .foregroundStyle(.white)
-            .frame(width: 32, height: 17)
-            .background(
+            .frame(minWidth: 18, alignment: .trailing)
+            .background(alignment: .trailing) {
                 BreakpointShape()
                     .fill(SwiftUI.Color.accentColor)
+                    .frame(width: 28, height: 15)
                     .shadow(color: .black.opacity(0.25), radius: 2, x: 1, y: 1)
-            )
-            .offset(x: 8) // Overhang past gutter edge
+                    .offset(x: 10) // overhang past gutter edge
+            }
             .onTapGesture {
                 breakpointLines.remove(lineNumber)
             }
@@ -213,45 +212,21 @@ private struct CustomGutterLineView: View {
 
 /// Arrow-right tab shape for breakpoint indicators, exported from Figma.
 /// Rounded left edges with a pointed right side, similar to Xcode's breakpoint indicator.
-/// Designed at 32×17pt.
+/// Designed at 28×15pt.
 private struct BreakpointShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
         let width = rect.size.width
         let height = rect.size.height
         path.move(to: CGPoint(x: 0.7966607881 * width, y: 0))
-        path.addCurve(
-            to: CGPoint(x: 0.9005266779 * width, y: 0.0959198282 * height),
-            control1: CGPoint(x: 0.8428305143 * width, y: 0.0000007783 * height),
-            control2: CGPoint(x: 0.8780923153 * width, y: 0.0342482898 * height)
-        )
-        path.addCurve(
-            to: CGPoint(x: 0.9999994484 * width, y: 0.5007874016 * height),
-            control1: CGPoint(x: 0.9425928167 * width, y: 0.2115586518 * height),
-            control2: CGPoint(x: 1.0002802524 * width, y: 0.3531960926 * height)
-        )
-        path.addCurve(
-            to: CGPoint(x: 0.9038528967 * width, y: 0.8949176807 * height),
-            control1: CGPoint(x: 0.9997174622 * width, y: 0.6488275483 * height),
-            control2: CGPoint(x: 0.9433396447 * width, y: 0.7907980917 * height)
-        )
-        path.addCurve(
-            to: CGPoint(x: 0.7966607881 * width, y: height),
-            control1: CGPoint(x: 0.8795991788 * width, y: 0.9588704573 * height),
-            control2: CGPoint(x: 0.8452111369 * width, y: 0.9999991936 * height)
-        )
+        path.addCurve(to: CGPoint(x: 0.9005266779 * width, y: 0.0959198282 * height), control1: CGPoint(x: 0.8428305143 * width, y: 0.0000007783 * height), control2: CGPoint(x: 0.8780923153 * width, y: 0.0342482898 * height))
+        path.addCurve(to: CGPoint(x: 0.9999994484 * width, y: 0.5007874016 * height), control1: CGPoint(x: 0.9425928167 * width, y: 0.2115586518 * height), control2: CGPoint(x: 1.0002802524 * width, y: 0.3531960926 * height))
+        path.addCurve(to: CGPoint(x: 0.9038528967 * width, y: 0.8949176807 * height), control1: CGPoint(x: 0.9997174622 * width, y: 0.6488275483 * height), control2: CGPoint(x: 0.9433396447 * width, y: 0.7907980917 * height))
+        path.addCurve(to: CGPoint(x: 0.7966607881 * width, y: height), control1: CGPoint(x: 0.8795991788 * width, y: 0.9588704573 * height), control2: CGPoint(x: 0.8452111369 * width, y: 0.9999991936 * height))
         path.addLine(to: CGPoint(x: 0.129785293 * width, y: height))
-        path.addCurve(
-            to: CGPoint(x: 0, y: 0.7102362205 * height),
-            control1: CGPoint(x: 0.0483242729 * width, y: height),
-            control2: CGPoint(x: 0.0000000978 * width, y: 0.8944942706 * height)
-        )
+        path.addCurve(to: CGPoint(x: 0, y: 0.7102362205 * height), control1: CGPoint(x: 0.0483242729 * width, y: height), control2: CGPoint(x: 0.0000000978 * width, y: 0.8944942706 * height))
         path.addLine(to: CGPoint(x: 0, y: 0.2897637795 * height))
-        path.addCurve(
-            to: CGPoint(x: 0.129785293 * width, y: 0),
-            control1: CGPoint(x: 0.0000000247 * width, y: 0.1070872608 * height),
-            control2: CGPoint(x: 0.0483242116 * width, y: 0)
-        )
+        path.addCurve(to: CGPoint(x: 0.129785293 * width, y: 0), control1: CGPoint(x: 0.0000000247 * width, y: 0.1070872608 * height), control2: CGPoint(x: 0.0483242116 * width, y: 0))
         path.addLine(to: CGPoint(x: 0.7966607881 * width, y: 0))
         path.closeSubpath()
         return path
