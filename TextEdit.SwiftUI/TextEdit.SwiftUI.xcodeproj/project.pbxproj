@@ -137,6 +137,9 @@
 			);
 			mainGroup = 7544422E27B9332E00901C0E;
 			productRefGroup = 7544423827B9332E00901C0E /* Products */;
+			packageReferences = (
+				758265CC2AB31F2900D5EFB5 /* XCLocalSwiftPackageReference ".." */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -380,9 +383,17 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		758265CC2AB31F2900D5EFB5 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		7582A1FB2A07096F00F8AB20 /* STTextView */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 758265CC2AB31F2900D5EFB5 /* XCLocalSwiftPackageReference ".." */;
 			productName = STTextView;
 		};
 /* End XCSwiftPackageProductDependency section */
