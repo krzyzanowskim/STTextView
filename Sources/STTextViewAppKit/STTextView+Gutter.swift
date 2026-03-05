@@ -48,14 +48,16 @@ extension STTextView {
     }
 
     func layoutGutter() {
-        guard let gutterView, textLayoutManager.textViewportLayoutController.viewportRange != nil else {
-            return
+        // Layout built-in gutter (line numbers + markers)
+        if let gutterView, textLayoutManager.textViewportLayoutController.viewportRange != nil {
+            gutterView.frame.size.height = contentView.bounds.height
+
+            layoutGutterLineNumbers()
+            layoutGutterMarkers()
         }
 
-        gutterView.frame.size.height = contentView.bounds.height
-
-        layoutGutterLineNumbers()
-        layoutGutterMarkers()
+        // Layout custom gutter line views (independent of built-in gutter)
+        layoutCustomGutterLineViews()
     }
 
 
@@ -227,5 +229,165 @@ extension STTextView {
         }
 
         gutterView.layoutMarkers()
+    }
+
+    // MARK: - Custom Gutter Line Views
+
+    /// Positions custom gutter line views provided by ``gutterLineViewProvider``.
+    /// Creates the container view lazily as a floating subview, then enumerates
+    /// visible lines to create and position one NSView per paragraph.
+    private func layoutCustomGutterLineViews() {
+        guard let provider = gutterLineViewProvider, customGutterWidth > 0 else {
+            return
+        }
+
+        // Lazy container setup — added as floating subview so it stays
+        // at a fixed horizontal position while scrolling vertically with content.
+        if customGutterContainerView == nil {
+            let container = STCustomGutterContainerView()
+            container.frame = NSRect(x: 0, y: 0, width: customGutterWidth, height: contentView.bounds.height)
+            if let enclosingScrollView {
+                enclosingScrollView.addFloatingSubview(container, for: .horizontal)
+            } else {
+                addSubview(container)
+            }
+            customGutterContainerView = container
+        }
+
+        guard let container = customGutterContainerView else { return }
+
+        // Update container dimensions and background
+        container.frame.size.width = customGutterWidth
+        container.frame.size.height = contentView.bounds.height
+        container.layer?.backgroundColor = customGutterBackgroundColor?.cgColor
+
+        // Remove old line views (and separator — it gets re-added at the end)
+        container.subviews.forEach { $0.removeFromSuperviewWithoutNeedingDisplay() }
+
+        // Empty document — show a single view for line 1
+        if textLayoutManager.documentRange.isEmpty {
+            if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
+                let lineView = provider(1, "")
+                lineView.frame = CGRect(
+                    origin: CGPoint(x: 0, y: selectionFrame.origin.y),
+                    size: CGSize(width: customGutterWidth, height: typingLineHeight)
+                ).pixelAligned
+                container.addSubview(lineView)
+            }
+            return
+        }
+
+        guard let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
+            return
+        }
+
+        let visibleFragmentViews = STGutterCalculations.visibleFragmentViewsInViewport(
+            fragmentViewMap: fragmentViewMap,
+            viewportRange: viewportRange
+        )
+
+        guard !visibleFragmentViews.isEmpty else {
+            return
+        }
+
+        // Count paragraphs before the viewport to determine starting line number
+        let textElementsBeforeViewport = textContentManager.textElements(
+            for: NSTextRange(
+                location: textLayoutManager.documentRange.location,
+                end: viewportRange.location
+            )!
+        )
+
+        let startLineIndex = textElementsBeforeViewport.count
+        var linesCount = 0
+
+        for (layoutFragment, fragmentView) in visibleFragmentViews {
+            // One custom view per paragraph (first text line fragment or extra line fragment)
+            for textLineFragment in layoutFragment.textLineFragments where (textLineFragment.isExtraLineFragment || layoutFragment.textLineFragments.first == textLineFragment) {
+                let lineNumber = startLineIndex + linesCount + 1
+
+                // Calculate the cell frame for this line (same positioning as line number cells)
+                let (_, _, cellFrame) = STGutterCalculations.calculateLineNumberMetrics(
+                    for: textLineFragment,
+                    in: layoutFragment,
+                    fragmentViewFrame: fragmentView.frame
+                )
+
+                // Extract the paragraph text content, trimming the trailing newline
+                let lineContent: String
+                if let paragraph = layoutFragment.textElement as? NSTextParagraph {
+                    var text = paragraph.attributedString.string
+                    if text.hasSuffix("\n") {
+                        text = String(text.dropLast())
+                    }
+                    lineContent = text
+                } else {
+                    lineContent = ""
+                }
+
+                let lineView = provider(lineNumber, lineContent)
+                lineView.frame = CGRect(
+                    origin: CGPoint(x: 0, y: cellFrame.origin.y),
+                    size: CGSize(width: customGutterWidth, height: cellFrame.size.height)
+                ).pixelAligned
+                container.addSubview(lineView)
+
+                linesCount += 1
+            }
+        }
+
+        // Draw trailing separator on top of all line views
+        addCustomGutterSeparator(to: container)
+    }
+
+    /// Adds a vertical separator line on the trailing edge of the custom gutter container.
+    private func addCustomGutterSeparator(to container: NSView) {
+        guard let separatorColor = customGutterSeparatorColor, customGutterSeparatorWidth > 0 else {
+            return
+        }
+
+        let separator = NSView(frame: CGRect(
+            x: customGutterWidth - customGutterSeparatorWidth,
+            y: 0,
+            width: customGutterSeparatorWidth,
+            height: container.bounds.height
+        ))
+        separator.wantsLayer = true
+        separator.layer?.backgroundColor = separatorColor.cgColor
+        container.addSubview(separator)
+    }
+}
+
+// MARK: - Custom Gutter Container
+
+/// Flipped container view for custom gutter line views.
+/// Uses flipped coordinates (top-to-bottom) to match document layout.
+private class STCustomGutterContainerView: NSView {
+
+    override var isFlipped: Bool {
+        true
+    }
+
+    override var isOpaque: Bool {
+        false
+    }
+
+    override func makeBackingLayer() -> CALayer {
+        CATiledLayer()
+    }
+
+    override func animation(forKey key: NSAnimatablePropertyKey) -> Any? {
+        nil
+    }
+
+    init() {
+        super.init(frame: .zero)
+        wantsLayer = true
+        clipsToBounds = true
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

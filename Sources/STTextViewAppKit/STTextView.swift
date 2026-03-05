@@ -378,6 +378,59 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Gutter view
     public var gutterView: STGutterView?
 
+    /// Width of the custom gutter area. When greater than 0, ``contentView.frame.origin.x``
+    /// is offset by this amount, allowing custom gutter content without the built-in ``STGutterView``.
+    ///
+    /// Use together with ``gutterLineViewProvider`` to supply a custom NSView per visible line.
+    /// When the built-in ``gutterView`` is present, its width takes precedence.
+    open var customGutterWidth: CGFloat = 0 {
+        didSet {
+            if customGutterWidth <= 0 {
+                customGutterContainerView?.removeFromSuperview()
+                customGutterContainerView = nil
+            }
+            needsLayout = true
+        }
+    }
+
+    /// Provider for custom gutter line views. Called with `(lineNumber, lineContent)` for each
+    /// visible line during layout. The returned view is positioned to fill the full line height
+    /// (including spacing) in the custom gutter area.
+    ///
+    /// Set ``customGutterWidth`` to reserve space for the gutter.
+    open var gutterLineViewProvider: ((Int, String) -> NSView)? {
+        didSet {
+            if gutterLineViewProvider == nil {
+                customGutterContainerView?.removeFromSuperview()
+                customGutterContainerView = nil
+            }
+            needsLayout = true
+        }
+    }
+
+    /// Container view for custom gutter line views (created lazily during layout).
+    /// Access this after the first layout pass to apply additional styling.
+    public internal(set) var customGutterContainerView: NSView?
+
+    /// Background color for the custom gutter area.
+    /// Applied to the container view's backing layer.
+    open var customGutterBackgroundColor: NSColor? {
+        didSet {
+            customGutterContainerView?.layer?.backgroundColor = customGutterBackgroundColor?.cgColor
+        }
+    }
+
+    /// Color of the vertical separator drawn on the trailing edge of the custom gutter.
+    /// Set to `nil` to hide the separator.
+    open var customGutterSeparatorColor: NSColor? {
+        didSet { needsLayout = true }
+    }
+
+    /// Width of the trailing separator line. Default 2.
+    open var customGutterSeparatorWidth: CGFloat = 2 {
+        didSet { needsLayout = true }
+    }
+
     /// The highlight color of the selected line.
     ///
     /// Note: Needs ``highlightSelectedLine`` to be set to `true`
@@ -1478,8 +1531,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     override open func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
 
-        // contentView should always fill the entire STTextView
-        contentView.frame.origin.x = gutterView?.frame.width ?? 0
+        // contentView should always fill the entire STTextView.
+        // Built-in gutterView width takes precedence; fall back to customGutterWidth
+        // so that custom gutter views can offset the content without enabling showsLineNumbers.
+        contentView.frame.origin.x = gutterView?.frame.width ?? customGutterWidth
         contentView.frame.size = newSize
 
         updateTextContainerSize(proposedSize: newSize)
@@ -1491,7 +1546,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     func updateContentSizeIfNeeded() {
-        let gutterWidth = gutterView?.frame.width ?? 0
+        let gutterWidth = gutterView?.frame.width ?? customGutterWidth
         let scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
 
         var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size

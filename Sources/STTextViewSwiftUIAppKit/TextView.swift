@@ -19,6 +19,11 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     @Binding private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
+    private let gutterWidth: CGFloat
+    private let gutterLineViewFactory: ((Int, String) -> NSView)?
+    private let gutterBackgroundColor: NSColor?
+    private let gutterSeparatorColor: NSColor?
+    private let gutterSeparatorWidth: CGFloat
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
@@ -36,6 +41,52 @@ public struct TextView: SwiftUI.View, TextViewModifier {
         _selection = selection
         self.options = options
         self.plugins = plugins
+        self.gutterWidth = 0
+        self.gutterLineViewFactory = nil
+        self.gutterBackgroundColor = nil
+        self.gutterSeparatorColor = nil
+        self.gutterSeparatorWidth = 0
+    }
+
+    /// Create a text edit view with a custom gutter that displays a SwiftUI view per line.
+    ///
+    /// Each visible line in the editor gets its own gutter view, positioned to fill the
+    /// full line height (including spacing). The view builder receives the 1-based line
+    /// number and the text content of that line.
+    ///
+    /// - Parameters:
+    ///   - text: The attributed string content
+    ///   - selection: The current selection range
+    ///   - options: Editor options
+    ///   - plugins: Editor plugins
+    ///   - gutterWidth: Width reserved for the custom gutter area (in points)
+    ///   - gutterBackgroundColor: Background color for the gutter container (optional)
+    ///   - gutterSeparatorColor: Color of the trailing vertical separator (optional, nil hides it)
+    ///   - gutterSeparatorWidth: Width of the trailing separator in points (default 2)
+    ///   - gutterContent: A view builder called with `(lineNumber, lineContent)` for each visible line
+    public init<GutterContent: View>(
+        text: Binding<AttributedString>,
+        selection: Binding<NSRange?> = .constant(nil),
+        options: Options = [],
+        plugins: [any STPlugin] = [],
+        gutterWidth: CGFloat,
+        gutterBackgroundColor: NSColor? = nil,
+        gutterSeparatorColor: NSColor? = nil,
+        gutterSeparatorWidth: CGFloat = 2,
+        @ViewBuilder gutterContent: @escaping (_ lineNumber: Int, _ lineContent: String) -> GutterContent
+    ) {
+        _text = text
+        _selection = selection
+        self.options = options
+        self.plugins = plugins
+        self.gutterWidth = gutterWidth
+        self.gutterBackgroundColor = gutterBackgroundColor
+        self.gutterSeparatorColor = gutterSeparatorColor
+        self.gutterSeparatorWidth = gutterSeparatorWidth
+        self.gutterLineViewFactory = { lineNumber, lineContent in
+            let hostingView = NSHostingView(rootView: gutterContent(lineNumber, lineContent))
+            return hostingView
+        }
     }
 
     public var body: some View {
@@ -43,7 +94,12 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             text: $text,
             selection: $selection,
             options: options,
-            plugins: plugins
+            plugins: plugins,
+            gutterWidth: gutterWidth,
+            gutterLineViewFactory: gutterLineViewFactory,
+            gutterBackgroundColor: gutterBackgroundColor,
+            gutterSeparatorColor: gutterSeparatorColor,
+            gutterSeparatorWidth: gutterSeparatorWidth
         )
         .background(.background)
     }
@@ -67,12 +123,22 @@ private struct TextViewRepresentable: NSViewRepresentable {
     private var selection: NSRange?
     private let options: TextView.Options
     private var plugins: [any STPlugin]
+    let gutterWidth: CGFloat
+    let gutterLineViewFactory: ((Int, String) -> NSView)?
+    let gutterBackgroundColor: NSColor?
+    let gutterSeparatorColor: NSColor?
+    let gutterSeparatorWidth: CGFloat
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = []) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], gutterWidth: CGFloat = 0, gutterLineViewFactory: ((Int, String) -> NSView)? = nil, gutterBackgroundColor: NSColor? = nil, gutterSeparatorColor: NSColor? = nil, gutterSeparatorWidth: CGFloat = 0) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
+        self.gutterWidth = gutterWidth
+        self.gutterLineViewFactory = gutterLineViewFactory
+        self.gutterBackgroundColor = gutterBackgroundColor
+        self.gutterSeparatorColor = gutterSeparatorColor
+        self.gutterSeparatorWidth = gutterSeparatorWidth
     }
 
     func makeNSView(context: Context) -> NSScrollView {
@@ -106,6 +172,15 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.gutterView?.textColor = .secondaryLabelColor
         }
 
+        // Configure custom gutter if provided
+        if gutterWidth > 0 {
+            textView.customGutterWidth = gutterWidth
+            textView.gutterLineViewProvider = gutterLineViewFactory
+            textView.customGutterBackgroundColor = gutterBackgroundColor
+            textView.customGutterSeparatorColor = gutterSeparatorColor
+            textView.customGutterSeparatorWidth = gutterSeparatorWidth
+        }
+
         context.coordinator.isUpdating = true
         textView.attributedText = NSAttributedString(styledAttributedString(textView.typingAttributes))
         context.coordinator.isUpdating = false
@@ -121,7 +196,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
         return scrollView
     }
-    
+
     func sizeThatFits(_ proposal: ProposedViewSize, nsView: NSScrollView, context: Context) -> CGSize? {
         let width = proposal.width ?? nsView.frame.size.width
         let height = proposal.height ?? nsView.frame.size.height
@@ -170,6 +245,17 @@ private struct TextViewRepresentable: NSViewRepresentable {
                 textView.gutterView?.font = textView.font
                 textView.gutterView?.textColor = .secondaryLabelColor
             }
+        }
+
+        // Update custom gutter — the factory may capture new SwiftUI state
+        if gutterWidth > 0 {
+            if textView.customGutterWidth != gutterWidth {
+                textView.customGutterWidth = gutterWidth
+            }
+            textView.gutterLineViewProvider = gutterLineViewFactory
+            textView.customGutterBackgroundColor = gutterBackgroundColor
+            textView.customGutterSeparatorColor = gutterSeparatorColor
+            textView.customGutterSeparatorWidth = gutterSeparatorWidth
         }
 
         textView.needsLayout = true
@@ -226,4 +312,3 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
     }
 }
-
