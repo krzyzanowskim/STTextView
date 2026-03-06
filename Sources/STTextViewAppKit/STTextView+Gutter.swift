@@ -462,6 +462,18 @@ private class STCustomGutterContainerView: NSView {
         nil
     }
 
+    override func mouseDown(with event: NSEvent) {
+        // Consume — prevent click-through to the editor.
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        // Consume — prevent drag-selection in the editor.
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        // Consume.
+    }
+
     override func layout() {
         super.layout()
 
