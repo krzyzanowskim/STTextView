@@ -239,13 +239,11 @@ extension STTextView {
     /// Identifier for the trailing separator view inside the custom gutter container.
     private static let gutterSeparatorID = NSUserInterfaceItemIdentifier("stgutter-separator")
 
-    /// Positions custom gutter line views provided by ``gutterLineViewProvider``.
+    /// Positions custom gutter line views provided by ``gutterLineViewDataSource``.
     /// Creates the container view lazily as a floating subview, then enumerates
     /// visible lines to create and position one NSView per paragraph.
     ///
-    /// Views are cached by line number (via `tag`) and reused across layout passes
-    /// so that interactive SwiftUI content (buttons, gestures) inside NSHostingViews
-    /// keeps working. Views are only recreated when the line's content or state changes.
+    /// Views are recreated on each layout pass to pick up fresh state.
     private func layoutCustomGutterLineViews() {
         guard let dataSource = gutterLineViewDataSource, customGutterWidth > 0 else {
             return

@@ -1021,7 +1021,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     override open var intrinsicContentSize: NSSize {
         // usageBoundsForTextContainer already includes lineFragmentPadding via STTextLayoutManager workaround
         let textSize = textLayoutManager.usageBoundsForTextContainer.size
-        let gutterWidth = gutterView?.frame.width ?? 0
+        let gutterWidth = gutterView?.frame.width ?? customGutterWidth
 
         return NSSize(
             width: textSize.width + gutterWidth,
@@ -1447,7 +1447,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             return
         }
 
-        let gutterWidth = gutterView?.frame.width ?? 0
+        let gutterWidth = gutterView?.frame.width ?? customGutterWidth
         let scrollerInset = proposedSize == nil ? (scrollView?.contentView.contentInsets.right ?? 0) : 0
         let referenceSize = proposedSize ?? effectiveVisibleRect.size
 
@@ -1510,7 +1510,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             return false
         }
 
-        let gutterWidth = gutterView?.frame.width ?? 0
+        let gutterWidth = gutterView?.frame.width ?? customGutterWidth
         var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
         newFrame.size.width += gutterWidth
 

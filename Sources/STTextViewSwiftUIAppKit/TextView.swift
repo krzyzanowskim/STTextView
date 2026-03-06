@@ -164,7 +164,7 @@ extension EnvironmentValues {
     }
 }
 
-public extension TextViewModifier {
+public extension TextViewWithGutter {
 
     /// Sets the background color for the custom gutter area.
     func gutterBackground(_ color: NSColor?) -> TextViewEnvironmentModifier<Self, NSColor?> {
@@ -361,6 +361,13 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.customGutterBackgroundColor = gutterBackgroundColor
             textView.customGutterSeparatorColor = gutterSeparatorColor
             textView.customGutterSeparatorWidth = gutterSeparatorWidth
+        } else if textView.customGutterWidth > 0 {
+            // Gutter was previously configured but is now disabled — clean up
+            textView.customGutterWidth = 0
+            textView.gutterLineViewDataSource = nil
+            context.coordinator.gutterDataSourceAdapter = nil
+            textView.customGutterBackgroundColor = nil
+            textView.customGutterSeparatorColor = nil
         }
 
         textView.needsLayout = true
