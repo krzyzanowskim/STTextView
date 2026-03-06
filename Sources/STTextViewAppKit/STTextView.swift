@@ -381,7 +381,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Width of the custom gutter area. When greater than 0, ``contentView.frame.origin.x``
     /// is offset by this amount, allowing custom gutter content without the built-in ``STGutterView``.
     ///
-    /// Use together with ``gutterLineViewProvider`` to supply a custom NSView per visible line.
+    /// Use together with ``gutterLineViewDataSource`` to supply a custom NSView per visible line.
     /// When the built-in ``gutterView`` is present, its width takes precedence.
     open var customGutterWidth: CGFloat = 0 {
         didSet {
