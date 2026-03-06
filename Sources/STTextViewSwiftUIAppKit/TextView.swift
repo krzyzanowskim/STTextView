@@ -164,7 +164,7 @@ extension EnvironmentValues {
     }
 }
 
-public extension TextViewWithGutter {
+public extension TextViewModifier {
 
     /// Sets the background color for the custom gutter area.
     func gutterBackground(_ color: NSColor?) -> TextViewEnvironmentModifier<Self, NSColor?> {
