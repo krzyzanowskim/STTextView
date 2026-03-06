@@ -38,7 +38,7 @@ open class STGutterView: NSView, NSDraggingSource {
     private var _didMouseDownAddMarker = false
 
     /// Delegate
-    weak var delegate: (any STGutterViewDelegate)?
+    public weak var delegate: (any STGutterViewDelegate)?
 
     /// The font used to draw line numbers.
     ///

@@ -393,14 +393,15 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
     }
 
-    /// Provider for custom gutter line views. Called with `(lineNumber, lineContent)` for each
-    /// visible line during layout. The returned view is positioned to fill the full line height
-    /// (including spacing) in the custom gutter area.
+    /// A data source that provides custom views for each visible line in the gutter area.
     ///
-    /// Set ``customGutterWidth`` to reserve space for the gutter.
-    open var gutterLineViewProvider: ((Int, String) -> NSView)? {
+    /// The data source is queried during layout for every line currently in the viewport.
+    /// Set ``customGutterWidth`` to reserve horizontal space for the gutter.
+    ///
+    /// - SeeAlso: ``STGutterLineViewDataSource``
+    open weak var gutterLineViewDataSource: (any STGutterLineViewDataSource)? {
         didSet {
-            if gutterLineViewProvider == nil {
+            if gutterLineViewDataSource == nil {
                 customGutterContainerView?.removeFromSuperview()
                 customGutterContainerView = nil
             }

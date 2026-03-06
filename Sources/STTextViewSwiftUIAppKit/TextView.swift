@@ -184,6 +184,22 @@ public extension TextViewModifier {
     }
 }
 
+// MARK: - Gutter Data Source Adapter
+
+/// Bridges a closure-based view factory to the ``STGutterLineViewDataSource`` protocol.
+/// Stored on the SwiftUI coordinator so it stays alive while the text view holds a weak reference.
+private class GutterLineViewDataSourceAdapter: STGutterLineViewDataSource {
+    var factory: (Int, String) -> NSView
+
+    init(factory: @escaping (Int, String) -> NSView) {
+        self.factory = factory
+    }
+
+    func textView(_ textView: STTextView, viewForGutterLine lineNumber: Int, content: String) -> NSView {
+        factory(lineNumber, content)
+    }
+}
+
 // MARK: - NSViewRepresentable
 
 private struct TextViewRepresentable: NSViewRepresentable {
@@ -254,9 +270,11 @@ private struct TextViewRepresentable: NSViewRepresentable {
         }
 
         // Configure custom gutter if provided
-        if gutterWidth > 0 {
+        if gutterWidth > 0, let factory = gutterLineViewFactory {
             textView.customGutterWidth = gutterWidth
-            textView.gutterLineViewProvider = gutterLineViewFactory
+            let adapter = GutterLineViewDataSourceAdapter(factory: factory)
+            context.coordinator.gutterDataSourceAdapter = adapter
+            textView.gutterLineViewDataSource = adapter
             textView.customGutterBackgroundColor = gutterBackgroundColor
             textView.customGutterSeparatorColor = gutterSeparatorColor
             textView.customGutterSeparatorWidth = gutterSeparatorWidth
@@ -329,11 +347,17 @@ private struct TextViewRepresentable: NSViewRepresentable {
         }
 
         // Update custom gutter — the factory may capture new SwiftUI state
-        if gutterWidth > 0 {
+        if gutterWidth > 0, let factory = gutterLineViewFactory {
             if textView.customGutterWidth != gutterWidth {
                 textView.customGutterWidth = gutterWidth
             }
-            textView.gutterLineViewProvider = gutterLineViewFactory
+            if let adapter = context.coordinator.gutterDataSourceAdapter {
+                adapter.factory = factory
+            } else {
+                let adapter = GutterLineViewDataSourceAdapter(factory: factory)
+                context.coordinator.gutterDataSourceAdapter = adapter
+                textView.gutterLineViewDataSource = adapter
+            }
             textView.customGutterBackgroundColor = gutterBackgroundColor
             textView.customGutterSeparatorColor = gutterSeparatorColor
             textView.customGutterSeparatorWidth = gutterSeparatorWidth
@@ -369,6 +393,8 @@ private struct TextViewRepresentable: NSViewRepresentable {
         var isUpdating = false
         var isUserEditing = false
         var lastFont: NSFont?
+        /// Keeps the gutter data source adapter alive while the text view holds a weak reference.
+        var gutterDataSourceAdapter: GutterLineViewDataSourceAdapter?
 
         init(text: Binding<AttributedString>, selection: Binding<NSRange?>) {
             self._text = text

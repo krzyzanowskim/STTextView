@@ -247,7 +247,7 @@ extension STTextView {
     /// so that interactive SwiftUI content (buttons, gestures) inside NSHostingViews
     /// keeps working. Views are only recreated when the line's content or state changes.
     private func layoutCustomGutterLineViews() {
-        guard let provider = gutterLineViewProvider, customGutterWidth > 0 else {
+        guard let dataSource = gutterLineViewDataSource, customGutterWidth > 0 else {
             return
         }
 
@@ -280,7 +280,7 @@ extension STTextView {
                 let lineID = Self.gutterLineViewID(for: 1)
                 visibleIDs.insert(lineID)
 
-                let lineView = lineViewForID(lineID, in: container, provider: provider, lineNumber: 1, lineContent: "")
+                let lineView = lineViewForID(lineID, in: container, dataSource: dataSource, lineNumber: 1, lineContent: "")
                 lineView.frame = CGRect(
                     origin: CGPoint(x: 0, y: selectionFrame.origin.y),
                     size: CGSize(width: customGutterWidth, height: typingLineHeight)
@@ -334,7 +334,7 @@ extension STTextView {
                     lineContent = ""
                 }
 
-                let lineView = lineViewForID(lineID, in: container, provider: provider, lineNumber: lineNumber, lineContent: lineContent)
+                let lineView = lineViewForID(lineID, in: container, dataSource: dataSource, lineNumber: lineNumber, lineContent: lineContent)
 
                 // Size the line view to just the first visual line of this paragraph.
                 // fragmentView.frame.size.height spans the entire wrapped paragraph — using it
@@ -370,18 +370,43 @@ extension STTextView {
         addCustomGutterSeparator(to: container)
     }
 
+    // MARK: - Custom Gutter Reload
+
+    /// Reloads all visible custom gutter line views by re-querying the data source.
+    ///
+    /// This is lighter-weight than setting `needsLayout = true` on the text view,
+    /// because it only re-runs the custom gutter layout without affecting text layout.
+    public func reloadGutterLineViews() {
+        layoutCustomGutterLineViews()
+    }
+
+    /// Reloads the custom gutter line view for a specific line number.
+    ///
+    /// If the line is not currently visible in the viewport, this is a no-op.
+    /// - Parameter lineNumber: The 1-based line number to reload.
+    public func reloadGutterLineView(at lineNumber: Int) {
+        guard let container = customGutterContainerView else { return }
+        let lineID = Self.gutterLineViewID(for: lineNumber)
+        if let existing = container.subviews.first(where: { $0.identifier == lineID }) {
+            existing.removeFromSuperviewWithoutNeedingDisplay()
+        }
+        // Re-run full custom gutter layout to position the replacement view correctly
+        // (we need fragment positions which are only available during layout enumeration)
+        layoutCustomGutterLineViews()
+    }
+
     /// Creates an identifier for a custom gutter line view at the given line number.
     private static func gutterLineViewID(for lineNumber: Int) -> NSUserInterfaceItemIdentifier {
         NSUserInterfaceItemIdentifier(gutterLineViewIDPrefix + "\(lineNumber)")
     }
 
     /// Returns (or creates) a gutter line view for the given identifier.
-    /// Always recreates the view from the provider to pick up captured SwiftUI state,
+    /// Always recreates the view from the data source to pick up captured SwiftUI state,
     /// but adds to the container first so the NSHostingView has a window before layout.
     private func lineViewForID(
         _ id: NSUserInterfaceItemIdentifier,
         in container: NSView,
-        provider: (Int, String) -> NSView,
+        dataSource: any STGutterLineViewDataSource,
         lineNumber: Int,
         lineContent: String
     ) -> NSView {
@@ -390,7 +415,7 @@ extension STTextView {
             existing.removeFromSuperviewWithoutNeedingDisplay()
         }
 
-        let lineView = provider(lineNumber, lineContent)
+        let lineView = dataSource.textView(self, viewForGutterLine: lineNumber, content: lineContent)
         lineView.identifier = id
 
         // Allow content (e.g. breakpoint badges) to extend beyond the
