@@ -334,10 +334,9 @@ extension STTextView {
 
                 let lineView = lineViewForID(lineID, in: container, dataSource: dataSource, lineNumber: lineNumber, lineContent: lineContent)
 
-                // Size the line view to just the first visual line of this paragraph.
-                // fragmentView.frame.size.height spans the entire wrapped paragraph — using it
-                // causes NSHostingView content to render at the bottom of a tall frame rather
-                // than the top, because NSHostingView is non-flipped inside our flipped container.
+                // Use the full fragment view height so the gutter line view spans the
+                // entire visual line including lineSpacing. For wrapped paragraphs this
+                // covers all wrapped lines — acceptable since we show one label per paragraph.
                 // For extra line fragments, typographicBounds.height may be invalid (FB15131180);
                 // fall back to the previous line fragment's height or typingLineHeight.
                 let lineHeight: CGFloat
@@ -349,7 +348,7 @@ extension STTextView {
                         lineHeight = typingLineHeight
                     }
                 } else {
-                    lineHeight = textLineFragment.typographicBounds.height
+                    lineHeight = fragmentView.frame.size.height
                 }
 
                 lineView.frame = CGRect(
