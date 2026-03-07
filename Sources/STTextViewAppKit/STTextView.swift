@@ -378,6 +378,19 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Gutter view
     public var gutterView: STGutterView?
 
+    /// Fraction of the visible viewport height added as extra scrollable space below the last line.
+    ///
+    /// For example, `0.5` allows the last line to scroll up to the vertical midpoint of the editor
+    /// (half-page overscroll). Set to `0` (the default) to disable overscroll.
+    ///
+    /// The extra space is only appended when the text content already overflows the viewport,
+    /// so short documents that fit entirely on screen are not affected and show no scrollbar.
+    open var overscrollFraction: CGFloat = 0 {
+        didSet {
+            updateContentSizeIfNeeded()
+        }
+    }
+
     /// Width of the custom gutter area. When greater than 0, ``contentView.frame.origin.x``
     /// is offset by this amount, allowing custom gutter content without the built-in ``STGutterView``.
     ///
@@ -1576,6 +1589,16 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         if let scrollView {
             estimatedSize.width = max(estimatedSize.width, scrollView.contentView.bounds.width - scrollerInset)
+        }
+
+        // Apply overscroll: extend document height so the last line can scroll
+        // up to `overscrollFraction` of the viewport height from the top.
+        // Only when text already overflows the viewport — short documents are unaffected.
+        if isVerticallyResizable, overscrollFraction > 0, let scrollView {
+            let viewportHeight = scrollView.contentView.bounds.height
+            if estimatedSize.height > viewportHeight {
+                estimatedSize.height += viewportHeight * overscrollFraction
+            }
         }
 
         let newFrame = backingAlignedRect(

@@ -79,6 +79,7 @@ struct ContentView: View {
             selection: $selection,
             options: options
         )
+        .overscrollFraction(0.5)
         .textViewFont(font)
     }
 
@@ -102,6 +103,7 @@ struct ContentView: View {
         )
         .gutterBackground(NSColor(srgbRed: 0.992, green: 0.984, blue: 0.969, alpha: 1))
         .gutterSeparator(color: NSColor(srgbRed: 0.75, green: 0.75, blue: 0.75, alpha: 0.5), width: 2)
+        .overscrollFraction(0.5)
         .textViewFont(font)
     }
 

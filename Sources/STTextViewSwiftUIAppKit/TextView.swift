@@ -130,6 +130,34 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
     }
 }
 
+// MARK: - Overscroll
+
+/// Environment key for overscroll fraction (fraction of viewport height added below last line).
+private struct OverscrollFractionKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
+extension EnvironmentValues {
+    /// Fraction of the viewport height to add as overscroll below the last text line.
+    /// `0.5` = half-page overscroll. `0` (default) disables overscroll.
+    var overscrollFraction: CGFloat {
+        get { self[OverscrollFractionKey.self] }
+        set { self[OverscrollFractionKey.self] = newValue }
+    }
+}
+
+public extension TextViewModifier {
+
+    /// Adds overscroll space below the last line of text.
+    ///
+    /// The `fraction` is relative to the visible viewport height — `0.5` allows the last
+    /// line to scroll up to the vertical midpoint of the editor. Overscroll only activates
+    /// when content already overflows the viewport, so short documents show no scrollbar.
+    func overscrollFraction(_ fraction: CGFloat) -> TextViewEnvironmentModifier<Self, CGFloat> {
+        TextViewEnvironmentModifier(content: self, keyPath: \.overscrollFraction, value: fraction)
+    }
+}
+
 // MARK: - Gutter Style Modifiers
 
 /// Environment key for custom gutter background color.
@@ -213,6 +241,8 @@ private struct TextViewRepresentable: NSViewRepresentable {
     private var lineHeightMultiple
     @Environment(\.autocorrectionDisabled)
     private var autocorrectionDisabled
+    @Environment(\.overscrollFraction)
+    private var overscrollFraction
 
     @Binding
     private var text: AttributedString
@@ -244,6 +274,11 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.textDelegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
         textView.isHorizontallyResizable = !options.contains(.wrapLines)
+        if options.contains(.wrapLines) {
+            // Wrapping lines means horizontal scrolling is never needed.
+            scrollView.hasHorizontalScroller = false
+        }
+        textView.overscrollFraction = overscrollFraction
         textView.showsLineNumbers = options.contains(.showLineNumbers)
         textView.textSelection = NSRange()
 
@@ -336,6 +371,10 @@ private struct TextViewRepresentable: NSViewRepresentable {
 
         if options.contains(.wrapLines) == textView.isHorizontallyResizable {
             textView.isHorizontallyResizable = !options.contains(.wrapLines)
+        }
+
+        if textView.overscrollFraction != overscrollFraction {
+            textView.overscrollFraction = overscrollFraction
         }
 
         if textView.showsLineNumbers != options.contains(.showLineNumbers) {
