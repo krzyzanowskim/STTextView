@@ -255,6 +255,9 @@ extension STTextView {
             let container = STCustomGutterContainerView()
             container.frame = NSRect(x: 0, y: 0, width: customGutterWidth, height: contentView.bounds.height)
             if let enclosingScrollView {
+                // Clip floating subviews at the scroll view bounds so the gutter
+                // doesn't render outside the visible editor area.
+                enclosingScrollView.clipsToBounds = true
                 enclosingScrollView.addFloatingSubview(container, for: .horizontal)
             } else {
                 addSubview(container)
