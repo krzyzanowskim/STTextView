@@ -212,6 +212,51 @@ public extension TextViewModifier {
     }
 }
 
+// MARK: - Scroll Restoration & Observation
+
+/// Environment key for one-shot scroll offset restoration.
+/// When non-nil, the scroll view scrolls to this Y offset on the next update,
+/// then the value is consumed (ignored on subsequent updates until it changes).
+private struct ScrollRestorationOffsetKey: EnvironmentKey {
+    static let defaultValue: CGFloat? = nil
+}
+
+/// Environment key for continuous scroll offset change reporting.
+/// The closure is called whenever the user scrolls (or the content scrolls programmatically).
+private struct ScrollOffsetChangeHandlerKey: EnvironmentKey {
+    nonisolated(unsafe) static let defaultValue: (@MainActor (CGFloat) -> Void)? = nil
+}
+
+extension EnvironmentValues {
+    var scrollRestorationOffset: CGFloat? {
+        get { self[ScrollRestorationOffsetKey.self] }
+        set { self[ScrollRestorationOffsetKey.self] = newValue }
+    }
+
+    var scrollOffsetChangeHandler: (@MainActor (CGFloat) -> Void)? {
+        get { self[ScrollOffsetChangeHandlerKey.self] }
+        set { self[ScrollOffsetChangeHandlerKey.self] = newValue }
+    }
+}
+
+public extension TextViewModifier {
+
+    /// Restores the scroll position to the given Y offset.
+    ///
+    /// The offset is applied once when it transitions from `nil` to a value.
+    /// Set to `nil` after the view appears, then set to the saved offset to trigger restoration.
+    func scrollRestoration(offset: CGFloat?) -> TextViewEnvironmentModifier<Self, CGFloat?> {
+        TextViewEnvironmentModifier(content: self, keyPath: \.scrollRestorationOffset, value: offset)
+    }
+
+    /// Reports scroll offset changes as the user scrolls.
+    ///
+    /// The handler receives the `contentView.bounds.origin.y` value of the scroll view's clip view.
+    func onScrollOffsetChange(_ handler: @escaping @MainActor (CGFloat) -> Void) -> TextViewEnvironmentModifier<Self, (@MainActor (CGFloat) -> Void)?> {
+        TextViewEnvironmentModifier(content: self, keyPath: \.scrollOffsetChangeHandler, value: handler)
+    }
+}
+
 // MARK: - Gutter Data Source Adapter
 
 /// Bridges a closure-based view factory to the ``STGutterLineViewDataSource`` protocol.
@@ -243,6 +288,10 @@ private struct TextViewRepresentable: NSViewRepresentable {
     private var autocorrectionDisabled
     @Environment(\.overscrollFraction)
     private var overscrollFraction
+    @Environment(\.scrollRestorationOffset)
+    private var scrollRestorationOffset
+    @Environment(\.scrollOffsetChangeHandler)
+    private var scrollOffsetChangeHandler
 
     @Binding
     private var text: AttributedString
@@ -328,6 +377,23 @@ private struct TextViewRepresentable: NSViewRepresentable {
         textView.isEditable = isEnabled
         textView.isSelectable = isEnabled
 
+        // Observe scroll position changes via the clip view's bounds notifications.
+        scrollView.contentView.postsBoundsChangedNotifications = true
+        context.coordinator.scrollObserver = NotificationCenter.default.addObserver(
+            forName: NSView.boundsDidChangeNotification,
+            object: scrollView.contentView,
+            queue: .main
+        ) { [weak scrollView, weak coordinator = context.coordinator] _ in
+            guard let scrollView, let coordinator else { return }
+            let offset = scrollView.contentView.bounds.origin.y
+            MainActor.assumeIsolated {
+                coordinator.scrollOffsetChangeHandler?(offset)
+            }
+        }
+
+        // Store initial scroll offset change handler
+        context.coordinator.scrollOffsetChangeHandler = scrollOffsetChangeHandler
+
         return scrollView
     }
 
@@ -409,6 +475,22 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.customGutterSeparatorColor = nil
         }
 
+        // Keep scroll offset change handler up to date
+        context.coordinator.scrollOffsetChangeHandler = scrollOffsetChangeHandler
+
+        // Apply one-shot scroll restoration when the offset changes
+        if let offset = scrollRestorationOffset, offset != context.coordinator.lastRestoredScrollOffset {
+            context.coordinator.lastRestoredScrollOffset = offset
+            // Defer scroll to after layout completes so the text view has its final size.
+            DispatchQueue.main.async {
+                scrollView.contentView.scroll(to: NSPoint(x: 0, y: offset))
+                scrollView.reflectScrolledClipView(scrollView.contentView)
+            }
+        } else if scrollRestorationOffset == nil {
+            // Reset tracking so the next non-nil value triggers restoration
+            context.coordinator.lastRestoredScrollOffset = nil
+        }
+
         textView.needsLayout = true
         textView.needsDisplay = true
     }
@@ -441,10 +523,22 @@ private struct TextViewRepresentable: NSViewRepresentable {
         var lastFont: NSFont?
         /// Keeps the gutter data source adapter alive while the text view holds a weak reference.
         var gutterDataSourceAdapter: GutterLineViewDataSourceAdapter?
+        /// Scroll observation token for NSView.boundsDidChangeNotification.
+        var scrollObserver: (any NSObjectProtocol)?
+        /// Callback invoked when the scroll offset changes.
+        var scrollOffsetChangeHandler: (@MainActor (CGFloat) -> Void)?
+        /// Tracks the last restored scroll offset to avoid re-applying on every update.
+        var lastRestoredScrollOffset: CGFloat?
 
         init(text: Binding<AttributedString>, selection: Binding<NSRange?>) {
             self._text = text
             self._selection = selection
+        }
+
+        deinit {
+            if let scrollObserver {
+                NotificationCenter.default.removeObserver(scrollObserver)
+            }
         }
 
         func textViewDidChangeText(_ notification: Notification) {
