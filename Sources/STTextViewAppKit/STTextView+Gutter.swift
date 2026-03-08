@@ -334,12 +334,14 @@ extension STTextView {
 
                 let lineView = lineViewForID(lineID, in: container, dataSource: dataSource, lineNumber: lineNumber, lineContent: lineContent)
 
-                // Use the full fragment view height so the gutter line view spans the
-                // entire visual line including lineSpacing. For wrapped paragraphs this
-                // covers all wrapped lines — acceptable since we show one label per paragraph.
+                // Size the gutter line view to cover only the text-content area,
+                // excluding trailing lineSpacing. This ensures vertically-centered
+                // gutter labels align with the text baseline region instead of being
+                // pushed down by the lineSpacing gap below.
                 // For extra line fragments, typographicBounds.height may be invalid (FB15131180);
                 // fall back to the previous line fragment's height or typingLineHeight.
                 let lineHeight: CGFloat
+                let lineY: CGFloat
                 if textLineFragment.isExtraLineFragment {
                     if layoutFragment.textLineFragments.count >= 2 {
                         let prevLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
@@ -347,12 +349,25 @@ extension STTextView {
                     } else {
                         lineHeight = typingLineHeight
                     }
+                    lineY = fragmentView.frame.origin.y
                 } else {
-                    lineHeight = fragmentView.frame.size.height
+                    // Subtract the paragraph's lineSpacing so the gutter view height
+                    // matches the text content area. When lineSpacing is 0 (default),
+                    // this equals the full fragment view height.
+                    // Try the line fragment's own paragraph style first, then fall back
+                    // to the text view's defaultParagraphStyle (set via TypingStylePlugin
+                    // or similar). This handles lines whose attributed string was rebuilt
+                    // internally without preserving the original paragraph style.
+                    let fragmentLineSpacing = (textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle)?.lineSpacing
+                    let effectiveLineSpacing = fragmentLineSpacing ?? defaultParagraphStyle.lineSpacing
+                    lineHeight = fragmentView.frame.size.height - effectiveLineSpacing
+                    // Offset by typographicBounds.origin.y to match the built-in line
+                    // number positioning (accounts for any top padding in the fragment).
+                    lineY = fragmentView.frame.origin.y + textLineFragment.typographicBounds.origin.y
                 }
 
                 lineView.frame = CGRect(
-                    origin: CGPoint(x: 0, y: fragmentView.frame.origin.y),
+                    origin: CGPoint(x: 0, y: lineY),
                     size: CGSize(width: customGutterWidth, height: lineHeight)
                 ).pixelAligned
 
