@@ -253,7 +253,8 @@ extension STTextView {
         // at a fixed horizontal position while scrolling vertically with content.
         if customGutterContainerView == nil {
             let container = STCustomGutterContainerView()
-            container.frame = NSRect(x: 0, y: 0, width: customGutterWidth, height: contentView.bounds.height)
+            let initialViewportHeight = enclosingScrollView?.contentView.bounds.height ?? 0
+            container.frame = NSRect(x: 0, y: 0, width: customGutterWidth, height: max(contentView.bounds.height, initialViewportHeight))
             if let enclosingScrollView {
                 // Clip floating subviews at the scroll view bounds so the gutter
                 // doesn't render outside the visible editor area.
@@ -267,9 +268,12 @@ extension STTextView {
 
         guard let container = customGutterContainerView else { return }
 
-        // Update container dimensions and background
+        // Update container dimensions and background.
+        // Use at least the viewport height so the gutter fills the full visible area
+        // even when the document is shorter than the viewport.
+        let viewportHeight = enclosingScrollView?.contentView.bounds.height ?? 0
         container.frame.size.width = customGutterWidth
-        container.frame.size.height = contentView.bounds.height
+        container.frame.size.height = max(contentView.bounds.height, viewportHeight)
         container.layer?.backgroundColor = customGutterBackgroundColor?.cgColor
 
         // Track which line numbers are currently visible so we can prune stale views
@@ -354,18 +358,19 @@ extension STTextView {
                     }
                     lineY = fragmentView.frame.origin.y
                 } else {
-                    // Subtract the paragraph's lineSpacing so the gutter view height
-                    // matches the text content area. When lineSpacing is 0 (default),
-                    // this equals the full fragment view height.
-                    // Try the line fragment's own paragraph style first, then fall back
-                    // to the text view's defaultParagraphStyle (set via TypingStylePlugin
-                    // or similar). This handles lines whose attributed string was rebuilt
-                    // internally without preserving the original paragraph style.
-                    let fragmentLineSpacing = (textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle)?.lineSpacing
-                    let effectiveLineSpacing = fragmentLineSpacing ?? defaultParagraphStyle.lineSpacing
-                    lineHeight = fragmentView.frame.size.height - effectiveLineSpacing
-                    // Offset by typographicBounds.origin.y to match the built-in line
-                    // number positioning (accounts for any top padding in the fragment).
+                    // Use typographicBounds.height directly as the label height.
+                    // TextKit 2 prepends lineSpacing to the NEXT paragraph's fragment
+                    // (not appending to the current one), so the first paragraph's fragment
+                    // has height = textHeight only, while subsequent paragraphs have height
+                    // = lineSpacing + textHeight. Subtracting lineSpacing would give ~0pt
+                    // for the first line. typographicBounds.height = maximumLineHeight =
+                    // the text content area, which is correct for all lines regardless of
+                    // their position in the document.
+                    lineHeight = textLineFragment.typographicBounds.height
+                    // Offset by typographicBounds.origin.y to position within the fragment.
+                    // For the first line of a paragraph: origin.y is 0 (no offset).
+                    // For subsequent lines in a wrapped paragraph: origin.y is the
+                    // accumulated height of preceding lines.
                     lineY = fragmentView.frame.origin.y + textLineFragment.typographicBounds.origin.y
                 }
 

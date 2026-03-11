@@ -79,6 +79,7 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
     @Environment(\.gutterBackgroundColor) private var envGutterBackgroundColor
     @Environment(\.gutterSeparatorColor) private var envGutterSeparatorColor
     @Environment(\.gutterSeparatorWidth) private var envGutterSeparatorWidth
+    @Environment(\.gutterShadow) private var envGutterShadow
 
     @Binding private var text: AttributedString
     @Binding private var selection: NSRange?
@@ -124,7 +125,8 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
             gutterLineViewFactory: gutterLineViewFactory,
             gutterBackgroundColor: envGutterBackgroundColor,
             gutterSeparatorColor: envGutterSeparatorColor,
-            gutterSeparatorWidth: envGutterSeparatorWidth
+            gutterSeparatorWidth: envGutterSeparatorWidth,
+            gutterShadow: envGutterShadow
         )
         .background(.background)
     }
@@ -175,6 +177,11 @@ private struct GutterSeparatorWidthKey: EnvironmentKey {
     static let defaultValue: CGFloat = 2
 }
 
+/// Environment key for custom gutter shadow.
+private struct GutterShadowKey: EnvironmentKey {
+    static let defaultValue: NSShadow? = nil
+}
+
 extension EnvironmentValues {
     var gutterBackgroundColor: NSColor? {
         get { self[GutterBackgroundColorKey.self] }
@@ -189,6 +196,11 @@ extension EnvironmentValues {
     var gutterSeparatorWidth: CGFloat {
         get { self[GutterSeparatorWidthKey.self] }
         set { self[GutterSeparatorWidthKey.self] = newValue }
+    }
+
+    var gutterShadow: NSShadow? {
+        get { self[GutterShadowKey.self] }
+        set { self[GutterShadowKey.self] = newValue }
     }
 }
 
@@ -209,6 +221,11 @@ public extension TextViewModifier {
             keyPath: \.gutterSeparatorWidth,
             value: width
         )
+    }
+
+    /// Applies a shadow to the custom gutter container, cast onto the editor content area.
+    func gutterShadow(_ shadow: NSShadow?) -> TextViewEnvironmentModifier<Self, NSShadow?> {
+        TextViewEnvironmentModifier(content: self, keyPath: \.gutterShadow, value: shadow)
     }
 }
 
@@ -304,8 +321,9 @@ private struct TextViewRepresentable: NSViewRepresentable {
     let gutterBackgroundColor: NSColor?
     let gutterSeparatorColor: NSColor?
     let gutterSeparatorWidth: CGFloat
+    let gutterShadow: NSShadow?
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], gutterWidth: CGFloat = 0, gutterLineViewFactory: ((Int, String) -> NSView)? = nil, gutterBackgroundColor: NSColor? = nil, gutterSeparatorColor: NSColor? = nil, gutterSeparatorWidth: CGFloat = 0) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], gutterWidth: CGFloat = 0, gutterLineViewFactory: ((Int, String) -> NSView)? = nil, gutterBackgroundColor: NSColor? = nil, gutterSeparatorColor: NSColor? = nil, gutterSeparatorWidth: CGFloat = 0, gutterShadow: NSShadow? = nil) {
         self._text = text
         self._selection = selection
         self.options = options
@@ -315,10 +333,16 @@ private struct TextViewRepresentable: NSViewRepresentable {
         self.gutterBackgroundColor = gutterBackgroundColor
         self.gutterSeparatorColor = gutterSeparatorColor
         self.gutterSeparatorWidth = gutterSeparatorWidth
+        self.gutterShadow = gutterShadow
     }
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = STTextView.scrollableTextView()
+        // Disable automatic content insets — SwiftUI handles safe area layout externally.
+        // Without this, macOS adds a topContentInset when the scroll view overlaps the title bar,
+        // triggering the FB21059465 gutter workaround that shifts the gutter container above the
+        // scroll view's clip boundary, causing the first-line gutter label to be clipped.
+        scrollView.automaticallyAdjustsContentInsets = false
         let textView = scrollView.documentView as! STTextView
         textView.textDelegate = context.coordinator
         textView.highlightSelectedLine = options.contains(.highlightSelectedLine)
@@ -474,6 +498,10 @@ private struct TextViewRepresentable: NSViewRepresentable {
             textView.customGutterBackgroundColor = nil
             textView.customGutterSeparatorColor = nil
         }
+
+        // Apply gutter shadow from the app layer — set on the container view
+        // which is created lazily by STTextView during layout.
+        textView.customGutterContainerView?.shadow = gutterShadow
 
         // Keep scroll offset change handler up to date
         context.coordinator.scrollOffsetChangeHandler = scrollOffsetChangeHandler
