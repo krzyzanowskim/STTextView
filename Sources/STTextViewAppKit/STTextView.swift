@@ -1339,8 +1339,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         super.layout()
         layoutText()
 
-        if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
-            scrollToVisible(textRange, type: .standard)
+        if needsScrollToSelection,
+           let textRange = textLayoutManager.textSelections.last?.textRanges.last,
+           let textLocation = textLocationForScrollingSelection(toVisible: textRange) {
+            scrollToVisible(textLocation, type: .standard)
         }
 
         needsScrollToSelection = false
@@ -1382,6 +1384,30 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         } else if !needsLayout, !inLiveResize {
             needsLayout = true
         }
+    }
+
+    func textLocationForScrollingSelection(toVisible textRange: NSTextRange) -> NSTextLocation? {
+        guard !textRange.isEmpty else {
+            return textRange.location
+        }
+
+        guard let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
+            return textRange.location
+        }
+
+        if textRange.intersects(viewportRange) {
+            return nil
+        }
+
+        let selectionEndsBeforeViewport = textContentManager.offset(
+            from: textRange.endLocation,
+            to: viewportRange.location
+        ) > 0
+        if selectionEndsBeforeViewport {
+            return textRange.endLocation
+        }
+
+        return textRange.location
     }
 
     private var effectiveVisibleRect: CGRect {
