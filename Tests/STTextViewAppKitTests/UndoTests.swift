@@ -80,5 +80,17 @@
             textView.redo(nil)
             XCTAssertEqual(textView.text!, "123a789")
         }
+
+        func testDeleteSelectionThenYankRestoresDeletedText() {
+            let textView = STTextView()
+            textView.text = "alpha\nbeta\ngamma"
+            textView.selectAll(nil)
+
+            textView.deleteBackward(nil)
+            XCTAssertEqual(textView.text!, "")
+
+            textView.yank(nil)
+            XCTAssertEqual(textView.text!, "alpha\nbeta\ngamma")
+        }
     }
 #endif
