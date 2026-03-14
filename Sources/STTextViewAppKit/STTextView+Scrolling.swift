@@ -6,27 +6,42 @@ import AppKit
 
 extension STTextView {
 
+    private func adjustedScrollRect(_ rect: CGRect) -> CGRect {
+        var adjustedRect = rect
+
+        if adjustedRect.width.isZero {
+            // add padding around the point to ensure the visibility the segment
+            // since the width of the segment is 0 for a selection
+            adjustedRect = adjustedRect.inset(by: .init(top: 0, left: -textContainer.lineFragmentPadding, bottom: 0, right: -textContainer.lineFragmentPadding))
+        }
+
+        // scroll to visible IN clip view (ignoring gutter view overlay)
+        // adjust rect to mimick it's size to include gutter overlay
+        adjustedRect.origin.x -= gutterView?.frame.width ?? 0
+        adjustedRect.size.width += gutterView?.frame.width ?? 0
+        return adjustedRect
+    }
+
     override open func scroll(_ point: NSPoint) {
         contentView.scroll(point.applying(.init(translationX: -(gutterView?.frame.width ?? 0), y: 0)))
     }
 
     @discardableResult
     func scrollToVisible(_ textRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
-        guard var rect = textLayoutManager.textSegmentFrame(in: textRange, type: type) else {
+        guard let rect = textLayoutManager.textSegmentFrame(in: textRange, type: type) else {
             return false
         }
 
-        if rect.width.isZero {
-            // add padding around the point to ensure the visibility the segment
-            // since the width of the segment is 0 for a selection
-            rect = rect.inset(by: .init(top: 0, left: -textContainer.lineFragmentPadding, bottom: 0, right: -textContainer.lineFragmentPadding))
+        return contentView.scrollToVisible(adjustedScrollRect(rect))
+    }
+
+    @discardableResult
+    func scrollToVisible(_ textLocation: NSTextLocation, type: NSTextLayoutManager.SegmentType) -> Bool {
+        guard let rect = textLayoutManager.textSegmentFrame(at: textLocation, type: type) else {
+            return false
         }
 
-        // scroll to visible IN clip view (ignoring gutter view overlay)
-        // adjust rect to mimick it's size to include gutter overlay
-        rect.origin.x -= gutterView?.frame.width ?? 0
-        rect.size.width += gutterView?.frame.width ?? 0
-        return contentView.scrollToVisible(rect)
+        return contentView.scrollToVisible(adjustedScrollRect(rect))
     }
 
     override open func centerSelectionInVisibleArea(_ sender: Any?) {
