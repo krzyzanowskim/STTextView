@@ -41,9 +41,8 @@ extension STTextView {
         ]
 
         updateTypingAttributes()
-        updateSelectedRangeHighlight()
-        updateSelectedLineHighlight()
-        layoutGutter()
+        setNeedsLayoutSafe()
+        needsDisplay = true
     }
 
     override open func selectLine(_ sender: Any?) {

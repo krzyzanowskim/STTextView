@@ -6,6 +6,18 @@ import AppKit
 
 extension STTextView {
 
+    private func deletedString(in textRanges: [NSTextRange]) -> String {
+        guard let textStorage = (textContentManager as? NSTextContentStorage)?.attributedString else {
+            return textRanges.reduce(into: "") { partialResult, textRange in
+                partialResult += textLayoutManager.substring(in: textRange)
+            }
+        }
+
+        return textRanges.reduce(into: "") { partialResult, textRange in
+            partialResult += textStorage.attributedSubstring(from: NSRange(textRange, in: textContentManager)).string
+        }
+    }
+
     override open func deleteForward(_ sender: Any?) {
         if let deletedString = delete(direction: .forward, destination: .character, allowsDecomposition: false) {
             _yankingManager.kill(action: .delete, string: deletedString)
@@ -87,9 +99,7 @@ extension STTextView {
             return nil
         }
 
-        let deletedString = textRanges.reduce(into: "") { partialResult, textRange in
-            partialResult += textLayoutManager.substring(in: textRange)
-        }
+        let deletedString = deletedString(in: textRanges)
 
         replaceCharacters(in: textRanges, with: "", useTypingAttributes: false, allowsTypingCoalescing: true)
         return deletedString
