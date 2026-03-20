@@ -21,7 +21,13 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
         let gutterWidth = gutterView?.frame.width ?? 0
-        let prepared = preparedContentRect.insetBy(dx: gutterWidth, dy: 0)
+
+        // preparedContentRect is in STTextView (documentView) coords — shift to contentView coords
+        var prepared = preparedContentRect
+        prepared.origin.x += gutterWidth
+        prepared.size.width -= gutterWidth
+
+        // visibleRect is already in contentView coords (contentView.origin.x = gutterWidth)
         var visible = contentView.visibleRect
 
         // Clamp negative origins to 0 (handles overscroll bounce)
@@ -34,8 +40,11 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             visible.origin.y = 0
         }
 
+        // Y-only union, width from contentView bounds
         if prepared.intersects(visible) {
-            return prepared.union(visible)
+            let minY = max(0, min(prepared.minY, visible.minY))
+            let maxY = max(prepared.maxY, visible.maxY)
+            return CGRect(x: 0, y: minY, width: contentView.bounds.width, height: maxY - minY)
         } else {
             return visible
         }
