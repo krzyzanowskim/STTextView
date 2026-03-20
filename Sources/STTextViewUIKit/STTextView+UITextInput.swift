@@ -32,8 +32,10 @@ extension STTextView: UITextInput {
             updateSelectedLineHighlight()
             layoutGutter()
 
-            // Defer scroll to layout pass (like UITextView's _scrollToSelectionIfNeeded)
-            needsScrollToSelection = true
+            postLayoutAction = { [weak self] in
+                guard let self, let textRange = textLayoutManager.textSelections.last?.textRanges.last else { return }
+                scrollToVisible(textRange, type: .standard)
+            }
         }
     }
 

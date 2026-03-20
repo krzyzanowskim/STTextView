@@ -227,10 +227,10 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     /// Line highlight view.
     let lineHighlightView: STLineHighlightView
 
-    /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
-    var needsScrollToSelection = false {
+    /// A one-shot action executed after the next layout viewport pass completes, then cleared.
+    var postLayoutAction: (() -> Void)? {
         didSet {
-            if needsScrollToSelection {
+            if postLayoutAction != nil {
                 setNeedsLayout()
             }
         }
@@ -990,7 +990,10 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         inputDelegate?.textDidChange(self)
         delegateProxy.textViewDidChangeText(notification)
 
-        needsScrollToSelection = true
+        postLayoutAction = { [weak self] in
+            guard let self, let textRange = textLayoutManager.textSelections.last?.textRanges.last else { return }
+            scrollToVisible(textRange, type: .standard)
+        }
     }
 
     /// Informs the receiver that it should begin coalescing successive typing operations in a new undo grouping
@@ -1023,11 +1026,10 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         super.layoutSubviews()
         layoutText()
 
-        // Scroll to selection if needed (equivalent to UITextView's _scrollToSelectionIfNeeded)
-        if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
-            scrollToVisible(textRange, type: .standard)
+        if let action = postLayoutAction {
+            postLayoutAction = nil
+            action()
         }
-        needsScrollToSelection = false
     }
 
     /// Performs text layout including container sizing, viewport layout, and related updates.
