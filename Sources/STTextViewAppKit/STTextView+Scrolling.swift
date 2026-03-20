@@ -12,6 +12,31 @@ extension STTextView {
 
     @discardableResult
     func scrollToVisible(_ textRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
+        let controller = textLayoutManager.textViewportLayoutController
+
+        // Ensure layout for the target range before computing its rect
+        textLayoutManager.ensureLayout(for: textRange)
+
+        // If the range is outside the current viewport, relocate the viewport anchor
+        // so that TextKit2 lays out around the target location (O(1) jump)
+        let isInViewport: Bool
+        if let viewportRange = controller.viewportRange {
+            if textRange.isEmpty {
+                isInViewport = viewportRange.contains(textRange.location)
+            } else {
+                isInViewport = viewportRange.intersects(textRange)
+            }
+        } else {
+            isInViewport = false
+        }
+
+        if !isInViewport {
+            relocateViewport(to: textRange.location)
+            layoutViewport()
+        }
+
+        updateContentSizeIfNeeded()
+
         guard var rect = textLayoutManager.textSegmentFrame(in: textRange, type: type) else {
             return false
         }
@@ -75,11 +100,15 @@ extension STTextView {
     }
 
     override open func scrollToBeginningOfDocument(_ sender: Any?) {
+        relocateViewport(to: textLayoutManager.documentRange.location)
+        layoutViewport()
         scroll(CGPoint(x: visibleRect.origin.x, y: frame.minY))
     }
 
     override open func scrollToEndOfDocument(_ sender: Any?) {
         relocateViewport(to: textLayoutManager.documentRange.endLocation)
+        layoutViewport()
+        updateContentSizeIfNeeded()
         scroll(CGPoint(x: visibleRect.origin.x, y: frame.maxY))
     }
 }
