@@ -236,6 +236,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         }
     }
 
+    private var inLayout = false
     private var needsRelayout = false
 
     var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
@@ -1036,6 +1037,9 @@ open class STTextView: UIScrollView, STTextViewProtocol {
 
     /// Performs text layout including container sizing, viewport layout, and related updates.
     private func layoutText() {
+        inLayout = true
+        defer { inLayout = false }
+
         updateTextContainerSize()
 
         // Convergence loop - max 5 iterations
@@ -1046,6 +1050,14 @@ open class STTextView: UIScrollView, STTextViewProtocol {
             textLayoutManager.textViewportLayoutController.layoutViewport()
             if !needsRelayout { break }
             iterations -= 1
+        }
+    }
+
+    func setNeedsLayoutSafe() {
+        if inLayout {
+            needsRelayout = true
+        } else {
+            setNeedsLayout()
         }
     }
 

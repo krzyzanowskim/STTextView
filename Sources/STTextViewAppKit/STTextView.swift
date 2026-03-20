@@ -1465,6 +1465,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         contentView.frame.size = newSize
 
         updateTextContainerSize(proposedSize: newSize)
+
+        if inLayout {
+            needsRelayout = true
+        }
     }
 
     func layoutViewport() {
