@@ -518,6 +518,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     private var _usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
     lazy var _speechSynthesizer = AVSpeechSynthesizer()
+    var _speechSynthesizerIsSpeaking = false
     private lazy var _defaultTextContainerSize: CGSize = NSTextContainer().size
 
     var _completionWindowController: STCompletionWindowController?
@@ -717,6 +718,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         super.init(frame: frameRect)
 
+        _speechSynthesizer.delegate = self
         textFinderBarContainer.client = self
         textFinder.findBarContainer = textFinderBarContainer
 
