@@ -1,47 +1,129 @@
 # Changelog
 
-## [2.3.0] - 2025-12-23
-
-### Added
-- [macOS] Add snapshot tests for STTextView gutter rendering with various configurations
-- [iOS] Add background blur effect to STGutterView when backgroundColor is nil
-- [SwiftUI] Add environment-based lineHeightMultiple support in text views
-- [SwiftUI] Add support for configurable lineHeightMultiple in TextView
-- [SwiftUI/iOS] Add support for custom contentInsets to TextView
-- [SwiftUI] Add showLineNumbers option and autocorrectionDisabled modifier to TextView
-- [Shared] Expose contentFrame property to Plugins SPI
+## [2.3.6] - 2026-03-20
 
 ### Changed
-- [iOS] Rename STContentView to STTextContainerView and add lightweight content size update
-- [iOS] Optimize text view layout fragment rendering by reusing existing views
-- [iOS] Adjust layout to respect textContainerInset in STTextView
-- [iOS] Adjust viewportBounds to account for textContainerInset for better fragment coverage
-- [iOS] Improve viewport bounds calculation to account for adjustedContentInset
-- [iOS] Refactor gutter width adjustment logic to reduce redundant checks and improve layout stability
-- [iOS] Make text, attributedText, and showsLineNumbers properties open and objc
-- [macOS] Improve layout and drawing logic for STTextRenderView with clipsToContent support
-- [macOS] Improve STTextRenderView layout to match actual rendering behavior
-- [macOS] Improve selection image frame and origin during drag-and-drop
-- [macOS] Adjust line fragment drawing position to account for line height multiple offset
-- [macOS] Refactor STTextView layout system for improved viewport stability and accuracy
-- [AppKit & UIKit] Ensure fragment views are marked for display when layout or rendering changes occur
-- [SwiftUI] Refactor TextView options into shared TextViewOptions struct and extend platform support
-- [SwiftUI] Refactor TextView view and coordinator for cleaner bindings and guard logic
-- [SwiftUI] Optimize font updates in TextView by caching last applied font
-- [Shared] Enable SwiftFormat with customized configuration and makefile tasks
-- [Shared] Update platform and toolchain requirements
-- Refactor README to consolidate and simplify SwiftUI usage documentation
+- Optimize TextKit2 scrolling by ensuring layout and relocating viewport
+- Defer relayout during active layout to prevent recursion; add inLayout and setNeedsLayoutSafe
+- Add convergence loop for text layout viewport with needsRelayout flag
+- Replace scroll-to-selection flag with one-shot postLayoutAction executed after layout
+- Ensure selection is scrolled post-layout via one-shot postLayoutAction
+- Refactor viewport layout: move convergence loop into layoutViewport() and call it from layoutText()
+- Ensure layout for current viewport range during viewport updates
+- Fix viewportBounds: adjust for gutter offset, use contentView coords and width, perform Y-only union, clamp negative origins
+- Track speech state via AVSpeechSynthesizer delegate and fix Stop Speaking validation
+- Speed up large selection deletes in [#107](https://github.com/krzyzanowskim/STTextView/pull/107)
 
-### Fixed
-- [iOS] Fix gutter alignment to scroll only vertically and remain fixed horizontally
-- [iOS] Defer scrolling to selection until layoutSubviews for better layout consistency
-- [macOS] Fix text view jumping by allowing growth of height but preventing shrinkage
-- [macOS] Fix dynamic height adjustment and layout behavior in STTextView
-- [macOS] Fix text view shrinkage and scroll issues when editing or resetting large documents
-- [macOS] Fix layout issue for gutter view with NSScrollView content insets
-- [macOS] Prevent text view from resizing below current scroll position
-- [SwiftUI] Fix .wrapLines option logic and improve UI toggles and editable state handling
-- [SwiftUI] Prevent selection change handling when isUpdating is true in TextViewRepresentable
+## [2.3.5] - 2026-01-14
+
+### Changed
+- Resolve crash within NavigationSplitView in v2.3.4 in [#102](https://github.com/krzyzanowskim/STTextView/pull/102)
+- Add ignoresSafeArea to STTextView to allow full-screen display
+- Refactor typing attribute reset logic by replacing direct assignment with resetTypingAttributes()
+- Add resetTypingAttributes() to reset typing attributes to default values
+- Reset typing attributes when setting new text or attributedText
+
+## [2.3.4] - 2026-01-06
+
+### Changed
+- Update test to reflect initial selection behavior in STTextView
+- Update iOS Simulator device from iPhone 17 Pro to iPhone 16 in test workflow
+- Run tests on all tags and update test scheme and simulator in CI configuration
+- Add workflow_dispatch trigger to GitHub Actions test workflow
+- Add GitHub Actions workflow for testing on macOS and iOS
+- Fix sizeToFit() not including gutter width in frame calculation in [#101](https://github.com/krzyzanowskim/STTextView/pull/101)
+
+## [2.3.3] - 2026-01-04
+
+### Changed
+- Improve VoiceOver accessibility for STTextView by refining traits and escape handling
+- Refine accessibility notification for selection change and remove unused method
+- Add accessibility scroll support to STTextView for VoiceOver users
+- Improve accessibility support for STTextView including VoiceOver and UI testing
+- Fix accessibilityRange to detect trailing newlines via NSString instead of textContentManager
+- Improve accessibility line range calculation and add support for setting insertion line
+- Add accessibility support for edited state, insertion point line, and help text
+- Improve accessibility support for text character range and hit testing
+- Improve accessibility by implementing accessibilitySelectedTextRanges and posting valueChanged notification
+- Add accessibility support to STTextView for VoiceOver and text selection
+
+## [2.3.2] - 2026-01-02
+
+### Changed
+- Improve layout fragment height calculation to handle incomplete layout cases
+
+## [2.3.1] - 2025-12-30
+
+### Changed
+- Ensure gutter view background color matches text view background color
+- Fix background and text color updates when appearance changes in GutterView
+- Ensure typing attributes are updated after text replacement
+- Ensure STTextView updates typing attributes after processing text service input
+
+## [2.3.0] - 2025-12-23
+
+### Changed
+- Release 2.3.0
+- Add changelog entries for upcoming release with new features, fixes, and refactors
+- Improve gutter rendering, alignment, and layout behavior across platforms
+- Expose contentFrame property to Plugins SPI and set GITHUB_TOKEN for git-cliff
+- Add background blur effect to STGutterView when backgroundColor is nil
+- Fix .wrapLines option logic and improve UI toggles and editable state handling
+- Prevent selection change handling when isUpdating is true in TextViewRepresentable
+- Remove .baselineOffset from supported text attributes in AppKit and UIKit views
+- Refactor TextView view and coordinator for cleaner bindings and guard logic
+- Optimize font updates in TextView by caching last applied font
+- Refactor README to consolidate and simplify SwiftUI usage documentation
+- Add showLineNumbers option and autocorrectionDisabled modifier to TextView
+- Remove support for explicitly setting text view editability via parameter or environment
+- Add environment-based lineHeightMultiple support in SwiftUI text views
+- Add support for explicitly setting isEditable in TextView for SwiftUI integration
+- Add support for configurable lineHeightMultiple in TextView
+- Add support for custom contentInsets to TextView
+- Refactor TextView options into shared TextViewOptions struct and extend platform support
+- Fix property name showsLineNumbers and remove sponsors section from README
+- Update platform and toolchain requirements; bump STTextView to version 2.2.0
+- Make text, attributedText, and showsLineNumbers properties open and objc
+- Ensure fragment views are marked for display when layout or rendering changes occur
+- Adjust viewportBounds to account for textContainerInset for better fragment coverage
+- Fix gutter alignment to scroll only vertically and remain fixed horizontally
+- Defer scrolling to selection until layoutSubviews for better layout consistency
+- Adjust layout to respect textContainerInset in STTextView
+- Refactor gutter width adjustment logic to reduce redundant checks and improve layout stability
+- Improve viewport bounds calculation to account for adjustedContentInset
+- Refactored text layout logic and improved container resizing behavior
+- Optimize text view layout fragment rendering by reusing existing views
+- Rename STContentView to STTextContainerView and add lightweight content size update
+- Improve layout and drawing logic for STTextRenderView with clipsToContent support
+- Adjust line fragment drawing position to account for line height multiple offset
+- Improve selection image frame and origin during drag-and-drop
+- Improve STTextRenderView layout to match actual rendering behavior
+- Move line height adjustment constant outside conditional for clarity and reuse
+- Enable SwiftFormat with customized configuration and makefile tasks
+- Refactor STTextView layout system for improved viewport stability and accuracy
+- Fix text view jumping by allowing growth of height but preventing shrinkage
+- Fix dynamic height adjustment and layout behavior in STTextView
+- Remove unused scrollView check in layoutGutterLineNumbers
+- Remove complex resize and scroll adjustment logic during layout update
+- Adjust gutter line number position by removing contentInsets offset
+- Fix text view shrinkage and scroll issues when editing or resetting large documents
+- Add snapshot test for gutter with extra line fragment and adjust scrolled view test
+- Ensure consistent scrollbar appearance during snapshot tests by setting UserDefaults
+- Add snapshot tests for STTextView gutter rendering with various configurations
+- Add snapshot tests for STTextView and integrate SnapshotTesting on macOS
+- Annotate ContentTests and TypingAttributesTests with @MainActor
+- Add comment explaining workaround for scroll position resizing issue
+- Prevent text view from resizing below current scroll position
+- Revert "Use needsViewportLayout flag instead of needsLayout for viewport-related updates"
+- Use needsViewportLayout flag instead of needsLayout for viewport-related updates
+- Remove redundant layoutGutter() call from setFrameSize()
+- Adjust STTextView sizeToFit to account for scroll view content insets
+- Adjust scroll view top constraint to align with view's top anchor instead of safe area
+- Fix layout issue for gutter view with NSScrollView content insets
+- Update README: reorganize sections, update requirements, and improve clarity
+- Use safe area constraints for scroll view when using fullSizeContentView style
+- Remove traitCollectionDidChange override from STGutterView
+- Improve layout handling and add tolerance support for geometric equality checks
 
 ## [2.2.8] - 2025-11-11
 
