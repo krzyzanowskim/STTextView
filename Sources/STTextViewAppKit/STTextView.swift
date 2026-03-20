@@ -608,10 +608,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// A Boolean value that controls whether the text views sharing the receiver’s layout manager use the Font panel and Font menu.
     open var usesFontPanel = true
 
-    /// A Boolean value indicating whether the view needs scroll to visible selection pass before it can be drawn.
-    var needsScrollToSelection = false {
+    /// A one-shot action executed after the next layout viewport pass completes, then cleared.
+    var postLayoutAction: (() -> Void)? {
         didSet {
-            if needsScrollToSelection {
+            if postLayoutAction != nil {
                 needsLayout = true
             }
         }
@@ -1341,11 +1341,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         super.layout()
         layoutText()
 
-        if needsScrollToSelection, let textRange = textLayoutManager.textSelections.last?.textRanges.last {
-            scrollToVisible(textRange, type: .standard)
+        if let action = postLayoutAction {
+            postLayoutAction = nil
+            action()
         }
-
-        needsScrollToSelection = false
     }
 
     /// Performs text layout including container sizing, viewport layout, and related updates.
@@ -1596,7 +1595,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         NSAccessibility.post(element: self, notification: .valueChanged)
 
-        needsScrollToSelection = true
+        postLayoutAction = { [weak self] in
+            guard let self, let textRange = textLayoutManager.textSelections.last?.textRanges.last else { return }
+            scrollToVisible(textRange, type: .standard)
+        }
         needsDisplay = true
     }
 

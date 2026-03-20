@@ -58,7 +58,10 @@ extension STTextView {
         ]
 
         updateTypingAttributes()
-        needsScrollToSelection = true
+        postLayoutAction = { [weak self] in
+            guard let self, let textRange = textLayoutManager.textSelections.last?.textRanges.last else { return }
+            scrollToVisible(textRange, type: .standard)
+        }
         needsDisplay = true
     }
 
@@ -75,7 +78,10 @@ extension STTextView {
         ]
 
         updateTypingAttributes()
-        needsScrollToSelection = true
+        postLayoutAction = { [weak self] in
+            guard let self, let textRange = textLayoutManager.textSelections.last?.textRanges.last else { return }
+            scrollToVisible(textRange, type: .standard)
+        }
         needsDisplay = true
     }
 
@@ -92,7 +98,10 @@ extension STTextView {
         ]
 
         updateTypingAttributes()
-        needsScrollToSelection = true
+        postLayoutAction = { [weak self] in
+            guard let self, let textRange = textLayoutManager.textSelections.last?.textRanges.last else { return }
+            scrollToVisible(textRange, type: .standard)
+        }
         needsDisplay = true
 
     }
@@ -458,7 +467,10 @@ extension STTextView {
         }
 
         updateTypingAttributes()
-        needsScrollToSelection = true
+        postLayoutAction = { [weak self] in
+            guard let self, let textRange = textLayoutManager.textSelections.last?.textRanges.last else { return }
+            scrollToVisible(textRange, type: .standard)
+        }
         needsDisplay = true
     }
 
