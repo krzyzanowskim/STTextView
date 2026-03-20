@@ -236,6 +236,8 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         }
     }
 
+    private var needsRelayout = false
+
     var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     var lastUsedFragmentViews: Set<STTextLayoutFragmentView> = []
 
@@ -1036,11 +1038,15 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     private func layoutText() {
         updateTextContainerSize()
 
-        // layoutViewport does not handle properly layout range
-        // for far jump it tries to layout everything starting at location 0
-        // even though viewport range is properly calculated.
-        // No known workaround.
-        textLayoutManager.textViewportLayoutController.layoutViewport()
+        // Convergence loop - max 5 iterations
+        // If layout triggers changes that require re-layout, needsRelayout is set
+        var iterations = 5
+        while iterations > 0 {
+            needsRelayout = false
+            textLayoutManager.textViewportLayoutController.layoutViewport()
+            if !needsRelayout { break }
+            iterations -= 1
+        }
     }
 
     private func updateTextContainerSize() {
