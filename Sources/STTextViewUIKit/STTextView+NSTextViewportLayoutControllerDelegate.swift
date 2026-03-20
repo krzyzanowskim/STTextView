@@ -62,6 +62,11 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             staleView.removeFromSuperview()
         }
         lastUsedFragmentViews.removeAll()
+
+        if let viewportRange = textViewportLayoutController.viewportRange {
+            textLayoutManager.ensureLayout(for: viewportRange)
+        }
+
         // Avoid updating content size during bounce animation as it resets contentSize
         // which cancels the bounce per openradar.appspot.com/8045239
         let isBouncing = (contentOffset.y < -contentInset.top || contentOffset.y > max(0, contentSize.height - bounds.height + contentInset.bottom))

@@ -93,6 +93,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         }
         lastUsedFragmentViews.removeAll()
 
+        if let viewportRange = textViewportLayoutController.viewportRange {
+            textLayoutManager.ensureLayout(for: viewportRange)
+        }
+
         updateContentSizeIfNeeded()
 
         // When scrolled to the end of the document, relocate viewport to ensure proper layout
