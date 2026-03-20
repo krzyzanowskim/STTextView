@@ -1356,26 +1356,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         defer { inLayout = false }
 
         updateTextContainerSize()
-
-        // Convergence loop - max 5 iterations (like NSTextView)
-        // If layout triggers changes that require re-layout, needsRelayout is set
-        var iterations = 5
-        while iterations > 0 {
-            needsRelayout = false
-
-            // not matter what, the layoutViewport() is slow
-            textLayoutManager.textViewportLayoutController.layoutViewport()
-            lastViewportBounds = viewportBounds(for: textLayoutManager.textViewportLayoutController)
-
-            if !needsRelayout { break }
-            iterations -= 1
-        }
-
-        #if DEBUG
-            if iterations == 0 {
-                logger.warning("layoutText() failed to converge after 5 iterations")
-            }
-        #endif
+        layoutViewport()
     }
 
     func setNeedsLayoutSafe() {
@@ -1488,8 +1469,22 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     func layoutViewport() {
-        // not matter what, the layoutViewport() is slow
-        textLayoutManager.textViewportLayoutController.layoutViewport()
+        // Convergence loop - max 5 iterations
+        // If layout triggers changes that require re-layout, needsRelayout is set
+        var iterations = 5
+        while iterations > 0 {
+            needsRelayout = false
+            textLayoutManager.textViewportLayoutController.layoutViewport()
+            lastViewportBounds = viewportBounds(for: textLayoutManager.textViewportLayoutController)
+            if !needsRelayout { break }
+            iterations -= 1
+        }
+
+        #if DEBUG
+            if iterations == 0 {
+                logger.warning("layoutViewport() failed to converge after 5 iterations")
+            }
+        #endif
     }
 
     func updateContentSizeIfNeeded() {
