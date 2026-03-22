@@ -378,6 +378,26 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Gutter view
     public var gutterView: STGutterView?
 
+    /// Extra whitespace inserted above line 1 by pushing text down via an exclusion path.
+    ///
+    /// TextKit 2 prepends `lineSpacing` to lines 2+ but NOT line 1, so without this the first line
+    /// starts at y=0 with no breathing room. An exclusion path at y=0 with height=`topContentInset`
+    /// pushes line 1 down by exactly `lineSpacing`, creating equal whitespace above line 1 as
+    /// between all other lines. This is preferable to `contentInsets.top` because the offset is
+    /// baked into layout itself — no scroll-position dependency (Xcode Preview always snapshots
+    /// at y=0, so a contentInsets approach makes the fix invisible in previews).
+    open var topContentInset: CGFloat = 0 {
+        didSet {
+            if topContentInset > 0 {
+                let exclusionRect = CGRect(x: 0, y: 0, width: 1e6, height: topContentInset)
+                textContainer.exclusionPaths = [NSBezierPath(rect: exclusionRect)]
+            } else {
+                textContainer.exclusionPaths = []
+            }
+            needsLayout = true
+        }
+    }
+
     /// Fraction of the visible viewport height added as extra scrollable space below the last line.
     ///
     /// For example, `0.5` allows the last line to scroll up to the vertical midpoint of the editor

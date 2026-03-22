@@ -19,6 +19,7 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     @Binding private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
+    private let textViewType: STTextView.Type
 
     /// Create a text edit view with a certain text that uses a certain options.
     /// - Parameters:
@@ -26,16 +27,19 @@ public struct TextView: SwiftUI.View, TextViewModifier {
     ///   - selection: The current selection range
     ///   - options: Editor options
     ///   - plugins: Editor plugins
+    ///   - textViewType: The ``STTextView`` subclass to instantiate
     public init(
         text: Binding<AttributedString>,
         selection: Binding<NSRange?> = .constant(nil),
         options: Options = [],
-        plugins: [any STPlugin] = []
+        plugins: [any STPlugin] = [],
+        textViewType: STTextView.Type = STTextView.self
     ) {
         _text = text
         _selection = selection
         self.options = options
         self.plugins = plugins
+        self.textViewType = textViewType
     }
 
     public var body: some View {
@@ -43,7 +47,8 @@ public struct TextView: SwiftUI.View, TextViewModifier {
             text: $text,
             selection: $selection,
             options: options,
-            plugins: plugins
+            plugins: plugins,
+            textViewType: textViewType
         )
         .background(.background)
     }
@@ -85,6 +90,7 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
     @Binding private var selection: NSRange?
     private let options: Options
     private let plugins: [any STPlugin]
+    private let textViewType: STTextView.Type
     private let gutterWidth: CGFloat
     private let gutterLineViewFactory: (Int, String) -> NSView
 
@@ -95,6 +101,7 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
     ///   - selection: The current selection range
     ///   - options: Editor options
     ///   - plugins: Editor plugins
+    ///   - textViewType: The ``STTextView`` subclass to instantiate
     ///   - gutterWidth: Width reserved for the custom gutter area (in points)
     ///   - gutterContent: A view builder called for each visible line with `(lineNumber, lineContent)`
     public init(
@@ -102,6 +109,7 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
         selection: Binding<NSRange?> = .constant(nil),
         options: Options = [],
         plugins: [any STPlugin] = [],
+        textViewType: STTextView.Type = STTextView.self,
         gutterWidth: CGFloat,
         @ViewBuilder gutterContent: @escaping (_ lineNumber: Int, _ lineContent: String) -> GutterContent
     ) {
@@ -109,6 +117,7 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
         _selection = selection
         self.options = options
         self.plugins = plugins
+        self.textViewType = textViewType
         self.gutterWidth = gutterWidth
         self.gutterLineViewFactory = { lineNumber, lineContent in
             NSHostingView(rootView: gutterContent(lineNumber, lineContent))
@@ -121,6 +130,7 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
             selection: $selection,
             options: options,
             plugins: plugins,
+            textViewType: textViewType,
             gutterWidth: gutterWidth,
             gutterLineViewFactory: gutterLineViewFactory,
             gutterBackgroundColor: envGutterBackgroundColor,
@@ -316,6 +326,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
     private var selection: NSRange?
     private let options: TextView.Options
     private var plugins: [any STPlugin]
+    private let textViewType: STTextView.Type
     let gutterWidth: CGFloat
     let gutterLineViewFactory: ((Int, String) -> NSView)?
     let gutterBackgroundColor: NSColor?
@@ -323,11 +334,12 @@ private struct TextViewRepresentable: NSViewRepresentable {
     let gutterSeparatorWidth: CGFloat
     let gutterShadow: NSShadow?
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], gutterWidth: CGFloat = 0, gutterLineViewFactory: ((Int, String) -> NSView)? = nil, gutterBackgroundColor: NSColor? = nil, gutterSeparatorColor: NSColor? = nil, gutterSeparatorWidth: CGFloat = 0, gutterShadow: NSShadow? = nil) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], textViewType: STTextView.Type = STTextView.self, gutterWidth: CGFloat = 0, gutterLineViewFactory: ((Int, String) -> NSView)? = nil, gutterBackgroundColor: NSColor? = nil, gutterSeparatorColor: NSColor? = nil, gutterSeparatorWidth: CGFloat = 0, gutterShadow: NSShadow? = nil) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
+        self.textViewType = textViewType
         self.gutterWidth = gutterWidth
         self.gutterLineViewFactory = gutterLineViewFactory
         self.gutterBackgroundColor = gutterBackgroundColor
@@ -337,7 +349,7 @@ private struct TextViewRepresentable: NSViewRepresentable {
     }
 
     func makeNSView(context: Context) -> NSScrollView {
-        let scrollView = STTextView.scrollableTextView()
+        let scrollView = textViewType.scrollableTextView()
         // Disable automatic content insets — SwiftUI handles safe area layout externally.
         // Without this, macOS adds a topContentInset when the scroll view overlaps the title bar,
         // triggering the FB21059465 gutter workaround that shifts the gutter container above the
@@ -482,6 +494,11 @@ private struct TextViewRepresentable: NSViewRepresentable {
             }
             if let adapter = context.coordinator.gutterDataSourceAdapter {
                 adapter.factory = factory
+                // Force-recreate gutter line views so they pick up the new factory closure.
+                // The normal layout path (including during live window resize) reuses
+                // existing views for performance; this explicit reload propagates
+                // SwiftUI state changes captured by the factory (e.g. rulerData update).
+                textView.reloadGutterLineViews()
             } else {
                 let adapter = GutterLineViewDataSourceAdapter(factory: factory)
                 context.coordinator.gutterDataSourceAdapter = adapter
