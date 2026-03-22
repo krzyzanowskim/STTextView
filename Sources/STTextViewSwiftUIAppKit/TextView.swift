@@ -93,6 +93,15 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
     private let textViewType: STTextView.Type
     private let gutterWidth: CGFloat
     private let gutterLineViewFactory: (Int, String) -> NSView
+    /// Returns only the AnyView for the given line, used to update an existing NSHostingView
+    /// in-place (cheaper than allocating a new hosting view for every layout pass).
+    private let gutterViewUpdater: (Int, String) -> AnyView
+    /// Opaque identity value for the current gutter data.
+    /// When this changes between SwiftUI updates, the gutter line views are reloaded
+    /// so they pick up the new data. When it is unchanged (e.g. normal keystroke that
+    /// doesn't alter syllable counts or rhyme labels), the reload is skipped — preventing
+    /// the expensive NSHostingView destruction+recreation on every character typed.
+    private let gutterDataID: AnyHashable?
 
     /// Create a text editor with a custom per-line gutter.
     ///
@@ -103,6 +112,9 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
     ///   - plugins: Editor plugins
     ///   - textViewType: The ``STTextView`` subclass to instantiate
     ///   - gutterWidth: Width reserved for the custom gutter area (in points)
+    ///   - gutterDataID: Opaque hash identity for the current gutter data. Pass a value that
+    ///     changes when the gutter content should be refreshed (e.g. `AnyHashable(rulerData)`).
+    ///     When `nil`, the gutter is always reloaded on every SwiftUI update (legacy behaviour).
     ///   - gutterContent: A view builder called for each visible line with `(lineNumber, lineContent)`
     public init(
         text: Binding<AttributedString>,
@@ -111,6 +123,7 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
         plugins: [any STPlugin] = [],
         textViewType: STTextView.Type = STTextView.self,
         gutterWidth: CGFloat,
+        gutterDataID: AnyHashable? = nil,
         @ViewBuilder gutterContent: @escaping (_ lineNumber: Int, _ lineContent: String) -> GutterContent
     ) {
         _text = text
@@ -119,8 +132,12 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
         self.plugins = plugins
         self.textViewType = textViewType
         self.gutterWidth = gutterWidth
+        self.gutterDataID = gutterDataID
         self.gutterLineViewFactory = { lineNumber, lineContent in
-            NSHostingView(rootView: gutterContent(lineNumber, lineContent))
+            NSHostingView(rootView: AnyView(gutterContent(lineNumber, lineContent)))
+        }
+        self.gutterViewUpdater = { lineNumber, lineContent in
+            AnyView(gutterContent(lineNumber, lineContent))
         }
     }
 
@@ -132,7 +149,9 @@ public struct TextViewWithGutter<GutterContent: View>: SwiftUI.View, TextViewMod
             plugins: plugins,
             textViewType: textViewType,
             gutterWidth: gutterWidth,
+            gutterDataID: gutterDataID,
             gutterLineViewFactory: gutterLineViewFactory,
+            gutterViewUpdater: gutterViewUpdater,
             gutterBackgroundColor: envGutterBackgroundColor,
             gutterSeparatorColor: envGutterSeparatorColor,
             gutterSeparatorWidth: envGutterSeparatorWidth,
@@ -288,15 +307,37 @@ public extension TextViewModifier {
 
 /// Bridges a closure-based view factory to the ``STGutterLineViewDataSource`` protocol.
 /// Stored on the SwiftUI coordinator so it stays alive while the text view holds a weak reference.
+///
+/// `viewFactory` creates a new `NSHostingView<AnyView>` for the initial layout (full allocation).
+/// `viewUpdater` returns only the `AnyView` for in-place `rootView` updates — cheaper because
+/// it does not allocate an NSHostingView; instead the existing hosting view's rootView is replaced
+/// via a lightweight SwiftUI reconciliation call. This avoids the ~500 ms stutter caused by
+/// destroying and recreating all visible NSHostingViews on every layout pass.
 private class GutterLineViewDataSourceAdapter: STGutterLineViewDataSource {
+    /// Returns a new NSHostingView wrapping the gutter content for the given line.
     var factory: (Int, String) -> NSView
+    /// Returns the AnyView for the given line, used to update an existing hosting view in-place.
+    var viewUpdater: ((Int, String) -> AnyView)?
 
-    init(factory: @escaping (Int, String) -> NSView) {
+    init(factory: @escaping (Int, String) -> NSView, viewUpdater: ((Int, String) -> AnyView)? = nil) {
         self.factory = factory
+        self.viewUpdater = viewUpdater
     }
 
     func textView(_ textView: STTextView, viewForGutterLine lineNumber: Int, content: String) -> NSView {
         factory(lineNumber, content)
+    }
+
+    func textView(_ textView: STTextView, updateView existingView: NSView, forGutterLine lineNumber: Int, content: String) -> Bool {
+        // Require both an updater and a castable hosting view.
+        guard let updater = viewUpdater,
+              let hostingView = existingView as? NSHostingView<AnyView> else {
+            return false
+        }
+        // Assign the new AnyView directly to the existing hosting view.
+        // This is a lightweight SwiftUI reconciliation, not an NSView allocation.
+        hostingView.rootView = updater(lineNumber, content)
+        return true
     }
 }
 
@@ -328,20 +369,27 @@ private struct TextViewRepresentable: NSViewRepresentable {
     private var plugins: [any STPlugin]
     private let textViewType: STTextView.Type
     let gutterWidth: CGFloat
+    /// Opaque identity for the current gutter data — see `TextViewWithGutter.gutterDataID`.
+    let gutterDataID: AnyHashable?
     let gutterLineViewFactory: ((Int, String) -> NSView)?
+    /// Returns only the AnyView for the given line, used to update existing NSHostingViews
+    /// in-place without allocating a new hosting view (avoids the stutter on layout passes).
+    let gutterViewUpdater: ((Int, String) -> AnyView)?
     let gutterBackgroundColor: NSColor?
     let gutterSeparatorColor: NSColor?
     let gutterSeparatorWidth: CGFloat
     let gutterShadow: NSShadow?
 
-    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], textViewType: STTextView.Type = STTextView.self, gutterWidth: CGFloat = 0, gutterLineViewFactory: ((Int, String) -> NSView)? = nil, gutterBackgroundColor: NSColor? = nil, gutterSeparatorColor: NSColor? = nil, gutterSeparatorWidth: CGFloat = 0, gutterShadow: NSShadow? = nil) {
+    init(text: Binding<AttributedString>, selection: Binding<NSRange?>, options: TextView.Options, plugins: [any STPlugin] = [], textViewType: STTextView.Type = STTextView.self, gutterWidth: CGFloat = 0, gutterDataID: AnyHashable? = nil, gutterLineViewFactory: ((Int, String) -> NSView)? = nil, gutterViewUpdater: ((Int, String) -> AnyView)? = nil, gutterBackgroundColor: NSColor? = nil, gutterSeparatorColor: NSColor? = nil, gutterSeparatorWidth: CGFloat = 0, gutterShadow: NSShadow? = nil) {
         self._text = text
         self._selection = selection
         self.options = options
         self.plugins = plugins
         self.textViewType = textViewType
         self.gutterWidth = gutterWidth
+        self.gutterDataID = gutterDataID
         self.gutterLineViewFactory = gutterLineViewFactory
+        self.gutterViewUpdater = gutterViewUpdater
         self.gutterBackgroundColor = gutterBackgroundColor
         self.gutterSeparatorColor = gutterSeparatorColor
         self.gutterSeparatorWidth = gutterSeparatorWidth
@@ -392,8 +440,9 @@ private struct TextViewRepresentable: NSViewRepresentable {
         // Configure custom gutter if provided
         if gutterWidth > 0, let factory = gutterLineViewFactory {
             textView.customGutterWidth = gutterWidth
-            let adapter = GutterLineViewDataSourceAdapter(factory: factory)
+            let adapter = GutterLineViewDataSourceAdapter(factory: factory, viewUpdater: gutterViewUpdater)
             context.coordinator.gutterDataSourceAdapter = adapter
+            context.coordinator.lastGutterDataID = gutterDataID
             textView.gutterLineViewDataSource = adapter
             textView.customGutterBackgroundColor = gutterBackgroundColor
             textView.customGutterSeparatorColor = gutterSeparatorColor
@@ -487,21 +536,34 @@ private struct TextViewRepresentable: NSViewRepresentable {
             }
         }
 
-        // Update custom gutter — the factory may capture new SwiftUI state
+        // Update custom gutter — the factory may capture new SwiftUI state.
+        // When a gutterDataID is provided, only call reloadGutterLineViews() when the
+        // ID actually changes, preventing expensive NSHostingView destruction+recreation
+        // on every keystroke. Without an ID, fall back to always reloading (legacy behaviour).
         if gutterWidth > 0, let factory = gutterLineViewFactory {
             if textView.customGutterWidth != gutterWidth {
                 textView.customGutterWidth = gutterWidth
             }
             if let adapter = context.coordinator.gutterDataSourceAdapter {
+                // Update both closures so they always capture the latest SwiftUI state.
                 adapter.factory = factory
-                // Force-recreate gutter line views so they pick up the new factory closure.
-                // The normal layout path (including during live window resize) reuses
-                // existing views for performance; this explicit reload propagates
-                // SwiftUI state changes captured by the factory (e.g. rulerData update).
-                textView.reloadGutterLineViews()
+                adapter.viewUpdater = gutterViewUpdater
+                // Reload only when gutter data has actually changed.
+                // gutterDataID == nil means no ID was supplied — always reload (legacy path).
+                let dataChanged: Bool
+                if let id = gutterDataID {
+                    dataChanged = id != context.coordinator.lastGutterDataID
+                } else {
+                    dataChanged = true
+                }
+                if dataChanged {
+                    context.coordinator.lastGutterDataID = gutterDataID
+                    textView.reloadGutterLineViews()
+                }
             } else {
-                let adapter = GutterLineViewDataSourceAdapter(factory: factory)
+                let adapter = GutterLineViewDataSourceAdapter(factory: factory, viewUpdater: gutterViewUpdater)
                 context.coordinator.gutterDataSourceAdapter = adapter
+                context.coordinator.lastGutterDataID = gutterDataID
                 textView.gutterLineViewDataSource = adapter
             }
             textView.customGutterBackgroundColor = gutterBackgroundColor
@@ -568,6 +630,9 @@ private struct TextViewRepresentable: NSViewRepresentable {
         var lastFont: NSFont?
         /// Keeps the gutter data source adapter alive while the text view holds a weak reference.
         var gutterDataSourceAdapter: GutterLineViewDataSourceAdapter?
+        /// The gutter data ID from the last updateNSView call.
+        /// Used to skip reloadGutterLineViews() when the gutter data has not changed.
+        var lastGutterDataID: AnyHashable?
         /// Scroll observation token for NSView.boundsDidChangeNotification.
         var scrollObserver: (any NSObjectProtocol)?
         /// Callback invoked when the scroll offset changes.

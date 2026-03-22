@@ -421,8 +421,12 @@ extension STTextView {
     }
 
     /// Returns (or creates) a gutter line view for the given identifier.
-    /// Always recreates the view from the data source to pick up captured SwiftUI state,
-    /// but adds to the container first so the NSHostingView has a window before layout.
+    ///
+    /// When an existing view is found for the line, the data source is given a chance to
+    /// update it in-place via `updateView`. This avoids destroying and recreating
+    /// NSHostingViews on every layout pass, which is expensive (~500 ms for many visible lines).
+    /// If the data source cannot update in-place (returns `false`), the old view is removed and
+    /// a new one is created from scratch.
     private func lineViewForID(
         _ id: NSUserInterfaceItemIdentifier,
         in container: NSView,
@@ -430,8 +434,13 @@ extension STTextView {
         lineNumber: Int,
         lineContent: String
     ) -> NSView {
-        // Remove existing view for this line — it captured stale state
+        // Attempt in-place update to avoid destroying and re-creating the NSHostingView.
         if let existing = container.subviews.first(where: { $0.identifier == id }) {
+            if dataSource.textView(self, updateView: existing, forGutterLine: lineNumber, content: lineContent) {
+                // Successfully updated — reuse the existing view as-is.
+                return existing
+            }
+            // Data source cannot update in-place — remove so we can create a fresh view below.
             existing.removeFromSuperviewWithoutNeedingDisplay()
         }
 
