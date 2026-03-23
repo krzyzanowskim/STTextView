@@ -7,7 +7,7 @@ import STTextKitPlus
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func textViewportLayoutControllerWillLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        lastUsedFragmentViews = Set(fragmentViewMap.objectEnumerator()?.allObjects as? [STTextLayoutFragmentView] ?? [])
+        lastUsedFragments = Set(fragmentViewMap.keyEnumerator().allObjects as! [NSTextLayoutFragment])
 
         if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
             let viewportDebugView = NSView(frame: viewportBounds(for: textViewportLayoutController))
@@ -56,7 +56,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         if let cachedFragmentView = fragmentViewMap.object(forKey: textLayoutFragment) {
             cachedFragmentView.layoutFragment = textLayoutFragment
             fragmentView = cachedFragmentView
-            lastUsedFragmentViews.remove(cachedFragmentView)
+            lastUsedFragments.remove(textLayoutFragment)
         } else {
             fragmentView = STTextLayoutFragmentView(layoutFragment: textLayoutFragment, frame: layoutFragmentFrame.pixelAligned)
             fragmentViewMap.setObject(fragmentView, forKey: textLayoutFragment)
@@ -79,10 +79,13 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
-        for staleView in lastUsedFragmentViews {
-            staleView.removeFromSuperview()
+        for staleFragment in lastUsedFragments {
+            if let view = fragmentViewMap.object(forKey: staleFragment) {
+                view.removeFromSuperview()
+            }
+            fragmentViewMap.removeObject(forKey: staleFragment)
         }
-        lastUsedFragmentViews.removeAll()
+        lastUsedFragments.removeAll()
 
         updateContentSizeIfNeeded()
 

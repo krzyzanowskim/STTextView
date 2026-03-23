@@ -601,7 +601,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     let selectionView: STSelectionView
 
     var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
-    var lastUsedFragmentViews: Set<STTextLayoutFragmentView> = []
+    var lastUsedFragments: Set<NSTextLayoutFragment> = []
     private var _usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
     lazy var _speechSynthesizer = AVSpeechSynthesizer()
