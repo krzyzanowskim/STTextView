@@ -618,7 +618,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     var liveResizeLayoutSuppression = false
-    private var lastViewportBounds: CGRect = .zero
     private var inLayout = false
     private var needsRelayout = false
 
@@ -1339,7 +1338,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
             if scrolledDown || largeDocument {
                 liveResizeLayoutSuppression = true
-                lastViewportBounds = viewportBounds(for: controller)
             }
         }
     }
@@ -1493,7 +1491,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         while iterations > 0 {
             needsRelayout = false
             textLayoutManager.textViewportLayoutController.layoutViewport()
-            lastViewportBounds = viewportBounds(for: textLayoutManager.textViewportLayoutController)
             if !needsRelayout { break }
             iterations -= 1
         }
