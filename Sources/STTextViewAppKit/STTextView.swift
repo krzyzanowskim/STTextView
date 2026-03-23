@@ -626,7 +626,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         if liveResizeLayoutSuppression {
             let controller = textLayoutManager.textViewportLayoutController
             let newBounds = viewportBounds(for: controller)
-            return !newBounds.isAlmostEqual(to: lastViewportBounds)
+            let currentViewportBounds = controller.viewportBounds
+
+            let verticallyContained =
+                newBounds.minY >= currentViewportBounds.minY &&
+                newBounds.maxY <= currentViewportBounds.maxY
+
+            return !verticallyContained
         }
         return true
     }
@@ -990,6 +996,15 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         let oldPreparedContentRect = preparedContentRect
 
         var rect = rect
+
+        // Add a modest upward overdraw band so small viewport shifts can stay
+        // within the already prepared content during scrolling/live resize.
+        let verticalPrepExpansion = rect.height * 0.5
+        if verticalPrepExpansion > 0 {
+            let upwardShift = min(verticalPrepExpansion, max(0, rect.minY))
+            rect.origin.y -= upwardShift
+            rect.size.height += upwardShift
+        }
 
         // Expand content to the full width.
         // This affects viewport
