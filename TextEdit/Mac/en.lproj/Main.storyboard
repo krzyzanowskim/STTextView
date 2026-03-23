@@ -732,10 +732,10 @@
             </objects>
             <point key="canvasLocation" x="93" y="307"/>
         </scene>
-        <!--View Controller-->
+        <!--Primary Text Edit View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="TextEdit" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="XfG-lQ-9wD" customClass="PrimaryTextEditViewController" customModule="TextEdit" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
                         <rect key="frame" x="0.0" y="0.0" width="500" height="500"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -744,6 +744,69 @@
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="74" y="895"/>
+        </scene>
+        <!--Secondary Window Controller-->
+        <scene sceneID="Rov-Ka-qw9">
+            <objects>
+                <windowController storyboardIdentifier="SecondaryWindowController" showSeguePresentationStyle="single" id="M4L-cA-kVd" sceneMemberID="viewController">
+                    <window key="window" title="TextEdit" subtitle="Rich Text" separatorStyle="shadow" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" visibleAtLaunch="NO" animationBehavior="default" tabbingMode="disallowed" id="Z9b-0N-U2K">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
+                        <windowCollectionBehavior key="collectionBehavior" fullScreenNone="YES"/>
+                        <rect key="contentRect" x="960" y="310" width="500" height="400"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <value key="minSize" type="size" width="300" height="100"/>
+                        <toolbar key="toolbar" implicitIdentifier="27841405-00EC-44EF-BF4E-95EAB0136D5D" autosavesConfiguration="NO" allowsUserCustomization="NO" showsBaselineSeparator="NO" displayMode="iconAndLabel" sizeMode="regular" id="mRH-u1-t8W">
+                            <allowedToolbarItems>
+                                <toolbarItem implicitItemIdentifier="2037E2A9-680A-4B7A-A839-C5A6AAB47961" label="Wrap" paletteLabel="Text Wrapping" tag="-1" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="J4o-U0-7ag">
+                                    <imageReference key="image" image="text.justify.leading" catalog="system" symbolScale="large"/>
+                                    <connections>
+                                        <action selector="toggleTextWrapMode:" target="Gip-vY-A5T" id="e7f-9j-C5Q"/>
+                                    </connections>
+                                </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="347F9A0A-3693-44D4-A2DB-1D42CCBF8F4E" label="Invisibles" paletteLabel="Invisible Characters" tag="-1" image="dot.viewfinder" catalog="system" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="X8q-kc-PvV">
+                                    <connections>
+                                        <action selector="toggleInvisibles:" target="Gip-vY-A5T" id="QXz-1x-aRk"/>
+                                    </connections>
+                                </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="D5D3A16B-4D73-41A3-8B8C-90D1CBA8A241" label="Gutter" paletteLabel="Line numbers" tag="-1" image="list.number" catalog="system" bordered="YES" sizingBehavior="auto" autovalidates="NO" id="h6a-S2-eSY">
+                                    <connections>
+                                        <action selector="toggleRuler:" target="Gip-vY-A5T" id="bpj-X8-9kX"/>
+                                    </connections>
+                                </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="hAQ-4g-nWr"/>
+                                <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="JQH-Dn-Q8f"/>
+                            </allowedToolbarItems>
+                            <defaultToolbarItems>
+                                <toolbarItem reference="JQH-Dn-Q8f"/>
+                                <toolbarItem reference="h6a-S2-eSY"/>
+                                <toolbarItem reference="X8q-kc-PvV"/>
+                                <toolbarItem reference="J4o-U0-7ag"/>
+                            </defaultToolbarItems>
+                        </toolbar>
+                        <connections>
+                            <outlet property="delegate" destination="M4L-cA-kVd" id="p5Q-BL-eGx"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="Q2X-Lq-ZbP" kind="relationship" relationship="window.shadowedContentViewController" id="6tQ-qb-Zd8"/>
+                    </connections>
+                </windowController>
+                <customObject id="Gip-vY-A5T" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="596" y="307"/>
+        </scene>
+        <!--Secondary Text Edit View Controller-->
+        <scene sceneID="M8m-aH-d9s">
+            <objects>
+                <viewController id="Q2X-Lq-ZbP" customClass="SecondaryTextEditViewController" customModule="TextEdit" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="cA3-rs-6uC">
+                        <rect key="frame" x="0.0" y="0.0" width="500" height="500"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                    </view>
+                </viewController>
+                <customObject id="oFb-bj-k3P" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="596" y="895"/>
         </scene>
     </scenes>
     <resources>

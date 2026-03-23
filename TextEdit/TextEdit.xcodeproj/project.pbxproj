@@ -8,8 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		75055B6C2A5C9F3A00595DC2 /* CompletionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75055B6B2A5C9F3A00595DC2 /* CompletionItem.swift */; platformFilters = (macos, ); };
+		7523FA5A2D1E130700A1B2C3 /* TextAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7523FA592D1E130700A1B2C3 /* TextAttachments.swift */; platformFilters = (macos, ); };
+		752A4E5F2D1E100100A1B2C3 /* PrimaryTextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752A4E5C2D1E100100A1B2C3 /* PrimaryTextEditViewController.swift */; platformFilters = (macos, ); };
+		752A4E602D1E100100A1B2C3 /* SecondaryTextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752A4E5D2D1E100100A1B2C3 /* SecondaryTextEditViewController.swift */; platformFilters = (macos, ); };
 		7544423B27B9332E00901C0E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7544423A27B9332E00901C0E /* AppDelegate.swift */; platformFilters = (macos, ); };
-		7544423D27B9332E00901C0E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7544423C27B9332E00901C0E /* ViewController.swift */; platformFilters = (macos, ); };
 		7544423F27B9332F00901C0E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7544423E27B9332F00901C0E /* Assets.xcassets */; };
 		7544424227B9332F00901C0E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7544424027B9332F00901C0E /* Main.storyboard */; platformFilters = (macos, ); };
 		7544424A27B9387300901C0E /* content.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7544424927B9387300901C0E /* content.txt */; };
@@ -24,9 +26,11 @@
 
 /* Begin PBXFileReference section */
 		75055B6B2A5C9F3A00595DC2 /* CompletionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionItem.swift; sourceTree = "<group>"; };
+		7523FA592D1E130700A1B2C3 /* TextAttachments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextAttachments.swift; sourceTree = "<group>"; };
+		752A4E5C2D1E100100A1B2C3 /* PrimaryTextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryTextEditViewController.swift; sourceTree = "<group>"; };
+		752A4E5D2D1E100100A1B2C3 /* SecondaryTextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryTextEditViewController.swift; sourceTree = "<group>"; };
 		7544423727B9332E00901C0E /* Text Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Text Editor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7544423A27B9332E00901C0E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		7544423C27B9332E00901C0E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7544423E27B9332F00901C0E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7544424327B9332F00901C0E /* TextEdit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TextEdit.entitlements; sourceTree = "<group>"; };
 		7544424927B9387300901C0E /* content.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = content.txt; sourceTree = "<group>"; };
@@ -94,7 +98,9 @@
 			isa = PBXGroup;
 			children = (
 				7544423A27B9332E00901C0E /* AppDelegate.swift */,
-				7544423C27B9332E00901C0E /* ViewController.swift */,
+				752A4E5C2D1E100100A1B2C3 /* PrimaryTextEditViewController.swift */,
+				752A4E5D2D1E100100A1B2C3 /* SecondaryTextEditViewController.swift */,
+				7523FA592D1E130700A1B2C3 /* TextAttachments.swift */,
 				75055B6B2A5C9F3A00595DC2 /* CompletionItem.swift */,
 				75BC2F7F2A62C86C00580249 /* Tokenizer.swift */,
 				7544424027B9332F00901C0E /* Main.storyboard */,
@@ -192,7 +198,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7544423D27B9332E00901C0E /* ViewController.swift in Sources */,
+				752A4E5F2D1E100100A1B2C3 /* PrimaryTextEditViewController.swift in Sources */,
+				752A4E602D1E100100A1B2C3 /* SecondaryTextEditViewController.swift in Sources */,
+				7523FA5A2D1E130700A1B2C3 /* TextAttachments.swift in Sources */,
 				75BC2F802A62C86C00580249 /* Tokenizer.swift in Sources */,
 				75055B6C2A5C9F3A00595DC2 /* CompletionItem.swift in Sources */,
 				7544423B27B9332E00901C0E /* AppDelegate.swift in Sources */,
