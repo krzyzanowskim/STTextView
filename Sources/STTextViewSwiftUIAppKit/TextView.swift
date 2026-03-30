@@ -221,7 +221,10 @@ private struct TextViewRepresentable: NSViewRepresentable {
                 return
             }
 
-            selection = textView.selectedRange()
+            let newSelection = textView.selectedRange()
+            DispatchQueue.main.async { [weak self] in
+                self?.selection = newSelection
+            }
         }
 
     }
