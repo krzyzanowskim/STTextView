@@ -32,7 +32,7 @@ extension STTextView {
                                     ),
                                     size: CGSize(
                                         width: textSegmentFrame.width,
-                                        height: typingLineHeight
+                                        height: textSegmentFrame.height
                                     )
                                 )
                             )

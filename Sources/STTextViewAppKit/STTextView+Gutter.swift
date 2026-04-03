@@ -117,7 +117,7 @@ extension STTextView {
                     ),
                     size: CGSize(
                         width: gutterView.containerView.frame.width,
-                        height: typingLineHeight
+                        height: selectionFrame.height
                     )
                 ).pixelAligned
 

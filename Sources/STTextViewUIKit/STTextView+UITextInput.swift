@@ -285,7 +285,7 @@ extension STTextView: UITextInput {
                             ),
                             size: CGSize(
                                 width: textSegmentFrame.width,
-                                height: typingLineHeight
+                                height: textSegmentFrame.height
                             )
                         )
                     )
@@ -328,7 +328,7 @@ extension STTextView: UITextInput {
                 x: selectionFrame.origin.x - 1,
                 y: selectionFrame.origin.y,
                 width: max(2, selectionFrame.width),
-                height: typingLineHeight
+                height: selectionFrame.height
             ).moved(by: contentView.frame.origin).pixelAligned
         }
 

@@ -12,25 +12,20 @@ extension STTextView {
     /// - Returns: `true` if the scroll was performed, `false` otherwise.
     @discardableResult
     func scrollToVisible(_ textRange: NSTextRange, type: NSTextLayoutManager.SegmentType) -> Bool {
-        guard var rect = textLayoutManager.textSegmentFrame(in: textRange, type: type) else {
+        guard var segmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: type) else {
             return false
         }
 
-        if rect.width.isZero {
+        if segmentFrame.width.isZero {
             // Add padding around the point to ensure visibility
             // since the width of the segment is 0 for a caret
-            rect = rect.insetBy(dx: -textContainer.lineFragmentPadding, dy: 0)
-        }
-
-        // Ensure minimum height for visibility
-        if rect.height < typingLineHeight {
-            rect.size.height = typingLineHeight
+            segmentFrame = segmentFrame.insetBy(dx: -textContainer.lineFragmentPadding, dy: 0)
         }
 
         // Adjust for content view offset
-        rect = rect.offsetBy(dx: contentView.frame.origin.x, dy: contentView.frame.origin.y)
+        segmentFrame = segmentFrame.offsetBy(dx: contentView.frame.origin.x, dy: contentView.frame.origin.y)
 
-        scrollRectToVisible(rect, animated: false)
+        scrollRectToVisible(segmentFrame, animated: false)
         return true
     }
 
@@ -41,23 +36,22 @@ extension STTextView {
             return
         }
 
-        guard var rect = textLayoutManager.textSegmentFrame(in: textRange, type: .standard) else {
+        guard var segmentFrame = textLayoutManager.textSegmentFrame(in: textRange, type: .standard) else {
             return
         }
 
-        if rect.width.isZero {
+        if segmentFrame.width.isZero {
             // Add padding for caret visibility
-            rect = rect.insetBy(dx: -textContainer.lineFragmentPadding, dy: 0)
+            segmentFrame = segmentFrame.insetBy(dx: -textContainer.lineFragmentPadding, dy: 0)
         }
 
         // Ensure minimum dimensions
-        rect.size.height = max(rect.size.height, typingLineHeight)
-        rect.size.width = max(rect.size.width, 2)
+        segmentFrame.size.width = max(segmentFrame.size.width, 2)
 
         // Adjust for content view offset
-        rect = rect.offsetBy(dx: contentView.frame.origin.x, dy: contentView.frame.origin.y)
+        segmentFrame = segmentFrame.offsetBy(dx: contentView.frame.origin.x, dy: contentView.frame.origin.y)
 
-        scrollRectToVisible(rect, animated: animated)
+        scrollRectToVisible(segmentFrame, animated: animated)
     }
 
     /// Scrolls to make the specified range visible.

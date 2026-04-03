@@ -250,6 +250,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     // line height based on current typing font and current typing paragraph
+    // Not used since extraLineFragmentAttributes workaround fixed most of measurements
+    @available(*, deprecated, message: "Use STTextLayoutFragment metrics")
     var typingLineHeight: CGFloat {
         let font = typingAttributes[.font] as? NSFont ?? _defaultTypingAttributes[.font] as! NSFont
         let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? self._defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
@@ -1192,7 +1194,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                         ),
                         size: CGSize(
                             width: selectionView.bounds.width,
-                            height: typingLineHeight
+                            height: selectionFrame.height
                         )
                     ).pixelAligned
                 )

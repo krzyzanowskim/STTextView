@@ -467,6 +467,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     }
 
     // line height based on current typing font and current typing paragraph
+    @available(*, deprecated, message: "Use STTextLayoutFragment metrics")
     var typingLineHeight: CGFloat {
         let font = typingAttributes[.font] as? UIFont ?? _defaultTypingAttributes[.font] as! UIFont
         let paragraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? _defaultTypingAttributes[.paragraphStyle] as! NSParagraphStyle
@@ -1120,7 +1121,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
                     ),
                     size: CGSize(
                         width: contentView.frame.width,
-                        height: typingLineHeight
+                        height: selectionFrame.height
                     )
                 ).pixelAligned
             }
