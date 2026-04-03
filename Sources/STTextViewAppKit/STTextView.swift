@@ -378,6 +378,93 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Gutter view
     public var gutterView: STGutterView?
 
+    /// Extra whitespace inserted above line 1 by pushing text down via an exclusion path.
+    ///
+    /// TextKit 2 prepends `lineSpacing` to lines 2+ but NOT line 1, so without this the first line
+    /// starts at y=0 with no breathing room. An exclusion path at y=0 with height=`topContentInset`
+    /// pushes line 1 down by exactly `lineSpacing`, creating equal whitespace above line 1 as
+    /// between all other lines. This is preferable to `contentInsets.top` because the offset is
+    /// baked into layout itself — no scroll-position dependency (Xcode Preview always snapshots
+    /// at y=0, so a contentInsets approach makes the fix invisible in previews).
+    open var topContentInset: CGFloat = 0 {
+        didSet {
+            if topContentInset > 0 {
+                let exclusionRect = CGRect(x: 0, y: 0, width: 1e6, height: topContentInset)
+                textContainer.exclusionPaths = [NSBezierPath(rect: exclusionRect)]
+            } else {
+                textContainer.exclusionPaths = []
+            }
+            needsLayout = true
+        }
+    }
+
+    /// Fraction of the visible viewport height added as extra scrollable space below the last line.
+    ///
+    /// For example, `0.5` allows the last line to scroll up to the vertical midpoint of the editor
+    /// (half-page overscroll). Set to `0` (the default) to disable overscroll.
+    ///
+    /// The extra space is only appended when the text content already overflows the viewport,
+    /// so short documents that fit entirely on screen are not affected and show no scrollbar.
+    open var overscrollFraction: CGFloat = 0 {
+        didSet {
+            updateContentSizeIfNeeded()
+        }
+    }
+
+    /// Width of the custom gutter area. When greater than 0, ``contentView.frame.origin.x``
+    /// is offset by this amount, allowing custom gutter content without the built-in ``STGutterView``.
+    ///
+    /// Use together with ``gutterLineViewDataSource`` to supply a custom NSView per visible line.
+    /// When the built-in ``gutterView`` is present, its width takes precedence.
+    open var customGutterWidth: CGFloat = 0 {
+        didSet {
+            if customGutterWidth <= 0 {
+                customGutterContainerView?.removeFromSuperview()
+                customGutterContainerView = nil
+            }
+            needsLayout = true
+        }
+    }
+
+    /// A data source that provides custom views for each visible line in the gutter area.
+    ///
+    /// The data source is queried during layout for every line currently in the viewport.
+    /// Set ``customGutterWidth`` to reserve horizontal space for the gutter.
+    ///
+    /// - SeeAlso: ``STGutterLineViewDataSource``
+    open weak var gutterLineViewDataSource: (any STGutterLineViewDataSource)? {
+        didSet {
+            if gutterLineViewDataSource == nil {
+                customGutterContainerView?.removeFromSuperview()
+                customGutterContainerView = nil
+            }
+            needsLayout = true
+        }
+    }
+
+    /// Container view for custom gutter line views (created lazily during layout).
+    /// Access this after the first layout pass to apply additional styling.
+    public internal(set) var customGutterContainerView: NSView?
+
+    /// Background color for the custom gutter area.
+    /// Applied to the container view's backing layer.
+    open var customGutterBackgroundColor: NSColor? {
+        didSet {
+            customGutterContainerView?.layer?.backgroundColor = customGutterBackgroundColor?.cgColor
+        }
+    }
+
+    /// Color of the vertical separator drawn on the trailing edge of the custom gutter.
+    /// Set to `nil` to hide the separator.
+    open var customGutterSeparatorColor: NSColor? {
+        didSet { needsLayout = true }
+    }
+
+    /// Width of the trailing separator line. Default 2.
+    open var customGutterSeparatorWidth: CGFloat = 2 {
+        didSet { needsLayout = true }
+    }
+
     /// The highlight color of the selected line.
     ///
     /// Note: Needs ``highlightSelectedLine`` to be set to `true`
@@ -514,7 +601,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     let selectionView: STSelectionView
 
     var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
-    var lastUsedFragmentViews: Set<STTextLayoutFragmentView> = []
+    var lastUsedFragments: Set<NSTextLayoutFragment> = []
     private var _usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
     lazy var _speechSynthesizer = AVSpeechSynthesizer()
@@ -974,7 +1061,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     override open var intrinsicContentSize: NSSize {
         // usageBoundsForTextContainer already includes lineFragmentPadding via STTextLayoutManager workaround
         let textSize = textLayoutManager.usageBoundsForTextContainer.size
-        let gutterWidth = gutterView?.frame.width ?? 0
+        let gutterWidth = gutterView?.frame.width ?? customGutterWidth
 
         return NSSize(
             width: textSize.width + gutterWidth,
@@ -1388,7 +1475,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             return
         }
 
-        let gutterWidth = gutterView?.frame.width ?? 0
+        let gutterWidth = gutterView?.frame.width ?? customGutterWidth
         let scrollerInset = proposedSize == nil ? (scrollView?.contentView.contentInsets.right ?? 0) : 0
         let referenceSize = proposedSize ?? effectiveVisibleRect.size
 
@@ -1451,7 +1538,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             return false
         }
 
-        let gutterWidth = gutterView?.frame.width ?? 0
+        let gutterWidth = gutterView?.frame.width ?? customGutterWidth
         var newFrame = CGRect(origin: frame.origin, size: usageBoundsForTextContainerSize)
         newFrame.size.width += gutterWidth
 
@@ -1473,8 +1560,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     override open func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
 
-        // contentView should always fill the entire STTextView
-        contentView.frame.origin.x = gutterView?.frame.width ?? 0
+        // contentView should always fill the entire STTextView.
+        // Built-in gutterView width takes precedence; fall back to customGutterWidth
+        // so that custom gutter views can offset the content without enabling showsLineNumbers.
+        contentView.frame.origin.x = gutterView?.frame.width ?? customGutterWidth
         contentView.frame.size = newSize
 
         updateTextContainerSize(proposedSize: newSize)
@@ -1503,7 +1592,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     func updateContentSizeIfNeeded() {
-        let gutterWidth = gutterView?.frame.width ?? 0
+        let gutterWidth = gutterView?.frame.width ?? customGutterWidth
         let scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
 
         var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
@@ -1532,6 +1621,16 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         if let scrollView {
             estimatedSize.width = max(estimatedSize.width, scrollView.contentView.bounds.width - scrollerInset)
+        }
+
+        // Apply overscroll: extend document height so the last line can scroll
+        // up to `overscrollFraction` of the viewport height from the top.
+        // Only when text already overflows the viewport — short documents are unaffected.
+        if isVerticallyResizable, overscrollFraction > 0, let scrollView {
+            let viewportHeight = scrollView.contentView.bounds.height
+            if estimatedSize.height > viewportHeight {
+                estimatedSize.height += viewportHeight * overscrollFraction
+            }
         }
 
         let newFrame = backingAlignedRect(

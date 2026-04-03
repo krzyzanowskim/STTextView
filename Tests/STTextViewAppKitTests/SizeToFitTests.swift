@@ -775,6 +775,196 @@
             XCTAssertGreaterThanOrEqual(stTextView.frame.width, textWidth + gutterWidth - 1, "Frame should include both text content and gutter")
         }
 
+        // MARK: - Custom Gutter Tests
+
+        @MainActor
+        func testSizeToFitIncludesCustomGutterWidth() {
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.isVerticallyResizable = true
+            stTextView.isHorizontallyResizable = true
+            stTextView.showsLineNumbers = false
+            stTextView.setString("Testing custom gutter width sizing")
+            stTextView.sizeToFit()
+
+            let frameWidthWithoutGutter = stTextView.frame.width
+
+            // Set custom gutter width (without built-in line numbers)
+            stTextView.customGutterWidth = 64
+            stTextView.sizeToFit()
+
+            let frameWidthWithCustomGutter = stTextView.frame.width
+
+            XCTAssertGreaterThan(frameWidthWithCustomGutter, frameWidthWithoutGutter, "Frame should be wider with custom gutter")
+            XCTAssertEqual(frameWidthWithCustomGutter, frameWidthWithoutGutter + 64, accuracy: 1.0, "Frame width should include custom gutter width")
+        }
+
+        @MainActor
+        func testIntrinsicContentSizeIncludesCustomGutterWidth() {
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.isVerticallyResizable = true
+            stTextView.isHorizontallyResizable = true
+            stTextView.showsLineNumbers = false
+            stTextView.setString("Testing intrinsic content size with custom gutter")
+            stTextView.sizeToFit()
+
+            let intrinsicWidthWithoutGutter = stTextView.intrinsicContentSize.width
+
+            stTextView.customGutterWidth = 80
+            stTextView.sizeToFit()
+
+            let intrinsicWidthWithCustomGutter = stTextView.intrinsicContentSize.width
+
+            XCTAssertGreaterThan(intrinsicWidthWithCustomGutter, intrinsicWidthWithoutGutter, "Intrinsic width should include custom gutter")
+            XCTAssertEqual(intrinsicWidthWithCustomGutter, intrinsicWidthWithoutGutter + 80, accuracy: 1.0, "Intrinsic width should grow by custom gutter width")
+        }
+
+        @MainActor
+        func testSizeToFitMatchesIntrinsicContentSizeWithCustomGutter() {
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.isVerticallyResizable = true
+            stTextView.isHorizontallyResizable = true
+            stTextView.showsLineNumbers = false
+            stTextView.customGutterWidth = 64
+            stTextView.setString("Consistency between sizeToFit and intrinsicContentSize")
+            stTextView.sizeToFit()
+
+            let intrinsicWidth = stTextView.intrinsicContentSize.width
+            let frameWidth = stTextView.frame.width
+
+            XCTAssertEqual(frameWidth, intrinsicWidth, accuracy: 1.0, "sizeToFit() frame width should match intrinsicContentSize width with custom gutter")
+        }
+
+        @MainActor
+        func testCustomGutterWidthResetRemovesOffset() {
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.isVerticallyResizable = true
+            stTextView.isHorizontallyResizable = true
+            stTextView.showsLineNumbers = false
+            stTextView.setString("Testing gutter removal")
+            stTextView.sizeToFit()
+
+            let frameWidthWithoutGutter = stTextView.frame.width
+
+            // Add custom gutter
+            stTextView.customGutterWidth = 64
+            stTextView.sizeToFit()
+            XCTAssertGreaterThan(stTextView.frame.width, frameWidthWithoutGutter)
+
+            // Remove custom gutter
+            stTextView.customGutterWidth = 0
+            stTextView.sizeToFit()
+
+            XCTAssertEqual(stTextView.frame.width, frameWidthWithoutGutter, accuracy: 1.0, "Frame should return to original width after removing custom gutter")
+        }
+
+        @MainActor
+        func testCustomGutterWithLongContent() {
+            let longLine = String(repeating: "x", count: 200)
+
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 300, height: 100)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.isVerticallyResizable = true
+            stTextView.isHorizontallyResizable = true
+            stTextView.showsLineNumbers = false
+            stTextView.customGutterWidth = 64
+            stTextView.setString(longLine)
+            stTextView.sizeToFit()
+
+            let textWidth = stTextView.textLayoutManager.usageBoundsForTextContainer.width
+
+            // Frame should be at least text width + custom gutter width
+            XCTAssertGreaterThanOrEqual(stTextView.frame.width, textWidth + 64 - 1, "Frame should include both text content and custom gutter")
+        }
+
+        @MainActor
+        func testDataSourceQueriedDuringLayout() {
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 300, height: 200)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.setString("Line 1\nLine 2\nLine 3")
+
+            var queriedLines: [(Int, String)] = []
+            let dataSource = TestGutterDataSource { lineNumber, content in
+                queriedLines.append((lineNumber, content))
+                let label = NSTextField(labelWithString: "\(lineNumber)")
+                return label
+            }
+
+            stTextView.customGutterWidth = 40
+            stTextView.gutterLineViewDataSource = dataSource
+            stTextView.layout()
+
+            XCTAssertFalse(queriedLines.isEmpty, "Data source should be queried during layout")
+            // All queried line numbers should be 1-based and positive
+            for (lineNumber, _) in queriedLines {
+                XCTAssertGreaterThan(lineNumber, 0, "Line numbers should be 1-based")
+            }
+        }
+
+        @MainActor
+        func testCustomGutterContainerCleanedUpWhenWidthZeroed() {
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 300, height: 200)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.setString("Hello")
+
+            let dataSource = TestGutterDataSource { _, _ in NSView() }
+            stTextView.customGutterWidth = 40
+            stTextView.gutterLineViewDataSource = dataSource
+            stTextView.layout()
+
+            XCTAssertNotNil(stTextView.customGutterContainerView, "Container should exist when custom gutter is configured")
+
+            // Disable the custom gutter
+            stTextView.customGutterWidth = 0
+
+            XCTAssertNil(stTextView.customGutterContainerView, "Container should be removed when custom gutter width is zeroed")
+        }
+
+        @MainActor
+        func testCustomGutterContainerCleanedUpWhenDataSourceNilled() {
+            let stTextView = STTextView()
+            stTextView.frame = CGRect(x: 0, y: 0, width: 300, height: 200)
+            stTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+            stTextView.setString("Hello")
+
+            let dataSource = TestGutterDataSource { _, _ in NSView() }
+            stTextView.customGutterWidth = 40
+            stTextView.gutterLineViewDataSource = dataSource
+            stTextView.layout()
+
+            XCTAssertNotNil(stTextView.customGutterContainerView, "Container should exist when custom gutter is configured")
+
+            // Nil the data source
+            stTextView.gutterLineViewDataSource = nil
+
+            XCTAssertNil(stTextView.customGutterContainerView, "Container should be removed when data source is nilled")
+        }
+
+    }
+
+    // MARK: - Test Helpers
+
+    /// A concrete ``STGutterLineViewDataSource`` for testing.
+    private class TestGutterDataSource: STGutterLineViewDataSource {
+        let factory: (Int, String) -> NSView
+
+        init(factory: @escaping (Int, String) -> NSView) {
+            self.factory = factory
+        }
+
+        func textView(_ textView: STTextView, viewForGutterLine lineNumber: Int, content: String) -> NSView {
+            factory(lineNumber, content)
+        }
     }
 
 #endif
