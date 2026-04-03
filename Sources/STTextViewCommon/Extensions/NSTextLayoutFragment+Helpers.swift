@@ -12,35 +12,6 @@ import STTextKitPlus
 public extension NSTextLayoutFragment {
 
     /// FB15131180 workaround: Extra line fragment's layoutFragmentFrame is miscalculated.
-    var stTypographicBounds: CGRect {
-        guard isExtraLineFragment else {
-            return layoutFragmentFrame
-        }
-
-        let fallbackLineHeight: CGFloat
-        if let textParagraph = textElement as? NSTextParagraph,
-           textParagraph.attributedString.length > 0 {
-            #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-                if let font = textParagraph.attributedString.attribute(.font, at: 0, effectiveRange: nil) as? NSFont {
-                    fallbackLineHeight = ceil(font.ascender - font.descender + font.leading)
-                } else {
-                    fallbackLineHeight = 14
-                }
-            #elseif canImport(UIKit)
-                if let font = textParagraph.attributedString.attribute(.font, at: 0, effectiveRange: nil) as? UIFont {
-                    fallbackLineHeight = ceil(font.ascender - font.descender + font.leading)
-                } else {
-                    fallbackLineHeight = 14
-                }
-            #endif
-        } else {
-            fallbackLineHeight = 14
-        }
-
-        return stTypographicBounds(fallbackLineHeight: fallbackLineHeight)
-    }
-
-    /// FB15131180 workaround: Extra line fragment's layoutFragmentFrame is miscalculated.
     func stTypographicBounds(fallbackLineHeight: CGFloat) -> CGRect {
         guard isExtraLineFragment else {
             return layoutFragmentFrame

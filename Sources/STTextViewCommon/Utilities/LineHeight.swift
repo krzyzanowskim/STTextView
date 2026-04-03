@@ -23,7 +23,7 @@ package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
     }
 
     // Compute line spacing before the line metrics hacks are applied.
-    var lineSpacing = round(ascent + descent + lineGap)
+    var lineSpacing = ceil(ascent + descent + lineGap)
 
     // Hack Hiragino line metrics to allow room for marked text underlines.
     if descent < 3, lineGap >= 3, familyName.hasPrefix("Hiragino") == true {
