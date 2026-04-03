@@ -295,25 +295,8 @@ extension STTextView: UITextInput {
                 let isAtEndLocation = textSegmentRange.location == documentRange.endLocation
                 guard !isAtEndLocation else {
                     // At the end of non-empty document
-
-                    // FB15131180: extra line fragment frame is not correct hence workaround location and height at extra line
-                    if let layoutFragment = textLayoutManager.extraLineTextLayoutFragment() {
-                        // at least 2 lines guaranteed at this point
-                        let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-                        textSelectionFrames.append(
-                            CGRect(
-                                origin: CGPoint(
-                                    x: textSegmentFrame.origin.x,
-                                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
-                                ),
-                                size: CGSize(
-                                    width: textSegmentFrame.width,
-                                    height: prevTextLineFragment.typographicBounds.height
-                                )
-                            )
-                        )
-                    } else if let prevLocation = textLayoutManager.location(textSegmentRange.endLocation, offsetBy: -1),
-                              let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation) {
+                    if let prevLocation = textLayoutManager.location(textSegmentRange.endLocation, offsetBy: -1),
+                       let prevTextLineFragment = textLayoutManager.textLineFragment(at: prevLocation) {
                         // Get insertion point height from the last-to-end (last) line fragment location
                         // since we're at the end location at this point.
                         textSelectionFrames.append(

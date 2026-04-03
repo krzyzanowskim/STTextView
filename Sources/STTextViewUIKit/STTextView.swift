@@ -797,18 +797,22 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         let horizontalTextContainerInset = textContainerInset.left + textContainerInset.right
         let verticalTextContainerInset = textContainerInset.top + textContainerInset.bottom
 
-        // Use existing layout data - don't force full document layout
-        var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
+        var estimatedSize = CGSize.zero
+        let documentEndLocation = textLayoutManager.documentRange.endLocation
 
-        // FB15131180 workaround: get accurate height from last layout fragment
-        // Use max() to avoid reducing height when lazy layout hasn't reached the end
-        // of document yet (the enumeration may find an earlier fragment, not the true last one)
         textLayoutManager.enumerateTextLayoutFragments(
-            from: textLayoutManager.documentRange.endLocation,
+            from: documentEndLocation,
             options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
         ) { layoutFragment in
-            estimatedSize.height = max(estimatedSize.height, layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY)
+            estimatedSize.width = max(estimatedSize.width, layoutFragment.layoutFragmentFrame.size.width)
             return false
+        }
+
+        let segmentRange = NSTextRange(location: documentEndLocation)
+        textLayoutManager.ensureLayout(for: segmentRange)
+        textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
+            estimatedSize.height = max(estimatedSize.height, rect.origin.y + rect.size.height)
+            return true
         }
 
         // Calculate frame based on resize mode
@@ -1145,39 +1149,19 @@ open class STTextView: UIScrollView, STTextViewProtocol {
                     )
 
                     if isLineSelected {
-                        let lineSelectionRectangle: CGRect
+                        var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                        lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
 
-                        if !textLineFragment.isExtraLineFragment {
-                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                            lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
-
-                            lineSelectionRectangle = CGRect(
-                                origin: CGPoint(
-                                    x: 0,
-                                    y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
-                                ),
-                                size: CGSize(
-                                    width: contentView.bounds.size.width,
-                                    height: lineFragmentFrame.height
-                                )
+                        let lineSelectionRectangle = CGRect(
+                            origin: CGPoint(
+                                x: 0,
+                                y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
+                            ),
+                            size: CGSize(
+                                width: contentView.bounds.size.width,
+                                height: lineFragmentFrame.height
                             )
-                        } else {
-                            // Workaround for FB15131180
-                            let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                            lineFragmentFrame.size.height = prevTextLineFragment.typographicBounds.height
-
-                            lineSelectionRectangle = CGRect(
-                                origin: CGPoint(
-                                    x: 0,
-                                    y: lineFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
-                                ),
-                                size: CGSize(
-                                    width: contentView.bounds.width,
-                                    height: lineFragmentFrame.height
-                                )
-                            )
-                        }
+                        )
 
                         if let rect = combinedFragmentsRect {
                             combinedFragmentsRect = rect.union(lineSelectionRectangle)

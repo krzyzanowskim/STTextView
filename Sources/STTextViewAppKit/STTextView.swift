@@ -1222,39 +1222,19 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                     )
 
                     if isLineSelected {
-                        let lineSelectionRectangle: CGRect
+                        var lineFragmentFrame = layoutFragment.layoutFragmentFrame
+                        lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
 
-                        if !textLineFragment.isExtraLineFragment {
-                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                            lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
-
-                            lineSelectionRectangle = CGRect(
-                                origin: CGPoint(
-                                    x: selectionView.bounds.minX,
-                                    y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
-                                ),
-                                size: CGSize(
-                                    width: selectionView.bounds.width,
-                                    height: lineFragmentFrame.height
-                                )
+                        let lineSelectionRectangle = CGRect(
+                            origin: CGPoint(
+                                x: selectionView.bounds.minX,
+                                y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
+                            ),
+                            size: CGSize(
+                                width: selectionView.bounds.width,
+                                height: lineFragmentFrame.height
                             )
-                        } else {
-                            // Workaround for FB15131180
-                            let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-                            var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                            lineFragmentFrame.size.height = prevTextLineFragment.typographicBounds.height
-
-                            lineSelectionRectangle = CGRect(
-                                origin: CGPoint(
-                                    x: selectionView.bounds.minX,
-                                    y: lineFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
-                                ),
-                                size: CGSize(
-                                    width: selectionView.bounds.width,
-                                    height: lineFragmentFrame.height
-                                )
-                            )
-                        }
+                        )
 
                         if let rect = combinedFragmentsRect {
                             combinedFragmentsRect = rect.union(lineSelectionRectangle)
@@ -1441,14 +1421,19 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
 
-        var usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
+        var usageBoundsForTextContainerSize = CGSize.zero
+        let documentEndLocation = textLayoutManager.documentRange.endLocation
 
-        textLayoutManager.enumerateTextLayoutFragments(from: textLayoutManager.documentRange.endLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-            // FB15131180 workaround: use stTypographicBounds instead of layoutFragmentFrame
-            // Use max() for safety in case enumeration doesn't find the true last fragment
-            let typoBounds = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight)
-            usageBoundsForTextContainerSize.height = max(usageBoundsForTextContainerSize.height, typoBounds.maxY)
+        textLayoutManager.enumerateTextLayoutFragments(from: documentEndLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
+            usageBoundsForTextContainerSize.width = max(usageBoundsForTextContainerSize.width, layoutFragment.layoutFragmentFrame.size.width)
             return false
+        }
+
+        let segmentRange = NSTextRange(location: documentEndLocation)
+        textLayoutManager.ensureLayout(for: segmentRange)
+        textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
+            usageBoundsForTextContainerSize.height = max(usageBoundsForTextContainerSize.height, rect.origin.y + rect.size.height)
+            return true
         }
 
         let gutterWidth = gutterView?.frame.width ?? 0
@@ -1506,18 +1491,22 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         let gutterWidth = gutterView?.frame.width ?? 0
         let scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
 
-        var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
+        var estimatedSize = CGSize.zero
+        let documentEndLocation = textLayoutManager.documentRange.endLocation
 
         textLayoutManager.enumerateTextLayoutFragments(
-            from: textLayoutManager.documentRange.endLocation,
+            from: documentEndLocation,
             options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
         ) { layoutFragment in
-            // FB15131180 workaround: use max() to avoid reducing height when lazy layout
-            // hasn't reached the end of document yet (the enumeration may find an earlier
-            // fragment, not the true last one)
-            let typoBounds = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight)
-            estimatedSize.height = max(estimatedSize.height, typoBounds.maxY)
+            estimatedSize.width = max(estimatedSize.width, layoutFragment.layoutFragmentFrame.size.width)
             return false
+        }
+
+        let segmentRange = NSTextRange(location: documentEndLocation)
+        textLayoutManager.ensureLayout(for: segmentRange)
+        textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
+            estimatedSize.height = max(estimatedSize.height, rect.origin.y + rect.size.height)
+            return true
         }
 
         if !isHorizontallyResizable {
@@ -1550,13 +1539,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         let suggestedAnchor = textViewportLayoutController.relocateViewport(to: location)
 
         var lastLineMaxY = suggestedAnchor
-        textLayoutManager.enumerateTextLayoutFragments(
-            from: location,
-            options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
-        ) { layoutFragment in
-            // FB15131180 workaround
-            lastLineMaxY = layoutFragment.stTypographicBounds(fallbackLineHeight: typingLineHeight).maxY
-            return false
+        let segmentRange = NSTextRange(location: location)
+        textLayoutManager.ensureLayout(for: segmentRange)
+        textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
+            lastLineMaxY = rect.origin.y + rect.size.height
+            return true
         }
 
         if !lastLineMaxY.isAlmostEqual(to: frame.height) {

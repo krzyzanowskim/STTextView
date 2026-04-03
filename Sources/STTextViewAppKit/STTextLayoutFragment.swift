@@ -5,16 +5,23 @@ import AppKit
 import STObjCLandShim
 
 final class STTextLayoutFragment: NSTextLayoutFragment {
-    private let defaultParagraphStyle: NSParagraphStyle
     var showsInvisibleCharacters = false
 
-    init(textElement: NSTextElement, range rangeInElement: NSTextRange?, paragraphStyle: NSParagraphStyle) {
-        self.defaultParagraphStyle = paragraphStyle
+    private let defaultParagraphStyle: NSParagraphStyle
+
+    /// Mapped to the `extraLineFragmentAttributes` ObjC selector so that
+    /// the internal typesetter picks up the correct font metrics (FB15131180).
+    @objc(extraLineFragmentAttributes)
+    dynamic var stExtraLineFragmentAttributes: NSDictionary?
+
+    init(textElement: NSTextElement, range rangeInElement: NSTextRange?, defaultTypingAttributes: [NSAttributedString.Key: Any]) {
+        self.defaultParagraphStyle = defaultTypingAttributes[.paragraphStyle] as? NSParagraphStyle ?? .default
         super.init(textElement: textElement, range: rangeInElement)
+        self.stExtraLineFragmentAttributes = defaultTypingAttributes as NSDictionary
     }
 
     required init?(coder: NSCoder) {
-        self.defaultParagraphStyle = NSParagraphStyle.default
+        self.defaultParagraphStyle = .default
         self.showsInvisibleCharacters = false
         super.init(coder: coder)
     }
@@ -56,13 +63,12 @@ final class STTextLayoutFragment: NSTextLayoutFragment {
 
         for lineFragment in textLineFragments {
             // Determine paragraph style. Either from the fragment string or default for the text view
-            // the ExtraLineFragment doesn't have information about typing attributes hence layout manager uses a default values - not from text view
-            let paragraphStyle: NSParagraphStyle = if !lineFragment.isExtraLineFragment,
-                                                      let lineParagraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+            let paragraphStyle: NSParagraphStyle = if !lineFragment.characterRange.isEmpty, let lineParagraphStyle = lineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
                 lineParagraphStyle
             } else {
                 self.defaultParagraphStyle
             }
+
 
             let offset = -(lineFragment.typographicBounds.height * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
             lineFragment.draw(at: point.moved(dx: lineFragment.typographicBounds.origin.x, dy: lineFragment.typographicBounds.origin.y + offset), in: context)
