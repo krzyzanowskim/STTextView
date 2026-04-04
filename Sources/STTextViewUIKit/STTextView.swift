@@ -389,7 +389,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     /// This dictionary contains the attribute keys (and corresponding values) to apply to newly typed text.
     /// When the text view’s selection changes, the contents of the dictionary are reset automatically.
     @objc
-    public internal(set) var typingAttributes: [NSAttributedString.Key: Any] {
+    public var typingAttributes: [NSAttributedString.Key: Any] {
         get {
             _typingAttributes.merging(_defaultTypingAttributes) { (current, _) in current }
         }
