@@ -9,6 +9,29 @@
 #endif
 
 package func calculateDefaultLineHeight(for font: CTFont) -> CGFloat {
+    #if canImport(AppKit) && !targetEnvironment(macCatalyst)
+        calculateAppKitDefaultLineHeight(for: font)
+    #elseif canImport(UIKit)
+        calculateUIKitDefaultLineHeight(for: font)
+    #else
+        calculateHeuristicDefaultLineHeight(for: font)
+    #endif
+}
+
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
+    private func calculateAppKitDefaultLineHeight(for font: CTFont) -> CGFloat {
+        NSLayoutManager().defaultLineHeight(for: font as NSFont)
+    }
+#endif
+
+#if canImport(UIKit)
+    private func calculateUIKitDefaultLineHeight(for font: CTFont) -> CGFloat {
+        let lineHeight = (font as UIFont).lineHeight
+        return lineHeight > 0 ? lineHeight : calculateHeuristicDefaultLineHeight(for: font)
+    }
+#endif
+
+private func calculateHeuristicDefaultLineHeight(for font: CTFont) -> CGFloat {
     let kLineHeightAdjustment: CGFloat = 0.15
     /// Heavily inspired by WebKit
     var ascent = CTFontGetAscent(font)
