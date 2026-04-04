@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.3.7] - 2026-04-04
+
+### Changed
+- CalculateDefaultLineHeight is not really used
+- Use layout fragment/selection heights instead of typingLineHeight; deprecate it
+- Fix extra-line metrics via extraLineFragmentAttributes (Simplify the FB15131180 workaround)
+- Use ceil for default line height and remove implicit stTypographicBounds var
+- Add secondary editor window on launch; rename/refactor primary VC; extract attachments
+- Remove unused lastViewportBounds tracking in STTextView
+- Suppress relayout when viewport is vertically contained; add upward prep band
+
 ## [2.3.6] - 2026-03-20
 
 ### Changed
