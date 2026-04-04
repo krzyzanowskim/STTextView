@@ -104,7 +104,7 @@ paragraph.lineHeightMultiple = 1.2
 paragraph.defaultTabInterval = 28
 
 // Default Paragraph style
-textView.typingAttributes[.paragraphStyle] = paragraph
+textView.defaultParagraphStyle = paragraph
 
 // Set default font
 textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
