@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.8] - 2026-04-09
+
+### Changed
+- Use emphasized/unemphasized selection colors and react to window key changes
+- Expose public setter for typingAttributes; update protocol and AppKit/UIKit
+
+### Fixed
+- Fix example code in README
+
 ## [2.3.7] - 2026-04-04
 
 ### Changed
