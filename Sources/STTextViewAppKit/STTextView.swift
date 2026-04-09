@@ -7,8 +7,8 @@
 //          |---gutterView
 //          |---contentView
 //              |---STInsertionPointView
-//              |---selectionView
-//                  |---(STLineHighlightView | SelectionHighlightView)
+//              |---selectionView (STSelectionView)
+//                  |---(STLineHighlightView | STSelectionHighlightView)
 //              |---contentViewportView
 //                  |---STTextLayoutFragmentView
 //

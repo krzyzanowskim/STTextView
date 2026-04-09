@@ -5,7 +5,10 @@ import AppKit
 
 final class STSelectionHighlightView: NSView {
 
-    var backgroundColor: NSColor? = .selectedTextBackgroundColor {
+    private static let emphasizedColor = NSColor.selectedTextBackgroundColor
+    private static let unemphasizedColor = NSColor.unemphasizedSelectedTextBackgroundColor
+
+    var backgroundColor: NSColor? {
         didSet {
             layer?.backgroundColor = backgroundColor?.cgColor
         }
@@ -36,6 +39,20 @@ final class STSelectionHighlightView: NSView {
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
             guard let self else { return }
             self.backgroundColor = self.backgroundColor
+        }
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+
+        self.backgroundColor = window?.isKeyWindow == true ? Self.emphasizedColor : Self.unemphasizedColor
+
+        NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] notification in
+            self?.backgroundColor = Self.emphasizedColor
+        }
+
+        NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: window, queue: .main) { [weak self] notification in
+            self?.backgroundColor = Self.unemphasizedColor
         }
     }
 }
