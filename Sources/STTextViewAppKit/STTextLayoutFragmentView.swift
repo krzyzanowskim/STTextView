@@ -86,17 +86,6 @@ final class STTextLayoutFragmentView: NSView {
         }
     }
 
-    private func findParentTextView() -> STTextView? {
-        var currentView: NSView? = self
-        while let parentView = currentView?.superview {
-            if let textView = parentView as? STTextView {
-                return textView
-            }
-            currentView = parentView
-        }
-        return nil
-    }
-
     private func configureAccessibilityForAttachmentView(_ attachmentView: NSView, provider: NSTextAttachmentViewProvider) {
         // Set up basic accessibility properties if not already configured
         if attachmentView.accessibilityRole() == nil {

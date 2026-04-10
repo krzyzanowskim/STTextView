@@ -180,7 +180,7 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
     }
 
     func drawCharacters(in range: NSRange, forContentView view: NSView) {
-        guard let textView = view.superview as? STTextView, textView == self.textView,
+        guard let textView = view.findParentTextView(), textView == self.textView,
               let textContentManager = textView.textLayoutManager.textContentManager,
               let textRange = NSTextRange(range, in: textContentManager),
               let context = NSGraphicsContext.current?.cgContext
