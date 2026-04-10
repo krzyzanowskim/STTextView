@@ -3,10 +3,10 @@
 
 import AppKit
 
-final class STSelectionHighlightView: NSView {
+private let emphasizedColor = NSColor.selectedTextBackgroundColor
+private let unemphasizedColor = NSColor.unemphasizedSelectedTextBackgroundColor
 
-    private static let emphasizedColor = NSColor.selectedTextBackgroundColor
-    private static let unemphasizedColor = NSColor.unemphasizedSelectedTextBackgroundColor
+final class STSelectionHighlightView: NSView {
 
     var backgroundColor: NSColor? {
         didSet {
@@ -38,21 +38,31 @@ final class STSelectionHighlightView: NSView {
         super.viewDidChangeEffectiveAppearance()
         effectiveAppearance.performAsCurrentDrawingAppearance { [weak self] in
             guard let self else { return }
-            self.backgroundColor = self.backgroundColor
+            self.updateBackgroundColor()
         }
     }
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
 
-        self.backgroundColor = window?.isKeyWindow == true ? Self.emphasizedColor : Self.unemphasizedColor
+        updateBackgroundColor()
 
-        NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] notification in
-            self?.backgroundColor = Self.emphasizedColor
+        NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] _ in
+            self?.updateBackgroundColor()
         }
 
-        NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: window, queue: .main) { [weak self] notification in
-            self?.backgroundColor = Self.unemphasizedColor
+        NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: window, queue: .main) { [weak self] _ in
+            self?.updateBackgroundColor()
         }
+    }
+
+    private func updateBackgroundColor() {
+        backgroundColor = shouldUseEmphasizedColor ? emphasizedColor : unemphasizedColor
+    }
+
+    private var shouldUseEmphasizedColor: Bool {
+        guard let window, window.isKeyWindow else { return false }
+        guard let textView = findParentTextView() else { return true }
+        return textView.isFirstResponder
     }
 }

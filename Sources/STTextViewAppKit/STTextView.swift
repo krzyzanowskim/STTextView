@@ -941,11 +941,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             NotificationCenter.default.post(name: NSText.didBeginEditingNotification, object: self, userInfo: nil)
         }
 
-        defer {
-            isFirstResponder = true
+        let result = super.becomeFirstResponder()
+        isFirstResponder = true
+        if isSelectable {
+            updateSelectedRangeHighlight()
+            updateSelectedLineHighlight()
         }
-
-        return super.becomeFirstResponder()
+        return result
     }
 
     override open func resignFirstResponder() -> Bool {
@@ -953,10 +955,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             NotificationCenter.default.post(name: NSText.didEndEditingNotification, object: self, userInfo: [NSText.didEndEditingNotification: NSTextMovement.other.rawValue])
         }
 
-        defer {
-            isFirstResponder = false
+        let result = super.resignFirstResponder()
+        isFirstResponder = false
+        if isSelectable {
+            updateSelectedRangeHighlight()
+            updateSelectedLineHighlight()
         }
-        return super.resignFirstResponder()
+        return result
     }
 
     /// Resigns the window’s key window status.
