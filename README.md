@@ -255,6 +255,7 @@ List of issues and bugs related to TextKit, NSTextView, AppKit, UIKit and relate
 - [FB19698121](https://gist.github.com/krzyzanowskim/4d831e0f44035b605768ff9d2a4c285e): TextKit 2 undocumented and unexpected behavior in textViewportLayoutControllerDidLayout
 - [FB21059465](https://gist.github.com/krzyzanowskim/d2c5d41b86096ccb19b110cf7a5514c8): NSScrollView horizontal floating subview does not respect insets 
 - [FB22523964](https://gist.github.com/krzyzanowskim/5c7e9088af2becc5ce446e49cb13cacd): UITextView does not apply contentScaleFactor to fragment view resulting in blurry drawing
+- [FB22524198](https://gist.github.com/krzyzanowskim/8f6a5eb39d9d2db70158cab0194b5878): NSTextLayoutFragment.extraLineFragmentAttributes is private API that makes impossible calculate extra line fragment correctly
 
 ... I'm aware that the list of issues is not complete. I managed to workaround most of the problems in STTextView.
 
