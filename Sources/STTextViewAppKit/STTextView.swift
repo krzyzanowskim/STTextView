@@ -619,7 +619,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
     }
 
-    var liveResizeLayoutSuppression = false
+    private var liveResizeLayoutSuppression = false
     private var inLayout = false
     private var needsRelayout = false
 

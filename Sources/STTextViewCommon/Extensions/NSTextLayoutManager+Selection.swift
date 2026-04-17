@@ -93,4 +93,13 @@ package extension NSTextLayoutManager {
         }
         return attributedString
     }
+
+    /// Return text range that intesect the rect
+    func textRange(in rect: CGRect) -> NSTextRange? {
+        if let startLocation = self.caretLocation(interactingAt: CGPoint(x: rect.minX, y: rect.minY), options: .allowOutside, inContainerAt: documentRange.location) {
+            let endLocation = self.caretLocation(interactingAt: CGPoint(x: rect.maxX, y: rect.maxY), options: .allowOutside, inContainerAt: documentRange.location)
+            return NSTextRange(location: startLocation, end: endLocation)
+        }
+        return nil
+    }
 }

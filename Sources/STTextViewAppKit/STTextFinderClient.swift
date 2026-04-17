@@ -140,14 +140,15 @@ final class STTextFinderClient: NSObject, NSTextFinderClient {
 
     /// An array of visible character ranges.
     var visibleCharacterRanges: [NSValue] {
-        guard let textLayoutManager = textView?.textLayoutManager,
-              let viewportTextRange = textLayoutManager.textViewportLayoutController.viewportRange,
+        guard let contentViewVisibleRect = textView?.contentView.visibleRect,
+              let textLayoutManager = textView?.textLayoutManager,
+              let visibleTextRange = textLayoutManager.textRange(in: contentViewVisibleRect),
               let textContentManager = textLayoutManager.textContentManager
         else {
             return []
         }
 
-        return [NSRange(viewportTextRange, in: textContentManager).nsValue]
+        return [NSRange(visibleTextRange, in: textContentManager).nsValue]
     }
 
     func rects(forCharacterRange range: NSRange) -> [NSValue]? {

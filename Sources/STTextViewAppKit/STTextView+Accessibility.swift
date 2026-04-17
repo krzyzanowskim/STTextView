@@ -113,8 +113,8 @@ extension STTextView {
     // NSAccessibilityStaticText
 
     override open func accessibilityVisibleCharacterRange() -> NSRange {
-        if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
-            return NSRange(viewportRange, in: textContentManager)
+        if let visibleTextRange = textLayoutManager.textRange(in: contentView.visibleRect) {
+            return NSRange(visibleTextRange, in: textContentManager)
         }
 
         return NSRange()
