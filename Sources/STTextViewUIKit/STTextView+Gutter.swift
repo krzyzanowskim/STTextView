@@ -197,7 +197,7 @@ extension STTextView {
                             y: lineFragmentFrame.origin.y
                         ),
                         size: CGSize(
-                            width: max(lineFragmentFrame.intersection(gutterView.containerView.frame).width, gutterView.containerView.frame.width),
+                            width: gutterView.containerView.frame.width,
                             height: lineFragmentFrame.size.height
                         )
                     ).pixelAligned

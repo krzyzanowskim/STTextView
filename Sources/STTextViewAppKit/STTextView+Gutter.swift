@@ -200,7 +200,7 @@ extension STTextView {
                             y: cellFrame.origin.y
                         ),
                         size: CGSize(
-                            width: max(cellFrame.intersection(gutterView.containerView.frame).width, gutterView.containerView.frame.width),
+                            width: gutterView.containerView.frame.width,
                             height: cellFrame.size.height
                         )
                     ).pixelAligned
