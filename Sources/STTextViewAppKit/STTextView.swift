@@ -1465,11 +1465,18 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     override open func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
 
+        // `super.setFrameSize` can synchronously fire `prepareContent`, which
+        // may recursively call back into `setFrameSize` with a different
+        // size. In that case `self.frame.size` no longer matches `newSize`;
+        // use the current frame so we don't stomp the recursive call's
+        // result and leave `contentView` pinned to the intermediate size.
+        let effectiveSize = frame.size
+
         // contentView should always fill the entire STTextView
         contentView.frame.origin.x = gutterView?.frame.width ?? 0
-        contentView.frame.size = newSize
+        contentView.frame.size = effectiveSize
 
-        updateTextContainerSize(proposedSize: newSize)
+        updateTextContainerSize(proposedSize: effectiveSize)
 
         if inLayout {
             needsRelayout = true
