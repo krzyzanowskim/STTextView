@@ -545,6 +545,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Automatically call ``cancelComplete(_:)`` when `true`.
     open var shouldDimissCompletionOnSelectionChange = true
 
+    var _completionTextChangeGeneration = 0
     var _completionTask: Task<Void, any Error>?
 
     /// Search-and-replace find interface inside a view.
@@ -1604,6 +1605,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Invoked automatically at the end of a series of changes, this method posts an `textDidChangeNotification` to the default notification center, which also results in the delegate receiving `textViewDidChangeText(_:)` message.
     /// Subclasses implementing methods that change their text should invoke this method at the end of those methods.
     open func didChangeText() {
+        _completionTextChangeGeneration += 1
 
         let notification = Notification(name: STTextView.textDidChangeNotification, object: self, userInfo: nil)
         NotificationCenter.default.post(notification)
