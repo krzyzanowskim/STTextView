@@ -421,6 +421,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     var _undoManager: UndoManager?
     var _yankingManager = YankingManager()
 
+    /// The Emacs-style mark set by `setMark(_:)` and consumed by
+    /// `selectToMark(_:)`, `swapWithMark(_:)` and `deleteToMark(_:)`.
+    var _mark: NSRange?
+
     var markedText: STMarkedText?
 
     /// The attributes used to draw marked text.
