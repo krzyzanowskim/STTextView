@@ -60,6 +60,7 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     public func textViewportLayoutControllerDidLayout(_ textViewportLayoutController: NSTextViewportLayoutController) {
         for staleView in lastUsedFragmentViews {
             staleView.removeFromSuperview()
+            fragmentViewMap.removeObject(forKey: staleView.layoutFragment)
         }
         lastUsedFragmentViews.removeAll()
 

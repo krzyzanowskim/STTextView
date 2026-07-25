@@ -9,7 +9,7 @@ import STTextKitPlus
 #endif
 
 final class STTextLayoutFragmentView: UIView {
-    private let layoutFragment: NSTextLayoutFragment
+    let layoutFragment: NSTextLayoutFragment
     private var layoutStateObservation: NSKeyValueObservation?
 
     init(layoutFragment: NSTextLayoutFragment, frame: CGRect) {
