@@ -42,27 +42,14 @@ package enum STGutterCalculations {
     ///   - layoutFragment: The layout fragment containing the line
     ///   - fragmentViewFrame: Optional frame of the rendered fragment view (for perfect alignment)
     ///   - contentOffset: Content offset for coordinate adjustment (UIKit scrolling, .zero for AppKit)
-    /// - Returns: (baselineYOffset, locationForFirstCharacter, cellFrame)
+    /// - Returns: cellFrame
     package static func calculateLineNumberMetrics(
         for textLineFragment: NSTextLineFragment,
         in layoutFragment: NSTextLayoutFragment,
         fragmentViewFrame: CGRect?,
         contentOffset: CGPoint = .zero
-    ) -> (baselineYOffset: CGFloat, locationForFirstCharacter: CGPoint, cellFrame: CGRect) {
-
-        var baselineYOffset: CGFloat = 0
-        let locationForFirstCharacter: CGPoint
+    ) -> CGRect {
         let cellFrame: CGRect
-
-        // Normal fragments: use fragment view frame if available, otherwise calculate
-        locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
-
-        if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
-            baselineYOffset = STGutterCalculations.calculateBaselineOffset(
-                lineHeight: textLineFragment.typographicBounds.pixelAligned.height,
-                paragraphStyle: paragraphStyle
-            )
-        }
 
         if let fragmentViewFrame {
             // Use the actual rendered fragment view frame for perfect alignment
@@ -103,7 +90,7 @@ package enum STGutterCalculations {
             #endif
         }
 
-        return (baselineYOffset, locationForFirstCharacter, cellFrame)
+        return cellFrame
     }
 
     /// Calculate baseline Y offset based on paragraph style line height multiple

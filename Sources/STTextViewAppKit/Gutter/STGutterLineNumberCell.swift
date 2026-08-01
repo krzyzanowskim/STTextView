@@ -7,10 +7,11 @@ import STTextViewCommon
 final class STGutterLineNumberCell: NSView {
     /// Line number
     let lineNumber: Int
-    let firstBaseline: CGFloat
     /// Y position from cell top to the visual center of the line number text
-    let textVisualCenter: CGFloat
+    var textVisualCenter: CGFloat { bounds.height / 2 }
     private let ctLine: CTLine
+    private let ascent: CGFloat
+    private let descent: CGFloat
     let textSize: CGSize
     var insets = STRulerInsets()
 
@@ -23,12 +24,11 @@ final class STGutterLineNumberCell: NSView {
     }
 
     override var firstBaselineOffsetFromTop: CGFloat {
-        firstBaseline
+        textVisualCenter + ((ascent - descent) / 2)
     }
 
-    init(firstBaseline: CGFloat, attributes: [NSAttributedString.Key: Any], number: Int) {
+    init(attributes: [NSAttributedString.Key: Any], number: Int) {
         self.lineNumber = number
-        self.firstBaseline = firstBaseline
 
         let attributedString = NSAttributedString(string: "\(number)", attributes: attributes)
         self.ctLine = CTLineCreateWithAttributedString(attributedString)
@@ -37,10 +37,8 @@ final class STGutterLineNumberCell: NSView {
         var ascent: CGFloat = 0
         var descent: CGFloat = 0
         let typographicsBoundsWidth = CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil)
-
-        // Calculate visual center: baseline + (descent - ascent) / 2
-        // This gives us the Y position from cell top to the visual middle of the text
-        self.textVisualCenter = firstBaseline + (descent - ascent) / 2
+        self.ascent = ascent
+        self.descent = descent
 
         if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle {
             let lineHeight = floor(ctLine.height() * paragraphStyle.stLineHeightMultiple)
@@ -83,8 +81,10 @@ final class STGutterLineNumberCell: NSView {
         ctx.saveGState()
         ctx.textMatrix = CGAffineTransform(scaleX: 1, y: isFlipped ? -1 : 1)
 
-        // align to right
-        ctx.textPosition = CGPoint(x: frame.width - (textSize.width + insets.trailing), y: firstBaseline)
+        ctx.textPosition = CGPoint(
+            x: bounds.width - (textSize.width + insets.trailing),
+            y: bounds.minY + firstBaselineOffsetFromTop
+        )
         CTLineDraw(ctLine, ctx)
         ctx.restoreGState()
     }

@@ -3,7 +3,6 @@
 
 import UIKit
 import STTextKitPlus
-import CoreTextSwift
 import STTextViewCommon
 
 extension STTextView {
@@ -81,20 +80,12 @@ extension STTextView {
             if let selectionFrame = textLayoutManager.textSegmentFrame(at: textLayoutManager.documentRange.location, type: .standard) {
                 let lineNumber = 1
 
-                // Use typingAttributes to calculate baseline position for empty document.
-                // The cell is sized for typingLineHeight, so baseline calculation should use typing font metrics
-                // to match where text baseline would be. Line number is still drawn with gutter font.
-                let ctNumberLine = CTLineCreateWithAttributedString(NSAttributedString(string: "\(lineNumber)", attributes: typingAttributes))
-                let baselineParagraphStyle = typingAttributes[.paragraphStyle] as? NSParagraphStyle ?? defaultParagraphStyle
-                let baselineOffset = -(ctNumberLine.typographicHeight() * (baselineParagraphStyle.stLineHeightMultiple - 1.0) / 2)
-
                 var effectiveLineTextAttributes = lineTextAttributes
                 if gutterView.highlightSelectedLine, !selectedLineTextAttributes.isEmpty {
                     effectiveLineTextAttributes.merge(selectedLineTextAttributes, uniquingKeysWith: { (_, new) in new })
                 }
 
                 let numberCell = STGutterLineNumberCell(
-                    firstBaseline: ctNumberLine.typographicBounds().ascent - baselineOffset,
                     attributes: effectiveLineTextAttributes,
                     number: lineNumber
                 )
@@ -159,7 +150,7 @@ extension STTextView {
                     // Calculate positioning metrics
                     // Get the actual fragment view frame for pixel-perfect alignment
                     // Pass .zero for contentOffset since gutter now scrolls with content (no compensation needed)
-                    let (baselineYOffset, locationForFirstCharacter, lineFragmentFrame) = STGutterCalculations.calculateLineNumberMetrics(
+                    let lineFragmentFrame = STGutterCalculations.calculateLineNumberMetrics(
                         for: textLineFragment,
                         in: layoutFragment,
                         fragmentViewFrame: fragmentView.frame,
@@ -177,7 +168,6 @@ extension STTextView {
 
                     // Create and configure line number cell
                     let numberCell = STGutterLineNumberCell(
-                        firstBaseline: locationForFirstCharacter.y + baselineYOffset,
                         attributes: effectiveLineTextAttributes,
                         number: lineNumber
                     )

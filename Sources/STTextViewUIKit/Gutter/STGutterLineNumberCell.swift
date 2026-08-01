@@ -2,25 +2,30 @@
 //  https://github.com/krzyzanowskim/STTextView/blob/main/LICENSE.md
 
 import UIKit
+import CoreTextSwift
 import STTextViewCommon
 
 final class STGutterLineNumberCell: UIView {
     /// Line number
     let lineNumber: Int
-    let firstBaseline: CGFloat
     /// Y position from cell top to the visual center of the line number text
-    let textVisualCenter: CGFloat
+    var textVisualCenter: CGFloat { bounds.height / 2 }
     private let ctLine: CTLine
+    private let ascent: CGFloat
+    private let descent: CGFloat
     let textSize: CGSize
     var insets = STRulerInsets()
+
+    private var firstBaselineOffsetFromTop: CGFloat {
+        textVisualCenter + ((ascent - descent) / 2)
+    }
 
     override var debugDescription: String {
         "\(super.debugDescription) (number: \(lineNumber))"
     }
 
-    init(firstBaseline: CGFloat, attributes: [NSAttributedString.Key: Any], number: Int) {
+    init(attributes: [NSAttributedString.Key: Any], number: Int) {
         self.lineNumber = number
-        self.firstBaseline = firstBaseline
 
         let attributedString = NSAttributedString(string: "\(number)", attributes: attributes)
         self.ctLine = CTLineCreateWithAttributedString(attributedString)
@@ -29,10 +34,8 @@ final class STGutterLineNumberCell: UIView {
         var ascent: CGFloat = 0
         var descent: CGFloat = 0
         let typographicsBoundsWidth = CTLineGetTypographicBounds(ctLine, &ascent, &descent, nil)
-
-        // Calculate visual center: baseline + (descent - ascent) / 2
-        // This gives us the Y position from cell top to the visual middle of the text
-        self.textVisualCenter = firstBaseline + (descent - ascent) / 2
+        self.ascent = ascent
+        self.descent = descent
 
         if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle {
             let lineHeight = floor(ctLine.height() * paragraphStyle.stLineHeightMultiple)
@@ -66,8 +69,10 @@ final class STGutterLineNumberCell: UIView {
         ctx.saveGState()
         ctx.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
 
-        // align to right
-        ctx.textPosition = CGPoint(x: frame.width - (textSize.width + insets.trailing), y: firstBaseline)
+        ctx.textPosition = CGPoint(
+            x: bounds.width - (textSize.width + insets.trailing),
+            y: bounds.minY + firstBaselineOffsetFromTop
+        )
         CTLineDraw(ctLine, ctx)
         ctx.restoreGState()
     }
