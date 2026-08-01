@@ -106,6 +106,7 @@ extension STTextView {
                         height: selectionFrame.height
                     )
                 ).pixelAligned
+                numberCell.textCenterY = numberCell.bounds.midY
 
                 gutterView.containerView.addSubview(numberCell)
             }
@@ -151,6 +152,10 @@ extension STTextView {
                         for: textLineFragment,
                         in: layoutFragment
                     )
+                    let textLineFrame = STGutterCalculations.textLineFragmentFrame(
+                        for: textLineFragment,
+                        in: layoutFragment
+                    )
 
                     // Prepare text attributes
                     var effectiveLineTextAttributes = lineTextAttributes
@@ -186,6 +191,7 @@ extension STTextView {
                             height: lineNumberFrame.size.height
                         )
                     ).pixelAligned
+                    numberCell.textCenterY = textLineFrame.midY - numberCell.frame.minY
 
                     gutterView.containerView.addSubview(numberCell)
                     requiredWidthFitText = max(requiredWidthFitText, numberCell.intrinsicContentSize.width)

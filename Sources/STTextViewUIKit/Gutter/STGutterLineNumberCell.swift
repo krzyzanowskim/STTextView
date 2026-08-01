@@ -8,8 +8,9 @@ import STTextViewCommon
 final class STGutterLineNumberCell: UIView {
     /// Line number
     let lineNumber: Int
-    /// Y position from cell top to the visual center of the line number text
-    var textVisualCenter: CGFloat { bounds.height / 2 }
+    /// Y position from the cell's top edge to the visual center of the line number text.
+    var textCenterY: CGFloat = 0
+
     private let ctLine: CTLine
     private let ascent: CGFloat
     private let descent: CGFloat
@@ -17,7 +18,7 @@ final class STGutterLineNumberCell: UIView {
     var insets = STRulerInsets()
 
     private var firstBaselineOffsetFromTop: CGFloat {
-        textVisualCenter + ((ascent - descent) / 2)
+        textCenterY + ((ascent - descent) / 2)
     }
 
     override var debugDescription: String {

@@ -77,7 +77,7 @@ open class STGutterView: UIView {
     @Invalidating(.display)
     open var selectedLineTextColor: UIColor? = nil
 
-    open override var backgroundColor: UIColor? {
+    override open var backgroundColor: UIColor? {
         didSet {
             if backgroundColor == nil, _backgroundEffectView == nil {
                 let backgroundEffect = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
@@ -217,7 +217,7 @@ open class STGutterView: UIView {
                 marker.view.frame.size.height = lineNumberCell.textSize.height
                 marker.view.frame.origin.x = lineNumberCell.frame.size.width - marker.view.frame.size.width - 1.5 /* separator */
                 // Center marker vertically on the line number text
-                marker.view.frame.origin.y = lineNumberCell.frame.origin.y + lineNumberCell.textVisualCenter - (marker.view.frame.size.height / 2)
+                marker.view.frame.origin.y = lineNumberCell.frame.origin.y + lineNumberCell.textCenterY - (marker.view.frame.size.height / 2)
                 markerContainerView.addSubview(marker.view)
             }
         }
