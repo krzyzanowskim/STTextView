@@ -625,8 +625,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     private var liveResizeLayoutSuppression = false
-    private var inLayout = false
+    private var isLayingOutViewport = false
+    private var frameSizeChangeDepth = 0
     private var needsRelayout = false
+    private var pendingPluginViewportRange: NSTextRange?
+    private var isPluginViewportNotificationScheduled = false
 
     private var shouldUpdateLayout: Bool {
         if liveResizeLayoutSuppression {
@@ -1023,7 +1026,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         super.prepareContent(in: rect)
 
-        if !oldPreparedContentRect.isAlmostEqual(to: preparedContentRect) {
+        if !oldPreparedContentRect.isAlmostEqual(to: preparedContentRect), shouldUpdateLayout {
             // I'm pretty sure there is a TextKit2 issue with the processing layout synchronously.
             // It behaves as if it is always processed asynchronously in the background, and it can get clogged.
             // Until the background processing does not finish all the work, the values returned by the API is just bananas.
@@ -1346,27 +1349,22 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
     override open func layout() {
         super.layout()
-        layoutText()
+        let didLayout = layoutText()
 
-        if let action = postLayoutAction {
+        if didLayout, let action = postLayoutAction {
             postLayoutAction = nil
             action()
         }
     }
 
     /// Performs text layout including container sizing, viewport layout, and related updates.
-    private func layoutText() {
-        guard shouldUpdateLayout else { return }
-
-        inLayout = true
-        defer { inLayout = false }
-
-        updateTextContainerSize()
-        layoutViewport()
+    private func layoutText() -> Bool {
+        guard shouldUpdateLayout else { return false }
+        return layoutViewport()
     }
 
     func setNeedsLayoutSafe() {
-        if inLayout {
+        if isLayingOutViewport || frameSizeChangeDepth > 0 {
             needsRelayout = true
         } else if !needsLayout, !inLiveResize {
             needsLayout = true
@@ -1377,14 +1375,28 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         visibleRect.isInfinite ? bounds : visibleRect
     }
 
-    private func updateTextContainerSize(proposedSize: NSSize? = nil) {
+    private enum TextContainerSizeReference {
+        case visibleRect
+        case frame(NSSize)
+    }
+
+    @discardableResult
+    private func updateTextContainerSize(using sizeReference: TextContainerSizeReference = .visibleRect) -> Bool {
         guard !liveResizeLayoutSuppression else {
-            return
+            return false
         }
 
         let gutterWidth = gutterView?.frame.width ?? 0
-        let scrollerInset = proposedSize == nil ? (scrollView?.contentView.contentInsets.right ?? 0) : 0
-        let referenceSize = proposedSize ?? effectiveVisibleRect.size
+        let referenceSize: NSSize
+        let scrollerInset: CGFloat
+        switch sizeReference {
+        case .visibleRect:
+            referenceSize = effectiveVisibleRect.size
+            scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
+        case let .frame(size):
+            referenceSize = size
+            scrollerInset = 0
+        }
 
         var newTextContainerSize = textContainer.size
         if !isHorizontallyResizable {
@@ -1407,7 +1419,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         if !textContainer.size.isAlmostEqual(to: newTextContainerSize) {
             textContainer.size = newTextContainerSize
+            return true
         }
+
+        return false
     }
 
     /// Resizes the receiver to fit its text.
@@ -1450,7 +1465,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         newFrame.size.width += gutterWidth
 
         if !isHorizontallyResizable {
-            newFrame.size.width = textContainer.size.width
+            newFrame.size.width = frame.size.width
         }
 
         if !isVerticallyResizable {
@@ -1465,6 +1480,17 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     }
 
     override open func setFrameSize(_ newSize: NSSize) {
+        let previousSize = frame.size
+        frameSizeChangeDepth += 1
+        defer {
+            frameSizeChangeDepth -= 1
+
+            if frameSizeChangeDepth == 0, !isLayingOutViewport, needsRelayout, !inLiveResize {
+                needsRelayout = false
+                needsLayout = true
+            }
+        }
+
         super.setFrameSize(newSize)
 
         // `super.setFrameSize` can synchronously fire `prepareContent`, which
@@ -1474,25 +1500,53 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         // result and leave `contentView` pinned to the intermediate size.
         let effectiveSize = frame.size
 
-        // contentView should always fill the entire STTextView
-        contentView.frame.origin.x = gutterView?.frame.width ?? 0
-        contentView.frame.size = effectiveSize
+        let contentViewFrameChanged = updateContentViewFrame()
+        let textContainerSizeChanged = updateTextContainerSize(using: .frame(effectiveSize))
 
-        updateTextContainerSize(proposedSize: effectiveSize)
-
-        if inLayout {
+        if !previousSize.isAlmostEqual(to: effectiveSize) || contentViewFrameChanged || textContainerSizeChanged {
             needsRelayout = true
         }
     }
 
-    func layoutViewport() {
-        // Convergence loop - max 5 iterations
-        // If layout triggers changes that require re-layout, needsRelayout is set
+    @discardableResult
+    func layoutViewport() -> Bool {
+        guard !isLayingOutViewport, frameSizeChangeDepth == 0 else {
+            needsRelayout = true
+            return false
+        }
+
+        isLayingOutViewport = true
+        defer {
+            isLayingOutViewport = false
+
+            if needsRelayout, !inLiveResize {
+                needsLayout = true
+            }
+
+            if pendingPluginViewportRange != nil {
+                self.pendingPluginViewportRange = nil
+                notifyPluginsDidLayoutViewportLater()
+            }
+        }
+
+        let viewportLayoutController = textLayoutManager.textViewportLayoutController
         var iterations = 5
         while iterations > 0 {
             needsRelayout = false
-            textLayoutManager.textViewportLayoutController.layoutViewport()
-            if !needsRelayout { break }
+
+            updateContentViewFrame()
+            updateTextContainerSize()
+            viewportLayoutController.layoutViewport()
+            updateContentSizeIfNeeded()
+
+            if shouldRelocateViewportToDocumentEnd(viewportLayoutController) {
+                relocateViewport(to: textLayoutManager.documentRange.endLocation)
+                needsRelayout = true
+            }
+
+            if !needsRelayout {
+                break
+            }
             iterations -= 1
         }
 
@@ -1501,28 +1555,71 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                 logger.warning("layoutViewport() failed to converge after 5 iterations")
             }
         #endif
+
+        if iterations == 0 {
+            needsRelayout = true
+        }
+
+        if let viewportRange = pendingPluginViewportRange ?? viewportLayoutController.viewportRange {
+            pendingPluginViewportRange = nil
+            isPluginViewportNotificationScheduled = false
+            notifyPluginsDidLayoutViewport(viewportRange)
+        }
+
+        return true
+    }
+
+    func recordDidLayoutViewport(_ viewportRange: NSTextRange?) {
+        guard let viewportRange else {
+            return
+        }
+
+        if isLayingOutViewport {
+            pendingPluginViewportRange = viewportRange
+        } else {
+            notifyPluginsDidLayoutViewportLater()
+        }
+    }
+
+    private func notifyPluginsDidLayoutViewport(_ viewportRange: NSTextRange) {
+        for events in plugins.events {
+            events.didLayoutViewportHandler?(viewportRange)
+        }
+    }
+
+    private func notifyPluginsDidLayoutViewportLater() {
+        guard !isPluginViewportNotificationScheduled else {
+            return
+        }
+
+        isPluginViewportNotificationScheduled = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.isPluginViewportNotificationScheduled else {
+                return
+            }
+
+            self.isPluginViewportNotificationScheduled = false
+            if let viewportRange = self.textLayoutManager.textViewportLayoutController.viewportRange {
+                self.notifyPluginsDidLayoutViewport(viewportRange)
+            }
+        }
     }
 
     func updateContentSizeIfNeeded() {
         let gutterWidth = gutterView?.frame.width ?? 0
         let scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
 
-        var estimatedSize = CGSize.zero
-        let documentEndLocation = textLayoutManager.documentRange.endLocation
-
-        textLayoutManager.enumerateTextLayoutFragments(
-            from: documentEndLocation,
-            options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]
-        ) { layoutFragment in
-            estimatedSize.width = max(estimatedSize.width, layoutFragment.layoutFragmentFrame.size.width)
-            return false
-        }
-
-        let segmentRange = NSTextRange(location: documentEndLocation)
-        textLayoutManager.ensureLayout(for: segmentRange)
-        textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
-            estimatedSize.height = max(estimatedSize.height, rect.origin.y + rect.size.height)
-            return true
+        var estimatedSize: CGSize
+        if isVerticallyResizable {
+            let segmentRange = NSTextRange(location: textLayoutManager.documentRange.endLocation)
+            textLayoutManager.ensureLayout(for: segmentRange)
+            estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
+            textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
+                estimatedSize.height = max(estimatedSize.height, rect.origin.y + rect.size.height)
+                return true
+            }
+        } else {
+            estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
         }
 
         if !isHorizontallyResizable {
@@ -1549,6 +1646,37 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
     }
 
+    @discardableResult
+    private func updateContentViewFrame() -> Bool {
+        var newFrame = contentView.frame
+        newFrame.origin.x = gutterView?.frame.width ?? 0
+        newFrame.size = frame.size
+
+        guard !newFrame.isAlmostEqual(to: contentView.frame) else {
+            return false
+        }
+
+        contentView.frame = newFrame
+        return true
+    }
+
+    private func shouldRelocateViewportToDocumentEnd(_ viewportLayoutController: NSTextViewportLayoutController) -> Bool {
+        guard isVerticallyResizable,
+              let scrollView,
+              let documentView = scrollView.documentView,
+              scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
+              let viewportRange = viewportLayoutController.viewportRange,
+              let remainingRange = NSTextRange(
+                  location: viewportRange.endLocation,
+                  end: textLayoutManager.documentRange.endLocation
+              )
+        else {
+            return false
+        }
+
+        return !remainingRange.isEmpty
+    }
+
     func relocateViewport(to location: NSTextLocation) {
         let textViewportLayoutController = textLayoutManager.textViewportLayoutController
 
@@ -1562,7 +1690,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             return true
         }
 
-        if !lastLineMaxY.isAlmostEqual(to: frame.height) {
+        if isVerticallyResizable, !lastLineMaxY.isAlmostEqual(to: frame.height) {
             setFrameSize(CGSize(width: frame.width, height: lastLineMaxY))
         }
 

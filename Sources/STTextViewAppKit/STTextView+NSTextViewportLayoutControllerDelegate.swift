@@ -95,30 +95,12 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             staleView.removeFromSuperview()
             fragmentViewMap.removeObject(forKey: staleView.layoutFragment)
         }
-        lastUsedFragmentViews.removeAll()
-
-        if let viewportRange = textViewportLayoutController.viewportRange {
-            textLayoutManager.ensureLayout(for: viewportRange)
-        }
-
-        updateContentSizeIfNeeded()
-
-        // When scrolled to the end of the document, relocate viewport to ensure proper layout
-        if let scrollView, let documentView = scrollView.documentView, scrollView.contentView.bounds.maxY >= documentView.bounds.maxY,
-           let viewportRange = textViewportLayoutController.viewportRange,
-           let textRange = NSTextRange(location: viewportRange.endLocation, end: textLayoutManager.documentRange.endLocation), !textRange.isEmpty {
-            relocateViewport(to: textLayoutManager.documentRange.endLocation)
-        }
+        lastUsedFragmentViews.removeAll(keepingCapacity: true)
 
         updateSelectedRangeHighlight()
         updateSelectedLineHighlight()
         layoutGutter()
-
-        if let viewportRange = textViewportLayoutController.viewportRange {
-            for events in plugins.events {
-                events.didLayoutViewportHandler?(viewportRange)
-            }
-        }
+        recordDidLayoutViewport(textViewportLayoutController.viewportRange)
     }
 }
 
