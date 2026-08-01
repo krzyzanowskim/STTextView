@@ -626,24 +626,22 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
     private var liveResizeLayoutSuppression = false
     private var isLayingOutViewport = false
-    private var frameSizeChangeDepth = 0
     private var needsRelayout = false
     private var pendingPluginViewportRange: NSTextRange?
     private var isPluginViewportNotificationScheduled = false
+    private weak var observedScrollView: NSScrollView?
 
     private var shouldUpdateLayout: Bool {
         if liveResizeLayoutSuppression {
-            let controller = textLayoutManager.textViewportLayoutController
-            let newBounds = viewportBounds(for: controller)
-            let currentViewportBounds = controller.viewportBounds
-
-            let verticallyContained =
-                newBounds.minY >= currentViewportBounds.minY &&
-                newBounds.maxY <= currentViewportBounds.maxY
-
-            return !verticallyContained
+            return visibleBoundsRequireViewportLayout
         }
         return true
+    }
+
+    private var visibleBoundsRequireViewportLayout: Bool {
+        let visibleBounds = visibleContentBounds()
+        let viewportBounds = textLayoutManager.textViewportLayoutController.viewportBounds
+        return visibleBounds.minY < viewportBounds.minY || visibleBounds.maxY > viewportBounds.maxY
     }
 
     override open var isFlipped: Bool {
@@ -877,8 +875,28 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     override open func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
 
+        if let observedScrollView {
+            NotificationCenter.default.removeObserver(self, name: NSScrollView.didLiveScrollNotification, object: observedScrollView)
+            NotificationCenter.default.removeObserver(self, name: NSView.boundsDidChangeNotification, object: observedScrollView.contentView)
+        }
+
         if let scrollView {
-            NotificationCenter.default.addObserver(self, selector: #selector(didLiveScrollNotification(_:)), name: NSScrollView.didLiveScrollNotification, object: scrollView)
+            observedScrollView = scrollView
+            scrollView.contentView.postsBoundsChangedNotifications = true
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(didLiveScrollNotification(_:)),
+                name: NSScrollView.didLiveScrollNotification,
+                object: scrollView
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(didChangeScrollViewBoundsNotification(_:)),
+                name: NSView.boundsDidChangeNotification,
+                object: scrollView.contentView
+            )
+        } else {
+            observedScrollView = nil
         }
     }
 
@@ -1004,36 +1022,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
     override open class var isCompatibleWithResponsiveScrolling: Bool {
         false
-    }
-
-    override open func prepareContent(in rect: NSRect) {
-        let oldPreparedContentRect = preparedContentRect
-
-        var rect = rect
-
-        // Add a modest upward overdraw band so small viewport shifts can stay
-        // within the already prepared content during scrolling/live resize.
-        let verticalPrepExpansion = rect.height * 0.5
-        if verticalPrepExpansion > 0 {
-            let upwardShift = min(verticalPrepExpansion, max(0, rect.minY))
-            rect.origin.y -= upwardShift
-            rect.size.height += upwardShift
-        }
-
-        // Expand content to the full width.
-        // This affects viewport
-        rect.size.width = max(rect.width, frame.width)
-
-        super.prepareContent(in: rect)
-
-        if !oldPreparedContentRect.isAlmostEqual(to: preparedContentRect), shouldUpdateLayout {
-            // I'm pretty sure there is a TextKit2 issue with the processing layout synchronously.
-            // It behaves as if it is always processed asynchronously in the background, and it can get clogged.
-            // Until the background processing does not finish all the work, the values returned by the API is just bananas.
-            // It automatically fixes itself after a while. I wish the API express how it works.
-            // https://mastodon.social/@krzyzanowskim/115532735501211715
-            layoutViewport()
-        }
     }
 
     /// The current selection range of the text view.
@@ -1314,24 +1302,27 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         cancelComplete(notification.object)
     }
 
+    @objc private func didChangeScrollViewBoundsNotification(_: Notification) {
+        guard visibleBoundsRequireViewportLayout else {
+            return
+        }
+
+        setNeedsLayoutSafe(allowDuringLiveResize: true)
+    }
+
     override open func viewDidUnhide() {
         super.viewDidUnhide()
-        self.prepareContent(in: visibleRect) // layoutViewport() on change
+        setNeedsLayoutSafe()
     }
 
     override open func viewWillStartLiveResize() {
         super.viewWillStartLiveResize()
 
         let controller = textLayoutManager.textViewportLayoutController
-        if let viewportRange = controller.viewportRange {
+        if controller.viewportRange != nil {
             let currentViewportBounds = controller.viewportBounds
-            let charCount = textContentManager.offset(
-                from: textContentManager.documentRange.location,
-                to: viewportRange.endLocation
-            )
-
             let scrolledDown = currentViewportBounds.minY > currentViewportBounds.height * 0.7
-            let largeDocument = charCount >= 50000
+            let largeDocument = textContentManager.length >= 50000
 
             if scrolledDown || largeDocument {
                 liveResizeLayoutSuppression = true
@@ -1363,10 +1354,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         return layoutViewport()
     }
 
-    func setNeedsLayoutSafe() {
-        if isLayingOutViewport || frameSizeChangeDepth > 0 {
+    func setNeedsLayoutSafe(allowDuringLiveResize: Bool = false) {
+        if isLayingOutViewport {
             needsRelayout = true
-        } else if !needsLayout, !inLiveResize {
+        } else if !needsLayout, allowDuringLiveResize || !inLiveResize {
             needsLayout = true
         }
     }
@@ -1481,36 +1472,21 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
     override open func setFrameSize(_ newSize: NSSize) {
         let previousSize = frame.size
-        frameSizeChangeDepth += 1
-        defer {
-            frameSizeChangeDepth -= 1
-
-            if frameSizeChangeDepth == 0, !isLayingOutViewport, needsRelayout, !inLiveResize {
-                needsRelayout = false
-                needsLayout = true
-            }
-        }
-
         super.setFrameSize(newSize)
 
-        // `super.setFrameSize` can synchronously fire `prepareContent`, which
-        // may recursively call back into `setFrameSize` with a different
-        // size. In that case `self.frame.size` no longer matches `newSize`;
-        // use the current frame so we don't stomp the recursive call's
-        // result and leave `contentView` pinned to the intermediate size.
         let effectiveSize = frame.size
 
         let contentViewFrameChanged = updateContentViewFrame()
         let textContainerSizeChanged = updateTextContainerSize(using: .frame(effectiveSize))
 
         if !previousSize.isAlmostEqual(to: effectiveSize) || contentViewFrameChanged || textContainerSizeChanged {
-            needsRelayout = true
+            setNeedsLayoutSafe()
         }
     }
 
     @discardableResult
     func layoutViewport() -> Bool {
-        guard !isLayingOutViewport, frameSizeChangeDepth == 0 else {
+        guard !isLayingOutViewport else {
             needsRelayout = true
             return false
         }

@@ -23,34 +23,34 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
     }
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        let gutterWidth = gutterView?.frame.width ?? 0
+        var viewportBounds = visibleContentBounds()
 
-        // preparedContentRect is in STTextView (documentView) coords — shift to contentView coords
-        var prepared = preparedContentRect
-        prepared.origin.x += gutterWidth
-        prepared.size.width -= gutterWidth
+        // Keep a prefetch band around the visible area so small scrolls can
+        // reuse the current TextKit viewport.
+        let verticalPrefetch = viewportBounds.height * 0.5
+        let upwardPrefetch = min(verticalPrefetch, viewportBounds.minY)
+        viewportBounds.origin.y -= upwardPrefetch
+        viewportBounds.size.height += upwardPrefetch + verticalPrefetch
 
-        // visibleRect is already in contentView coords (contentView.origin.x = gutterWidth)
-        var visible = contentView.visibleRect
+        viewportBounds.origin.x = 0
+        viewportBounds.size.width = contentView.bounds.width
+        return viewportBounds
+    }
+
+    func visibleContentBounds() -> CGRect {
+        var viewportBounds = contentView.visibleRect
 
         // Clamp negative origins to 0 (handles overscroll bounce)
-        if visible.minX < 0 {
-            visible.size.width += visible.minX
-            visible.origin.x = 0
+        if viewportBounds.minX < 0 {
+            viewportBounds.size.width = max(0, viewportBounds.width + viewportBounds.minX)
+            viewportBounds.origin.x = 0
         }
-        if visible.minY < 0 {
-            visible.size.height += visible.minY
-            visible.origin.y = 0
+        if viewportBounds.minY < 0 {
+            viewportBounds.size.height = max(0, viewportBounds.height + viewportBounds.minY)
+            viewportBounds.origin.y = 0
         }
 
-        // Y-only union, width from contentView bounds
-        if prepared.intersects(visible) {
-            let minY = max(0, min(prepared.minY, visible.minY))
-            let maxY = max(prepared.maxY, visible.maxY)
-            return CGRect(x: 0, y: minY, width: contentView.bounds.width, height: maxY - minY)
-        } else {
-            return visible
-        }
+        return viewportBounds
     }
 
     public func textViewportLayoutController(_ textViewportLayoutController: NSTextViewportLayoutController, configureRenderingSurfaceFor textLayoutFragment: NSTextLayoutFragment) {
