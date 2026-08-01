@@ -54,96 +54,53 @@ package enum STGutterCalculations {
         let locationForFirstCharacter: CGPoint
         let cellFrame: CGRect
 
-        if layoutFragment.isExtraLineFragment {
-            // Extra line fragments require special handling due to FB15131180
-            // They don't have fragment views and need calculated positioning based on previous line
-            locationForFirstCharacter = STGutterCalculations.locationForFirstCharacter(
-                in: layoutFragment,
-                textLineFragment: textLineFragment,
-                isExtraTextLineFragment: textLineFragment.isExtraLineFragment
-            )
+        // Normal fragments: use fragment view frame if available, otherwise calculate
+        locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
 
-            if let paragraphStyle = STGutterCalculations.paragraphStyleForBaseline(
-                in: layoutFragment,
-                textLineFragment: textLineFragment,
-                isExtraTextLineFragment: textLineFragment.isExtraLineFragment
-            ) {
-                let lineHeight = textLineFragment.isExtraLineFragment
-                    ? layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2].typographicBounds.height
-                    : textLineFragment.typographicBounds.height
-                baselineYOffset = STGutterCalculations.calculateBaselineOffset(
-                    lineHeight: lineHeight,
-                    paragraphStyle: paragraphStyle
+        if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
+            baselineYOffset = STGutterCalculations.calculateBaselineOffset(
+                lineHeight: textLineFragment.typographicBounds.height,
+                paragraphStyle: paragraphStyle
+            )
+        }
+
+        if let fragmentViewFrame {
+            // Use the actual rendered fragment view frame for perfect alignment
+            cellFrame = CGRect(
+                origin: CGPoint(
+                    x: fragmentViewFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                    y: fragmentViewFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
+                ),
+                size: CGSize(
+                    width: fragmentViewFrame.width,
+                    height: fragmentViewFrame.height
                 )
-            }
-
-            let rawFrame = STGutterCalculations.calculateExtraLineFragmentFrame(
-                layoutFragment: layoutFragment,
-                textLineFragment: textLineFragment,
-                isExtraTextLineFragment: textLineFragment.isExtraLineFragment
             )
-
+        } else {
+            // Fallback to layout fragment frame if view not available yet
             #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-                cellFrame = rawFrame.pixelAligned
+                cellFrame = CGRect(
+                    origin: CGPoint(
+                        x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                        y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
+                    ),
+                    size: CGSize(
+                        width: layoutFragment.layoutFragmentFrame.width,
+                        height: layoutFragment.layoutFragmentFrame.height
+                    )
+                ).pixelAligned
             #else
                 cellFrame = CGRect(
                     origin: CGPoint(
-                        x: rawFrame.origin.x,
-                        y: rawFrame.origin.y - contentOffset.y
-                    ),
-                    size: rawFrame.size
-                )
-            #endif
-
-        } else {
-            // Normal fragments: use fragment view frame if available, otherwise calculate
-            locationForFirstCharacter = textLineFragment.locationForCharacter(at: 0)
-
-            if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
-                baselineYOffset = STGutterCalculations.calculateBaselineOffset(
-                    lineHeight: textLineFragment.typographicBounds.height,
-                    paragraphStyle: paragraphStyle
-                )
-            }
-
-            if let fragmentViewFrame {
-                // Use the actual rendered fragment view frame for perfect alignment
-                cellFrame = CGRect(
-                    origin: CGPoint(
-                        x: fragmentViewFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                        y: fragmentViewFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
+                        x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
+                        y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
                     ),
                     size: CGSize(
-                        width: fragmentViewFrame.width,
-                        height: fragmentViewFrame.height
+                        width: layoutFragment.layoutFragmentFrame.width,
+                        height: layoutFragment.layoutFragmentFrame.height
                     )
                 )
-            } else {
-                // Fallback to layout fragment frame if view not available yet
-                #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-                    cellFrame = CGRect(
-                        origin: CGPoint(
-                            x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                            y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
-                        ),
-                        size: CGSize(
-                            width: layoutFragment.layoutFragmentFrame.width,
-                            height: layoutFragment.layoutFragmentFrame.height
-                        )
-                    ).pixelAligned
-                #else
-                    cellFrame = CGRect(
-                        origin: CGPoint(
-                            x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                            y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
-                        ),
-                        size: CGSize(
-                            width: layoutFragment.layoutFragmentFrame.width,
-                            height: layoutFragment.layoutFragmentFrame.height
-                        )
-                    )
-                #endif
-            }
+            #endif
         }
 
         return (baselineYOffset, locationForFirstCharacter, cellFrame)
@@ -178,41 +135,6 @@ package enum STGutterCalculations {
                 result = result && (c1 || c2 || c3 || c4 || c5)
             }
             return partialResult && result
-        }
-    }
-
-    /// Calculate frame for extra line fragment using previous line fragment
-    /// Workaround for FB15131180 - invalid frame being reported for extra line fragments
-    package static func calculateExtraLineFragmentFrame(
-        layoutFragment: NSTextLayoutFragment,
-        textLineFragment: NSTextLineFragment,
-        isExtraTextLineFragment: Bool
-    ) -> CGRect {
-        if !isExtraTextLineFragment {
-            return CGRect(
-                origin: CGPoint(
-                    x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                    y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
-                ),
-                size: CGSize(
-                    width: textLineFragment.typographicBounds.width,
-                    height: textLineFragment.typographicBounds.height
-                )
-            )
-        } else {
-            // Use values from the same layoutFragment but previous line, that is not extra line fragment.
-            // Since this is extra line fragment, it is guaranteed that there is at least 2 line fragments in the layout fragment
-            let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-            return CGRect(
-                origin: CGPoint(
-                    x: layoutFragment.layoutFragmentFrame.origin.x + prevTextLineFragment.typographicBounds.origin.x,
-                    y: layoutFragment.layoutFragmentFrame.origin.y + prevTextLineFragment.typographicBounds.maxY
-                ),
-                size: CGSize(
-                    width: textLineFragment.typographicBounds.width,
-                    height: prevTextLineFragment.typographicBounds.height
-                )
-            )
         }
     }
 
