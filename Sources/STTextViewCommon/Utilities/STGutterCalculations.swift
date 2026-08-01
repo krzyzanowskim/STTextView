@@ -59,7 +59,7 @@ package enum STGutterCalculations {
 
         if let paragraphStyle = textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle {
             baselineYOffset = STGutterCalculations.calculateBaselineOffset(
-                lineHeight: textLineFragment.typographicBounds.height,
+                lineHeight: textLineFragment.typographicBounds.pixelAligned.height,
                 paragraphStyle: paragraphStyle
             )
         }
@@ -73,7 +73,7 @@ package enum STGutterCalculations {
                 ),
                 size: CGSize(
                     width: fragmentViewFrame.width,
-                    height: fragmentViewFrame.height
+                    height: textLineFragment.typographicBounds.pixelAligned.height
                 )
             )
         } else {
@@ -86,7 +86,7 @@ package enum STGutterCalculations {
                     ),
                     size: CGSize(
                         width: layoutFragment.layoutFragmentFrame.width,
-                        height: layoutFragment.layoutFragmentFrame.height
+                        height: textLineFragment.typographicBounds.pixelAligned.height
                     )
                 ).pixelAligned
             #else
@@ -97,7 +97,7 @@ package enum STGutterCalculations {
                     ),
                     size: CGSize(
                         width: layoutFragment.layoutFragmentFrame.width,
-                        height: layoutFragment.layoutFragmentFrame.height
+                        height: textLineFragment.typographicBounds.height
                     )
                 )
             #endif
