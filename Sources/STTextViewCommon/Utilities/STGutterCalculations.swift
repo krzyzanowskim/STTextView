@@ -13,92 +13,73 @@ import STTextKitPlus
 
 package enum STGutterCalculations {
 
-    /// Get visible fragment views from the map and sort by document order
+    /// Get visible layout fragments with live rendered views, sorted by document order.
     /// - Parameters:
     ///   - fragmentViewMap: Map of layout fragments to their rendered views
     ///   - viewportRange: The visible text range in the viewport
-    /// - Returns: Array of (layoutFragment, fragmentView) tuples sorted by document position
-    package static func visibleFragmentViewsInViewport<FragmentView>(
-        fragmentViewMap: NSMapTable<NSTextLayoutFragment, FragmentView>,
+    /// - Returns: Layout fragments sorted by document position
+    package static func visibleLayoutFragmentsInViewport(
+        fragmentViewMap: NSMapTable<NSTextLayoutFragment, some AnyObject>,
         viewportRange: NSTextRange
-    ) -> [(NSTextLayoutFragment, FragmentView)] {
-        (fragmentViewMap.keyEnumerator().allObjects as! [NSTextLayoutFragment])
-            .compactMap { layoutFragment -> (NSTextLayoutFragment, FragmentView)? in
-                guard let fragmentView = fragmentViewMap.object(forKey: layoutFragment),
+    ) -> [NSTextLayoutFragment] {
+        fragmentViewMap.keyEnumerator().allObjects
+            .compactMap { object -> NSTextLayoutFragment? in
+                guard let layoutFragment = object as? NSTextLayoutFragment,
+                      fragmentViewMap.object(forKey: layoutFragment) != nil,
                       layoutFragment.rangeInElement.intersects(viewportRange)
                 else {
                     return nil
                 }
-                return (layoutFragment, fragmentView)
+                return layoutFragment
             }
             .sorted { lhs, rhs in
-                lhs.0.rangeInElement.location.compare(rhs.0.rangeInElement.location) == .orderedAscending
+                lhs.rangeInElement.location.compare(rhs.rangeInElement.location) == .orderedAscending
             }
     }
 
-    /// Calculate positioning metrics for a line number cell
+    /// Calculate the frame of a text line fragment in the text layout coordinate space.
     /// - Parameters:
-    ///   - textLineFragment: The text line fragment to calculate metrics for
-    ///   - layoutFragment: The layout fragment containing the line
-    ///   - fragmentViewFrame: Optional frame of the rendered fragment view (for perfect alignment)
-    ///   - contentOffset: Content offset for coordinate adjustment (UIKit scrolling, .zero for AppKit)
-    /// - Returns: cellFrame
-    package static func calculateLineNumberMetrics(
+    ///   - textLineFragment: The text line fragment to calculate the frame for.
+    ///   - layoutFragment: The layout fragment containing the text line fragment.
+    /// - Returns: The unaligned frame. Pixel alignment belongs at the rendering edge.
+    package static func textLineFragmentFrame(
         for textLineFragment: NSTextLineFragment,
-        in layoutFragment: NSTextLayoutFragment,
-        fragmentViewFrame: CGRect?,
-        contentOffset: CGPoint = .zero
+        in layoutFragment: NSTextLayoutFragment
     ) -> CGRect {
-        let cellFrame: CGRect
-
-        if let fragmentViewFrame {
-            // Use the actual rendered fragment view frame for perfect alignment
-            cellFrame = CGRect(
-                origin: CGPoint(
-                    x: fragmentViewFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                    y: fragmentViewFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
-                ),
-                size: CGSize(
-                    width: fragmentViewFrame.width,
-                    height: textLineFragment.typographicBounds.pixelAligned.height
-                )
-            )
-        } else {
-            // Fallback to layout fragment frame if view not available yet
-            #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-                cellFrame = CGRect(
-                    origin: CGPoint(
-                        x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                        y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y
-                    ),
-                    size: CGSize(
-                        width: layoutFragment.layoutFragmentFrame.width,
-                        height: textLineFragment.typographicBounds.pixelAligned.height
-                    )
-                ).pixelAligned
-            #else
-                cellFrame = CGRect(
-                    origin: CGPoint(
-                        x: layoutFragment.layoutFragmentFrame.origin.x + textLineFragment.typographicBounds.origin.x,
-                        y: layoutFragment.layoutFragmentFrame.origin.y + textLineFragment.typographicBounds.origin.y - contentOffset.y
-                    ),
-                    size: CGSize(
-                        width: layoutFragment.layoutFragmentFrame.width,
-                        height: textLineFragment.typographicBounds.height
-                    )
-                )
-            #endif
-        }
-
-        return cellFrame
+        CGRect(
+            origin: CGPoint(
+                x: layoutFragment.layoutFragmentFrame.minX + textLineFragment.typographicBounds.minX,
+                y: layoutFragment.layoutFragmentFrame.minY + textLineFragment.typographicBounds.minY
+            ),
+            size: textLineFragment.typographicBounds.size
+        )
     }
 
-    /// Calculate baseline Y offset based on paragraph style line height multiple
-    package static func calculateBaselineOffset(
-        lineHeight: CGFloat,
-        paragraphStyle: NSParagraphStyle
-    ) -> CGFloat {
-        -(lineHeight * (paragraphStyle.stLineHeightMultiple - 1.0) / 2)
+    /// Calculate the frame represented by a line number cell.
+    ///
+    /// A regular line number represents the complete logical line, including every wrapped
+    /// text line fragment. An extra line fragment continues to use its own independent frame.
+    package static func lineNumberFrame(
+        for textLineFragment: NSTextLineFragment,
+        in layoutFragment: NSTextLayoutFragment
+    ) -> CGRect {
+        let representedFragments = textLineFragment.isExtraLineFragment
+            ? [textLineFragment]
+            : layoutFragment.textLineFragments.filter { !$0.isExtraLineFragment }
+
+        return representedFragments.dropFirst().reduce(
+            textLineFragmentFrame(
+                for: representedFragments.first ?? textLineFragment,
+                in: layoutFragment
+            )
+        ) { frame, fragment in
+            frame.union(
+                textLineFragmentFrame(
+                    for: fragment,
+                    in: layoutFragment
+                )
+            )
+        }
     }
 
     /// Determine if a line is selected based on text layout manager selections
@@ -125,32 +106,4 @@ package enum STGutterCalculations {
         }
     }
 
-    /// Get location for first character, handling extra line fragments
-    package static func locationForFirstCharacter(
-        in layoutFragment: NSTextLayoutFragment,
-        textLineFragment: NSTextLineFragment,
-        isExtraTextLineFragment: Bool
-    ) -> CGPoint {
-        if !isExtraTextLineFragment || !layoutFragment.isExtraLineFragment {
-            return textLineFragment.locationForCharacter(at: 0)
-        } else {
-            // Use previous line fragment for extra line fragments
-            let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-            return prevTextLineFragment.locationForCharacter(at: 0)
-        }
-    }
-
-    /// Get paragraph style for baseline calculations, handling extra line fragments
-    package static func paragraphStyleForBaseline(
-        in layoutFragment: NSTextLayoutFragment,
-        textLineFragment: NSTextLineFragment,
-        isExtraTextLineFragment: Bool
-    ) -> NSParagraphStyle? {
-        if !isExtraTextLineFragment || !layoutFragment.isExtraLineFragment {
-            return textLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
-        } else {
-            let prevTextLineFragment = layoutFragment.textLineFragments[layoutFragment.textLineFragments.count - 2]
-            return prevTextLineFragment.attributedString.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
-        }
-    }
 }

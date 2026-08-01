@@ -110,13 +110,13 @@ extension STTextView {
                 gutterView.containerView.addSubview(numberCell)
             }
         } else if let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange {
-            // Get visible fragment views from the map and sort by document order
-            let visibleFragmentViews = STGutterCalculations.visibleFragmentViewsInViewport(
+            // Get visible layout fragments from the map and sort by document order
+            let visibleLayoutFragments = STGutterCalculations.visibleLayoutFragmentsInViewport(
                 fragmentViewMap: fragmentViewMap,
                 viewportRange: viewportRange
             )
 
-            guard !visibleFragmentViews.isEmpty else {
+            guard !visibleLayoutFragments.isEmpty else {
                 return
             }
 
@@ -132,7 +132,7 @@ extension STTextView {
             let startLineIndex = textElementsBeforeViewport.count
             var linesCount = 0
 
-            for (layoutFragment, fragmentView) in visibleFragmentViews {
+            for layoutFragment in visibleLayoutFragments {
                 let contentRangeInElement = (layoutFragment.textElement as? NSTextParagraph)?.paragraphContentRange ?? layoutFragment.rangeInElement
 
                 // Only show line numbers for the first line fragment or extra line fragments
@@ -147,14 +147,9 @@ extension STTextView {
                         textLayoutManager: textLayoutManager
                     )
 
-                    // Calculate positioning metrics
-                    // Get the actual fragment view frame for pixel-perfect alignment
-                    // Pass .zero for contentOffset since gutter now scrolls with content (no compensation needed)
-                    let lineFragmentFrame = STGutterCalculations.calculateLineNumberMetrics(
+                    let lineNumberFrame = STGutterCalculations.lineNumberFrame(
                         for: textLineFragment,
-                        in: layoutFragment,
-                        fragmentViewFrame: fragmentView.frame,
-                        contentOffset: .zero
+                        in: layoutFragment
                     )
 
                     // Prepare text attributes
@@ -184,11 +179,11 @@ extension STTextView {
                     numberCell.frame = CGRect(
                         origin: CGPoint(
                             x: 0,
-                            y: lineFragmentFrame.origin.y
+                            y: lineNumberFrame.origin.y
                         ),
                         size: CGSize(
                             width: gutterView.containerView.frame.width,
-                            height: lineFragmentFrame.size.height
+                            height: lineNumberFrame.size.height
                         )
                     ).pixelAligned
 

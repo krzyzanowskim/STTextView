@@ -1234,13 +1234,15 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                     )
 
                     if isLineSelected {
-                        var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                        lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
+                        let lineFragmentFrame = STGutterCalculations.textLineFragmentFrame(
+                            for: textLineFragment,
+                            in: layoutFragment
+                        )
 
                         let lineSelectionRectangle = CGRect(
                             origin: CGPoint(
                                 x: selectionView.bounds.minX,
-                                y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
+                                y: lineFragmentFrame.minY
                             ),
                             size: CGSize(
                                 width: selectionView.bounds.width,

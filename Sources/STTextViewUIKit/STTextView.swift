@@ -1150,13 +1150,15 @@ open class STTextView: UIScrollView, STTextViewProtocol {
                     )
 
                     if isLineSelected {
-                        var lineFragmentFrame = layoutFragment.layoutFragmentFrame
-                        lineFragmentFrame.size.height = textLineFragment.typographicBounds.height
+                        let lineFragmentFrame = STGutterCalculations.textLineFragmentFrame(
+                            for: textLineFragment,
+                            in: layoutFragment
+                        )
 
                         let lineSelectionRectangle = CGRect(
                             origin: CGPoint(
                                 x: 0,
-                                y: lineFragmentFrame.origin.y + textLineFragment.typographicBounds.minY
+                                y: lineFragmentFrame.minY
                             ),
                             size: CGSize(
                                 width: contentView.bounds.size.width,
