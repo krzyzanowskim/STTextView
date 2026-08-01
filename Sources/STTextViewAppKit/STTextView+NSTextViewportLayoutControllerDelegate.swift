@@ -10,7 +10,10 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         lastUsedFragmentViews = Set(fragmentViewMap.objectEnumerator()?.allObjects as? [STTextLayoutFragmentView] ?? [])
 
         if ProcessInfo().environment["ST_LAYOUT_DEBUG"] == "YES" {
-            let viewportDebugView = NSView(frame: viewportBounds(for: textViewportLayoutController))
+            contentViewportView.subviews.removeAll { view in
+                view is ViewportDebugView
+            }
+            let viewportDebugView = ViewportDebugView(frame: viewportBounds(for: textViewportLayoutController))
             viewportDebugView.clipsToBounds = true
             viewportDebugView.wantsLayer = true
             viewportDebugView.layer?.borderColor = NSColor.magenta.cgColor
@@ -118,3 +121,5 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
         }
     }
 }
+
+private class ViewportDebugView: NSView { }
