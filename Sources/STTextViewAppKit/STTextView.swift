@@ -1435,13 +1435,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
         textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
 
-        var usageBoundsForTextContainerSize = CGSize.zero
+        var usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
         let documentEndLocation = textLayoutManager.documentRange.endLocation
-
-        textLayoutManager.enumerateTextLayoutFragments(from: documentEndLocation, options: [.reverse, .ensuresLayout, .ensuresExtraLineFragment]) { layoutFragment in
-            usageBoundsForTextContainerSize.width = max(usageBoundsForTextContainerSize.width, layoutFragment.layoutFragmentFrame.size.width)
-            return false
-        }
 
         let segmentRange = NSTextRange(location: documentEndLocation)
         textLayoutManager.ensureLayout(for: segmentRange)
