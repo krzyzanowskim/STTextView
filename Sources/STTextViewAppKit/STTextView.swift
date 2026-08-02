@@ -650,6 +650,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         let scrollView = NSScrollView(frame: frame)
         let textView = Self()
 
+        scrollView.clipsToBounds = true
         scrollView.wantsLayer = true
         scrollView.hasVerticalScroller = true
         scrollView.hasHorizontalScroller = true
