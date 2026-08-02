@@ -23,12 +23,12 @@ extension STTextView {
                 gutterView.backgroundColor = backgroundColor
                 self.addSubview(gutterView)
                 self.gutterView = gutterView
-                setNeedsLayout()
+                setNeedsViewportLayout()
             } else if newValue == false {
                 if let gutterView {
                     gutterView.removeFromSuperview()
                     self.gutterView = nil
-                    setNeedsLayout()
+                    setNeedsViewportLayout()
                 }
             }
             layoutGutter()
@@ -39,7 +39,17 @@ extension STTextView {
     }
 
     func layoutGutter() {
-        guard let gutterView, textLayoutManager.textViewportLayoutController.viewportRange != nil else {
+        guard gutterView != nil, textLayoutManager.textViewportLayoutController.viewportRange != nil else {
+            return
+        }
+
+        updateGutterFrame()
+        layoutGutterLineNumbers()
+        layoutGutterMarkers()
+    }
+
+    func updateGutterFrame() {
+        guard let gutterView else {
             return
         }
 
@@ -50,9 +60,6 @@ extension STTextView {
         gutterView.frame.origin.x = contentOffset.x
         gutterView.frame.origin.y = textContainerInset.top
         gutterView.frame.size.height = contentView.frame.height
-
-        layoutGutterLineNumbers()
-        layoutGutterMarkers()
     }
 
     private func layoutGutterLineNumbers() {
@@ -204,6 +211,7 @@ extension STTextView {
                 let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
                 if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne), newGutterWidth > gutterView.frame.size.width {
                     gutterView.frame.size.width = newGutterWidth
+                    setNeedsViewportLayout()
                 }
             }
         }
