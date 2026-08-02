@@ -632,10 +632,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     private weak var observedScrollView: NSScrollView?
 
     private var shouldUpdateLayout: Bool {
-        if liveResizeLayoutSuppression {
-            return visibleBoundsRequireViewportLayout
-        }
-        return true
+        !liveResizeLayoutSuppression || visibleBoundsRequireViewportLayout
     }
 
     private var visibleBoundsRequireViewportLayout: Bool {
@@ -1340,18 +1337,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
     override open func layout() {
         super.layout()
-        let didLayout = layoutText()
 
-        if didLayout, let action = postLayoutAction {
-            postLayoutAction = nil
-            action()
+        guard shouldUpdateLayout, layoutViewport(), let action = postLayoutAction else {
+            return
         }
-    }
 
-    /// Performs text layout including container sizing, viewport layout, and related updates.
-    private func layoutText() -> Bool {
-        guard shouldUpdateLayout else { return false }
-        return layoutViewport()
+        postLayoutAction = nil
+        action()
     }
 
     func setNeedsLayoutSafe(allowDuringLiveResize: Bool = false) {
@@ -1499,15 +1491,14 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                 needsLayout = true
             }
 
-            if pendingPluginViewportRange != nil {
+            if !needsRelayout, pendingPluginViewportRange != nil {
                 self.pendingPluginViewportRange = nil
                 notifyPluginsDidLayoutViewportLater()
             }
         }
 
         let viewportLayoutController = textLayoutManager.textViewportLayoutController
-        var iterations = 5
-        while iterations > 0 {
+        for _ in 0 ..< 5 {
             needsRelayout = false
 
             updateContentViewFrame()
@@ -1523,26 +1514,22 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             if !needsRelayout {
                 break
             }
-            iterations -= 1
         }
 
         #if DEBUG
-            if iterations == 0 {
+            if needsRelayout {
                 logger.warning("layoutViewport() failed to converge after 5 iterations")
             }
         #endif
 
-        if iterations == 0 {
-            needsRelayout = true
-        }
-
-        if let viewportRange = pendingPluginViewportRange ?? viewportLayoutController.viewportRange {
+        if !needsRelayout,
+           let viewportRange = pendingPluginViewportRange ?? viewportLayoutController.viewportRange {
             pendingPluginViewportRange = nil
             isPluginViewportNotificationScheduled = false
             notifyPluginsDidLayoutViewport(viewportRange)
         }
 
-        return true
+        return !needsRelayout
     }
 
     func recordDidLayoutViewport(_ viewportRange: NSTextRange?) {
