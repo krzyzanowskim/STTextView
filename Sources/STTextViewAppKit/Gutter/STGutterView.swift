@@ -180,17 +180,17 @@ open class STGutterView: NSView, NSDraggingSource {
     }
 
     override open func layout() {
-        super.layout()
-
         // Workaround
         // FB21059465: NSScrollView horizontal floating subview does not respect insets
         // https://gist.github.com/krzyzanowskim/d2c5d41b86096ccb19b110cf7a5514c8
         if let enclosingScrollView = superview?.superview as? NSScrollView, enclosingScrollView.automaticallyAdjustsContentInsets {
-            let topContentInset = enclosingScrollView.contentView.contentInsets.top
+            let topContentInset = enclosingScrollView.contentInsets.top
             if !topContentInset.isAlmostZero(), !topContentInset.isAlmostEqual(to: -topContentInset) {
                 self.frame.origin.y = -topContentInset
             }
         }
+
+        super.layout()
     }
 
     fileprivate func updateBackgroundColor() {
