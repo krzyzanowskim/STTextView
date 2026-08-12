@@ -7,9 +7,21 @@ import STTextKitPlus
 extension STTextView: NSTextViewportLayoutControllerDelegate {
 
     public func viewportBounds(for textViewportLayoutController: NSTextViewportLayoutController) -> CGRect {
-        // Expand viewport bounds to include fragments slightly outside the visible area
-        // for smooth scrolling. Account for both adjustedContentInset and textContainerInset
-        // to ensure proper coverage of the text content area.
+        var viewportBounds = visibleContentBounds()
+
+        // Keep a prefetch band around the visible area so small scrolls can
+        // reuse the current TextKit viewport.
+        let verticalPrefetch = viewportBounds.height * 0.5
+        let upwardPrefetch = min(verticalPrefetch, max(0, viewportBounds.minY))
+        viewportBounds.origin.y -= upwardPrefetch
+        viewportBounds.size.height += upwardPrefetch + verticalPrefetch
+
+        viewportBounds.origin.x = 0
+        viewportBounds.size.width = max(viewportBounds.width, contentView.bounds.width)
+        return viewportBounds
+    }
+
+    func visibleContentBounds() -> CGRect {
         let scrollInsets = adjustedContentInset
         return CGRect(
             x: bounds.origin.x,
@@ -68,22 +80,11 @@ extension STTextView: NSTextViewportLayoutControllerDelegate {
             textLayoutManager.ensureLayout(for: viewportRange)
         }
 
-        // Avoid updating content size during bounce animation as it resets contentSize
-        // which cancels the bounce per openradar.appspot.com/8045239
-        let isBouncing = (contentOffset.y < -contentInset.top || contentOffset.y > max(0, contentSize.height - bounds.height + contentInset.bottom))
-            && (isTracking || isDecelerating)
-
-        if !isBouncing {
-            updateContentSizeIfNeeded()
-        }
+        updateContentSizeIfNeeded()
 
         updateSelectedLineHighlight()
         layoutGutter()
 
-        if let viewportRange = textViewportLayoutController.viewportRange {
-            for events in plugins.events {
-                events.didLayoutViewportHandler?(viewportRange)
-            }
-        }
+        recordDidLayoutViewport(textViewportLayoutController.viewportRange)
     }
 }

@@ -37,6 +37,8 @@ public class STPluginEvents {
         return self
     }
 
+    /// Registers a handler invoked after viewport layout completes.
+    /// Multiple internal passes needed to converge a viewport layout are reported once.
     @discardableResult
     public func onDidLayoutViewport(_ handler: @escaping (_ visibleRange: NSTextRange?) -> Void) -> Self {
         didLayoutViewportHandler = handler

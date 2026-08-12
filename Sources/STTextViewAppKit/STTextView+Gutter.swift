@@ -210,6 +210,7 @@ extension STTextView {
                 let newGutterWidth = max(requiredWidthFitText, gutterView.minimumThickness)
                 if !newGutterWidth.isAlmostEqual(to: gutterView.frame.size.width, tolerance: .ulpOfOne), newGutterWidth > gutterView.frame.size.width {
                     gutterView.frame.size.width = newGutterWidth
+                    setNeedsLayoutSafe()
                 }
             }
         }
