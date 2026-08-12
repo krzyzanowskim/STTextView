@@ -1485,6 +1485,11 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
 
         isLayingOutViewport = true
+
+        // Plugins are notified from the `defer`, after `isLayingOutViewport` is cleared and
+        // the result is decided. Notifying earlier lets a handler that invalidates layout
+        // flip `needsRelayout` back on, which would starve `postLayoutAction` indefinitely.
+        var viewportRangeToNotify: NSTextRange?
         defer {
             isLayingOutViewport = false
 
@@ -1492,7 +1497,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                 needsLayout = true
             }
 
-            if !needsRelayout, pendingPluginViewportRange != nil {
+            if let viewportRangeToNotify {
+                notifyPluginsDidLayoutViewport(viewportRangeToNotify)
+            } else if !needsRelayout, pendingPluginViewportRange != nil {
                 self.pendingPluginViewportRange = nil
                 notifyPluginsDidLayoutViewportLater()
             }
@@ -1523,14 +1530,15 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             }
         #endif
 
-        if !needsRelayout,
+        let didConverge = !needsRelayout
+        if didConverge,
            let viewportRange = pendingPluginViewportRange ?? viewportLayoutController.viewportRange {
             pendingPluginViewportRange = nil
             isPluginViewportNotificationScheduled = false
-            notifyPluginsDidLayoutViewport(viewportRange)
+            viewportRangeToNotify = viewportRange
         }
 
-        return !needsRelayout
+        return didConverge
     }
 
     func recordDidLayoutViewport(_ viewportRange: NSTextRange?) {
@@ -1573,17 +1581,21 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         let gutterWidth = gutterView?.frame.width ?? 0
         let scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
 
+        // `usageBoundsForTextContainer` is offset by the line fragment padding, so the
+        // trailing edge of the longest line is at `maxX`, not at `size.width`.
         var estimatedSize: CGSize
         if isVerticallyResizable {
             let segmentRange = NSTextRange(location: textLayoutManager.documentRange.endLocation)
             textLayoutManager.ensureLayout(for: segmentRange)
-            estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
+            let usageBounds = textLayoutManager.usageBoundsForTextContainer
+            estimatedSize = CGSize(width: usageBounds.maxX, height: usageBounds.maxY)
             textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
                 estimatedSize.height = max(estimatedSize.height, rect.origin.y + rect.size.height)
                 return true
             }
         } else {
-            estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
+            let usageBounds = textLayoutManager.usageBoundsForTextContainer
+            estimatedSize = CGSize(width: usageBounds.maxX, height: usageBounds.maxY)
         }
 
         if !isHorizontallyResizable {
@@ -1591,7 +1603,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
 
         if !isVerticallyResizable {
-            estimatedSize.height = frame.height
+            // A view that doesn't grow to fit its text fills the clip view instead. Deriving
+            // the height from `frame.height` would be self-referential, leaving a view that
+            // starts out zero-height (as `scrollableTextView()` does) permanently empty.
+            estimatedSize.height = scrollView?.contentView.bounds.height ?? frame.height
         }
 
         estimatedSize.width += gutterWidth
@@ -1658,7 +1673,9 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             setFrameSize(CGSize(width: frame.width, height: lastLineMaxY))
         }
 
-        let offset = frame.height - suggestedAnchor
+        // Anchor against the laid out text, not the frame: when the view isn't vertically
+        // resizable the frame height is unrelated to `lastLineMaxY`.
+        let offset = lastLineMaxY - suggestedAnchor
         if !offset.isAlmostZero() {
             textViewportLayoutController.adjustViewport(byVerticalOffset: -offset)
         }

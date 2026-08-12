@@ -1039,7 +1039,10 @@ open class STTextView: UIScrollView, STTextViewProtocol {
 
         notifyPluginsDidLayoutViewportIfNeeded()
 
-        if !needsViewportLayout, let action = postLayoutAction {
+        // `layoutText()` returning true already means the viewport pass converged. Gating on
+        // `needsViewportLayout` as well would defer the action by a pass whenever the pass
+        // itself invalidated layout, which assigning `contentSize` always does.
+        if let action = postLayoutAction {
             postLayoutAction = nil
             action()
         }
