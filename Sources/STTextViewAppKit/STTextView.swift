@@ -628,7 +628,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     private var isLayingOutViewport = false
     private var needsRelayout = false
     private var pendingPluginViewportRange: NSTextRange?
-    private var isPluginViewportNotificationScheduled = false
     private weak var observedScrollView: NSScrollView?
 
     private var shouldUpdateLayout: Bool {
@@ -1493,15 +1492,12 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         defer {
             isLayingOutViewport = false
 
-            if needsRelayout, !inLiveResize {
-                needsLayout = true
+            if needsRelayout {
+                setNeedsLayoutSafe()
             }
 
             if let viewportRangeToNotify {
                 notifyPluginsDidLayoutViewport(viewportRangeToNotify)
-            } else if !needsRelayout, pendingPluginViewportRange != nil {
-                self.pendingPluginViewportRange = nil
-                notifyPluginsDidLayoutViewportLater()
             }
         }
 
@@ -1534,7 +1530,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         if didConverge,
            let viewportRange = pendingPluginViewportRange ?? viewportLayoutController.viewportRange {
             pendingPluginViewportRange = nil
-            isPluginViewportNotificationScheduled = false
             viewportRangeToNotify = viewportRange
         }
 
@@ -1546,10 +1541,13 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             return
         }
 
+        // Passes driven by `layoutViewport()` are coalesced into a single notification once
+        // the pass converges. A layout the controller performs on its own is reported as it
+        // happens, matching UIKit.
         if isLayingOutViewport {
             pendingPluginViewportRange = viewportRange
         } else {
-            notifyPluginsDidLayoutViewportLater()
+            notifyPluginsDidLayoutViewport(viewportRange)
         }
     }
 
@@ -1559,43 +1557,22 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
     }
 
-    private func notifyPluginsDidLayoutViewportLater() {
-        guard !isPluginViewportNotificationScheduled else {
-            return
-        }
-
-        isPluginViewportNotificationScheduled = true
-        DispatchQueue.main.async { [weak self] in
-            guard let self, self.isPluginViewportNotificationScheduled else {
-                return
-            }
-
-            self.isPluginViewportNotificationScheduled = false
-            if let viewportRange = self.textLayoutManager.textViewportLayoutController.viewportRange {
-                self.notifyPluginsDidLayoutViewport(viewportRange)
-            }
-        }
-    }
-
     func updateContentSizeIfNeeded() {
         let gutterWidth = gutterView?.frame.width ?? 0
         let scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
 
-        // `usageBoundsForTextContainer` is offset by the line fragment padding, so the
-        // trailing edge of the longest line is at `maxX`, not at `size.width`.
-        var estimatedSize: CGSize
+        let segmentRange = NSTextRange(location: textLayoutManager.documentRange.endLocation)
         if isVerticallyResizable {
-            let segmentRange = NSTextRange(location: textLayoutManager.documentRange.endLocation)
             textLayoutManager.ensureLayout(for: segmentRange)
-            let usageBounds = textLayoutManager.usageBoundsForTextContainer
-            estimatedSize = CGSize(width: usageBounds.maxX, height: usageBounds.maxY)
+        }
+
+        var estimatedSize = textLayoutManager.textContentExtent()
+
+        if isVerticallyResizable {
             textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
-                estimatedSize.height = max(estimatedSize.height, rect.origin.y + rect.size.height)
+                estimatedSize.height = max(estimatedSize.height, rect.maxY)
                 return true
             }
-        } else {
-            let usageBounds = textLayoutManager.usageBoundsForTextContainer
-            estimatedSize = CGSize(width: usageBounds.maxX, height: usageBounds.maxY)
         }
 
         if !isHorizontallyResizable {

@@ -70,11 +70,19 @@
             textView.setString(String(repeating: "x", count: 300))
             scrollView.layoutSubtreeIfNeeded()
 
-            // usageBoundsForTextContainer is offset by the line fragment padding, so the
-            // trailing edge of the longest line is at maxX, not at size.width.
+            // usageBoundsForTextContainer is offset by the leading line fragment padding, so
+            // the trailing edge of the longest line is at maxX, not at size.width. The
+            // content carries the same padding again on the trailing side.
             let usageBounds = textView.textLayoutManager.usageBoundsForTextContainer
             let gutterWidth = textView.gutterView?.frame.width ?? 0
-            XCTAssertGreaterThanOrEqual(textView.frame.width, usageBounds.maxX + gutterWidth - 0.5)
+            let textRightEdge = usageBounds.maxX + gutterWidth
+            XCTAssertGreaterThanOrEqual(textView.frame.width, textRightEdge)
+            XCTAssertEqual(
+                textView.frame.width - textRightEdge,
+                textView.textContainer.lineFragmentPadding,
+                accuracy: 1.0,
+                "Trailing slack should match the leading line fragment padding"
+            )
         }
 
         @MainActor

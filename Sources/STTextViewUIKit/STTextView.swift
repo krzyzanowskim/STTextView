@@ -762,7 +762,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
 
         super.sizeToFit()
 
-        if updateContentGeometry(for: textLayoutManager.usageBoundsForTextContainer.size, viewportSize: viewportSize) {
+        if updateContentGeometry(for: textLayoutManager.textContentExtent(), viewportSize: viewportSize) {
             setNeedsViewportLayout()
         }
     }
@@ -785,9 +785,9 @@ open class STTextView: UIScrollView, STTextViewProtocol {
 
         let segmentRange = NSTextRange(location: textLayoutManager.documentRange.endLocation)
         textLayoutManager.ensureLayout(for: segmentRange)
-        var estimatedSize = textLayoutManager.usageBoundsForTextContainer.size
+        var estimatedSize = textLayoutManager.textContentExtent()
         textLayoutManager.enumerateTextSegments(in: segmentRange, type: .standard, options: .middleFragmentsExcluded) { _, rect, _, _ in
-            estimatedSize.height = max(estimatedSize.height, rect.origin.y + rect.size.height)
+            estimatedSize.height = max(estimatedSize.height, rect.maxY)
             return true
         }
 
@@ -802,7 +802,7 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         let verticalInsets = textContainerInset.top + textContainerInset.bottom
         let minimumHeight = viewportSize.height - contentInset.top - contentInset.bottom
         let contentWidth = if isHorizontallyResizable {
-            max(textSize.width + gutterWidth + (textContainer.lineFragmentPadding * 2) + horizontalInsets, viewportSize.width)
+            max(textSize.width + gutterWidth + horizontalInsets, viewportSize.width)
         } else {
             viewportSize.width
         }
