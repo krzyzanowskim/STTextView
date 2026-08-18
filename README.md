@@ -159,6 +159,7 @@ struct ContentView: View {
 
 Plugins in an STTextView component offer additional functionalities and customizations beyond the simple text display. They enhance the core capabilities of the text view by adding features such as syntax highlighting, word count tracking, and more. These plugins expand the STTextView's utility while maintaining a modular and adaptable software structure.
 
+- [Plugin-TreeSitter](https://github.com/krzyzanowskim/STTextView-Plugin-TreeSitter) Source code syntax highlighting with [Tree-sitter](https://tree-sitter.github.io/tree-sitter/).
 - [Plugin-Neon](https://github.com/krzyzanowskim/STTextView-Plugin-Neon) Source Code Syntax Highlighting with [TreeSitter](https://tree-sitter.github.io/tree-sitter/) and [Neon](https://github.com/ChimeHQ/Neon).
 - [Plugin-TextFormation](https://github.com/krzyzanowskim/STTextView-Plugin-TextFormation) Typing completions with [TextFormation](https://github.com/ChimeHQ/TextFormation).
 - [Plugin-Annotations](https://github.com/krzyzanowskim/STTextView-Plugin-Annotations) Anchored annotations (eg. inlined error message)) plugin.
