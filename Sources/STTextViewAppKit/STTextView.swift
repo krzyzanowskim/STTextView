@@ -149,6 +149,17 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     public var defaultParagraphStyle: NSParagraphStyle {
         set {
             _defaultTypingAttributes[.paragraphStyle] = newValue
+
+            // Text is stamped with the typing attributes when it is set, so the
+            // document carries an explicit paragraph style that would otherwise
+            // keep the previous value. `font` applies itself the same way.
+            if !textLayoutManager.documentRange.isEmpty {
+                addAttributes([.paragraphStyle: newValue], range: textLayoutManager.documentRange)
+                needsLayout = true
+                needsDisplay = true
+            }
+
+            updateTypingAttributes()
         }
         get {
             _defaultTypingAttributes[.paragraphStyle] as? NSParagraphStyle ?? NSParagraphStyle.default
