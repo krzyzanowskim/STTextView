@@ -1246,10 +1246,40 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         }
     }
 
-    open func addPlugin(_ instance: any STPlugin) {
-        let plugin = Plugin(instance: instance)
+    /// Installs a plugin.
+    ///
+    /// - Parameters:
+    ///   - instance: The plugin to install.
+    ///   - id: A handle for this installation. Defaults to a fresh unique one;
+    ///     pass a named ``STPluginIdentifier`` to address the plugin later
+    ///     without keeping the returned handle around.
+    /// - Returns: The handle to pass to ``removePlugin(_:)`` to uninstall it.
+    @discardableResult
+    open func addPlugin(_ instance: any STPlugin, id: STPluginIdentifier = STPluginIdentifier()) -> STPluginIdentifier {
+        let plugin = Plugin(id: id, instance: instance)
         plugins.append(plugin)
         setupPlugins()
+        return plugin.id
+    }
+
+    /// Uninstalls previously installed plugins, giving each a chance to clean up.
+    ///
+    /// Removing a plugin discards its event handlers, so it stops receiving
+    /// callbacks immediately. Unknown identifiers are ignored.
+    ///
+    /// Installing more than one plugin under the same identifier is allowed, and
+    /// this removes all of them, so no installation can be left unreachable.
+    open func removePlugin(_ identifier: STPluginIdentifier) {
+        let removed = plugins.filter { $0.id == identifier }
+        guard !removed.isEmpty else {
+            return
+        }
+
+        plugins.removeAll { $0.id == identifier }
+
+        for plugin in removed {
+            plugin.instance.tearDown()
+        }
     }
 
     private func setupPlugins() {
