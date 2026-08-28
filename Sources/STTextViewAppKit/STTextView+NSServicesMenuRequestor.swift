@@ -100,6 +100,18 @@ extension STTextView: NSServicesMenuRequestor {
             }
         }
 
+        // The default color belongs to the view, not to the content. Exported, a dark
+        // theme's near-white text is invisible on a light background.
+        var defaultColorRanges: [NSRange] = []
+        attributedString.enumerateAttribute(.foregroundColor, in: attributedString.range, options: []) { value, range, _ in
+            if let color = value as? NSColor, color == textColor {
+                defaultColorRanges.append(range)
+            }
+        }
+        for range in defaultColorRanges {
+            attributedString.removeAttribute(.foregroundColor, range: range)
+        }
+
         let actions = types.map { type -> () -> Bool in
             switch type.rawValue {
             case NSPasteboard.PasteboardType.string.rawValue, "NSStringPboardType":
