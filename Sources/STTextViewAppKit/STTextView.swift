@@ -640,6 +640,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     private var needsRelayout = false
     private var pendingPluginViewportRange: NSTextRange?
     private weak var observedScrollView: NSScrollView?
+    private var isLiveScrolling = false
 
     private var shouldUpdateLayout: Bool {
         !liveResizeLayoutSuppression || visibleBoundsRequireViewportLayout
@@ -886,6 +887,8 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         if let observedScrollView {
             NotificationCenter.default.removeObserver(self, name: NSScrollView.didLiveScrollNotification, object: observedScrollView)
             NotificationCenter.default.removeObserver(self, name: NSView.boundsDidChangeNotification, object: observedScrollView.contentView)
+            NotificationCenter.default.removeObserver(self, name: NSScrollView.willStartLiveScrollNotification, object: observedScrollView)
+            NotificationCenter.default.removeObserver(self, name: NSScrollView.didEndLiveScrollNotification, object: observedScrollView)
         }
 
         if let scrollView {
@@ -895,6 +898,18 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
                 self,
                 selector: #selector(didLiveScrollNotification(_:)),
                 name: NSScrollView.didLiveScrollNotification,
+                object: scrollView
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(willStartLiveScrollNotification(_:)),
+                name: NSScrollView.willStartLiveScrollNotification,
+                object: scrollView
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(didEndLiveScrollNotification(_:)),
+                name: NSScrollView.didEndLiveScrollNotification,
                 object: scrollView
             )
             NotificationCenter.default.addObserver(
@@ -1306,6 +1321,15 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
     }
 
+    @objc func willStartLiveScrollNotification(_: Notification) {
+        isLiveScrolling = true
+    }
+
+    @objc func didEndLiveScrollNotification(_: Notification) {
+        isLiveScrolling = false
+        updateContentSizeIfNeeded()
+    }
+
     @objc func didLiveScrollNotification(_ notification: Notification) {
         cancelComplete(notification.object)
     }
@@ -1568,7 +1592,44 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
     }
 
+    /// Whether the content size has to keep its current value for now.
+    ///
+    /// `usageBoundsForTextContainer` is an estimate that moves in both directions on every
+    /// layout pass, so following it while the user scrolls makes the scroller jump around.
+    /// `NSTextView` handles this by not letting the estimate reach the frame during a scroll
+    /// gesture (`-[NSTextView _updateContentSizeIfNeeded]` bails out on `_isScrolling`), and
+    /// re-measuring only once the estimate can no longer stay hidden: when the end of the
+    /// document is laid out, when the visible bottom edge enters the last tenth of the frame,
+    /// or before there is a viewport at all.
+    private var shouldDeferContentSizeUpdate: Bool {
+        guard isLiveScrolling || isVerticalScrollerTracking else {
+            return false
+        }
+
+        guard let viewportRange = textLayoutManager.textViewportLayoutController.viewportRange else {
+            return false
+        }
+
+        let documentEnd = textLayoutManager.documentRange.endLocation
+        if viewportRange.endLocation.compare(documentEnd) != .orderedAscending {
+            return false
+        }
+
+        return effectiveVisibleRect.maxY <= bounds.height * 0.9
+    }
+
+    private var isVerticalScrollerTracking: Bool {
+        guard let scroller = scrollView?.verticalScroller, scrollView?.hasVerticalScroller == true else {
+            return false
+        }
+        return scroller.hitPart != .noPart
+    }
+
     func updateContentSizeIfNeeded() {
+        guard !shouldDeferContentSizeUpdate else {
+            return
+        }
+
         let gutterWidth = gutterView?.frame.width ?? 0
         let scrollerInset = scrollView?.contentView.contentInsets.right ?? 0
 
