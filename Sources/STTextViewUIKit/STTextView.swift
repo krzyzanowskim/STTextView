@@ -822,6 +822,11 @@ open class STTextView: UIScrollView, STTextViewProtocol {
         }
         if !contentSize.isAlmostEqual(to: newContentSize) {
             contentSize = newContentSize
+
+            // `-[_UITextLayoutCanvasView updateContentSizeIfNeeded]` flushes the selection
+            // navigation cache whenever the content size it reports changes, so caret motion
+            // that depends on line geometry doesn't run against stale layout.
+            textLayoutManager.textSelectionNavigation.flushLayoutCache()
         }
 
         return viewportWidthChanged
