@@ -532,7 +532,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
 
     var fragmentViewMap: NSMapTable<NSTextLayoutFragment, STTextLayoutFragmentView>
     var lastUsedFragmentViews: Set<STTextLayoutFragmentView> = []
-    private var _usageBoundsForTextContainerObserver: NSKeyValueObservation?
 
     lazy var _speechSynthesizer = AVSpeechSynthesizer()
     var _speechSynthesizerIsSpeaking = false
@@ -817,11 +816,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             // textCheckingController.didChangeSelectedRange()
         }
 
-        _usageBoundsForTextContainerObserver = nil
-        _usageBoundsForTextContainerObserver = textLayoutManager.observe(\.usageBoundsForTextContainer, options: [.initial, .new]) { [weak self] _, _ in
-            // FB13291926: Notification no longer works. Fixed again in macOS 15.6
-            self?.needsUpdateConstraints = true
-        }
     }
 
     override open func resetCursorRects() {
@@ -1466,7 +1460,18 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         // Asking for the end location result in estimated `usageBoundsForTextContainer`
         // that eventually get right as more and more layout happen (when scrolling)
 
-        textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
+        // `-[NSTextView sizeToFit]` lays out the whole document only when the container
+        // height is tied to the view (`heightTracksTextView`, i.e. not vertically resizable);
+        // otherwise it lays out the viewport and leaves the height an estimate, which the
+        // document-end measurement below refines. Laying out the whole document takes seconds
+        // on a large file, and the extra precision doesn't survive the next edit anyway.
+        // Without a scroll view `-[NSTextView _viewportBoundsForTextViewportLayoutController:]`
+        // reports an unbounded height, so that path lays the whole document out anyway.
+        if isVerticallyResizable, scrollView != nil {
+            textLayoutManager.ensureLayout(for: viewportBounds(for: textLayoutManager.textViewportLayoutController))
+        } else {
+            textLayoutManager.ensureLayout(for: textLayoutManager.documentRange)
+        }
 
         var usageBoundsForTextContainerSize = textLayoutManager.usageBoundsForTextContainer.size
         let documentEndLocation = textLayoutManager.documentRange.endLocation
