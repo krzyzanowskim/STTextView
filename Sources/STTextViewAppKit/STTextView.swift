@@ -1607,7 +1607,7 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// document is laid out, when the visible bottom edge enters the last tenth of the frame,
     /// or before there is a viewport at all.
     private var shouldDeferContentSizeUpdate: Bool {
-        guard isLiveScrolling || isVerticalScrollerTracking else {
+        guard isLiveScrolling else {
             return false
         }
 
@@ -1621,13 +1621,6 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
         }
 
         return effectiveVisibleRect.maxY <= bounds.height * 0.9
-    }
-
-    private var isVerticalScrollerTracking: Bool {
-        guard let scroller = scrollView?.verticalScroller, scrollView?.hasVerticalScroller == true else {
-            return false
-        }
-        return scroller.hitPart != .noPart
     }
 
     func updateContentSizeIfNeeded() {
