@@ -1,5 +1,72 @@
 # Changelog
 
+## [2.4.1] - 2026-09-08
+
+### Added
+- Add plugin installation identifiers (`STPluginIdentifier`) and `removePlugin(_:)` support
+- Document Plugin-TreeSitter in README
+
+### Changed
+- Apply `defaultParagraphStyle` changes to existing text and refresh typing attributes
+- Lay out only the viewport when sizing vertically resizable text views
+- Defer content size updates during live scrolling to prevent scroller jumps
+- Flush text selection navigation cache after content size changes
+- Bump STTextKitPlus to 0.3.1
+
+### Fixed
+- Strip default text color when exporting via Services so dark-theme text stays readable on light backgrounds
+
+## [2.4.0] - 2026-08-12
+
+### Changed
+- Adopt viewport-driven layout and sizing on UIKit
+- Unify content sizing and drop dead layout notification paths
+- Trust usageBoundsForTextContainer for width
+- Defer viewport layout notifications and tighten relayout handling
+- Wait for AppKit viewport layout convergence before notifying
+- Refine TextKit viewport bounds handling and live-resize relayout scheduling
+- Adjust gutter layout to use scroll view contentInsets and apply workaround before super.layout()
+- Clip STTextView scroll view contents to bounds
+
+### Fixed
+- Fix viewport sizing and layout notification defects
+
+## [2.3.12] - 2026-08-01
+
+### Changed
+- Position line number in the midY of the first line of the line fragment
+- Align line number in the middle of the line, not at the baseline of the font
+- Use line typographic bounds when calculating gutter line metrics for extra line fragment height
+- Update selected region calculation and share with the gutter
+- Remove special extra line fragment handling now that STTextLayoutFragment.stExtraLineFragmentAttributes is set
+- Replace viewport debug overlay with dedicated view and remove stale instances
+
+### Fixed
+- Remove stale fragment views from the fragment view map after layout
+
+## [2.3.11] - 2026-07-18
+
+### Added
+- Add Emacs-style mark commands (setMark:, selectToMark:, swapWithMark:, deleteToMark:) in [#113](https://github.com/krzyzanowskim/STTextView/pull/113)
+
+### Changed
+- Harden STTextView completion: snapshot/validate async requests, drop stale results, add tests
+
+## [2.3.10] - 2026-04-28
+
+### Fixed
+- Fix gutter rect width: always use container width (AppKit/UIKit)
+- Fix viewport blanking after large programmatic scroll (setFrameSize re-entrance) in [#110](https://github.com/krzyzanowskim/STTextView/pull/110)
+
+## [2.3.9] - 2026-04-17
+
+### Changed
+- Use visibleRect to compute visible character ranges; add textRange(in:) helper
+- Make selection highlight follow first responder and update on focus changes
+- Add NSView parent lookup helpers; fix text finder parent search; dedup code
+- Document FB22524198 about private extraLineFragmentAttributes affecting extra line calc
+- Document FB22523964: UITextView fragment view ignores contentScaleFactor
+
 ## [2.3.8] - 2026-04-09
 
 ### Changed
