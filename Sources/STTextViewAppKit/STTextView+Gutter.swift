@@ -223,4 +223,17 @@ extension STTextView {
 
         gutterView.layoutMarkers()
     }
+
+    /// Line mapping for markers affected by replacing `textRange`. `nil` when no marker can move.
+    /// Replacing the whole document (`text`, `attributedText`, Select All) keeps markers on their line numbers.
+    func gutterLineEdit(replacing textRange: NSTextRange, with replacementString: String) -> STGutterLineEdit? {
+        guard let gutterView, !gutterView.markers.isEmpty,
+              !textRange.isEqual(to: textContentManager.documentRange),
+              let text = (textContentManager as? NSTextContentStorage)?.textStorage?.mutableString
+        else {
+            return nil
+        }
+
+        return STGutterLineEdit(text: text, range: NSRange(textRange, in: textContentManager), replacement: replacementString)
+    }
 }

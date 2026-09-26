@@ -13,18 +13,25 @@ import UIKit
 import STTextViewCommon
 
 public protocol STGutterViewDelegate: AnyObject {
-    func textViewGutterShouldAddMarker(_ gutter: STGutterView) -> Bool
-    func textViewGutterShouldRemoveMarker(_ gutter: STGutterView) -> Bool
+    /// Asks the delegate whether the user can add the marker.
+    func textViewGutter(_ gutter: STGutterView, shouldAddMarker marker: STGutterMarker) -> Bool
+    /// Asks the delegate whether the user can remove the marker.
+    func textViewGutter(_ gutter: STGutterView, shouldRemoveMarker marker: STGutterMarker) -> Bool
+    /// Markers changed by user interaction or by a text edit that moved or removed marked lines.
+    /// Not called for `addMarker(_:)` and `removeMarker(lineNumber:)`.
+    func textViewGutterDidChangeMarkers(_ gutter: STGutterView)
 }
 
 public extension STGutterViewDelegate {
-    func textViewGutterShouldAddMarker(_ gutter: STGutterView) -> Bool {
+    func textViewGutter(_ gutter: STGutterView, shouldAddMarker marker: STGutterMarker) -> Bool {
         true
     }
 
-    func textViewGutterShouldRemoveMarker(_ gutter: STGutterView) -> Bool {
+    func textViewGutter(_ gutter: STGutterView, shouldRemoveMarker marker: STGutterMarker) -> Bool {
         true
     }
+
+    func textViewGutterDidChangeMarkers(_ gutter: STGutterView) {}
 }
 
 /// A gutter to the side of a scroll view's document view.
@@ -34,7 +41,7 @@ open class STGutterView: UIView {
     let markerContainerView: STGutterMarkerContainerView
 
     /// Delegate
-    weak var delegate: (any STGutterViewDelegate)?
+    public weak var delegate: (any STGutterViewDelegate)?
 
     /// The font used to draw line numbers.
     ///
@@ -107,9 +114,9 @@ open class STGutterView: UIView {
         }
     }
 
-    /// The receiver’s gutter markers to markers, removing any existing ruler markers and not consulting with the client view about the new markers.
+    /// The gutter markers. Line numbers follow text edits.
     @Invalidating(.markers)
-    private(set) var markers: [STGutterMarker] = []
+    public private(set) var markers: [STGutterMarker] = []
 
     /// A Boolean value that determines whether the markers functionality is in an enabled state. Default `false.`
     open var areMarkersEnabled = false {
@@ -175,13 +182,20 @@ open class STGutterView: UIView {
                 $0.frame.contains(eventPoint)
             }
 
-        if let cellView {
-            if marker(lineNumber: cellView.lineNumber) != nil {
-                removeMarker(lineNumber: cellView.lineNumber)
-                return
-            } else if delegate?.textViewGutterShouldAddMarker(self) ?? true {
-                addMarker(STGutterMarker(lineNumber: cellView.lineNumber))
-                return
+        guard let cellView else {
+            return
+        }
+
+        if let marker = marker(lineNumber: cellView.lineNumber) {
+            if delegate?.textViewGutter(self, shouldRemoveMarker: marker) ?? true {
+                removeMarker(lineNumber: marker.lineNumber)
+                delegate?.textViewGutterDidChangeMarkers(self)
+            }
+        } else {
+            let marker = STGutterMarker(lineNumber: cellView.lineNumber)
+            if delegate?.textViewGutter(self, shouldAddMarker: marker) ?? true {
+                addMarker(marker)
+                delegate?.textViewGutterDidChangeMarkers(self)
             }
         }
     }
@@ -199,6 +213,17 @@ open class STGutterView: UIView {
     public func marker(lineNumber: Int) -> STGutterMarker? {
         markers.first { marker in
             marker.lineNumber == lineNumber
+        }
+    }
+
+    func updateMarkers(for edit: STGutterLineEdit) {
+        let updatedMarkers = edit.updatedMarkers(markers, lineNumber: \.lineNumber) {
+            STGutterMarker(lineNumber: $1, view: $0.view)
+        }
+
+        if updatedMarkers != markers {
+            markers = updatedMarkers
+            delegate?.textViewGutterDidChangeMarkers(self)
         }
     }
 

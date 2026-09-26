@@ -927,6 +927,8 @@ open class STTextView: UIScrollView, STTextViewProtocol {
     func replaceCharacters(in textRange: NSTextRange, with replacementString: NSAttributedString, allowsTypingCoalescing: Bool) {
         let previousStringInRange = (textContentManager as? NSTextContentStorage)!.attributedString!.attributedSubstring(from: NSRange(textRange, in: textContentManager))
 
+        let gutterLineEdit = gutterLineEdit(replacing: textRange, with: replacementString.string)
+
         textWillChange(self)
         delegateProxy.textView(self, willChangeTextIn: textRange, replacementString: replacementString.string)
 
@@ -935,6 +937,10 @@ open class STTextView: UIScrollView, STTextViewProtocol {
                 in: textRange,
                 with: [NSTextParagraph(attributedString: replacementString)]
             )
+        }
+
+        if let gutterLineEdit {
+            gutterView?.updateMarkers(for: gutterLineEdit)
         }
 
         delegateProxy.textView(self, didChangeTextIn: textRange, replacementString: replacementString.string)

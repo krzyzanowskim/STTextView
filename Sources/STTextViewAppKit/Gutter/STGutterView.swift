@@ -13,18 +13,25 @@ import AppKit
 import STTextViewCommon
 
 public protocol STGutterViewDelegate: AnyObject {
-    func textViewGutterShouldAddMarker(_ gutter: STGutterView) -> Bool
-    func textViewGutterShouldRemoveMarker(_ gutter: STGutterView) -> Bool
+    /// Asks the delegate whether the user can add the marker.
+    func textViewGutter(_ gutter: STGutterView, shouldAddMarker marker: STGutterMarker) -> Bool
+    /// Asks the delegate whether the user can remove the marker.
+    func textViewGutter(_ gutter: STGutterView, shouldRemoveMarker marker: STGutterMarker) -> Bool
+    /// Markers changed by user interaction or by a text edit that moved or removed marked lines.
+    /// Not called for `addMarker(_:)` and `removeMarker(lineNumber:)`.
+    func textViewGutterDidChangeMarkers(_ gutter: STGutterView)
 }
 
 public extension STGutterViewDelegate {
-    func textViewGutterShouldAddMarker(_ gutter: STGutterView) -> Bool {
+    func textViewGutter(_ gutter: STGutterView, shouldAddMarker marker: STGutterMarker) -> Bool {
         true
     }
 
-    func textViewGutterShouldRemoveMarker(_ gutter: STGutterView) -> Bool {
+    func textViewGutter(_ gutter: STGutterView, shouldRemoveMarker marker: STGutterMarker) -> Bool {
         true
     }
+
+    func textViewGutterDidChangeMarkers(_ gutter: STGutterView) {}
 }
 
 /// A gutter to the side of a scroll view’s document view.
@@ -38,7 +45,7 @@ open class STGutterView: NSView, NSDraggingSource {
     private var _didMouseDownAddMarker = false
 
     /// Delegate
-    weak var delegate: (any STGutterViewDelegate)?
+    public weak var delegate: (any STGutterViewDelegate)?
 
     /// The font used to draw line numbers.
     ///
@@ -114,9 +121,9 @@ open class STGutterView: NSView, NSDraggingSource {
         }
     }
 
-    /// The receiver’s gutter markers to markers, removing any existing ruler markers and not consulting with the client view about the new markers.
+    /// The gutter markers. Line numbers follow text edits.
     @Invalidating(.markers)
-    private(set) var markers: [STGutterMarker] = []
+    public private(set) var markers: [STGutterMarker] = []
 
     /// A Boolean value that determines whether the markers functionality is in an enabled state. Default `false.`
     open var areMarkersEnabled = false
@@ -213,6 +220,29 @@ open class STGutterView: NSView, NSDraggingSource {
         }
     }
 
+    func updateMarkers(for edit: STGutterLineEdit) {
+        let updatedMarkers = edit.updatedMarkers(markers, lineNumber: \.lineNumber) {
+            STGutterMarker(lineNumber: $1, view: $0.view)
+        }
+
+        if updatedMarkers != markers {
+            markers = updatedMarkers
+            delegate?.textViewGutterDidChangeMarkers(self)
+        }
+    }
+
+    private func lineNumberCell(at locationInWindow: CGPoint) -> STGutterLineNumberCell? {
+        let eventPoint = containerView.convert(locationInWindow, from: nil)
+        return containerView.subviews
+            .compactMap { $0 as? STGutterLineNumberCell }
+            .first { $0.frame.contains(eventPoint) }
+    }
+
+    private func isMarkerView(at locationInWindow: CGPoint) -> Bool {
+        let eventPoint = markerContainerView.convert(locationInWindow, from: nil)
+        return markerContainerView.subviews.contains { $0.frame.contains(eventPoint) }
+    }
+
     func layoutMarkers() {
         for v in markerContainerView.subviews {
             v.removeFromSuperviewWithoutNeedingDisplay()
@@ -239,15 +269,12 @@ open class STGutterView: NSView, NSDraggingSource {
             _isDragging = false
         }
 
-        if areMarkersEnabled {
-            let eventPoint = containerView.convert(event.locationInWindow, from: nil)
-            let lineNumberCell = containerView.subviews
-                .compactMap { $0 as? STGutterLineNumberCell }
-                .first { $0.frame.contains(eventPoint) }
-
-            if let lineNumberCell, marker(lineNumber: lineNumberCell.lineNumber) == nil {
-                addMarker(STGutterMarker(lineNumber: lineNumberCell.lineNumber))
+        if areMarkersEnabled, let lineNumberCell = lineNumberCell(at: event.locationInWindow), marker(lineNumber: lineNumberCell.lineNumber) == nil {
+            let marker = STGutterMarker(lineNumber: lineNumberCell.lineNumber)
+            if delegate?.textViewGutter(self, shouldAddMarker: marker) ?? true {
+                addMarker(marker)
                 _didMouseDownAddMarker = true
+                delegate?.textViewGutterDidChangeMarkers(self)
                 return
             }
         }
@@ -255,24 +282,19 @@ open class STGutterView: NSView, NSDraggingSource {
         super.mouseDown(with: event)
     }
 
-
     override open func mouseUp(with event: NSEvent) {
         defer {
             _didMouseDownAddMarker = false
             _isDragging = false
         }
 
-        if areMarkersEnabled {
-            let eventPoint = containerView.convert(event.locationInWindow, from: nil)
-            let lineNumberCell = containerView.subviews
-                .compactMap { $0 as? STGutterLineNumberCell }
-                .first { $0.frame.contains(eventPoint) }
-
-            let tapOnMark = markerContainerView.subviews.contains(where: { $0.frame.contains(markerContainerView.convert(event.locationInWindow, from: nil)) })
-            if let lineNumberCell, tapOnMark, !_didMouseDownAddMarker {
-                removeMarker(lineNumber: lineNumberCell.lineNumber)
-                return
-            }
+        if areMarkersEnabled, !_didMouseDownAddMarker, isMarkerView(at: event.locationInWindow),
+           let lineNumberCell = lineNumberCell(at: event.locationInWindow),
+           let marker = marker(lineNumber: lineNumberCell.lineNumber),
+           delegate?.textViewGutter(self, shouldRemoveMarker: marker) ?? true {
+            removeMarker(lineNumber: marker.lineNumber)
+            delegate?.textViewGutterDidChangeMarkers(self)
+            return
         }
 
         super.mouseUp(with: event)
@@ -283,26 +305,20 @@ open class STGutterView: NSView, NSDraggingSource {
             _isDragging = true
         }
 
-        if areMarkersEnabled {
-            let eventPoint = containerView.convert(event.locationInWindow, from: nil)
-            let lineNumberCell = containerView.subviews
-                .compactMap { $0 as? STGutterLineNumberCell }
-                .first { $0.frame.contains(eventPoint) }
-
-            let tapOnMark = markerContainerView.subviews.contains(where: { $0.frame.contains(markerContainerView.convert(event.locationInWindow, from: nil)) })
-            if !_isDragging, tapOnMark, !_didMouseDownAddMarker, let lineNumberCell, let marker = marker(lineNumber: lineNumberCell.lineNumber) {
-                let pasteboardItem = NSPasteboardItem()
-                pasteboardItem.setString("", forType: .string)
-                let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
-                draggingItem.setDraggingFrame(
-                    CGRect(origin: marker.view.frame.origin, size: marker.view.frame.size),
-                    contents: marker.view.stImage()
-                )
-                let draggingSession = beginDraggingSession(with: [draggingItem], event: event, source: self)
-                draggingSession.animatesToStartingPositionsOnCancelOrFail = false
-                _draggingMarker = marker
-                return
-            }
+        if areMarkersEnabled, !_isDragging, !_didMouseDownAddMarker, isMarkerView(at: event.locationInWindow),
+           let lineNumberCell = lineNumberCell(at: event.locationInWindow),
+           let marker = marker(lineNumber: lineNumberCell.lineNumber) {
+            let pasteboardItem = NSPasteboardItem()
+            pasteboardItem.setString("", forType: .string)
+            let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
+            draggingItem.setDraggingFrame(
+                CGRect(origin: marker.view.frame.origin, size: marker.view.frame.size),
+                contents: marker.view.stImage()
+            )
+            let draggingSession = beginDraggingSession(with: [draggingItem], event: event, source: self)
+            draggingSession.animatesToStartingPositionsOnCancelOrFail = false
+            _draggingMarker = marker
+            return
         }
 
         super.mouseDragged(with: event)
@@ -315,9 +331,19 @@ open class STGutterView: NSView, NSDraggingSource {
     }
 
     public func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
-        if let _draggingMarker {
-            removeMarker(lineNumber: _draggingMarker.lineNumber)
-            self._draggingMarker = nil
+        guard let marker = _draggingMarker else {
+            return
+        }
+        _draggingMarker = nil
+
+        // Dropped back on the gutter keeps the marker
+        if let window, visibleRect.contains(convert(window.convertPoint(fromScreen: screenPoint), from: nil)) {
+            return
+        }
+
+        if delegate?.textViewGutter(self, shouldRemoveMarker: marker) ?? true {
+            removeMarker(lineNumber: marker.lineNumber)
+            delegate?.textViewGutterDidChangeMarkers(self)
         }
     }
 }
