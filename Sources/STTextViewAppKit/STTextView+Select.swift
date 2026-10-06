@@ -457,7 +457,13 @@ extension STTextView {
         guard isSelectable else { return }
 
         textLayoutManager.textSelections = textLayoutManager.textSelections.compactMap { textSelection in
-            textLayoutManager.textSelectionNavigation.destinationSelection(
+            if direction == .up || direction == .down, textSelection.anchorPositionOffset == 0, let textRange = textSelection.textRanges.first, textRange.isEmpty {
+                textLayoutManager.enumerateTextSegments(in: textRange, type: .standard, options: []) { _, frame, _, _ in
+                    textSelection.anchorPositionOffset = frame.minX
+                    return false
+                }
+            }
+            return textLayoutManager.textSelectionNavigation.destinationSelection(
                 for: textSelection,
                 direction: direction,
                 destination: destination,

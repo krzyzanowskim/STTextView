@@ -78,6 +78,16 @@
             XCTAssertEqual(NSRange(location: 5, length: 0), textView.selectedRange())
         }
 
+        func testMoveDownKeepsColumnThroughShorterLine() {
+            let textView = STTextView()
+            textView.attributedText = .init("abcdefgh\na\nabcdefgh")
+            textView.setSelectedRange(NSRange(location: 3, length: 0))
+
+            textView.moveDown(nil)
+            textView.moveDown(nil)
+            XCTAssertEqual(NSRange(location: 14, length: 0), textView.selectedRange())
+        }
+
         func testMoveDownAndModifySelection() {
             let textView = STTextView()
             textView.attributedText = .init("012\n456\n89")
