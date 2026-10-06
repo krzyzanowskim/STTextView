@@ -11,15 +11,17 @@ extension STTextView {
     public func updateInsertionPointStateAndRestartTimer() {
         // Hide insertion point layers
         if shouldDrawInsertionPoint {
-            let insertionPointsRanges = textLayoutManager.insertionPointSelections.flatMap(\.textRanges).filter(\.isEmpty)
-            guard !insertionPointsRanges.isEmpty else {
+            let insertionPoints = textLayoutManager.insertionPointSelections.flatMap { textSelection in
+                textSelection.textRanges.filter(\.isEmpty).map { (textRange: $0, affinity: textSelection.affinity) }
+            }
+            guard !insertionPoints.isEmpty else {
                 return
             }
 
             // rewrite it to lines
             var textSelectionFrames: [CGRect] = []
-            for selectionTextRange in insertionPointsRanges {
-                textLayoutManager.enumerateTextSegments(in: selectionTextRange, type: .standard) { textSegmentRange, textSegmentFrame, _, _ in
+            for (selectionTextRange, affinity) in insertionPoints {
+                textLayoutManager.enumerateTextSegments(in: selectionTextRange, type: .standard, options: affinity == .upstream ? .upstreamAffinity : []) { textSegmentRange, textSegmentFrame, _, _ in
                     if let textSegmentRange {
                         let documentRange = textLayoutManager.documentRange
                         guard !documentRange.isEmpty else {

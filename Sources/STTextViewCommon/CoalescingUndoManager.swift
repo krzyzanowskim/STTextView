@@ -48,7 +48,7 @@ package class CoalescingUndoManager: UndoManager {
             startCoalescing()
             return
         }
-        if !lastRange.intersects(range), lastRange.endLocation != range.location {
+        if !lastRange.intersects(range), lastRange.endLocation != range.location, range.endLocation != lastRange.location {
             endCoalescing()
             startCoalescing()
         }

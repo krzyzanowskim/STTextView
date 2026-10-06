@@ -1844,12 +1844,10 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
             end: textContentManager.location(textRange.location, offsetBy: replacementString.length)
         ) ?? textRange
 
-        if let coalescingUndoManager = undoManager as? CoalescingUndoManager, !undoManager.isUndoing, !undoManager.isRedoing {
-            if allowsTypingCoalescing, processingKeyEvent {
-                coalescingUndoManager.checkCoalescing(range: undoRange)
-            } else {
-                coalescingUndoManager.endCoalescing()
-            }
+        if allowsTypingCoalescing {
+            continueUndoCoalescing(for: textRange.union(undoRange))
+        } else {
+            breakUndoCoalescing()
         }
         undoManager.beginUndoGrouping()
         undoManager.registerUndo(withTarget: self) { textView in
@@ -1885,6 +1883,19 @@ open class STTextView: NSView, NSTextInput, NSTextContent, STTextViewProtocol {
     /// Informs the receiver that it should begin coalescing successive typing operations in a new undo grouping
     public func breakUndoCoalescing() {
         (undoManager as? CoalescingUndoManager)?.endCoalescing()
+    }
+
+    /// Continues the current typing undo grouping with an edit of `textRange` when it follows the previous edit during a key event, otherwise begins a new grouping.
+    public func continueUndoCoalescing(for textRange: NSTextRange) {
+        guard let coalescingUndoManager = undoManager as? CoalescingUndoManager, !coalescingUndoManager.isUndoing, !coalescingUndoManager.isRedoing else {
+            return
+        }
+
+        if processingKeyEvent {
+            coalescingUndoManager.checkCoalescing(range: textRange)
+        } else {
+            coalescingUndoManager.endCoalescing()
+        }
     }
 
     /// Releases the drag information still existing after the dragging session has completed.

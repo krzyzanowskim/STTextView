@@ -76,19 +76,42 @@ extension STTextView {
     }
 
     override open func pageUp(_ sender: Any?) {
-        scrollPageUp(sender)
+        movePage(up: true, extending: false)
     }
 
     override open func pageUpAndModifySelection(_ sender: Any?) {
-        pageUp(sender)
+        movePage(up: true, extending: true)
     }
 
     override open func pageDown(_ sender: Any?) {
-        scrollPageDown(sender)
+        movePage(up: false, extending: false)
     }
 
     override open func pageDownAndModifySelection(_ sender: Any?) {
-        pageDown(sender)
+        movePage(up: false, extending: true)
+    }
+
+    private func movePage(up: Bool, extending: Bool) {
+        let distance = up ? -visibleRect.height : visibleRect.height
+        let caretFrame = textLayoutManager.textSelections.last?.textRanges.last.flatMap { textRange in
+            textLayoutManager.textSegmentFrame(in: NSTextRange(location: up ? textRange.location : textRange.endLocation), type: .standard)
+        }
+
+        if up {
+            scrollPageUp(nil)
+        } else {
+            scrollPageDown(nil)
+        }
+
+        if isSelectable, let caretFrame {
+            layoutViewport()
+            updateTextSelection(
+                interactingAt: CGPoint(x: caretFrame.minX, y: caretFrame.midY + distance),
+                inContainerAt: textLayoutManager.documentRange.location,
+                anchors: extending ? textLayoutManager.textSelections : [],
+                extending: extending
+            )
+        }
     }
 
     override open func scrollPageDown(_ sender: Any?) {

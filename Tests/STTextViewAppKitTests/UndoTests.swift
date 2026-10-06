@@ -92,5 +92,18 @@
             textView.yank(nil)
             XCTAssertEqual(textView.text!, "alpha\nbeta\ngamma")
         }
+
+        func testBackspaceCoalescing() throws {
+            let textView = STTextView()
+            textView.text = "abcd"
+            textView.setSelectedRange(NSRange(location: 4, length: 0))
+            for _ in 0..<3 {
+                try textView.keyDown(with: .create(key: .delete))
+            }
+            XCTAssertEqual(textView.text!, "a")
+
+            textView.undo(nil)
+            XCTAssertEqual(textView.text!, "abcd")
+        }
     }
 #endif

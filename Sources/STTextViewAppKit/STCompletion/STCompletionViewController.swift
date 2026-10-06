@@ -93,7 +93,8 @@ open class STCompletionViewController: NSViewController, STCompletionViewControl
         _eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event -> NSEvent? in
             guard let self else { return nil }
 
-            if let characters = event.characters {
+            let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask).subtracting([.capsLock, .numericPad, .function])
+            if modifiers.isEmpty, let characters = event.characters {
                 for c in characters {
                     switch c {
                     case "\u{001B}", // esc
